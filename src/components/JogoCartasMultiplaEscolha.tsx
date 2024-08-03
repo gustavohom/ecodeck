@@ -20,6 +20,7 @@ import {
   Star,
   MinusCircle,
   ChevronUp,
+  PlusCircle, // Novo ícone para incremento de progresso
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -264,6 +265,11 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
+  const incrementarProgresso = () => {
+    setProgresso((prev) => Math.min(prev + 10, 100));
+    setMensagem("Progresso incrementado em 10%!");
+  };
+
   const eliminarRespostaErrada = () => {
     if (respostasSeguidas >= 6 && cartaAtual) {
       const opcoesErradas = cartaAtual.opcoes.filter((opcao: Opcao) => {
@@ -471,8 +477,8 @@ const EcoChallenge: React.FC = () => {
             >
               <Star className="h-4 w-4 text-yellow-500" />
             </Button>
-            <Button onClick={resetarJogo} size="sm" variant="outline">
-              <RotateCcw className="h-4 w-4" />
+            <Button onClick={incrementarProgresso} size="sm" variant="outline">
+              <PlusCircle className="h-4 w-4" />
             </Button>
             <Button onClick={voltarTelaInicial} size="sm" variant="outline">
               <Home className="h-4 w-4" />
