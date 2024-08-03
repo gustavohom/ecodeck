@@ -11,8 +11,6 @@ const cartas = [
     opcoes: [
       { id: 1, texto: "Avaliar o valor econômico das florestas" },
       { id: 2, texto: "Medir a altura das árvores" },
-      { id: 3, texto: "Determinar a biodiversidade local" },
-      { id: 4, texto: "Identificar espécies raras" },
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
