@@ -35,7 +35,24 @@ const cartas = [
     ],
     respostaCorreta: 1,
     dificuldade: "dificil",
-    categorias: ["Manejo Florestal", "Desenvolvimento Sustentável"],
+    categorias: ["Manejo Florestal", "Desenvolvimento Sustentável", "teste 1"],
+    fontes: [
+      "1. Oliveira, A. (2021). Práticas de Manejo Florestal Sustentável.",
+      "2. Pereira, G. (2018). Gestão Florestal para o Futuro.",
+    ],
+    vantagem: "Ganhe 10 moedas",
+    desvantagem: "Escolha um jogador para ficar uma rodada sem jogar",
+    dica: "",
+  },
+  {
+    titulo: "TESTE - escolha uma opção",
+    pergunta: `GANHE 10 moedas`,
+    opcoes: [
+      { id: 1, texto: "Confirmar" },
+    ],
+    respostaCorreta: 1,
+    dificuldade: "dificil",
+    categorias: ["Manejo Florestal", "Desenvolvimento Sustentável", "teste 1"],
     fontes: [
       "1. Oliveira, A. (2021). Práticas de Manejo Florestal Sustentável.",
       "2. Pereira, G. (2018). Gestão Florestal para o Futuro.",
