@@ -21,7 +21,7 @@ import {
   MinusCircle,
   ChevronUp,
   PlusCircle,
-} from "lucide-react"; // Adiciona o PlusCircle
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -256,11 +256,6 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
-  const incrementarProgresso = () => {
-    setProgresso((prev) => Math.min(prev + 1, 100));
-    setMensagem("Progresso incrementado!");
-  };
-
   const removerProgressoBarra = () => {
     if (barrasCompletadas > 0) {
       setBarrasCompletadas((prev) => prev - 1);
@@ -268,6 +263,12 @@ const EcoChallenge: React.FC = () => {
     } else {
       setMensagem("Nenhuma barra de progresso para remover!");
     }
+  };
+
+  const incrementarProgressoBarra = () => {
+    // Aumenta o contador de progresso
+    setBarrasCompletadas((prev) => prev + 1);
+    setMensagem("Progresso aumentado!");
   };
 
   const eliminarRespostaErrada = () => {
@@ -475,14 +476,14 @@ const EcoChallenge: React.FC = () => {
               } // Muda o estilo se não houver barras para remover
               disabled={barrasCompletadas === 0}
             >
-              <Star className="h-4 w-4 text-red-500" /> {/* Ícone vermelho para remover progresso */}
+              <Star className="h-4 w-4 text-red-500" /> {/* Alteração para vermelho */}
             </Button>
             <Button
-              onClick={incrementarProgresso} // Novo botão para aumentar progresso
+              onClick={incrementarProgressoBarra}
               size="sm"
-              variant="secondary" // Estilo semelhante ao do botão anterior
+              variant="secondary" // Estilo do botão de incrementar
             >
-              <PlusCircle className="h-4 w-4 text-green-500" /> {/* Ícone verde para aumentar progresso */}
+              <Star className="h-4 w-4 text-yellow-500" /> {/* Cor amarela */}
             </Button>
             <Button onClick={voltarTelaInicial} size="sm" variant="outline">
               <Home className="h-4 w-4" />
