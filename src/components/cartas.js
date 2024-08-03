@@ -12,7 +12,7 @@ const cartas = [
       { id: 1, texto: "Avaliar o valor econômico das florestas" },
       { id: 2, texto: "Medir a altura das árvores" },
     ],
-    respostaCorreta: 1,
+    respostaCorreta: [1,2],
     dificuldade: "normal",
     categorias: ["Inventário Florestal", "Conservação da Biodiversidade", "teste 1", "teste 2", "teste 3", "teste 4", "teste 5"],
     fontes: [
