@@ -20,8 +20,8 @@ import {
   Star,
   MinusCircle,
   ChevronUp,
-  PlusCircle, // Novo ícone para incremento de progresso
-} from "lucide-react";
+  PlusCircle,
+} from "lucide-react"; // Adiciona o PlusCircle
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -256,6 +256,11 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
+  const incrementarProgresso = () => {
+    setProgresso((prev) => Math.min(prev + 1, 100));
+    setMensagem("Progresso incrementado!");
+  };
+
   const removerProgressoBarra = () => {
     if (barrasCompletadas > 0) {
       setBarrasCompletadas((prev) => prev - 1);
@@ -263,11 +268,6 @@ const EcoChallenge: React.FC = () => {
     } else {
       setMensagem("Nenhuma barra de progresso para remover!");
     }
-  };
-
-  const incrementarProgresso = () => {
-    setProgresso((prev) => Math.min(prev + 10, 100));
-    setMensagem("Progresso incrementado em 10%!");
   };
 
   const eliminarRespostaErrada = () => {
@@ -475,10 +475,14 @@ const EcoChallenge: React.FC = () => {
               } // Muda o estilo se não houver barras para remover
               disabled={barrasCompletadas === 0}
             >
-              <Star className="h-4 w-4 text-yellow-500" />
+              <Star className="h-4 w-4 text-red-500" /> {/* Ícone vermelho para remover progresso */}
             </Button>
-            <Button onClick={incrementarProgresso} size="sm" variant="outline">
-              <PlusCircle className="h-4 w-4" />
+            <Button
+              onClick={incrementarProgresso} // Novo botão para aumentar progresso
+              size="sm"
+              variant="secondary" // Estilo semelhante ao do botão anterior
+            >
+              <PlusCircle className="h-4 w-4 text-green-500" /> {/* Ícone verde para aumentar progresso */}
             </Button>
             <Button onClick={voltarTelaInicial} size="sm" variant="outline">
               <Home className="h-4 w-4" />
