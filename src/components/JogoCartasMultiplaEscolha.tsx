@@ -40,7 +40,7 @@ interface Carta {
   titulo: string;
   pergunta: string;
   opcoes: Opcao[];
-  respostaCorreta: number;
+  respostaCorreta: number[];
   dificuldade: string;
   categorias: string[];
   fontes: string[];
