@@ -27,23 +27,21 @@ const cartas = [
     dica: "",
   },
   {
-    titulo: "PTESTE sem opção",
-    pergunta: `O manejo florestal sustentável visa equilibrar as necessidades ecológicas, sociais e econômicas das florestas. Qual é uma prática comum em manejo florestal sustentável? 
-    
-    <img src="/2.jpg" alt="Manejo Florestal Sustentável" class="img-grande my-4" />
-    
-    O manejo florestal sustentável é uma abordagem holística que busca manter e melhorar a saúde a longo prazo das florestas enquanto satisfaz as necessidades humanas. Esta prática envolve o uso de técnicas como a silvicultura de ciclo longo, que permite que as árvores cresçam até uma maturidade plena antes de serem colhidas, garantindo assim que as florestas continuem a fornecer serviços ecossistêmicos essenciais. Outra prática é o manejo comunitário, onde as comunidades locais são envolvidas no processo de decisão e gestão das florestas, promovendo a equidade e o desenvolvimento sustentável.`,
-
-    respostaCorreta: 3,
+    titulo: "TESTE - escolha uma opção",
+    pergunta: `Escolha uma das seguintes opções`,
+    opcoes: [
+      { id: 1, texto: "Ganhe 10 moedas" },
+      { id: 2, texto: "Surpresa " },
+    ],
+    respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Manejo Florestal", "Desenvolvimento Sustentável"],
     fontes: [
       "1. Oliveira, A. (2021). Práticas de Manejo Florestal Sustentável.",
       "2. Pereira, G. (2018). Gestão Florestal para o Futuro.",
     ],
-    vantagem: "Ganhe 3 pontos de sustentabilidade!",
-    desvantagem: "Perca 2 pontos de sustentabilidade.",
-    dica: "A restauração de ecossistemas é uma prática-chave em manejo sustentável.",
+    vantagem: "Ganhe 10 moedas",
+    desvantagem: "Escolha um jogador para ficar uma rodada sem jogar",
   },
   {
     titulo: "Biodiversidade em Florestas Tropicais",
