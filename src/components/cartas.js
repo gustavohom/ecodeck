@@ -11,6 +11,9 @@ const cartas = [
     opcoes: [
       { id: 1, texto: "Avaliar o valor econômico das florestas" },
       { id: 2, texto: "Medir a altura das árvores" },
+      { id: 3, texto: "Medir a altura das árvores" },
+      { id: 4, texto: "Medir a altura das árvores" },
+      { id: 5, texto: "Medir a altura das árvores" },
     ],
     respostaCorreta: [1,2],
     dificuldade: "normal",
