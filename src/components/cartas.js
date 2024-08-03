@@ -16,7 +16,7 @@ const cartas = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Inventário Florestal", "Conservação da Biodiversidade". "teste 1", "teste 2", "teste 3", "teste 4", "teste 5"],
+    categorias: ["Inventário Florestal", "Conservação da Biodiversidade", "teste 1", "teste 2", "teste 3", "teste 4", "teste 5"],
     fontes: [
       "1. Silva, J. (2020). Fundamentos de Inventário Florestal.",
       "2. Almeida, F. (2019). Técnicas Modernas em Inventário Florestal.",
