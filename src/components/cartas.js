@@ -42,6 +42,7 @@ const cartas = [
     ],
     vantagem: "Ganhe 10 moedas",
     desvantagem: "Escolha um jogador para ficar uma rodada sem jogar",
+    dica: "",
   },
   {
     titulo: "Biodiversidade em Florestas Tropicais",
