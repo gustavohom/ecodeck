@@ -2,7 +2,7 @@
 
 const cartas = [
   {
-    titulo: "Importância do Inventário Florestal",
+    titulo: "TESTE - Importância do Inventário Florestal",
     pergunta: `O inventário florestal é uma ferramenta essencial para entender a composição e o estado das florestas. Qual é o principal objetivo de realizar um inventário florestal? 
     
     <img src="/1.jpg" alt="Inventário Florestal" class="img-media my-4" />
@@ -16,14 +16,14 @@ const cartas = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Inventário Florestal", "Conservação da Biodiversidade"],
+    categorias: ["Inventário Florestal", "Conservação da Biodiversidade". "teste 1", "teste 2", "teste 3", "teste 4", "teste 5"],
     fontes: [
       "1. Silva, J. (2020). Fundamentos de Inventário Florestal.",
       "2. Almeida, F. (2019). Técnicas Modernas em Inventário Florestal.",
     ],
     vantagem: "Avance 2 casas no tabuleiro!",
     desvantagem: "Perde 1 ponto de progresso.",
-    dica: "O inventário florestal é utilizado principalmente para fins econômicos e de manejo.",
+    dica: "",
   },
   {
     titulo: "Práticas de Manejo Florestal Sustentável",
