@@ -33,24 +33,6 @@ const cartas = [
     <img src="/1.jpg" alt="Inventário Florestal" class="img-media my-4" />
     
     A importância do inventário florestal não pode ser subestimada. Ele permite que os gestores de recursos florestais tomem decisões informadas sobre a conservação, manejo e uso sustentável das florestas. O processo envolve a coleta de dados detalhados sobre a flora e fauna de uma área específica, bem como informações sobre a qualidade do solo e da água. Ao longo dos anos, o inventário florestal evoluiu para incorporar tecnologias avançadas, como sensoriamento remoto e sistemas de informações geográficas (SIG), que aumentam a precisão e a eficiência dos dados coletados.`,
-    respostaCorreta: [1,2],
-    dificuldade: "normal",
-    categorias: ["Inventário Florestal", "Conservação da Biodiversidade", "teste 1"],
-    fontes: [
-      "1. Silva, J. (2020). Fundamentos de Inventário Florestal.",
-      "2. Almeida, F. (2019). Técnicas Modernas em Inventário Florestal.",
-    ],
-    vantagem: "Avance 2 casas no tabuleiro!",
-    desvantagem: "Perde 1 ponto de progresso.",
-    dica: "",
-  },
-  {
-    titulo: "TESTE - Importância do Inventário Florestal",
-    pergunta: `O inventário florestal é uma ferramenta essencial para entender a composição e o estado das florestas. Qual é o principal objetivo de realizar um inventário florestal? 
-    
-    <img src="/1.jpg" alt="Inventário Florestal" class="img-media my-4" />
-    
-    A importância do inventário florestal não pode ser subestimada. Ele permite que os gestores de recursos florestais tomem decisões informadas sobre a conservação, manejo e uso sustentável das florestas. O processo envolve a coleta de dados detalhados sobre a flora e fauna de uma área específica, bem como informações sobre a qualidade do solo e da água. Ao longo dos anos, o inventário florestal evoluiu para incorporar tecnologias avançadas, como sensoriamento remoto e sistemas de informações geográficas (SIG), que aumentam a precisão e a eficiência dos dados coletados.`,
     opcoes: [
       { id: 1, texto: "Ganhe 10 ouro" },
       { id: 2, texto: "Escolha alguem para ficar sem jogar na proxima rodada" },
