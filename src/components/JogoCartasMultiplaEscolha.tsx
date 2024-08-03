@@ -40,7 +40,7 @@ interface Carta {
   titulo: string;
   pergunta: string;
   opcoes: Opcao[];
-  respostaCorreta: number[];
+  respostaCorreta: number | number[]; // Pode ser um número ou um array de números
   dificuldade: string;
   categorias: string[];
   fontes: string[];
@@ -182,7 +182,13 @@ const EcoChallenge: React.FC = () => {
   const verificarResposta = () => {
     if (selecionado !== null && cartaAtual) {
       setRespondido(true);
-      if (selecionado === cartaAtual.respostaCorreta) {
+      
+      // Verifica se a resposta correta é um array ou um número único
+      const isCorrect = Array.isArray(cartaAtual.respostaCorreta)
+        ? cartaAtual.respostaCorreta.includes(selecionado) // Verifica se está no array
+        : cartaAtual.respostaCorreta === selecionado; // Compara com o número único
+      
+      if (isCorrect) {
         setRespostasCertas((prev) => prev + 1);
         setRespostasSeguidas((prev) => prev + 1);
         setMensagem(`Correto! ${cartaAtual.vantagem}`);
@@ -260,7 +266,13 @@ const EcoChallenge: React.FC = () => {
 
   const eliminarRespostaErrada = () => {
     if (respostasSeguidas >= 6 && cartaAtual) {
-      const opcoesErradas = cartaAtual.opcoes.filter((opcao: Opcao) => opcao.id !== cartaAtual.respostaCorreta);
+      const opcoesErradas = cartaAtual.opcoes.filter((opcao: Opcao) => {
+        if (Array.isArray(cartaAtual.respostaCorreta)) {
+          return !cartaAtual.respostaCorreta.includes(opcao.id);
+        } else {
+          return opcao.id !== cartaAtual.respostaCorreta;
+        }
+      });
 
       const opcoesRestantes = opcoesErradas.filter(
         (opcao: Opcao) => !opcoesEliminadas.includes(opcao.id)
@@ -360,27 +372,39 @@ const EcoChallenge: React.FC = () => {
               onClick={() => handleSelecao(opcao.id)}
               variant={selecionado === opcao.id ? "secondary" : "outline"}
               className={`w-full justify-start text-sm ${
-                respondido && opcao.id === cartaAtual.respostaCorreta
-                  ? "bg-green-100"
-                  : ""
+                respondido && (
+                  Array.isArray(cartaAtual.respostaCorreta)
+                    ? cartaAtual.respostaCorreta.includes(opcao.id)
+                    : cartaAtual.respostaCorreta === opcao.id
+                ) ? "bg-green-100" : ""
               } ${
                 respondido &&
                 selecionado === opcao.id &&
-                opcao.id !== cartaAtual.respostaCorreta
-                  ? "bg-red-100"
-                  : ""
+                !(
+                  Array.isArray(cartaAtual.respostaCorreta)
+                    ? cartaAtual.respostaCorreta.includes(opcao.id)
+                    : cartaAtual.respostaCorreta === opcao.id
+                ) ? "bg-red-100" : ""
               } ${
                 opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""
               }`} // Adiciona opacidade reduzida para opções eliminadas
               disabled={opcoesEliminadas.includes(opcao.id)}
             >
               {opcao.texto}
-              {respondido && opcao.id === cartaAtual.respostaCorreta && (
+              {respondido && (
+                Array.isArray(cartaAtual.respostaCorreta)
+                  ? cartaAtual.respostaCorreta.includes(opcao.id)
+                  : cartaAtual.respostaCorreta === opcao.id
+              ) && (
                 <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
               )}
               {respondido &&
                 selecionado === opcao.id &&
-                opcao.id !== cartaAtual.respostaCorreta && (
+                !(
+                  Array.isArray(cartaAtual.respostaCorreta)
+                    ? cartaAtual.respostaCorreta.includes(opcao.id)
+                    : cartaAtual.respostaCorreta === opcao.id
+                ) && (
                   <XCircle className="ml-auto h-4 w-4 text-red-500" />
                 )}
             </Button>
