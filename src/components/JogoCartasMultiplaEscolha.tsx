@@ -20,7 +20,8 @@ import {
   Star,
   MinusCircle,
   ChevronUp,
-  PlusCircle,
+  Minus,
+  Plus,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -146,6 +147,7 @@ const EcoChallenge: React.FC = () => {
   const [barrasCompletadas, setBarrasCompletadas] = useState<number>(0);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
   const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>([]);
+  const [rodadasPreso, setRodadasPreso] = useState<number>(0);
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
@@ -172,7 +174,7 @@ const EcoChallenge: React.FC = () => {
     if (jogoIniciado) {
       selecionarCartaAleatoria();
     }
-  }, [jogoIniciado, selecionarCartaAleatoria]); // Corrigido o warning de dependência
+  }, [jogoIniciado, selecionarCartaAleatoria]);
 
   const handleSelecao = (id: number) => {
     if (!respondido) {
@@ -184,10 +186,9 @@ const EcoChallenge: React.FC = () => {
     if (selecionado !== null && cartaAtual) {
       setRespondido(true);
       
-      // Verifica se a resposta correta é um array ou um número único
       const isCorrect = Array.isArray(cartaAtual.respostaCorreta)
-        ? cartaAtual.respostaCorreta.includes(selecionado) // Verifica se está no array
-        : cartaAtual.respostaCorreta === selecionado; // Compara com o número único
+        ? cartaAtual.respostaCorreta.includes(selecionado)
+        : cartaAtual.respostaCorreta === selecionado;
       
       if (isCorrect) {
         setRespostasCertas((prev) => prev + 1);
@@ -266,9 +267,8 @@ const EcoChallenge: React.FC = () => {
   };
 
   const incrementarProgressoBarra = () => {
-    // Aumenta o contador de progresso
     setBarrasCompletadas((prev) => prev + 1);
-    setMensagem("Progresso aumentado!");
+    setMensagem("Barra de progresso incrementada!");
   };
 
   const eliminarRespostaErrada = () => {
@@ -300,6 +300,35 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
+  const resetarContadores = () => {
+    if (window.confirm("Tem certeza que deseja resetar todos os contadores?")) {
+      setRespostasCertas(0);
+      setRespostasErradas(0);
+      setProgresso(0);
+      setPulosDisponiveis(0);
+      setBarrasCompletadas(0);
+      setRespostasSeguidas(0);
+      setRodadasPreso(0);
+      setMensagem("Todos os contadores foram resetados!");
+    }
+  };
+
+  const diminuirAcertos = () => {
+    setRespostasCertas((prev) => Math.max(prev - 1, 0));
+  };
+
+  const diminuirErros = () => {
+    setRespostasErradas((prev) => Math.max(prev - 1, 0));
+  };
+
+  const incrementarRodadasPreso = () => {
+    setRodadasPreso((prev) => prev + 1);
+  };
+
+  const diminuirRodadasPreso = () => {
+    setRodadasPreso((prev) => Math.max(prev - 1, 0));
+  };
+
   const voltarTelaInicial = () => {
     setJogoIniciado(false);
   };
@@ -309,7 +338,6 @@ const EcoChallenge: React.FC = () => {
 
     const conteudo = cartaAtual.pergunta.split("\n").map((linha: string, index: number) => {
       if (linha.includes("<img")) {
-        // Captura a tag de imagem e retorna o componente Zoom
         const imgRegex = /<img src="([^"]+)" alt="([^"]+)" class="([^"]+)" \/>/;
         const match = imgRegex.exec(linha);
 
@@ -320,8 +348,8 @@ const EcoChallenge: React.FC = () => {
               <Image
                 src={src}
                 alt={alt}
-                width={500} // Exemplo de largura
-                height={300} // Exemplo de altura
+                width={500}
+                height={300}
                 className={`${className} img-zoom`}
               />
             </Zoom>
@@ -394,7 +422,7 @@ const EcoChallenge: React.FC = () => {
                 ) ? "bg-red-100" : ""
               } ${
                 opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""
-              }`} // Adiciona opacidade reduzida para opções eliminadas
+              }`}
               disabled={opcoesEliminadas.includes(opcao.id)}
             >
               {opcao.texto}
@@ -435,83 +463,65 @@ const EcoChallenge: React.FC = () => {
         )}
       </CardContent>
       <CardFooter className="flex flex-col items-center">
-        <div className="flex justify-between w-full mb-4">
-          <div className="flex items-center space-x-2">
-            <Button onClick={toggleFontes} size="sm" variant="outline">
-              <BookOpen className="h-4 w-4" />
-            </Button>
-            <Button
-              onClick={pularPergunta}
-              size="sm"
-              variant={pulosDisponiveis === 0 ? "outline" : "secondary"} // Muda o estilo se estiver indisponível
-              disabled={pulosDisponiveis === 0}
-            >
-              <SkipForward className="h-4 w-4" />
-            </Button>
-            <Button
-              onClick={toggleDica}
-              size="sm"
-              variant={
-                respostasSeguidas < 3 || !cartaAtual.dica ? "outline" : "secondary"
-              } // Muda o estilo se a dica não estiver disponível
-              disabled={respostasSeguidas < 3 || !cartaAtual.dica}
-            >
-              <HelpCircle className="h-4 w-4" />
-            </Button>
-            <Button
-              onClick={eliminarRespostaErrada}
-              size="sm"
-              variant={
-                respostasSeguidas < 6 ? "outline" : "secondary"
-              } // Muda o estilo se não houver respostas seguidas suficientes
-              disabled={respostasSeguidas < 6}
-            >
-              <MinusCircle className="h-4 w-4" />
-            </Button>
-            <Button
-              onClick={removerProgressoBarra}
-              size="sm"
-              variant={
-                barrasCompletadas === 0 ? "outline" : "secondary"
-              } // Muda o estilo se não houver barras para remover
-              disabled={barrasCompletadas === 0}
-            >
-              <Star className="h-4 w-4 text-red-500" /> {/* Alteração para vermelho */}
-            </Button>
-            <Button
-              onClick={incrementarProgressoBarra}
-              size="sm"
-              variant="secondary" // Estilo do botão de incrementar
-            >
-              <Star className="h-4 w-4 text-yellow-500" /> {/* Cor amarela */}
-            </Button>
-            <Button onClick={voltarTelaInicial} size="sm" variant="outline">
-              <Home className="h-4 w-4" />
-            </Button>
-          </div>
+        <div className="flex flex-wrap justify-between w-full mb-4 space-x-2">
+          <Button onClick={toggleFontes} size="sm" variant="outline">
+            <BookOpen className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={pularPergunta}
+            size="sm"
+            variant={pulosDisponiveis === 0 ? "outline" : "secondary"}
+            disabled={pulosDisponiveis === 0}
+          >
+            <SkipForward className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={toggleDica}
+            size="sm"
+            variant={
+              respostasSeguidas < 3 || !cartaAtual.dica ? "outline" : "secondary"
+            }
+            disabled={respostasSeguidas < 3 || !cartaAtual.dica}
+          >
+            <HelpCircle className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={eliminarRespostaErrada}
+            size="sm"
+            variant={
+              respostasSeguidas < 6 ? "outline" : "secondary"
+            }
+            disabled={respostasSeguidas < 6}
+          >
+            <MinusCircle className="h-4 w-4" />
+          </Button>
+          <Button onClick={resetarContadores} size="sm" variant="outline">
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+          <Button onClick={voltarTelaInicial} size="sm" variant="outline">
+            <Home className="h-4 w-4" />
+          </Button>
         </div>
-        <div className="flex justify-between w-full mb-4">
-          {!respondido ? (
-            <Button
-              onClick={verificarResposta}
-              disabled={selecionado === null}
-              className="w-full"
-            >
-              Verificar
-            </Button>
-          ) : (
-            <Button onClick={selecionarCartaAleatoria} className="w-full">
-              Próxima Carta
-            </Button>
-          )}
+        <div className="flex flex-wrap justify-between w-full mb-4 space-x-2">
+          <Button onClick={diminuirAcertos} size="sm" variant="outline">
+            <ChevronUp className="h-4 w-4" />
+          </Button>
+          <Button onClick={diminuirErros} size="sm" variant="outline">
+            <ChevronUp className="h-4 w-4" />
+          </Button>
+          <Button onClick={removerProgressoBarra} size="sm" variant="outline">
+            <Star className="h-4 w-4 text-red-500" />
+          </Button>
+          <Button onClick={incrementarProgressoBarra} size="sm" variant="outline">
+            <Star className="h-4 w-4 text-yellow-500" />
+          </Button>
+          <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
+            <Minus className="h-4 w-4" />
+          </Button>
+          <Button onClick={incrementarRodadasPreso} size="sm" variant="outline">
+            <Plus className="h-4 w-4" />
+          </Button>
         </div>
-        {mensagem && (
-          <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
-        )}
-        <Progress
-          value={progresso}
-          className={`w-full ${progresso === 100 ? "bg-green-500" : ""}`}
-        />
         <div className="flex justify-between w-full mt-4 text-sm">
           <div className="flex items-center space-x-1">
             <ChevronUp className="h-4 w-4 text-purple-500" />
@@ -532,6 +542,10 @@ const EcoChallenge: React.FC = () => {
           <div className="flex items-center space-x-1">
             <ThumbsDown className="h-4 w-4 text-red-500" />
             <span>{respostasErradas}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <ChevronUp className="h-4 w-4 text-orange-500" />
+            <span>{rodadasPreso}</span>
           </div>
         </div>
       </CardFooter>
