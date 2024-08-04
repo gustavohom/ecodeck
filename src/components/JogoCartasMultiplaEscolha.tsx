@@ -19,9 +19,8 @@ import {
   SkipForward,
   Star,
   MinusCircle,
-  Zap,
-  Lock,
-  LockOpen,
+  ChevronUp,
+  Zap, // Ícone de raio para respostas seguidas
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -48,10 +47,9 @@ interface Carta {
   fontes: string[];
   vantagem: string;
   desvantagem: string;
-  dica?: string; // Pode ser indefinido se a carta não tiver dica
+  dica: string;
 }
 
-// Definição das propriedades para o componente TelaInicial
 interface TelaInicialProps {
   onStartGame: (categoriasSelecionadas: string[]) => void;
   onReset: () => void;
@@ -150,7 +148,7 @@ const EcoChallenge: React.FC = () => {
   const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
     string[]
   >([]);
-  const [rodadasPreso, setRodadasPreso] = useState<number>(0);
+  const [rodadasPreso, setRodadasPreso] = useState<number>(0); // Novo contador para rodadas preso
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
@@ -231,8 +229,9 @@ const EcoChallenge: React.FC = () => {
       setPulosDisponiveis(0);
       setBarrasCompletadas(0);
       setRespostasSeguidas(0);
-      setRodadasPreso(0);
-      setMensagem("Todos os contadores foram resetados!");
+      setRodadasPreso(0); // Reseta rodadas preso
+      setMensagem("Contadores resetados!");
+      setTimeout(() => setMensagem(""), 2000);
     }
   };
 
@@ -269,17 +268,9 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
-  const adicionarProgressoBarra = () => {
+  const incrementarProgressoBarra = () => {
     setBarrasCompletadas((prev) => prev + 1);
     setMensagem("Barra de progresso adicionada!");
-  };
-
-  const diminuirRespostasCertas = () => {
-    setRespostasCertas((prev) => Math.max(prev - 1, 0));
-  };
-
-  const diminuirRespostasErradas = () => {
-    setRespostasErradas((prev) => Math.max(prev - 1, 0));
   };
 
   const eliminarRespostaErrada = () => {
@@ -315,40 +306,54 @@ const EcoChallenge: React.FC = () => {
     setJogoIniciado(false);
   };
 
-  const aumentarRodadasPreso = () => {
+  const incrementarRodadasPreso = () => {
     setRodadasPreso((prev) => prev + 1);
+    setMensagem("Rodada de prisão adicionada!");
   };
 
   const diminuirRodadasPreso = () => {
-    setRodadasPreso((prev) => Math.max(prev - 1, 0));
+    setRodadasPreso((prev) => (prev > 0 ? prev - 1 : 0));
+    setMensagem("Rodada de prisão removida!");
+  };
+
+  const diminuirAcertos = () => {
+    setRespostasCertas((prev) => (prev > 0 ? prev - 1 : 0));
+    setMensagem("Acerto removido!");
+  };
+
+  const diminuirErros = () => {
+    setRespostasErradas((prev) => (prev > 0 ? prev - 1 : 0));
+    setMensagem("Erro removido!");
   };
 
   const renderizarConteudoPergunta = () => {
     if (!cartaAtual) return null;
 
-    const conteudo = cartaAtual.pergunta.split("\n").map((linha: string, index: number) => {
-      if (linha.includes("<img")) {
-        // Captura a tag de imagem e retorna o componente Zoom
-        const imgRegex = /<img src="([^"]+)" alt="([^"]+)" class="([^"]+)" \/>/;
-        const match = imgRegex.exec(linha);
+    const conteudo = cartaAtual.pergunta
+      .split("\n")
+      .map((linha: string, index: number) => {
+        if (linha.includes("<img")) {
+          // Captura a tag de imagem e retorna o componente Zoom
+          const imgRegex = /<img src="([^"]+)" alt="([^"]+)" class="([^"]+)" \/>/;
+          const match = imgRegex.exec(linha);
 
-        if (match) {
-          const [_, src, alt, className] = match;
-          return (
-            <Zoom key={index}>
-              <Image
-                src={src}
-                alt={alt}
-                width={500} // Exemplo de largura
-                height={300} // Exemplo de altura
-                className={`${className} img-zoom`}
-              />
-            </Zoom>
-          );
+          if (match) {
+            const [_, src, alt, className] = match;
+            return (
+              <Zoom key={index}>
+                <Image
+                  src={src}
+                  alt={alt}
+                  width={500} // Exemplo de largura
+                  height={300} // Exemplo de altura
+                  className={`${className} img-zoom`}
+                />
+              </Zoom>
+            );
+          }
         }
-      }
-      return <p key={index} dangerouslySetInnerHTML={{ __html: linha }} />;
-    });
+        return <p key={index} dangerouslySetInnerHTML={{ __html: linha }} />;
+      });
 
     return conteudo;
   };
@@ -357,7 +362,7 @@ const EcoChallenge: React.FC = () => {
     return (
       <TelaInicial
         onStartGame={() => setJogoIniciado(true)}
-        onReset={resetarContadores} // Chama o método correto
+        onReset={resetarContadores}
         categoriasDisponiveis={categoriasDisponiveis}
         categoriasSelecionadas={categoriasSelecionadas}
         setCategoriasSelecionadas={setCategoriasSelecionadas}
@@ -428,7 +433,9 @@ const EcoChallenge: React.FC = () => {
                   Array.isArray(cartaAtual.respostaCorreta)
                     ? cartaAtual.respostaCorreta.includes(opcao.id)
                     : cartaAtual.respostaCorreta === opcao.id
-                ) && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
+                ) && (
+                  <XCircle className="ml-auto h-4 w-4 text-red-500" />
+                )}
             </Button>
           ))}
         </div>
@@ -450,85 +457,79 @@ const EcoChallenge: React.FC = () => {
         )}
       </CardContent>
       <CardFooter className="flex flex-col items-center">
-        <div className="flex justify-between w-full mb-2">
-          <div className="flex items-center space-x-2">
-            <Button onClick={toggleFontes} size="sm" variant="outline">
-              <BookOpen className="h-4 w-4" />
-            </Button>
-            <Button
-              onClick={pularPergunta}
-              size="sm"
-              variant={pulosDisponiveis === 0 ? "outline" : "secondary"} // Muda o estilo se estiver indisponível
-              disabled={pulosDisponiveis === 0}
-            >
-              <SkipForward className="h-4 w-4" />
-            </Button>
-            <Button
-              onClick={toggleDica}
-              size="sm"
-              variant={
-                respostasSeguidas < 3 || !cartaAtual.dica
-                  ? "outline"
-                  : "secondary"
-              } // Muda o estilo se a dica não estiver disponível
-              disabled={respostasSeguidas < 3 || !cartaAtual.dica}
-            >
-              <HelpCircle className="h-4 w-4" />
-            </Button>
-            <Button
-              onClick={eliminarRespostaErrada}
-              size="sm"
-              variant={respostasSeguidas < 6 ? "outline" : "secondary"} // Muda o estilo se não houver respostas seguidas suficientes
-              disabled={respostasSeguidas < 6}
-            >
-              <MinusCircle className="h-4 w-4" />
-            </Button>
-            <Button onClick={resetarContadores} size="sm" variant="outline">
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-            <Button onClick={voltarTelaInicial} size="sm" variant="outline">
-              <Home className="h-4 w-4" />
-            </Button>
-          </div>
+        <div className="flex flex-wrap justify-between w-full mb-1 space-x-2">
+          <Button onClick={toggleFontes} size="sm" variant="outline">
+            <BookOpen className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={pularPergunta}
+            size="sm"
+            variant={pulosDisponiveis === 0 ? "outline" : "secondary"} // Muda o estilo se estiver indisponível
+            disabled={pulosDisponiveis === 0}
+          >
+            <SkipForward className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={toggleDica}
+            size="sm"
+            variant={
+              respostasSeguidas < 3 || !cartaAtual.dica ? "outline" : "secondary"
+            } // Muda o estilo se a dica não estiver disponível
+            disabled={respostasSeguidas < 3 || !cartaAtual.dica}
+          >
+            <HelpCircle className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={eliminarRespostaErrada}
+            size="sm"
+            variant={respostasSeguidas < 6 ? "outline" : "secondary"} // Muda o estilo se não houver respostas seguidas suficientes
+            disabled={respostasSeguidas < 6}
+          >
+            <MinusCircle className="h-4 w-4" />
+          </Button>
+          <Button onClick={resetarContadores} size="sm" variant="outline">
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+          <Button onClick={voltarTelaInicial} size="sm" variant="outline">
+            <Home className="h-4 w-4" />
+          </Button>
         </div>
-        <div className="flex justify-between w-full mb-4">
-          <div className="flex items-center space-x-2">
-            <Button onClick={diminuirRespostasCertas} size="sm" variant="outline">
-              <ThumbsUp className="h-4 w-4" />
-            </Button>
-            <Button onClick={diminuirRespostasErradas} size="sm" variant="outline">
-              <ThumbsDown className="h-4 w-4" />
-            </Button>
-            <Button
-              onClick={removerProgressoBarra}
-              size="sm"
-              variant={barrasCompletadas === 0 ? "outline" : "destructive"} // Muda o estilo se não houver barras para remover
-              disabled={barrasCompletadas === 0}
-            >
-              <Star className="h-4 w-4 text-red-500" />
-            </Button>
-            <Button onClick={adicionarProgressoBarra} size="sm" variant="outline">
-              <Star className="h-4 w-4 text-yellow-500" />
-            </Button>
-            <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
-              <Lock className="h-4 w-4" />
-            </Button>
-            <Button onClick={aumentarRodadasPreso} size="sm" variant="outline">
-              <LockOpen className="h-4 w-4" />
-            </Button>
-          </div>
+        <div className="flex flex-wrap justify-between w-full space-x-2">
+          <Button onClick={diminuirAcertos} size="sm" variant="outline">
+            <ThumbsDown className="h-4 w-4 text-green-500" />
+          </Button>
+          <Button onClick={diminuirErros} size="sm" variant="outline">
+            <ThumbsUp className="h-4 w-4 text-red-500" />
+          </Button>
+          <Button
+            onClick={removerProgressoBarra}
+            size="sm"
+            variant={barrasCompletadas === 0 ? "outline" : "secondary"} // Muda o estilo se não houver barras para remover
+            disabled={barrasCompletadas === 0}
+          >
+            <Star className="h-4 w-4 text-red-500" />
+          </Button>
+          <Button onClick={incrementarProgressoBarra} size="sm" variant="outline">
+            <Star className="h-4 w-4 text-yellow-500" />
+          </Button>
+          <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
+            <ChevronUp className="h-4 w-4 text-purple-500 transform rotate-180" />
+          </Button>
+          <Button onClick={incrementarRodadasPreso} size="sm" variant="outline">
+            <ChevronUp className="h-4 w-4 text-purple-500" />
+          </Button>
         </div>
         <div className="flex justify-between w-full mb-4">
           {!respondido ? (
             <Button
               onClick={verificarResposta}
               disabled={selecionado === null}
-              className="w-full"
+              className="w-full mt-2"
             >
               Verificar
             </Button>
           ) : (
-            <Button onClick={selecionarCartaAleatoria} className="w-full">
+            <Button onClick={selecionarCartaAleatoria} className="w-full mt-2">
               Próxima Carta
             </Button>
           )}
@@ -542,8 +543,8 @@ const EcoChallenge: React.FC = () => {
         />
         <div className="flex justify-between w-full mt-4 text-sm">
           <div className="flex items-center space-x-1">
-            <Zap className="h-4 w-4 text-purple-500" />
-            <span>{respostasSeguidas}</span>
+            <ChevronUp className="h-4 w-4 text-purple-500" />
+            <span>{rodadasPreso}</span>
           </div>
           <div className="flex items-center space-x-1">
             <Star className="h-4 w-4 text-yellow-500" />
@@ -562,8 +563,8 @@ const EcoChallenge: React.FC = () => {
             <span>{respostasErradas}</span>
           </div>
           <div className="flex items-center space-x-1">
-            <Lock className="h-4 w-4" />
-            <span>{rodadasPreso}</span>
+            <Zap className="h-4 w-4 text-purple-500" /> {/* Ícone de raio para respostas seguidas */}
+            <span>{respostasSeguidas}</span>
           </div>
         </div>
       </CardFooter>
