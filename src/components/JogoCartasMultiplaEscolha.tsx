@@ -19,8 +19,9 @@ import {
   SkipForward,
   Star,
   MinusCircle,
-  ChevronUp,
-  Zap, // Importa o ícone de raio
+  Zap,
+  Lock,
+  LockOpen,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -29,7 +30,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import Image from "next/image";
-import cartas from './cartas';
+import cartas from "./cartas";
 
 // Definição de Tipos
 interface Opcao {
@@ -47,9 +48,10 @@ interface Carta {
   fontes: string[];
   vantagem: string;
   desvantagem: string;
-  dica: string;
+  dica?: string; // Pode ser indefinido se a carta não tiver dica
 }
 
+// Definição das propriedades para o componente TelaInicial
 interface TelaInicialProps {
   onStartGame: (categoriasSelecionadas: string[]) => void;
   onReset: () => void;
@@ -90,7 +92,10 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                     categoriasSelecionadas.filter((c) => c !== categoria)
                   );
                 } else {
-                  setCategoriasSelecionadas([...categoriasSelecionadas, categoria]);
+                  setCategoriasSelecionadas([
+                    ...categoriasSelecionadas,
+                    categoria,
+                  ]);
                 }
               }}
               className="mr-2"
@@ -106,10 +111,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         >
           Selecionar Todas
         </Button>
-        <Button
-          onClick={() => setCategoriasSelecionadas([])}
-          className="mt-2"
-        >
+        <Button onClick={() => setCategoriasSelecionadas([])} className="mt-2">
           Limpar Todas
         </Button>
       </div>
@@ -145,7 +147,9 @@ const EcoChallenge: React.FC = () => {
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [barrasCompletadas, setBarrasCompletadas] = useState<number>(0);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>([]);
+  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
+    string[]
+  >([]);
   const [rodadasPreso, setRodadasPreso] = useState<number>(0);
 
   const categoriasDisponiveis = Array.from(
@@ -184,12 +188,12 @@ const EcoChallenge: React.FC = () => {
   const verificarResposta = () => {
     if (selecionado !== null && cartaAtual) {
       setRespondido(true);
-      
+
       // Verifica se a resposta correta é um array ou um número único
       const isCorrect = Array.isArray(cartaAtual.respostaCorreta)
         ? cartaAtual.respostaCorreta.includes(selecionado) // Verifica se está no array
         : cartaAtual.respostaCorreta === selecionado; // Compara com o número único
-      
+
       if (isCorrect) {
         setRespostasCertas((prev) => prev + 1);
         setRespostasSeguidas((prev) => prev + 1);
@@ -229,7 +233,6 @@ const EcoChallenge: React.FC = () => {
       setRespostasSeguidas(0);
       setRodadasPreso(0);
       setMensagem("Todos os contadores foram resetados!");
-      setTimeout(() => setMensagem(""), 2000);
     }
   };
 
@@ -268,7 +271,15 @@ const EcoChallenge: React.FC = () => {
 
   const adicionarProgressoBarra = () => {
     setBarrasCompletadas((prev) => prev + 1);
-    setMensagem("Uma barra de progresso foi adicionada!");
+    setMensagem("Barra de progresso adicionada!");
+  };
+
+  const diminuirRespostasCertas = () => {
+    setRespostasCertas((prev) => Math.max(prev - 1, 0));
+  };
+
+  const diminuirRespostasErradas = () => {
+    setRespostasErradas((prev) => Math.max(prev - 1, 0));
   };
 
   const eliminarRespostaErrada = () => {
@@ -300,40 +311,16 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
+  const voltarTelaInicial = () => {
+    setJogoIniciado(false);
+  };
+
   const aumentarRodadasPreso = () => {
     setRodadasPreso((prev) => prev + 1);
-    setMensagem("Rodada de prisão adicionada!");
   };
 
   const diminuirRodadasPreso = () => {
-    if (rodadasPreso > 0) {
-      setRodadasPreso((prev) => prev - 1);
-      setMensagem("Rodada de prisão removida!");
-    } else {
-      setMensagem("Nenhuma rodada de prisão para remover!");
-    }
-  };
-
-  const diminuirRespostasCertas = () => {
-    if (respostasCertas > 0) {
-      setRespostasCertas((prev) => prev - 1);
-      setMensagem("Resposta correta removida!");
-    } else {
-      setMensagem("Nenhuma resposta correta para remover!");
-    }
-  };
-
-  const diminuirRespostasErradas = () => {
-    if (respostasErradas > 0) {
-      setRespostasErradas((prev) => prev - 1);
-      setMensagem("Resposta errada removida!");
-    } else {
-      setMensagem("Nenhuma resposta errada para remover!");
-    }
-  };
-
-  const voltarTelaInicial = () => {
-    setJogoIniciado(false);
+    setRodadasPreso((prev) => Math.max(prev - 1, 0));
   };
 
   const renderizarConteudoPergunta = () => {
@@ -370,7 +357,7 @@ const EcoChallenge: React.FC = () => {
     return (
       <TelaInicial
         onStartGame={() => setJogoIniciado(true)}
-        onReset={resetarContadores}
+        onReset={resetarContadores} // Chama o método correto
         categoriasDisponiveis={categoriasDisponiveis}
         categoriasSelecionadas={categoriasSelecionadas}
         setCategoriasSelecionadas={setCategoriasSelecionadas}
@@ -384,9 +371,7 @@ const EcoChallenge: React.FC = () => {
     <Card className="w-full max-w-sm mx-auto mt-4">
       <CardHeader>
         <div className="flex justify-between items-center mb-4">
-          <CardTitle className="text-xl font-bold">
-            {cartaAtual.titulo}
-          </CardTitle>
+          <CardTitle className="text-xl font-bold">{cartaAtual.titulo}</CardTitle>
           <Badge
             variant={
               cartaAtual.dificuldade === "facil"
@@ -411,11 +396,12 @@ const EcoChallenge: React.FC = () => {
               onClick={() => handleSelecao(opcao.id)}
               variant={selecionado === opcao.id ? "secondary" : "outline"}
               className={`w-full justify-start text-sm ${
-                respondido && (
-                  Array.isArray(cartaAtual.respostaCorreta)
-                    ? cartaAtual.respostaCorreta.includes(opcao.id)
-                    : cartaAtual.respostaCorreta === opcao.id
-                ) ? "bg-green-100" : ""
+                respondido &&
+                (Array.isArray(cartaAtual.respostaCorreta)
+                  ? cartaAtual.respostaCorreta.includes(opcao.id)
+                  : cartaAtual.respostaCorreta === opcao.id)
+                  ? "bg-green-100"
+                  : ""
               } ${
                 respondido &&
                 selecionado === opcao.id &&
@@ -423,29 +409,26 @@ const EcoChallenge: React.FC = () => {
                   Array.isArray(cartaAtual.respostaCorreta)
                     ? cartaAtual.respostaCorreta.includes(opcao.id)
                     : cartaAtual.respostaCorreta === opcao.id
-                ) ? "bg-red-100" : ""
-              } ${
-                opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""
-              }`} // Adiciona opacidade reduzida para opções eliminadas
+                )
+                  ? "bg-red-100"
+                  : ""
+              } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`} // Adiciona opacidade reduzida para opções eliminadas
               disabled={opcoesEliminadas.includes(opcao.id)}
             >
               {opcao.texto}
-              {respondido && (
-                Array.isArray(cartaAtual.respostaCorreta)
+              {respondido &&
+                (Array.isArray(cartaAtual.respostaCorreta)
                   ? cartaAtual.respostaCorreta.includes(opcao.id)
-                  : cartaAtual.respostaCorreta === opcao.id
-              ) && (
-                <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
-              )}
+                  : cartaAtual.respostaCorreta === opcao.id) && (
+                  <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
+                )}
               {respondido &&
                 selecionado === opcao.id &&
                 !(
                   Array.isArray(cartaAtual.respostaCorreta)
                     ? cartaAtual.respostaCorreta.includes(opcao.id)
                     : cartaAtual.respostaCorreta === opcao.id
-                ) && (
-                  <XCircle className="ml-auto h-4 w-4 text-red-500" />
-                )}
+                ) && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
             </Button>
           ))}
         </div>
@@ -484,7 +467,9 @@ const EcoChallenge: React.FC = () => {
               onClick={toggleDica}
               size="sm"
               variant={
-                respostasSeguidas < 3 || !cartaAtual.dica ? "outline" : "secondary"
+                respostasSeguidas < 3 || !cartaAtual.dica
+                  ? "outline"
+                  : "secondary"
               } // Muda o estilo se a dica não estiver disponível
               disabled={respostasSeguidas < 3 || !cartaAtual.dica}
             >
@@ -493,9 +478,7 @@ const EcoChallenge: React.FC = () => {
             <Button
               onClick={eliminarRespostaErrada}
               size="sm"
-              variant={
-                respostasSeguidas < 6 ? "outline" : "secondary"
-              } // Muda o estilo se não houver respostas seguidas suficientes
+              variant={respostasSeguidas < 6 ? "outline" : "secondary"} // Muda o estilo se não houver respostas seguidas suficientes
               disabled={respostasSeguidas < 6}
             >
               <MinusCircle className="h-4 w-4" />
@@ -511,22 +494,27 @@ const EcoChallenge: React.FC = () => {
         <div className="flex justify-between w-full mb-4">
           <div className="flex items-center space-x-2">
             <Button onClick={diminuirRespostasCertas} size="sm" variant="outline">
-              <ThumbsUp className="h-4 w-4 text-green-500" />
+              <ThumbsUp className="h-4 w-4" />
             </Button>
             <Button onClick={diminuirRespostasErradas} size="sm" variant="outline">
-              <ThumbsDown className="h-4 w-4 text-red-500" />
+              <ThumbsDown className="h-4 w-4" />
             </Button>
-            <Button onClick={removerProgressoBarra} size="sm" variant="outline">
+            <Button
+              onClick={removerProgressoBarra}
+              size="sm"
+              variant={barrasCompletadas === 0 ? "outline" : "destructive"} // Muda o estilo se não houver barras para remover
+              disabled={barrasCompletadas === 0}
+            >
               <Star className="h-4 w-4 text-red-500" />
             </Button>
             <Button onClick={adicionarProgressoBarra} size="sm" variant="outline">
               <Star className="h-4 w-4 text-yellow-500" />
             </Button>
             <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
-              <ChevronUp className="h-4 w-4 text-red-500" />
+              <Lock className="h-4 w-4" />
             </Button>
             <Button onClick={aumentarRodadasPreso} size="sm" variant="outline">
-              <ChevronUp className="h-4 w-4 text-yellow-500" />
+              <LockOpen className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -572,6 +560,10 @@ const EcoChallenge: React.FC = () => {
           <div className="flex items-center space-x-1">
             <ThumbsDown className="h-4 w-4 text-red-500" />
             <span>{respostasErradas}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Lock className="h-4 w-4" />
+            <span>{rodadasPreso}</span>
           </div>
         </div>
       </CardFooter>
