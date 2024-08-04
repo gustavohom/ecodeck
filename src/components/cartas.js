@@ -15,7 +15,7 @@ const cartas = [
       { id: 4, texto: "Medir a altura das árvores" },
       { id: 5, texto: "Medir a altura das árvores" },
     ],
-    respostaCorreta: [1,2],
+    respostaCorreta: 6,
     dificuldade: "normal",
     categorias: ["Inventário Florestal", "Conservação da Biodiversidade", "teste 1"],
     fontes: [
