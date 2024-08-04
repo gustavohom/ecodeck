@@ -308,12 +308,12 @@ const EcoChallenge: React.FC = () => {
 
   const incrementarRodadasPreso = () => {
     setRodadasPreso((prev) => prev + 1);
-    setMensagem("Rodada de prisão adicionada!");
+    setMensagem("Uma rodada adicionada!");
   };
 
   const diminuirRodadasPreso = () => {
     setRodadasPreso((prev) => (prev > 0 ? prev - 1 : 0));
-    setMensagem("Rodada de prisão removida!");
+    setMensagem("Uma rodada removida!");
   };
 
   const diminuirAcertos = () => {
