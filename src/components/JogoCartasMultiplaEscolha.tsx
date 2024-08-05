@@ -65,44 +65,59 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   categoriasDisponiveis,
   categoriasSelecionadas,
   setCategoriasSelecionadas,
-}) => (
-  <Card className="w-full max-w-sm mx-auto mt-8">
-    <CardHeader>
-      <CardTitle className="text-xl font-bold mb-4">
-        Eco Challenge: O Jogo da Sustentabilidade
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p className="text-sm mb-4">
-        Bem-vindo ao Eco Challenge! Teste seus conhecimentos sobre
-        sustentabilidade e faça escolhas que impactam o meio ambiente.
-      </p>
-      <div>
-        {categoriasDisponiveis.map((categoria) => (
-          <div key={categoria} className="flex items-center mb-2">
-            <input
-              type="checkbox"
-              id={categoria}
-              checked={categoriasSelecionadas.includes(categoria)}
-              onChange={() => {
-                if (categoriasSelecionadas.includes(categoria)) {
-                  setCategoriasSelecionadas(
-                    categoriasSelecionadas.filter((c) => c !== categoria)
-                  );
-                } else {
-                  setCategoriasSelecionadas([
-                    ...categoriasSelecionadas,
-                    categoria,
-                  ]);
-                }
-              }}
-              className="mr-2"
-            />
-            <label htmlFor={categoria} className="text-sm">
-              {categoria}
-            </label>
-          </div>
-        ))}
+}) => {
+  const [termoBusca, setTermoBusca] = useState<string>("");
+
+  const categoriasFiltradas = categoriasDisponiveis.filter((categoria) =>
+    categoria.toLowerCase().includes(termoBusca.toLowerCase())
+  );
+
+  return (
+    <Card className="w-full max-w-sm mx-auto mt-8">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold mb-4">
+          Eco Challenge: O Jogo da Sustentabilidade
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm mb-4">
+          Bem-vindo ao Eco Challenge! Teste seus conhecimentos sobre
+          sustentabilidade e faça escolhas que impactam o meio ambiente.
+        </p>
+        <input
+          type="text"
+          placeholder="Pesquisar Categoria"
+          value={termoBusca}
+          onChange={(e) => setTermoBusca(e.target.value)}
+          className="w-full p-2 mb-2 border rounded"
+        />
+        <ScrollArea className="h-40 mb-4 border rounded">
+          {categoriasFiltradas.map((categoria) => (
+            <div key={categoria} className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                id={categoria}
+                checked={categoriasSelecionadas.includes(categoria)}
+                onChange={() => {
+                  if (categoriasSelecionadas.includes(categoria)) {
+                    setCategoriasSelecionadas(
+                      categoriasSelecionadas.filter((c) => c !== categoria)
+                    );
+                  } else {
+                    setCategoriasSelecionadas([
+                      ...categoriasSelecionadas,
+                      categoria,
+                    ]);
+                  }
+                }}
+                className="mr-2"
+              />
+              <label htmlFor={categoria} className="text-sm">
+                {categoria}
+              </label>
+            </div>
+          ))}
+        </ScrollArea>
         <Button
           onClick={() => setCategoriasSelecionadas(categoriasDisponiveis)}
           className="mr-2 mt-2"
@@ -112,22 +127,22 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         <Button onClick={() => setCategoriasSelecionadas([])} className="mt-2">
           Limpar Todas
         </Button>
-      </div>
-    </CardContent>
-    <CardFooter className="flex justify-between">
-      <Button
-        onClick={() => onStartGame(categoriasSelecionadas)}
-        className="flex-1 mr-2"
-        disabled={categoriasSelecionadas.length === 0} // Desabilita o botão se nenhuma categoria estiver selecionada
-      >
-        Iniciar Jogo
-      </Button>
-      <Button onClick={onReset} variant="outline" className="flex-1 ml-2">
-        Resetar
-      </Button>
-    </CardFooter>
-  </Card>
-);
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button
+          onClick={() => onStartGame(categoriasSelecionadas)}
+          className="flex-1 mr-2"
+          disabled={categoriasSelecionadas.length === 0} // Desabilita o botão se nenhuma categoria estiver selecionada
+        >
+          Iniciar Jogo
+        </Button>
+        <Button onClick={onReset} variant="outline" className="flex-1 ml-2">
+          Resetar
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
 
 // Componente Principal EcoChallenge
 const EcoChallenge: React.FC = () => {
