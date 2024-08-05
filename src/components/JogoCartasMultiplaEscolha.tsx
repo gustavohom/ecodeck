@@ -20,7 +20,7 @@ import {
   Star,
   MinusCircle,
   ChevronUp,
-  Zap,
+  Zap, // Ícone de raio para respostas seguidas
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -38,17 +38,17 @@ interface Opcao {
 }
 
 interface Carta {
+  tipo: string; // Adicionei o tipo para diferenciar entre "Pergunta" e "Outras"
   titulo: string;
   pergunta: string;
   opcoes: Opcao[];
-  respostaCorreta: number | number[];
+  respostaCorreta: number | number[]; // Pode ser um número ou um array de números
   dificuldade: string;
   categorias: string[];
   fontes: string[];
   vantagem: string;
   desvantagem: string;
   dica: string;
-  tipo: string; // Novo campo para o tipo de carta
 }
 
 interface TelaInicialProps {
@@ -133,7 +133,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         <Button
           onClick={() => onStartGame(categoriasSelecionadas)}
           className="flex-1 mr-2"
-          disabled={categoriasSelecionadas.length === 0}
+          disabled={categoriasSelecionadas.length === 0} // Desabilita o botão se nenhuma categoria estiver selecionada
         >
           Iniciar Jogo
         </Button>
@@ -164,23 +164,23 @@ const EcoChallenge: React.FC = () => {
   const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
     string[]
   >([]);
-  const [rodadasPreso, setRodadasPreso] = useState<number>(0);
-  const [mostrarSomentePerguntas, setMostrarSomentePerguntas] = useState<boolean>(false);
+  const [rodadasPreso, setRodadasPreso] = useState<number>(0); // Novo contador para rodadas preso
+
+  // Estado para controlar se apenas cartas do tipo "Pergunta" serão exibidas
+  const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
+    useState<boolean>(false);
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
   );
 
   const selecionarCartaAleatoria = useCallback(() => {
-    const cartasFiltradas = cartas.filter((carta) => {
-      const pertenceCategoria = carta.categorias.some((categoria) =>
-        categoriasSelecionadas.includes(categoria)
-      );
-      const tipoCorreto = mostrarSomentePerguntas
-        ? carta.tipo === "pergunta"
-        : true;
-      return pertenceCategoria && tipoCorreto;
-    });
+    const cartasFiltradas = cartas.filter(
+      (carta) =>
+        carta.categorias.some((categoria) =>
+          categoriasSelecionadas.includes(categoria)
+        ) && (!mostrarSomentePerguntas || carta.tipo === "Pergunta") // Filtra apenas perguntas se mostrarSomentePerguntas for true
+    );
 
     const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
     setCartaAtual(cartasFiltradas[indiceAleatorio]);
@@ -196,7 +196,7 @@ const EcoChallenge: React.FC = () => {
     if (jogoIniciado) {
       selecionarCartaAleatoria();
     }
-  }, [jogoIniciado, selecionarCartaAleatoria]);
+  }, [jogoIniciado, selecionarCartaAleatoria]); // Corrigido o warning de dependência
 
   const handleSelecao = (id: number) => {
     if (!respondido) {
@@ -208,9 +208,10 @@ const EcoChallenge: React.FC = () => {
     if (selecionado !== null && cartaAtual) {
       setRespondido(true);
 
+      // Verifica se a resposta correta é um array ou um número único
       const isCorrect = Array.isArray(cartaAtual.respostaCorreta)
-        ? cartaAtual.respostaCorreta.includes(selecionado)
-        : cartaAtual.respostaCorreta === selecionado;
+        ? cartaAtual.respostaCorreta.includes(selecionado) // Verifica se está no array
+        : cartaAtual.respostaCorreta === selecionado; // Compara com o número único
 
       if (isCorrect) {
         setRespostasCertas((prev) => prev + 1);
@@ -249,7 +250,7 @@ const EcoChallenge: React.FC = () => {
       setPulosDisponiveis(0);
       setBarrasCompletadas(0);
       setRespostasSeguidas(0);
-      setRodadasPreso(0);
+      setRodadasPreso(0); // Reseta rodadas preso
       setMensagem("Contadores resetados!");
       setTimeout(() => setMensagem(""), 2000);
     }
@@ -353,6 +354,7 @@ const EcoChallenge: React.FC = () => {
       .split("\n")
       .map((linha: string, index: number) => {
         if (linha.includes("<img")) {
+          // Captura a tag de imagem e retorna o componente Zoom
           const imgRegex = /<img src="([^"]+)" alt="([^"]+)" class="([^"]+)" \/>/;
           const match = imgRegex.exec(linha);
 
@@ -363,8 +365,8 @@ const EcoChallenge: React.FC = () => {
                 <Image
                   src={src}
                   alt={alt}
-                  width={500}
-                  height={300}
+                  width={500} // Exemplo de largura
+                  height={300} // Exemplo de altura
                   className={`${className} img-zoom`}
                 />
               </Zoom>
@@ -395,7 +397,19 @@ const EcoChallenge: React.FC = () => {
     <Card className="w-full max-w-sm mx-auto mt-4">
       <CardHeader>
         <div className="flex justify-between items-center mb-4">
-          <CardTitle className="text-xl font-bold">{cartaAtual.titulo}</CardTitle>
+          <div className="flex items-center space-x-2">
+            <Button
+              onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
+              className="mt-2"
+            >
+              {mostrarSomentePerguntas
+                ? "Mostrar Todas as Cartas"
+                : "Mostrar Apenas Perguntas"}
+            </Button>
+            <CardTitle className="text-xl font-bold">
+              {cartaAtual.titulo}
+            </CardTitle>
+          </div>
           <Badge
             variant={
               cartaAtual.dificuldade === "facil"
@@ -436,7 +450,7 @@ const EcoChallenge: React.FC = () => {
                 )
                   ? "bg-red-100"
                   : ""
-              } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
+              } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`} // Adiciona opacidade reduzida para opções eliminadas
               disabled={opcoesEliminadas.includes(opcao.id)}
             >
               {opcao.texto}
@@ -483,7 +497,7 @@ const EcoChallenge: React.FC = () => {
           <Button
             onClick={pularPergunta}
             size="sm"
-            variant={pulosDisponiveis === 0 ? "outline" : "secondary"}
+            variant={pulosDisponiveis === 0 ? "outline" : "secondary"} // Muda o estilo se estiver indisponível
             disabled={pulosDisponiveis === 0}
           >
             <SkipForward className="h-4 w-4" />
@@ -493,7 +507,7 @@ const EcoChallenge: React.FC = () => {
             size="sm"
             variant={
               respostasSeguidas < 3 || !cartaAtual.dica ? "outline" : "secondary"
-            }
+            } // Muda o estilo se a dica não estiver disponível
             disabled={respostasSeguidas < 3 || !cartaAtual.dica}
           >
             <HelpCircle className="h-4 w-4" />
@@ -501,7 +515,7 @@ const EcoChallenge: React.FC = () => {
           <Button
             onClick={eliminarRespostaErrada}
             size="sm"
-            variant={respostasSeguidas < 6 ? "outline" : "secondary"}
+            variant={respostasSeguidas < 6 ? "outline" : "secondary"} // Muda o estilo se não houver respostas seguidas suficientes
             disabled={respostasSeguidas < 6}
           >
             <MinusCircle className="h-4 w-4" />
@@ -523,7 +537,7 @@ const EcoChallenge: React.FC = () => {
           <Button
             onClick={removerProgressoBarra}
             size="sm"
-            variant={barrasCompletadas === 0 ? "outline" : "secondary"}
+            variant={barrasCompletadas === 0 ? "outline" : "secondary"} // Muda o estilo se não houver barras para remover
             disabled={barrasCompletadas === 0}
           >
             <Star className="h-4 w-4 text-red-500" />
@@ -582,7 +596,7 @@ const EcoChallenge: React.FC = () => {
             <span>{respostasErradas}</span>
           </div>
           <div className="flex items-center space-x-1">
-            <Zap className="h-4 w-4 text-purple-500" />
+            <Zap className="h-4 w-4 text-purple-500" /> {/* Ícone de raio para respostas seguidas */}
             <span>{respostasSeguidas}</span>
           </div>
         </div>
