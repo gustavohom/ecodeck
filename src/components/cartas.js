@@ -15,6 +15,7 @@ const cartas = [
       { id: 4, texto: "Medir a altura das árvores" },
       { id: 5, texto: "Medir a altura das árvores" },
     ],
+    tipo: "outra",
     respostaCorreta: 6,
     dificuldade: "normal",
     categorias: ["Inventário Florestal", "Conservação da Biodiversidade", "teste 1"],
@@ -40,6 +41,7 @@ const cartas = [
       { id: 4, texto: "Medir a altura das árvores" },
       { id: 5, texto: "Medir a altura das árvores" },
     ],
+    tipo: "outra",
     respostaCorreta: [1,2,3,4,5],
     dificuldade: "normal",
     categorias: ["Inventário Florestal", "Conservação da Biodiversidade", "teste 1"],
@@ -58,6 +60,7 @@ const cartas = [
       { id: 1, texto: "Ganhe 10 moedas" },
       { id: 2, texto: "Surpresa " },
     ],
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Manejo Florestal", "Desenvolvimento Sustentável", "teste 1"],
@@ -75,6 +78,7 @@ const cartas = [
     opcoes: [
       { id: 1, texto: "Confirmar" },
     ],
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Manejo Florestal", "Desenvolvimento Sustentável", "teste 1"],
@@ -99,6 +103,7 @@ const cartas = [
       { id: 3, texto: "Solo pobre em nutrientes" },
       { id: 4, texto: "Baixa densidade de árvores" },
     ],
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "normal",
     categorias: ["Conservação da Biodiversidade"],
@@ -123,6 +128,7 @@ const cartas = [
       { id: 3, texto: "Usando pulsos de laser" },
       { id: 4, texto: "Por satélites de alta resolução" },
     ],
+    tipo: "outra",
     respostaCorreta: 3,
     dificuldade: "facil",
     categorias: ["Tecnologia em Florestas", "Silvicultura"],
@@ -2986,7 +2992,8 @@ const cartas = [
       { id: 2, texto: "Restaurar funções ecológicas" },
       { id: 3, texto: "Aumentar erosão do solo" },
       { id: 4, texto: "Conectar habitats fragmentados" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [1, 2, 4],
     dificuldade: "facil",
     categorias: ["Restauração Ecológica", "Conservação"],
@@ -3005,7 +3012,8 @@ const cartas = [
       { id: 2, texto: "Uso racional de água" },
       { id: 3, texto: "Poluição de rios" },
       { id: 4, texto: "Tratamento de esgoto" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [1, 2, 4],
     dificuldade: "facil",
     categorias: ["Recursos Hídricos", "Sustentabilidade"],
@@ -3024,7 +3032,8 @@ const cartas = [
       { id: 2, texto: "Diversificação de culturas" },
       { id: 3, texto: "Redução da biodiversidade" },
       { id: 4, texto: "Sequestro de carbono" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [1, 2, 4],
     dificuldade: "facil",
     categorias: ["Agrofloresta", "Sustentabilidade"],
@@ -3043,7 +3052,8 @@ const cartas = [
       { id: 2, texto: "Terraceamento" },
       { id: 3, texto: "Monocultura intensiva" },
       { id: 4, texto: "Rotações de cultura" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [1, 2, 4],
     dificuldade: "facil",
     categorias: ["Conservação do Solo", "Sustentabilidade"],
@@ -3062,7 +3072,8 @@ const cartas = [
       { id: 2, texto: "Plantio de espécies nativas" },
       { id: 3, texto: "Desmatamento indiscriminado" },
       { id: 4, texto: "Manejo florestal responsável" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [2, 4],
     dificuldade: "facil",
     categorias: ["Silvicultura", "Sustentabilidade"],
@@ -3081,7 +3092,8 @@ const cartas = [
       { id: 2, texto: "Redução da biodiversidade" },
       { id: 3, texto: "Maior resiliência florestal" },
       { id: 4, texto: "Aumento de incêndios florestais" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [1, 2, 4],
     dificuldade: "facil",
     categorias: ["Mudanças Climáticas", "Conservação"],
@@ -3103,7 +3115,8 @@ const cartas = [
       { id: 3, texto: "Fitometria" },
       { id: 4, texto: "Ecocronologia" },
       { id: 5, texto: "Dendrofitometria" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Tecnologia Florestal", "Ecologia"],
@@ -3123,7 +3136,8 @@ const cartas = [
       { id: 3, texto: "Adaptação ao ambiente" },
       { id: 4, texto: "Resistência a pragas" },
       { id: 5, texto: "Capacidade de dispersão" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Ecologia", "Biodiversidade"],
@@ -3143,7 +3157,8 @@ const cartas = [
       { id: 3, texto: "Redução de eventos extremos" },
       { id: 4, texto: "Desaparecimento de pragas" },
       { id: 5, texto: "Aumento na diversidade de espécies" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Mudanças Climáticas", "Ecologia"],
@@ -3163,7 +3178,8 @@ const cartas = [
       { id: 3, texto: "Rápido crescimento de árvores" },
       { id: 4, texto: "Facilidade de manejo" },
       { id: 5, texto: "Redução da poluição" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Gestão Florestal", "Florestas Urbanas"],
@@ -3183,7 +3199,8 @@ const cartas = [
       { id: 3, texto: "Reduzir a resiliência" },
       { id: 4, texto: "Simplificar cadeias alimentares" },
       { id: 5, texto: "Aumentar a diversidade genética" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [1, 5],
     dificuldade: "facil",
     categorias: ["Biodiversidade", "Ecologia"],
@@ -3203,7 +3220,8 @@ const cartas = [
       { id: 3, texto: "Monitoramento via drones" },
       { id: 4, texto: "Queima controlada" },
       { id: 5, texto: "Métodos manuais de inventário" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [1, 3],
     dificuldade: "facil",
     categorias: ["Gestão Florestal", "Tecnologia"],
@@ -3223,7 +3241,8 @@ const cartas = [
       { id: 3, texto: "Educação ambiental" },
       { id: 4, texto: "Expansão urbana" },
       { id: 5, texto: "Desmatamento sustentável" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [2, 3],
     dificuldade: "facil",
     categorias: ["Conservação", "Ecologia"],
@@ -3243,7 +3262,8 @@ const cartas = [
       { id: 3, texto: "Pesca intensiva" },
       { id: 4, texto: "Destruição de habitats" },
       { id: 5, texto: "Educação ambiental marinha" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [2, 5],
     dificuldade: "facil",
     categorias: ["Restauração Ecológica", "Ecologia Marinha"],
@@ -3263,7 +3283,8 @@ const cartas = [
       { id: 3, texto: "Conservação de habitats" },
       { id: 4, texto: "Espécies invasoras" },
       { id: 5, texto: "Expansão agrícola" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [1, 2, 4, 5],
     dificuldade: "facil",
     categorias: ["Biodiversidade", "Conservação"],
@@ -3283,7 +3304,8 @@ const cartas = [
       { id: 3, texto: "Proteção de habitats" },
       { id: 4, texto: "Concorrência com espécies nativas" },
       { id: 5, texto: "Estabilização de ecossistemas" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [2, 4],
     dificuldade: "facil",
     categorias: ["Ecologia", "Espécies Invasoras"],
@@ -3306,7 +3328,8 @@ const cartas = [
       { id: 4, texto: "Desmatamento intensivo" },
       { id: 5, texto: "Reintrodução de espécies nativas" },
       { id: 6, texto: "Queimadas não controladas" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [3, 5],
     dificuldade: "facil",
     categorias: ["Restauração Ecológica", "Ecologia"],
@@ -3327,7 +3350,8 @@ const cartas = [
       { id: 4, texto: "Redução do desmatamento ilegal" },
       { id: 5, texto: "Gestão sustentável de recursos" },
       { id: 6, texto: "Falta de biodiversidade" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [3, 4, 5],
     dificuldade: "facil",
     categorias: ["Gestão Florestal", "Florestas Tropicais"],
@@ -3348,7 +3372,8 @@ const cartas = [
       { id: 4, texto: "Acidificação dos oceanos" },
       { id: 5, texto: "Redução de habitats marinhos" },
       { id: 6, texto: "Melhoria na saúde dos corais" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [1, 3, 4, 5],
     dificuldade: "facil",
     categorias: ["Alterações Climáticas", "Ecologia Marinha"],
@@ -3369,7 +3394,8 @@ const cartas = [
       { id: 4, texto: "Introdução de espécies invasoras" },
       { id: 5, texto: "Redução de poluentes orgânicos" },
       { id: 6, texto: "Monitoramento de qualidade da água" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [1, 4],
     dificuldade: "facil",
     categorias: ["Ecossistemas Aquáticos", "Conservação"],
@@ -3390,7 +3416,8 @@ const cartas = [
       { id: 4, texto: "Conservação de espécies" },
       { id: 5, texto: "Exploração de recursos naturais" },
       { id: 6, texto: "Mudanças climáticas" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [1, 2, 5, 6],
     dificuldade: "facil",
     categorias: ["Vida Selvagem", "Conservação"],
@@ -3408,7 +3435,8 @@ const cartas = [
     pergunta: `GANHE 15 MM`,
     opcoes: [
       { id: 1, texto: "Entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Vantagens"],
@@ -3422,7 +3450,8 @@ const cartas = [
     pergunta: `GANHE 5 MM`,
     opcoes: [
       { id: 1, texto: "Entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Vantagens"],
@@ -3436,7 +3465,8 @@ const cartas = [
     pergunta: `GANHE 10 MM`,
     opcoes: [
       { id: 1, texto: "Entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Vantagens"],
@@ -3450,7 +3480,8 @@ const cartas = [
     pergunta: `GANHE 20 MM`,
     opcoes: [
       { id: 1, texto: "Entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Vantagens"],
@@ -3464,7 +3495,8 @@ const cartas = [
     pergunta: `GANHE 30 MM`,
     opcoes: [
       { id: 1, texto: "Entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Vantagens"],
@@ -3478,7 +3510,8 @@ const cartas = [
     pergunta: `GANHE 50 MM`,
     opcoes: [
       { id: 1, texto: "Entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Vantagens"],
@@ -3494,7 +3527,8 @@ const cartas = [
       { id: 1, texto: "Ganhe 20 moedas" },
       { id: 2, texto: "Ganhe 30 moedas" },
       { id: 3, texto: "Ganhe 50 moedas" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [1, 2, 3],
     dificuldade: "facil",
     categorias: ["Vantagens"],
@@ -3508,7 +3542,8 @@ const cartas = [
     pergunta: `GANHE 100 MM`,
     opcoes: [
       { id: 1, texto: "Entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Vantagens"],
@@ -3524,7 +3559,8 @@ const cartas = [
     pergunta: `PERCA 1 RODADA`,
     opcoes: [
       { id: 1, texto: "Estou triste, mas entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Desvantagens"],
@@ -3538,7 +3574,8 @@ const cartas = [
     pergunta: `PERCA 5 MM`,
     opcoes: [
       { id: 1, texto: "Estou triste, mas entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Desvantagens"],
@@ -3552,7 +3589,8 @@ const cartas = [
     pergunta: `PERCA 10 MM`,
     opcoes: [
       { id: 1, texto: "Estou triste, mas entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Desvantagens"],
@@ -3566,7 +3604,8 @@ const cartas = [
     pergunta: `PERCA 15 MM`,
     opcoes: [
       { id: 1, texto: "Estou triste, mas entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Desvantagens"],
@@ -3580,7 +3619,8 @@ const cartas = [
     pergunta: `PERCA 20 MM`,
     opcoes: [
       { id: 1, texto: "Estou triste, mas entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Desvantagens"],
@@ -3594,7 +3634,8 @@ const cartas = [
     pergunta: `PERCA 30 MM`,
     opcoes: [
       { id: 1, texto: "Estou triste, mas entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Desvantagens"],
@@ -3608,7 +3649,8 @@ const cartas = [
     pergunta: `PERCA 50 MM`,
     opcoes: [
       { id: 1, texto: "Estou triste, mas entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Desvantagens"],
@@ -3622,7 +3664,8 @@ const cartas = [
     pergunta: `PERCA 1 TURNO`,
     opcoes: [
       { id: 1, texto: "Estou triste, mas entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Desvantagens"],
@@ -3636,7 +3679,8 @@ const cartas = [
     pergunta: `PERCA 2 RODADAS`,
     opcoes: [
       { id: 1, texto: "Estou triste, mas entendi" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "facil",
     categorias: ["Desvantagens"],
@@ -3652,7 +3696,8 @@ const cartas = [
       { id: 1, texto: "Perca 10 moedas" },
       { id: 2, texto: "Perca 1 rodada" },
       { id: 3, texto: "Perca 20 moedas" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: [1, 2, 3],
     dificuldade: "facil",
     categorias: ["Desvantagens"],
@@ -3684,7 +3729,8 @@ const cartas = [
       { id: 3, texto: "Desertificação crescente" },
       { id: 4, texto: "Crescimento descontrolado de árvores" },
       { id: 5, texto: "Diminuição da fauna endêmica" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 5,
     dificuldade: "dificil",
     categorias: ["Mudanças Climáticas", "Florestas Tropicais"],
@@ -3704,7 +3750,8 @@ const cartas = [
       { id: 3, texto: "Evaporação lenta" },
       { id: 4, texto: "Desertificação rápida" },
       { id: 5, texto: "Inundações sazonais intensas" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 5,
     dificuldade: "dificil",
     categorias: ["Gestão de Recursos Hídricos", "Florestas Tropicais"],
@@ -3724,7 +3771,8 @@ const cartas = [
       { id: 3, texto: "Interação com espécies exóticas" },
       { id: 4, texto: "Preservação do habitat" },
       { id: 5, texto: "Polinização excessiva" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Conservação", "Espécies Ameaçadas"],
@@ -3744,7 +3792,8 @@ const cartas = [
       { id: 3, texto: "Isolamento total das áreas afetadas" },
       { id: 4, texto: "Queima controlada de árvores" },
       { id: 5, texto: "Desmatamento seletivo" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Gestão de Pragas", "Florestas Tropicais"],
@@ -3764,7 +3813,8 @@ const cartas = [
       { id: 3, texto: "Manutenção de habitats aquáticos saudáveis" },
       { id: 4, texto: "Erosão acelerada do solo" },
       { id: 5, texto: "Poluição das fontes de água" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 3,
     dificuldade: "dificil",
     categorias: ["Conservação da Água", "Ecossistemas Florestais"],
@@ -3784,7 +3834,8 @@ const cartas = [
       { id: 3, texto: "Poluição luminosa" },
       { id: 4, texto: "Poluição térmica" },
       { id: 5, texto: "Poluição do ar" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 5,
     dificuldade: "dificil",
     categorias: ["Poluição", "Florestas Tropicais"],
@@ -3804,7 +3855,8 @@ const cartas = [
       { id: 3, texto: "Queima controlada" },
       { id: 4, texto: "Construção de barreiras físicas" },
       { id: 5, texto: "Negligência dos focos de incêndio" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 3,
     dificuldade: "dificil",
     categorias: ["Gestão de Incêndios", "Florestas Tropicais"],
@@ -3824,7 +3876,8 @@ const cartas = [
       { id: 3, texto: "Extinção de espécies nativas" },
       { id: 4, texto: "Melhoria da qualidade do solo" },
       { id: 5, texto: "Expansão de habitats naturais" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 3,
     dificuldade: "dificil",
     categorias: ["Desflorestação", "Ecologia"],
@@ -3844,7 +3897,8 @@ const cartas = [
       { id: 3, texto: "Expansão agrícola" },
       { id: 4, texto: "Erosão do solo" },
       { id: 5, texto: "Pesca controlada" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Ecossistemas de Manguezais", "Conservação"],
@@ -3864,7 +3918,8 @@ const cartas = [
       { id: 3, texto: "Redução de espécies endêmicas" },
       { id: 4, texto: "Extinção de espécies invasoras" },
       { id: 5, texto: "Diminuição da cobertura florestal" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Biodiversidade", "Florestas Tropicais"],
@@ -3884,7 +3939,8 @@ const cartas = [
       { id: 3, texto: "Recuperação de ecossistemas" },
       { id: 4, texto: "Redução da pesca" },
       { id: 5, texto: "Conservação de espécies marinhas" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Conservação Marinha", "Recifes de Corais"],
@@ -3904,7 +3960,8 @@ const cartas = [
       { id: 3, texto: "Estabilização do ecossistema" },
       { id: 4, texto: "Redução do impacto humano" },
       { id: 5, texto: "Melhoria da qualidade do solo" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Espécies Invasoras", "Ecossistemas Tropicais"],
@@ -3924,7 +3981,8 @@ const cartas = [
       { id: 3, texto: "Desertificação crescente" },
       { id: 4, texto: "Crescimento descontrolado de árvores" },
       { id: 5, texto: "Diminuição da fauna endêmica" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 5,
     dificuldade: "dificil",
     categorias: ["Mudanças Climáticas", "Florestas Tropicais"],
@@ -3944,7 +4002,8 @@ const cartas = [
       { id: 3, texto: "Evaporação lenta" },
       { id: 4, texto: "Desertificação rápida" },
       { id: 5, texto: "Inundações sazonais intensas" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 4,
     dificuldade: "dificil",
     categorias: ["Gestão de Recursos Hídricos", "Florestas Tropicais"],
@@ -3964,7 +4023,8 @@ const cartas = [
       { id: 3, texto: "Interação com espécies exóticas" },
       { id: 4, texto: "Preservação do habitat" },
       { id: 5, texto: "Polinização excessiva" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 3,
     dificuldade: "dificil",
     categorias: ["Conservação", "Espécies Ameaçadas"],
@@ -3984,7 +4044,8 @@ const cartas = [
       { id: 3, texto: "Isolamento total das áreas afetadas" },
       { id: 4, texto: "Queima controlada de árvores" },
       { id: 5, texto: "Desmatamento seletivo" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Gestão de Pragas", "Florestas Tropicais"],
@@ -4004,7 +4065,8 @@ const cartas = [
       { id: 3, texto: "Manutenção de habitats aquáticos saudáveis" },
       { id: 4, texto: "Erosão acelerada do solo" },
       { id: 5, texto: "Poluição das fontes de água" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 3,
     dificuldade: "dificil",
     categorias: ["Conservação da Água", "Ecossistemas Florestais"],
@@ -4024,7 +4086,8 @@ const cartas = [
       { id: 3, texto: "Poluição luminosa" },
       { id: 4, texto: "Poluição térmica" },
       { id: 5, texto: "Poluição do ar" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 5,
     dificuldade: "dificil",
     categorias: ["Poluição", "Florestas Tropicais"],
@@ -4044,7 +4107,8 @@ const cartas = [
       { id: 3, texto: "Queima controlada" },
       { id: 4, texto: "Construção de barreiras físicas" },
       { id: 5, texto: "Negligência dos focos de incêndio" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 3,
     dificuldade: "dificil",
     categorias: ["Gestão de Incêndios", "Florestas Tropicais"],
@@ -4064,7 +4128,8 @@ const cartas = [
       { id: 3, texto: "Extinção de espécies nativas" },
       { id: 4, texto: "Melhoria da qualidade do solo" },
       { id: 5, texto: "Expansão de habitats naturais" }
-    ],
+    ], 
+    tipo: "outra",
     respostaCorreta: 3,
     dificuldade: "dificil",
     categorias: ["Desflorestação", "Ecologia"],
@@ -4085,6 +4150,7 @@ const cartas = [
       { id: 4, texto: "Crescimento descontrolado de árvores" },
       { id: 5, texto: "Diminuição da fauna endêmica" }
     ],
+    tipo: "outra",
     respostaCorreta: 5,
     dificuldade: "dificil",
     categorias: ["Mudanças Climáticas", "Florestas Tropicais"],
@@ -4105,6 +4171,7 @@ const cartas = [
       { id: 4, texto: "Desertificação rápida" },
       { id: 5, texto: "Inundações sazonais intensas" }
     ],
+    tipo: "outra",
     respostaCorreta: 5,
     dificuldade: "dificil",
     categorias: ["Gestão de Recursos Hídricos", "Florestas Tropicais"],
@@ -4125,6 +4192,7 @@ const cartas = [
       { id: 4, texto: "Preservação do habitat" },
       { id: 5, texto: "Polinização excessiva" }
     ],
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Conservação", "Espécies Ameaçadas"],
@@ -4145,6 +4213,7 @@ const cartas = [
       { id: 4, texto: "Queima controlada de árvores" },
       { id: 5, texto: "Desmatamento seletivo" }
     ],
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Gestão de Pragas", "Florestas Tropicais"],
@@ -4165,6 +4234,7 @@ const cartas = [
       { id: 4, texto: "Erosão acelerada do solo" },
       { id: 5, texto: "Poluição das fontes de água" }
     ],
+    tipo: "outra",
     respostaCorreta: 3,
     dificuldade: "dificil",
     categorias: ["Conservação da Água", "Ecossistemas Florestais"],
@@ -4185,6 +4255,7 @@ const cartas = [
       { id: 4, texto: "Poluição térmica" },
       { id: 5, texto: "Poluição do ar" }
     ],
+    tipo: "outra",
     respostaCorreta: 5,
     dificuldade: "dificil",
     categorias: ["Poluição", "Florestas Tropicais"],
@@ -4205,6 +4276,7 @@ const cartas = [
       { id: 4, texto: "Construção de barreiras físicas" },
       { id: 5, texto: "Negligência dos focos de incêndio" }
     ],
+    tipo: "outra",
     respostaCorreta: 3,
     dificuldade: "dificil",
     categorias: ["Gestão de Incêndios", "Florestas Tropicais"],
@@ -4225,6 +4297,7 @@ const cartas = [
       { id: 4, texto: "Melhoria da qualidade do solo" },
       { id: 5, texto: "Expansão de habitats naturais" }
     ],
+    tipo: "outra",
     respostaCorreta: 3,
     dificuldade: "dificil",
     categorias: ["Desflorestação", "Ecologia"],
@@ -4245,6 +4318,7 @@ const cartas = [
       { id: 4, texto: "Expansão agrícola" },
       { id: 5, texto: "Aumento da cobertura vegetal" }
     ],
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Ecossistemas de Manguezais", "Conservação"],
@@ -4265,6 +4339,7 @@ const cartas = [
       { id: 4, texto: "Construção de estradas de terra" },
       { id: 5, texto: "Drenagem de áreas úmidas" }
     ],
+    tipo: "outra",
     respostaCorreta: 2,
     dificuldade: "dificil",
     categorias: ["Erosão do Solo", "Conservação"],
@@ -4285,6 +4360,7 @@ const cartas = [
       { id: 4, texto: "Melhoria do ciclo da água" },
       { id: 5, texto: "Redução da erosão do solo" }
     ],
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Desmatamento", "Impacto Ambiental"],
@@ -4305,6 +4381,7 @@ const cartas = [
       { id: 4, texto: "Aumentam a competição por recursos" },
       { id: 5, texto: "Promovem a exclusão de espécies" }
     ],
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Corredores Ecológicos", "Conservação"],
@@ -4325,6 +4402,7 @@ const cartas = [
       { id: 4, texto: "Ozônio (O3)" },
       { id: 5, texto: "Hélio (He)" }
     ],
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Poluição do Ar", "Florestas"],
@@ -4345,6 +4423,7 @@ const cartas = [
       { id: 4, texto: "Remoção de cobertura vegetal" },
       { id: 5, texto: "Uso de pesticidas químicos" }
     ],
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Erosão do Solo", "Conservação"],
@@ -4365,6 +4444,7 @@ const cartas = [
       { id: 4, texto: "Destruição de habitats naturais" },
       { id: 5, texto: "Desmatamento total" }
     ],
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Controle de Pragas", "Sustentabilidade"],
@@ -4385,6 +4465,7 @@ const cartas = [
       { id: 4, texto: "Eliminar todas as espécies invasoras" },
       { id: 5, texto: "Promover monoculturas" }
     ],
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Silvicultura", "Sustentabilidade"],
@@ -4405,6 +4486,7 @@ const cartas = [
       { id: 4, texto: "Expansão de áreas agrícolas" },
       { id: 5, texto: "Uso de fertilizantes sintéticos" }
     ],
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Agricultura", "Florestas Tropicais"],
@@ -4425,6 +4507,7 @@ const cartas = [
       { id: 4, texto: "Canalização de rios" },
       { id: 5, texto: "Construção de represas" }
     ],
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Recursos Hídricos", "Conservação"],
@@ -4445,6 +4528,7 @@ const cartas = [
       { id: 4, texto: "Expansão da cobertura de neve" },
       { id: 5, texto: "Estabilidade do ecossistema" }
     ],
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Mudanças Climáticas", "Florestas Boreais"],
@@ -4465,6 +4549,7 @@ const cartas = [
       { id: 4, texto: "Plantio de espécies inflamáveis" },
       { id: 5, texto: "Expansão de áreas de cultivo" }
     ],
+    tipo: "outra",
     respostaCorreta: 1,
     dificuldade: "dificil",
     categorias: ["Manejo de Incêndios", "Florestas Secas"],
