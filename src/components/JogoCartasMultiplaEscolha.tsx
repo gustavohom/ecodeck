@@ -398,7 +398,7 @@ const EcoChallenge: React.FC = () => {
     <Card
       className={`w-full max-w-sm mx-auto mt-4 ${
         mostrarSomentePerguntas
-          ? "border-blue-300 bg-blue-20"
+          ? "border-yellow-200 bg-yellow-50"
           : "border-gray-200 bg-white"
       }`}
     >
