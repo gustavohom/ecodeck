@@ -21,7 +21,7 @@ import {
   MinusCircle,
   ChevronUp,
   Zap,
-  Filter, // Ícone de filtro para mostrar apenas perguntas
+  Filter, // Adiciona o ícone de filtro para o botão
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -39,6 +39,7 @@ interface Opcao {
 }
 
 interface Carta {
+  tipo: string; // Tipo da carta: "Pergunta" ou "Outras"
   titulo: string;
   pergunta: string;
   opcoes: Opcao[];
@@ -49,7 +50,6 @@ interface Carta {
   vantagem: string;
   desvantagem: string;
   dica: string;
-  tipo: string; // Adicionando o campo tipo para diferenciar entre perguntas e outras
 }
 
 interface TelaInicialProps {
@@ -166,26 +166,25 @@ const EcoChallenge: React.FC = () => {
     string[]
   >([]);
   const [rodadasPreso, setRodadasPreso] = useState<number>(0); // Novo contador para rodadas preso
-  const [mostrarSomentePerguntas, setMostrarSomentePerguntas] = useState<boolean>(false); // Estado para controlar o filtro de perguntas
+
+  // Estado para controlar se apenas cartas do tipo "Pergunta" serão exibidas
+  const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
+    useState<boolean>(false);
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
   );
 
   const selecionarCartaAleatoria = useCallback(() => {
-    const cartasFiltradas = cartas.filter((carta) =>
-      carta.categorias.some((categoria) =>
-        categoriasSelecionadas.includes(categoria)
-      )
+    const cartasFiltradas = cartas.filter(
+      (carta) =>
+        carta.categorias.some((categoria) =>
+          categoriasSelecionadas.includes(categoria)
+        ) && (!mostrarSomentePerguntas || carta.tipo === "Pergunta") // Filtra apenas perguntas se mostrarSomentePerguntas for true
     );
 
-    // Filtra cartas do tipo pergunta se o filtro estiver ativado
-    const cartasParaSelecionar = mostrarSomentePerguntas
-      ? cartasFiltradas.filter((carta) => carta.tipo === "pergunta")
-      : cartasFiltradas;
-
-    const indiceAleatorio = Math.floor(Math.random() * cartasParaSelecionar.length);
-    setCartaAtual(cartasParaSelecionar[indiceAleatorio]);
+    const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
+    setCartaAtual(cartasFiltradas[indiceAleatorio]);
     setSelecionado(null);
     setRespondido(false);
     setMensagem("");
@@ -198,7 +197,7 @@ const EcoChallenge: React.FC = () => {
     if (jogoIniciado) {
       selecionarCartaAleatoria();
     }
-  }, [jogoIniciado, selecionarCartaAleatoria]); // Corrigido o warning de dependência
+  }, [jogoIniciado, selecionarCartaAleatoria]);
 
   const handleSelecao = (id: number) => {
     if (!respondido) {
@@ -398,23 +397,25 @@ const EcoChallenge: React.FC = () => {
   return (
     <Card
       className={`w-full max-w-sm mx-auto mt-4 ${
-        mostrarSomentePerguntas ? "border-2 border-blue-500" : ""
+        mostrarSomentePerguntas
+          ? "border-blue-200 bg-blue-50"
+          : "border-gray-200 bg-white"
       }`}
     >
       <CardHeader>
         <div className="flex justify-between items-center mb-4">
-          <CardTitle className="text-xl font-bold">
-            {cartaAtual.titulo}
-          </CardTitle>
-          <Button
-            onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
-            size="sm"
-            variant="outline"
-            className="p-1"
-            title="Mostrar Apenas Perguntas"
-          >
-            <Filter className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Button
+              onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
+              size="sm"
+              variant="outline"
+            >
+              <Filter className="h-4 w-4" /> {/* Ícone de filtro */}
+            </Button>
+            <CardTitle className="text-xl font-bold">
+              {cartaAtual.titulo}
+            </CardTitle>
+          </div>
           <Badge
             variant={
               cartaAtual.dificuldade === "facil"
@@ -511,7 +512,9 @@ const EcoChallenge: React.FC = () => {
             onClick={toggleDica}
             size="sm"
             variant={
-              respostasSeguidas < 3 || !cartaAtual.dica ? "outline" : "secondary"
+              respostasSeguidas < 3 || !cartaAtual.dica
+                ? "outline"
+                : "secondary"
             } // Muda o estilo se a dica não estiver disponível
             disabled={respostasSeguidas < 3 || !cartaAtual.dica}
           >
