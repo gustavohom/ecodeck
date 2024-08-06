@@ -20,7 +20,8 @@ import {
   Star,
   MinusCircle,
   ChevronUp,
-  Zap, // Ícone de raio para respostas seguidas
+  Zap,
+  Filter, // Ícone de filtro para mostrar apenas perguntas
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -38,7 +39,6 @@ interface Opcao {
 }
 
 interface Carta {
-  tipo: string; // Adicionei o tipo para diferenciar entre "Pergunta" e "Outras"
   titulo: string;
   pergunta: string;
   opcoes: Opcao[];
@@ -49,6 +49,7 @@ interface Carta {
   vantagem: string;
   desvantagem: string;
   dica: string;
+  tipo: string; // Adicionando o campo tipo para diferenciar entre perguntas e outras
 }
 
 interface TelaInicialProps {
@@ -165,25 +166,26 @@ const EcoChallenge: React.FC = () => {
     string[]
   >([]);
   const [rodadasPreso, setRodadasPreso] = useState<number>(0); // Novo contador para rodadas preso
-
-  // Estado para controlar se apenas cartas do tipo "Pergunta" serão exibidas
-  const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
-    useState<boolean>(false);
+  const [mostrarSomentePerguntas, setMostrarSomentePerguntas] = useState<boolean>(false); // Estado para controlar o filtro de perguntas
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
   );
 
   const selecionarCartaAleatoria = useCallback(() => {
-    const cartasFiltradas = cartas.filter(
-      (carta) =>
-        carta.categorias.some((categoria) =>
-          categoriasSelecionadas.includes(categoria)
-        ) && (!mostrarSomentePerguntas || carta.tipo === "Pergunta") // Filtra apenas perguntas se mostrarSomentePerguntas for true
+    const cartasFiltradas = cartas.filter((carta) =>
+      carta.categorias.some((categoria) =>
+        categoriasSelecionadas.includes(categoria)
+      )
     );
 
-    const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
-    setCartaAtual(cartasFiltradas[indiceAleatorio]);
+    // Filtra cartas do tipo pergunta se o filtro estiver ativado
+    const cartasParaSelecionar = mostrarSomentePerguntas
+      ? cartasFiltradas.filter((carta) => carta.tipo === "pergunta")
+      : cartasFiltradas;
+
+    const indiceAleatorio = Math.floor(Math.random() * cartasParaSelecionar.length);
+    setCartaAtual(cartasParaSelecionar[indiceAleatorio]);
     setSelecionado(null);
     setRespondido(false);
     setMensagem("");
@@ -394,22 +396,25 @@ const EcoChallenge: React.FC = () => {
   if (!cartaAtual) return null;
 
   return (
-    <Card className="w-full max-w-sm mx-auto mt-4">
+    <Card
+      className={`w-full max-w-sm mx-auto mt-4 ${
+        mostrarSomentePerguntas ? "border-2 border-blue-500" : ""
+      }`}
+    >
       <CardHeader>
         <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center space-x-2">
-            <Button
-              onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
-              className="mt-2"
-            >
-              {mostrarSomentePerguntas
-                ? "Mostrar Todas as Cartas"
-                : "Mostrar Apenas Perguntas"}
-            </Button>
-            <CardTitle className="text-xl font-bold">
-              {cartaAtual.titulo}
-            </CardTitle>
-          </div>
+          <CardTitle className="text-xl font-bold">
+            {cartaAtual.titulo}
+          </CardTitle>
+          <Button
+            onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
+            size="sm"
+            variant="outline"
+            className="p-1"
+            title="Mostrar Apenas Perguntas"
+          >
+            <Filter className="h-4 w-4" />
+          </Button>
           <Badge
             variant={
               cartaAtual.dificuldade === "facil"
