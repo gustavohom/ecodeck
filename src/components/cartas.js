@@ -4,7 +4,7 @@ const cartas = [
 
   // Pergunta Fácil com Verdadeiro ou Falso
   {
-    "tipo": "Pergunta",
+    "tipo": "Outras",
     "titulo": "Impacto das Energias Renováveis",
     "pergunta": "A energia solar é uma fonte inesgotável de energia e não emite gases poluentes durante seu uso.",
     "opcoes": [
@@ -161,7 +161,7 @@ const cartas = [
 
   // Carta contendo apenas uma Alternativa (Vantagem)
   {
-    "tipo": "Outras",
+    "tipo": "Vantagem",
     "titulo": "Recompensa Especial",
     "pergunta": "Você ganhou um bônus especial!",
     "opcoes": [
@@ -178,7 +178,7 @@ const cartas = [
 
   // Carta contendo apenas uma Alternativa (Desvantagem)
   {
-    "tipo": "Outras",
+    "tipo": "Desvantagem",
     "titulo": "Penalidade Especial",
     "pergunta": "Você perdeu uma rodada!",
     "opcoes": [
