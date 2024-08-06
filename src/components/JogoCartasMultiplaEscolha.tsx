@@ -405,7 +405,7 @@ const EcoChallenge: React.FC = () => {
         return "border-red-200 bg-red-50";
       default:
         return mostrarSomentePerguntas
-          ? "border-yellow-200 bg-yellow-50"
+          ? "border-blue-500 bg-gray-50"
           : "border-gray-200 bg-white";
     }
   };
