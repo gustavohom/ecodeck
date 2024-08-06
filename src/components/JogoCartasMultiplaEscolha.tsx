@@ -217,7 +217,12 @@ const EcoChallenge: React.FC = () => {
       if (isCorrect) {
         setRespostasCertas((prev) => prev + 1);
         setRespostasSeguidas((prev) => prev + 1);
-        setMensagem(`Correto! ${cartaAtual.vantagem}`);
+
+        // Altera a mensagem se "mostrarSomentePerguntas" estiver ativo
+        setMensagem(
+          `Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`
+        );
+
         const novoProgresso = progresso + 20;
         if (novoProgresso >= 100) {
           setProgresso(0);
@@ -232,11 +237,16 @@ const EcoChallenge: React.FC = () => {
         }
       } else {
         setRespostasErradas((prev) => prev + 1);
+
+        // Altera a mensagem se "mostrarSomentePerguntas" estiver ativo
         if (respostasSeguidas >= 5) {
           setMensagem("Resposta incorreta, mas você não será penalizado!");
         } else {
-          setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
+          setMensagem(
+            `Incorreto. ${mostrarSomentePerguntas ? "" : cartaAtual.desvantagem}`
+          );
         }
+
         setProgresso((prev) => Math.max(prev - 10, 0));
         setRespostasSeguidas(0);
       }
