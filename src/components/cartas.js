@@ -150,7 +150,7 @@ const cartas = [
       { "id": 2, "texto": "Volte 3 casas" },
       { "id": 3, "texto": "Perca um turno" }
     ],
-    "respostaCorreta": [],
+    "respostaCorreta": [1,2,3],
     "dificuldade": "facil",
     "categorias": ["Penalidades"],
     "fontes": [],
@@ -185,7 +185,7 @@ const cartas = [
       { "id": 1, "texto": "Estou triste mas entendi" }
     ],
     "respostaCorreta": 1,
-    "dificuldade": "dificil",
+    "dificuldade": "facil",
     "categorias": ["Penalidades"],
     "fontes": [],
     "vantagem": "",
