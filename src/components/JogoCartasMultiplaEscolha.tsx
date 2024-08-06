@@ -21,7 +21,7 @@ import {
   MinusCircle,
   ChevronUp,
   Zap,
-  Filter, // Ícone de filtro para o botão
+  Filter,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -39,11 +39,11 @@ interface Opcao {
 }
 
 interface Carta {
-  tipo: string; // Adicionado: Tipo da carta: "Pergunta", "Outras", "Vantagem", "Desvantagem"
+  tipo: string;
   titulo: string;
   pergunta: string;
   opcoes: Opcao[];
-  respostaCorreta: number | number[]; // Pode ser um número ou um array de números
+  respostaCorreta: number | number[];
   dificuldade: string;
   categorias: string[];
   fontes: string[];
@@ -134,7 +134,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         <Button
           onClick={() => onStartGame(categoriasSelecionadas)}
           className="flex-1 mr-2"
-          disabled={categoriasSelecionadas.length === 0} // Desabilita o botão se nenhuma categoria estiver selecionada
+          disabled={categoriasSelecionadas.length === 0}
         >
           Iniciar Jogo
         </Button>
@@ -165,9 +165,8 @@ const EcoChallenge: React.FC = () => {
   const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
     string[]
   >([]);
-  const [rodadasPreso, setRodadasPreso] = useState<number>(0); // Novo contador para rodadas preso
+  const [rodadasPreso, setRodadasPreso] = useState<number>(0);
 
-  // Estado para controlar se apenas cartas do tipo "Pergunta" serão exibidas
   const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
     useState<boolean>(false);
 
@@ -180,7 +179,7 @@ const EcoChallenge: React.FC = () => {
       (carta) =>
         carta.categorias.some((categoria) =>
           categoriasSelecionadas.includes(categoria)
-        ) && (!mostrarSomentePerguntas || carta.tipo === "Pergunta") // Filtra apenas perguntas se mostrarSomentePerguntas for true
+        ) && (!mostrarSomentePerguntas || carta.tipo === "Pergunta")
     );
 
     const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
@@ -209,36 +208,39 @@ const EcoChallenge: React.FC = () => {
     if (selecionado !== null && cartaAtual) {
       setRespondido(true);
 
-      // Verifica se a resposta correta é um array ou um número único
       const isCorrect = Array.isArray(cartaAtual.respostaCorreta)
-        ? cartaAtual.respostaCorreta.includes(selecionado) // Verifica se está no array
-        : cartaAtual.respostaCorreta === selecionado; // Compara com o número único
+        ? cartaAtual.respostaCorreta.includes(selecionado)
+        : cartaAtual.respostaCorreta === selecionado;
 
       if (isCorrect) {
-        setRespostasCertas((prev) => prev + 1);
-        setRespostasSeguidas((prev) => prev + 1);
-        setMensagem(`Correto! ${cartaAtual.vantagem}`);
-        const novoProgresso = progresso + 20;
-        if (novoProgresso >= 100) {
-          setProgresso(0);
-          setMensagem("Correto! Bônus extra! Barra completada!");
-          setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-          setBarrasCompletadas((prev) => prev + 1);
-        } else {
-          setProgresso(novoProgresso);
-        }
-        if (cartaAtual.dificuldade === "dificil") {
-          setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
+        if (cartaAtual.tipo === "Pergunta") {
+          setRespostasCertas((prev) => prev + 1);
+          setRespostasSeguidas((prev) => prev + 1);
+          setMensagem(`Correto! ${cartaAtual.vantagem}`);
+          const novoProgresso = progresso + 20;
+          if (novoProgresso >= 100) {
+            setProgresso(0);
+            setMensagem("Correto! Bônus extra! Barra completada!");
+            setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
+            setBarrasCompletadas((prev) => prev + 1);
+          } else {
+            setProgresso(novoProgresso);
+          }
+          if (cartaAtual.dificuldade === "dificil") {
+            setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
+          }
         }
       } else {
-        setRespostasErradas((prev) => prev + 1);
-        if (respostasSeguidas >= 5) {
-          setMensagem("Resposta incorreta, mas você não será penalizado!");
-        } else {
-          setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
+        if (cartaAtual.tipo === "Pergunta") {
+          setRespostasErradas((prev) => prev + 1);
+          if (respostasSeguidas >= 5) {
+            setMensagem("Resposta incorreta, mas você não será penalizado!");
+          } else {
+            setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
+          }
+          setProgresso((prev) => Math.max(prev - 10, 0));
+          setRespostasSeguidas(0);
         }
-        setProgresso((prev) => Math.max(prev - 10, 0));
-        setRespostasSeguidas(0);
       }
     }
   };
@@ -251,7 +253,7 @@ const EcoChallenge: React.FC = () => {
       setPulosDisponiveis(0);
       setBarrasCompletadas(0);
       setRespostasSeguidas(0);
-      setRodadasPreso(0); // Reseta rodadas preso
+      setRodadasPreso(0);
       setMensagem("Contadores resetados!");
       setTimeout(() => setMensagem(""), 2000);
     }
@@ -355,7 +357,6 @@ const EcoChallenge: React.FC = () => {
       .split("\n")
       .map((linha: string, index: number) => {
         if (linha.includes("<img")) {
-          // Captura a tag de imagem e retorna o componente Zoom
           const imgRegex = /<img src="([^"]+)" alt="([^"]+)" class="([^"]+)" \/>/;
           const match = imgRegex.exec(linha);
 
@@ -366,8 +367,8 @@ const EcoChallenge: React.FC = () => {
                 <Image
                   src={src}
                   alt={alt}
-                  width={500} // Exemplo de largura
-                  height={300} // Exemplo de altura
+                  width={500}
+                  height={300}
                   className={`${className} img-zoom`}
                 />
               </Zoom>
@@ -394,32 +395,23 @@ const EcoChallenge: React.FC = () => {
 
   if (!cartaAtual) return null;
 
-  // Determine o estilo da carta baseado no tipo
-  let estiloCarta = "border-gray-200 bg-white"; // Default
-  let desativarInteracoes = false; // Para desativar interações em cartas "Outras", "Vantagem" e "Desvantagem"
-
-  switch (cartaAtual.tipo) {
-    case "Pergunta":
-      if (mostrarSomentePerguntas) {
-        estiloCarta = "border-yellow-200 bg-yellow-50"; // Estilo quando o filtro está ativo
-      }
-      break;
-    case "Outras":
-      estiloCarta = "border-blue-200 bg-blue-50"; // Estilo para cartas "Outras"
-      desativarInteracoes = true; // Desativa interações
-      break;
-    case "Vantagem":
-      estiloCarta = "border-green-200 bg-green-50"; // Estilo para cartas "Vantagem"
-      desativarInteracoes = true; // Desativa interações
-      break;
-    case "Desvantagem":
-      estiloCarta = "border-red-200 bg-red-50"; // Estilo para cartas "Desvantagem"
-      desativarInteracoes = true; // Desativa interações
-      break;
-  }
+  const obterEstiloCarta = () => {
+    switch (cartaAtual.tipo) {
+      case "Outras":
+        return "border-blue-200 bg-blue-50";
+      case "Vantagem":
+        return "border-green-200 bg-green-50";
+      case "Desvantagem":
+        return "border-red-200 bg-red-50";
+      default:
+        return mostrarSomentePerguntas
+          ? "border-yellow-200 bg-yellow-50"
+          : "border-gray-200 bg-white";
+    }
+  };
 
   return (
-    <Card className={`w-full max-w-sm mx-auto mt-4 ${estiloCarta}`}>
+    <Card className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}>
       <CardHeader>
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center space-x-2">
@@ -428,7 +420,7 @@ const EcoChallenge: React.FC = () => {
               size="sm"
               variant="outline"
             >
-              <Filter className="h-4 w-4" /> {/* Ícone de filtro */}
+              <Filter className="h-4 w-4" />
             </Button>
             <CardTitle className="text-xl font-bold">
               {cartaAtual.titulo}
@@ -474,8 +466,8 @@ const EcoChallenge: React.FC = () => {
                 )
                   ? "bg-red-100"
                   : ""
-              } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`} // Adiciona opacidade reduzida para opções eliminadas
-              disabled={opcoesEliminadas.includes(opcao.id) || desativarInteracoes} // Desativa botões se a carta for "Outras", "Vantagem" ou "Desvantagem"
+              } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
+              disabled={opcoesEliminadas.includes(opcao.id)}
             >
               {opcao.texto}
               {respondido &&
@@ -521,10 +513,8 @@ const EcoChallenge: React.FC = () => {
           <Button
             onClick={pularPergunta}
             size="sm"
-            variant={
-              pulosDisponiveis === 0 || desativarInteracoes ? "outline" : "secondary"
-            } // Desabilita pular para cartas "Outras", "Vantagem", "Desvantagem"
-            disabled={pulosDisponiveis === 0 || desativarInteracoes}
+            variant={pulosDisponiveis === 0 ? "outline" : "secondary"}
+            disabled={pulosDisponiveis === 0 || cartaAtual.tipo !== "Pergunta"}
           >
             <SkipForward className="h-4 w-4" />
           </Button>
@@ -532,21 +522,19 @@ const EcoChallenge: React.FC = () => {
             onClick={toggleDica}
             size="sm"
             variant={
-              respostasSeguidas < 3 || !cartaAtual.dica || desativarInteracoes
+              respostasSeguidas < 3 || !cartaAtual.dica
                 ? "outline"
                 : "secondary"
-            } // Desabilita dicas para cartas "Outras", "Vantagem", "Desvantagem"
-            disabled={respostasSeguidas < 3 || !cartaAtual.dica || desativarInteracoes}
+            }
+            disabled={respostasSeguidas < 3 || !cartaAtual.dica}
           >
             <HelpCircle className="h-4 w-4" />
           </Button>
           <Button
             onClick={eliminarRespostaErrada}
             size="sm"
-            variant={
-              respostasSeguidas < 6 || desativarInteracoes ? "outline" : "secondary"
-            } // Desabilita eliminação de respostas erradas para cartas "Outras", "Vantagem", "Desvantagem"
-            disabled={respostasSeguidas < 6 || desativarInteracoes}
+            variant={respostasSeguidas < 6 ? "outline" : "secondary"}
+            disabled={respostasSeguidas < 6}
           >
             <MinusCircle className="h-4 w-4" />
           </Button>
@@ -567,12 +555,8 @@ const EcoChallenge: React.FC = () => {
           <Button
             onClick={removerProgressoBarra}
             size="sm"
-            variant={
-              barrasCompletadas === 0 || desativarInteracoes
-                ? "outline"
-                : "secondary"
-            } // Desabilita remoção de barras para cartas "Outras", "Vantagem", "Desvantagem"
-            disabled={barrasCompletadas === 0 || desativarInteracoes}
+            variant={barrasCompletadas === 0 ? "outline" : "secondary"}
+            disabled={barrasCompletadas === 0}
           >
             <Star className="h-4 w-4 text-red-500" />
           </Button>
@@ -630,8 +614,7 @@ const EcoChallenge: React.FC = () => {
             <span>{respostasErradas}</span>
           </div>
           <div className="flex items-center space-x-1">
-            <Zap className="h-4 w-4 text-purple-500" />{" "}
-            {/* Ícone de raio para respostas seguidas */}
+            <Zap className="h-4 w-4 text-purple-500" />
             <span>{respostasSeguidas}</span>
           </div>
         </div>
