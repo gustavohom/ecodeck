@@ -4,7 +4,7 @@ const cartas = [
 
   // Pergunta Fácil com Verdadeiro ou Falso
   {
-    "tipo": "Outras",
+    "tipo": "Pergunta",
     "titulo": "Impacto das Energias Renováveis",
     "pergunta": "A energia solar é uma fonte inesgotável de energia e não emite gases poluentes durante seu uso.",
     "opcoes": [
@@ -123,11 +123,11 @@ const cartas = [
 
   // Carta para Escolher uma entre 3 Vantagens (todas respostas corretas)
   {
-    "tipo": "Outras",
+    "tipo": "Vantagem",
     "titulo": "Escolha sua Recompensa",
     "pergunta": "Escolha uma vantagem entre as opções abaixo:",
     "opcoes": [
-      { "id": 1, "texto": "Ganhe 5 pontos" },
+      { "id": 1, "texto": "Jogue novamente" },
       { "id": 2, "texto": "Avance 3 casas" },
       { "id": 3, "texto": "Receba um bônus de 10 MM" }
     ],
@@ -142,7 +142,7 @@ const cartas = [
 
   // Carta para Escolher uma entre 3 Desvantagens (todas respostas erradas)
   {
-    "tipo": "Outras",
+    "tipo": "Desvantagem",
     "titulo": "Escolha sua Penalidade",
     "pergunta": "Escolha uma desvantagem entre as opções abaixo:",
     "opcoes": [
@@ -150,7 +150,7 @@ const cartas = [
       { "id": 2, "texto": "Volte 3 casas" },
       { "id": 3, "texto": "Perca um turno" }
     ],
-    "respostaCorreta": [1,2,3],
+    "respostaCorreta": [],
     "dificuldade": "facil",
     "categorias": ["Penalidades"],
     "fontes": [],
@@ -191,7 +191,22 @@ const cartas = [
     "vantagem": "",
     "desvantagem": "Perca uma rodada e 5 pontos.",
     "dica": ""
-  }
+  },
+  {
+    "tipo": "Outras",
+    "titulo": "Reset seus contadores",
+    "pergunta": "Aperte o botão de zerar seus contadores. Entretanto mantenha todos os contadores de progresso que você possuí (acrescente-os manualmente)",
+    "opcoes": [
+      { "id": 1, "texto": "Entendi" }
+    ],
+    "respostaCorreta": 1,
+    "dificuldade": "facil",
+    "categorias": ["Outras"],
+    "fontes": [],
+    "vantagem": "Resetado",
+    "desvantagem": "",
+    "dica": ""
+  },
 ];
 
 export default cartas;
