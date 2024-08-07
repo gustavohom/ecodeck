@@ -1023,6 +1023,153 @@ const cartas = [
     vantagem: "Isso pode ser bom ou ruim",
     desvantagem: "",
     dica: "",
+  }, 
+
+  // Perguntas com Imagens
+  {
+    tipo: "Pergunta",
+    titulo: "Identificação de Espécies",
+    pergunta: `Identifique a espécie da árvore na imagem abaixo:
+    <img src="/1.jpg" alt="Árvore" class="img-media my-4" />`,
+    opcoes: [
+      { id: 1, texto: "Cedro" },
+      { id: 2, texto: "Ipê" },
+      { id: 3, texto: "Copaíba" },
+      { id: 4, texto: "Jatobá" },
+    ],
+    respostaCorreta: 2,
+    dificuldade: "normal",
+    categorias: ["Manejo Florestal de Nativas", "Silvicultura"],
+    fontes: [
+      "1. Oliveira, L. (2024). Guia de Espécies Nativas.",
+      "2. Ferreira, C. (2023). Identificação de Árvores na Amazônia.",
+    ],
+    vantagem: "Avance 3 casas!",
+    desvantagem: "Perda de 2 pontos.",
+    dica: "Esta espécie é famosa por suas flores amarelas.",
+  },
+  {
+    tipo: "Pergunta",
+    titulo: "Formação de Paisagens",
+    pergunta: `Qual é o tipo de formação de paisagem florestal na imagem?
+    <img src="/2.jpg" alt="Paisagem Florestal" class="img-media my-4" />`,
+    opcoes: [
+      { id: 1, texto: "Mata Atlântica" },
+      { id: 2, texto: "Cerrado" },
+      { id: 3, texto: "Floresta Amazônica" },
+      { id: 4, texto: "Pantanal" },
+    ],
+    respostaCorreta: 3,
+    dificuldade: "dificil",
+    categorias: ["Manejo Florestal de Nativas", "Dendrometria"],
+    fontes: [
+      "1. Silva, T. (2024). Paisagens Naturais do Brasil.",
+      "2. Costa, R. (2023). Formações Florestais Brasileiras.",
+    ],
+    vantagem: "Ganhe 5 pontos!",
+    desvantagem: "Perda de 3 pontos.",
+    dica: "Esta floresta é conhecida por sua grande biodiversidade.",
+  },
+  {
+    tipo: "Pergunta",
+    titulo: "Sistemas Agroflorestais",
+    pergunta: `Identifique o componente principal do sistema agroflorestal na imagem:
+    <img src="/3.jpg" alt="Sistema Agroflorestal" class="img-media my-4" />`,
+    opcoes: [
+      { id: 1, texto: "Bananeira" },
+      { id: 2, texto: "Cacau" },
+      { id: 3, texto: "Eucalipto" },
+      { id: 4, texto: "Palmito" },
+    ],
+    respostaCorreta: 2,
+    dificuldade: "normal",
+    categorias: ["Silvicultura", "Manejo Florestal de Plantadas"],
+    fontes: [
+      "1. Ribeiro, M. (2024). Sistemas Agroflorestais: Teoria e Prática.",
+      "2. Almeida, J. (2023). Sustentabilidade em Sistemas Agroflorestais.",
+    ],
+    vantagem: "Avance 4 casas!",
+    desvantagem: "Perda de 2 pontos.",
+    dica: "Este componente é amplamente cultivado na Bahia.",
+  },
+
+  // Perguntas com Preambulo Grande
+  {
+    tipo: "Pergunta",
+    titulo: "Planejamento Florestal",
+    pergunta: `O planejamento florestal é uma prática essencial na gestão de recursos naturais, englobando atividades de plantio, manejo e colheita. No contexto brasileiro, as florestas desempenham um papel crucial na economia, contribuindo para a produção de madeira, alimentos, e medicamentos. A sustentabilidade é um fator chave para garantir a continuidade desses recursos, sendo o planejamento uma ferramenta vital para alcançar o equilíbrio entre exploração e conservação. 
+
+    Qual é o principal objetivo do planejamento florestal sustentável?
+    `,
+    opcoes: [
+      { id: 1, texto: "Maximizar a produção de madeira" },
+      { id: 2, texto: "Proteger espécies ameaçadas" },
+      { id: 3, texto: "Manter o equilíbrio ecológico" },
+      { id: 4, texto: "Aumentar a área de plantio" },
+    ],
+    respostaCorreta: 3,
+    dificuldade: "normal",
+    categorias: ["Manejo Florestal de Nativas", "Silvicultura"],
+    fontes: [
+      "1. Carvalho, P. (2024). Planejamento Florestal Sustentável.",
+      "2. Silva, E. (2023). Gestão de Recursos Naturais.",
+    ],
+    vantagem: "Ganhe 3 pontos!",
+    desvantagem: "Perda de 2 pontos.",
+    dica: "O equilíbrio entre exploração e conservação é vital.",
+  },
+  {
+    tipo: "Pergunta",
+    titulo: "Ciclo do Carbono",
+    pergunta: `O ciclo do carbono é um dos processos mais importantes da biosfera, regulando o fluxo de carbono entre a atmosfera, os oceanos, e os ecossistemas terrestres. As florestas, em particular, desempenham um papel crucial na captura de carbono, atuando como grandes sumidouros naturais. A compreensão do ciclo do carbono é fundamental para mitigar os efeitos das mudanças climáticas e promover práticas de manejo florestal que visam a redução das emissões de carbono.
+
+    Qual é a principal função das florestas no ciclo do carbono?
+    `,
+    opcoes: [
+      { id: 1, texto: "Emitir gases poluentes" },
+      { id: 2, texto: "Capturar carbono da atmosfera" },
+      { id: 3, texto: "Produzir alimentos" },
+      { id: 4, texto: "Regular o ciclo da água" },
+    ],
+    respostaCorreta: 2,
+    dificuldade: "normal",
+    categorias: ["Manejo Florestal de Nativas", "Dendrometria"],
+    fontes: [
+      "1. Santos, F. (2024). O Papel das Florestas no Ciclo do Carbono.",
+      "2. Oliveira, L. (2023). Florestas e Mudanças Climáticas.",
+    ],
+    vantagem: "Avance 2 casas!",
+    desvantagem: "Perda de 1 ponto.",
+    dica: "As florestas são conhecidas como sumidouros de carbono.",
+  },
+  // Carta com Texto Grande e Imagem
+  {
+    tipo: "Pergunta",
+    titulo: "Desafios do Manejo Sustentável",
+    pergunta: `O manejo sustentável de florestas tropicais é uma prática que busca equilibrar as necessidades econômicas, sociais e ambientais. O objetivo é garantir que as florestas continuem a fornecer recursos valiosos, como madeira e produtos não madeireiros, enquanto preservam a biodiversidade e os serviços ecossistêmicos. Este tipo de manejo enfrenta muitos desafios, incluindo pressões econômicas que incentivam a exploração excessiva, a falta de dados precisos sobre a dinâmica das florestas, e as dificuldades em implementar práticas de manejo que sejam economicamente viáveis e ecologicamente responsáveis.
+
+A pesquisa sobre o manejo sustentável enfatiza a importância da cooperação entre governos, comunidades locais e setor privado para desenvolver políticas e práticas que protejam as florestas e os meios de subsistência das populações locais. Além disso, o papel da tecnologia, como o uso de sensoriamento remoto para monitoramento florestal, está se tornando cada vez mais crucial para a implementação efetiva de estratégias de manejo.
+
+Na imagem abaixo, observamos uma floresta tropical em manejo sustentável. Qual é uma das principais técnicas utilizadas para garantir que o manejo seja realizado de forma sustentável?
+
+<img src="/4.jpg" alt="Manejo Florestal Sustentável" class="img-grande my-4" />`,
+
+    opcoes: [
+      { id: 1, texto: "Corte raso" },
+      { id: 2, texto: "Seleção de árvores" },
+      { id: 3, texto: "Desmatamento total" },
+      { id: 4, texto: "Queimadas controladas" },
+    ],
+    respostaCorreta: 2,
+    dificuldade: "dificil",
+    categorias: ["Manejo Florestal de Nativas", "Silvicultura", "Grande"],
+    fontes: [
+      "1. Lima, A. (2024). Manejo Sustentável de Florestas Tropicais.",
+      "2. Ribeiro, C. (2023). Práticas de Silvicultura Sustentável.",
+    ],
+    vantagem: "Ganhe 5 pontos e avance 2 casas!",
+    desvantagem: "Perda de 4 pontos e volte 2 casas.",
+    dica: "Esta técnica permite que a floresta se regenere naturalmente.",
   }
 ];
 
