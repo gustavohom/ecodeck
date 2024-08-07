@@ -991,7 +991,7 @@ const cartas = [
     vantagem: "Itens adquiridos podem ser usados posteriormente.",
     desvantagem: "",
     dica: "",
-  }
+  }, 
   {
     tipo: "Outras",
     titulo: "Decisão Estratégica",
