@@ -991,7 +991,7 @@ const cartas = [
     vantagem: "Itens adquiridos podem ser usados posteriormente.",
     desvantagem: "",
     dica: "",
-  },
+  }
   {
     tipo: "Outras",
     titulo: "Decisão Estratégica",
@@ -1008,7 +1008,7 @@ const cartas = [
     vantagem: "A escolha pode influenciar sua estratégia futura.",
     desvantagem: "",
     dica: "",
-  }
+  },
   {
     tipo: "Outras",
     titulo: "Redefinir contadores",
@@ -1023,7 +1023,7 @@ const cartas = [
     vantagem: "Isso pode ser bom ou ruim",
     desvantagem: "",
     dica: "",
-  },
+  }
 ];
 
 export default cartas;
