@@ -1,627 +1,212 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  CheckCircle2,
-  XCircle,
-  ThumbsUp,
-  ThumbsDown,
-  RotateCcw,
-  HelpCircle,
-  BookOpen,
-  Home,
-  SkipForward,
-  Star,
-  MinusCircle,
-  ChevronUp,
-  Zap,
-  Filter,
-} from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import Zoom from "react-medium-image-zoom";
-import "react-medium-image-zoom/dist/styles.css";
-import Image from "next/image";
-import cartas from "./cartas";
+// components/cartas.js
 
-// Definição de Tipos
-interface Opcao {
-  id: number;
-  texto: string;
-}
+const cartas = [
 
-interface Carta {
-  tipo: string;
-  titulo: string;
-  pergunta: string;
-  opcoes: Opcao[];
-  respostaCorreta: number | number[];
-  dificuldade: string;
-  categorias: string[];
-  fontes: string[];
-  vantagem: string;
-  desvantagem: string;
-  dica: string;
-}
+  // Pergunta Fácil com Verdadeiro ou Falso
+  {
+    "tipo": "Pergunta",
+    "titulo": "Impacto das Energias Renováveis",
+    "pergunta": "A energia solar é uma fonte inesgotável de energia e não emite gases poluentes durante seu uso.",
+    "opcoes": [
+      { "id": 1, "texto": "Verdadeiro" },
+      { "id": 2, "texto": "Falso" }
+    ],
+    "respostaCorreta": 1,
+    "dificuldade": "facil",
+    "categorias": ["Energias Renováveis", "Sustentabilidade"],
+    "fontes": [
+      "1. Silva, A. (2023). Fontes de Energia e o Futuro.",
+      "2. Rocha, B. (2022). Energia Sustentável para Todos."
+    ],
+    "vantagem": "Avance uma casa!",
+    "desvantagem": "Volte uma casa.",
+    "dica": "A energia solar é limpa e renovável."
+  },
 
-interface TelaInicialProps {
-  onStartGame: (categoriasSelecionadas: string[]) => void;
-  onReset: () => void;
-  categoriasDisponiveis: string[];
-  categoriasSelecionadas: string[];
-  setCategoriasSelecionadas: (categorias: string[]) => void;
-}
+  // Pergunta Fácil com 4 Alternativas e uma Resposta Correta
+  {
+    "tipo": "Pergunta",
+    "titulo": "Reciclagem de Materiais",
+    "pergunta": "Qual desses materiais é considerado o mais reciclável?",
+    "opcoes": [
+      { "id": 1, "texto": "Plástico" },
+      { "id": 2, "texto": "Vidro" },
+      { "id": 3, "texto": "Papelão" },
+      { "id": 4, "texto": "Isopor" }
+    ],
+    "respostaCorreta": 2,
+    "dificuldade": "facil",
+    "categorias": ["Reciclagem", "Sustentabilidade"],
+    "fontes": [
+      "1. Costa, M. (2023). O Guia Completo da Reciclagem.",
+      "2. Almeida, P. (2022). Reciclagem e Meio Ambiente."
+    ],
+    "vantagem": "Ganhe 2 pontos extra!",
+    "desvantagem": "Perda de 1 ponto.",
+    "dica": "Pense em algo que pode ser reciclado infinitamente."
+  },
 
-// Componente Tela Inicial
-const TelaInicial: React.FC<TelaInicialProps> = ({
-  onStartGame,
-  onReset,
-  categoriasDisponiveis,
-  categoriasSelecionadas,
-  setCategoriasSelecionadas,
-}) => {
-  const [termoBusca, setTermoBusca] = useState<string>("");
+  // Pergunta Fácil com 5 Alternativas e Duas Respostas Corretas
+  {
+    "tipo": "Pergunta",
+    "titulo": "Plantas Medicinais",
+    "pergunta": "Quais dessas plantas são conhecidas por suas propriedades medicinais?",
+    "opcoes": [
+      { "id": 1, "texto": "Camomila" },
+      { "id": 2, "texto": "Margarida" },
+      { "id": 3, "texto": "Alecrim" },
+      { "id": 4, "texto": "Dente-de-leão" },
+      { "id": 5, "texto": "Flor de Lis" }
+    ],
+    "respostaCorreta": [1, 3],
+    "dificuldade": "facil",
+    "categorias": ["Plantas Medicinais", "Saúde"],
+    "fontes": [
+      "1. Fernandes, T. (2023). O Poder das Plantas Medicinais.",
+      "2. Ribeiro, L. (2022). Ervas que Curam."
+    ],
+    "vantagem": "Escolha uma planta para ganhar 2 pontos!",
+    "desvantagem": "Perde 1 ponto.",
+    "dica": "Camomila e alecrim são populares na medicina herbal."
+  },
 
-  const categoriasFiltradas = categoriasDisponiveis.filter((categoria) =>
-    categoria.toLowerCase().includes(termoBusca.toLowerCase())
-  );
+  // Pergunta Normal com 4 Alternativas e uma Resposta Correta com Imagem
+  {
+    "tipo": "Pergunta",
+    "titulo": "Efeito Estufa",
+    "pergunta": `O que mais contribui para o efeito estufa?
+    <img src="/5.jpg" alt="Efeito Estufa" class="img-media my-4" />`,
+    "opcoes": [
+      { "id": 1, "texto": "Energia Eólica" },
+      { "id": 2, "texto": "Combustíveis Fósseis" },
+      { "id": 3, "texto": "Energia Solar" },
+      { "id": 4, "texto": "Plantas Marinhas" }
+    ],
+    "respostaCorreta": 2,
+    "dificuldade": "normal",
+    "categorias": ["Meio Ambiente", "Clima"],
+    "fontes": [
+      "1. Oliveira, R. (2023). Mudanças Climáticas e Efeito Estufa.",
+      "2. Silva, A. (2022). Aquecimento Global e o Futuro do Planeta."
+    ],
+    "vantagem": "Ganhe 3 pontos!",
+    "desvantagem": "Perde 2 pontos.",
+    "dica": "Os combustíveis fósseis são uma grande fonte de gases do efeito estufa."
+  },
 
-  return (
-    <Card className="w-full max-w-sm mx-auto mt-8">
-      <CardHeader>
-        <CardTitle className="text-xl font-bold mb-4">
-          Eco Challenge: O Jogo da Sustentabilidade
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm mb-4">
-          Bem-vindo ao Eco Challenge! Teste seus conhecimentos sobre
-          sustentabilidade e faça escolhas que impactam o meio ambiente.
-        </p>
-        <input
-          type="text"
-          placeholder="Pesquisar Categoria"
-          value={termoBusca}
-          onChange={(e) => setTermoBusca(e.target.value)}
-          className="w-full p-2 mb-2 border rounded"
-        />
-        <ScrollArea className="h-40 mb-4 border rounded">
-          {categoriasFiltradas.map((categoria) => (
-            <div key={categoria} className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                id={categoria}
-                checked={categoriasSelecionadas.includes(categoria)}
-                onChange={() => {
-                  if (categoriasSelecionadas.includes(categoria)) {
-                    setCategoriasSelecionadas(
-                      categoriasSelecionadas.filter((c) => c !== categoria)
-                    );
-                  } else {
-                    setCategoriasSelecionadas([
-                      ...categoriasSelecionadas,
-                      categoria,
-                    ]);
-                  }
-                }}
-                className="mr-2"
-              />
-              <label htmlFor={categoria} className="text-sm">
-                {categoria}
-              </label>
-            </div>
-          ))}
-        </ScrollArea>
-        <Button
-          onClick={() => setCategoriasSelecionadas(categoriasDisponiveis)}
-          className="mr-2 mt-2"
-        >
-          Selecionar Todas
-        </Button>
-        <Button onClick={() => setCategoriasSelecionadas([])} className="mt-2">
-          Limpar Todas
-        </Button>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button
-          onClick={() => onStartGame(categoriasSelecionadas)}
-          className="flex-1 mr-2"
-          disabled={categoriasSelecionadas.length === 0}
-        >
-          Iniciar Jogo
-        </Button>
-        <Button onClick={onReset} variant="outline" className="flex-1 ml-2">
-          Resetar
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-};
+  // Pergunta Difícil com 5 Alternativas, uma Resposta Correta e Imagem
+  {
+    "tipo": "Pergunta",
+    "titulo": "Florestas Tropicais",
+    "pergunta": `Qual é o principal fator que ameaça as florestas tropicais?
+    <img src="/7.jpg" alt="Florestas Tropicais" class="img-grande my-4" />`,
+    "opcoes": [
+      { "id": 1, "texto": "Desmatamento para Agricultura" },
+      { "id": 2, "texto": "Conservação Ambiental" },
+      { "id": 3, "texto": "Turismo Sustentável" },
+      { "id": 4, "texto": "Programas de Reflorestamento" },
+      { "id": 5, "texto": "Mudança para Energias Renováveis" }
+    ],
+    "respostaCorreta": 1,
+    "dificuldade": "dificil",
+    "categorias": ["Florestas", "Conservação"],
+    "fontes": [
+      "1. Souza, E. (2023). Protegendo Nossas Florestas Tropicais.",
+      "2. Costa, M. (2022). A Batalha Contra o Desmatamento."
+    ],
+    "vantagem": "Ganhe 4 pontos e avance 2 casas!",
+    "desvantagem": "Perde 3 pontos e volte 1 casa.",
+    "dica": "A agricultura é uma das maiores ameaças às florestas."
+  },
 
-// Componente Principal EcoChallenge
-const EcoChallenge: React.FC = () => {
-  const [cartaAtual, setCartaAtual] = useState<Carta | null>(null);
-  const [selecionado, setSelecionado] = useState<number | null>(null);
-  const [respondido, setRespondido] = useState<boolean>(false);
-  const [respostasCertas, setRespostasCertas] = useState<number>(0);
-  const [respostasErradas, setRespostasErradas] = useState<number>(0);
-  const [respostasSeguidas, setRespostasSeguidas] = useState<number>(0);
-  const [mensagem, setMensagem] = useState<string>("");
-  const [progresso, setProgresso] = useState<number>(0);
-  const [mostrarDica, setMostrarDica] = useState<boolean>(false);
-  const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
-  const [pulosDisponiveis, setPulosDisponiveis] = useState<number>(0);
-  const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
-  const [barrasCompletadas, setBarrasCompletadas] = useState<number>(0);
-  const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
-    string[]
-  >([]);
-  const [rodadasPreso, setRodadasPreso] = useState<number>(0);
+  // Cartas do Tipo Outras
 
-  const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
-    useState<boolean>(false);
+  // Carta para Escolher uma entre 3 Vantagens (todas respostas corretas)
+  {
+    "tipo": "Vantagem",
+    "titulo": "Escolha sua Recompensa",
+    "pergunta": "Escolha uma vantagem entre as opções abaixo:",
+    "opcoes": [
+      { "id": 1, "texto": "Jogue novamente" },
+      { "id": 2, "texto": "Avance 3 casas" },
+      { "id": 3, "texto": "Receba um bônus de 10 MM" }
+    ],
+    "respostaCorreta": [1, 2, 3],
+    "dificuldade": "facil",
+    "categorias": ["Recompensas"],
+    "fontes": [],
+    "vantagem": "Todas as opções são vantajosas!",
+    "desvantagem": "",
+    "dica": ""
+  },
 
-  const categoriasDisponiveis = Array.from(
-    new Set(cartas.flatMap((carta) => carta.categorias))
-  );
+  // Carta para Escolher uma entre 3 Desvantagens (todas respostas erradas)
+  {
+    "tipo": "Desvantagem",
+    "titulo": "Escolha sua Penalidade",
+    "pergunta": "Escolha uma desvantagem entre as opções abaixo:",
+    "opcoes": [
+      { "id": 1, "texto": "Perde 5 pontos" },
+      { "id": 2, "texto": "Volte 3 casas" },
+      { "id": 3, "texto": "Perca um turno" }
+    ],
+    "respostaCorreta": [],
+    "dificuldade": "facil",
+    "categorias": ["Penalidades"],
+    "fontes": [],
+    "vantagem": "",
+    "desvantagem": "Todas as opções são desvantajosas!",
+    "dica": ""
+  },
 
-  const selecionarCartaAleatoria = useCallback(() => {
-    const cartasFiltradas = cartas.filter(
-      (carta) =>
-        carta.categorias.some((categoria) =>
-          categoriasSelecionadas.includes(categoria)
-        ) && (!mostrarSomentePerguntas || carta.tipo === "Pergunta")
-    );
+  // Carta contendo apenas uma Alternativa (Vantagem)
+  {
+    "tipo": "Vantagem",
+    "titulo": "Recompensa Especial",
+    "pergunta": "Você ganhou um bônus especial!",
+    "opcoes": [
+      { "id": 1, "texto": "Entendi" }
+    ],
+    "respostaCorreta": 1,
+    "dificuldade": "facil",
+    "categorias": ["Recompensas"],
+    "fontes": [],
+    "vantagem": "Receba um bônus de 20 MM!",
+    "desvantagem": "",
+    "dica": ""
+  },
 
-    const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
-    setCartaAtual(cartasFiltradas[indiceAleatorio]);
-    setSelecionado(null);
-    setRespondido(false);
-    setMensagem("");
-    setMostrarDica(false);
-    setMostrarFontes(false);
-    setOpcoesEliminadas([]);
-  }, [categoriasSelecionadas, mostrarSomentePerguntas]);
+  // Carta contendo apenas uma Alternativa (Desvantagem)
+  {
+    "tipo": "Desvantagem",
+    "titulo": "Penalidade Especial",
+    "pergunta": "Você perdeu uma rodada!",
+    "opcoes": [
+      { "id": 1, "texto": "Estou triste mas entendi" }
+    ],
+    "respostaCorreta": 1,
+    "dificuldade": "facil",
+    "categorias": ["Penalidades"],
+    "fontes": [],
+    "vantagem": "",
+    "desvantagem": "Perca uma rodada e 5 pontos.",
+    "dica": ""
+  },
+  {
+    "tipo": "Outras",
+    "titulo": "Reset seus contadores",
+    "pergunta": "Aperte o botão de zerar seus contadores. Entretanto mantenha todos os contadores de progresso que você possuí (acrescente-os manualmente)",
+    "opcoes": [
+      { "id": 1, "texto": "Entendi" }
+    ],
+    "respostaCorreta": 1,
+    "dificuldade": "facil",
+    "categorias": ["Outras"],
+    "fontes": [],
+    "vantagem": "Resetado",
+    "desvantagem": "",
+    "dica": ""
+  },
+];
 
-  useEffect(() => {
-    if (jogoIniciado) {
-      selecionarCartaAleatoria();
-    }
-  }, [jogoIniciado, selecionarCartaAleatoria]);
-
-  const handleSelecao = (id: number) => {
-    if (!respondido) {
-      setSelecionado(id);
-    }
-  };
-
-  const verificarResposta = () => {
-    if (selecionado !== null && cartaAtual) {
-      setRespondido(true);
-
-      const isCorrect = Array.isArray(cartaAtual.respostaCorreta)
-        ? cartaAtual.respostaCorreta.includes(selecionado)
-        : cartaAtual.respostaCorreta === selecionado;
-
-      if (isCorrect) {
-        if (cartaAtual.tipo === "Pergunta") {
-          setRespostasCertas((prev) => prev + 1);
-          setRespostasSeguidas((prev) => prev + 1);
-          const novoProgresso = progresso + 20;
-          if (novoProgresso >= 100) {
-            setProgresso(0);
-            setMensagem("Correto! Bônus extra! Barra completada!");
-            setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-            setBarrasCompletadas((prev) => prev + 1);
-          } else {
-            setProgresso(novoProgresso);
-          }
-          if (cartaAtual.dificuldade === "dificil") {
-            setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-          }
-        }
-        setMensagem(`Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`);
-      } else {
-        if (cartaAtual.tipo === "Pergunta") {
-          setRespostasErradas((prev) => prev + 1);
-          if (respostasSeguidas >= 5) {
-            setMensagem("Resposta incorreta, mas você não será penalizado!");
-          } else {
-            setMensagem(`Incorreto. ${mostrarSomentePerguntas ? "" : cartaAtual.desvantagem}`);
-          }
-          setProgresso((prev) => Math.max(prev - 10, 0));
-          setRespostasSeguidas(0);
-        }
-      }
-    }
-  };
-
-  const resetarContadores = () => {
-    if (window.confirm("Tem certeza que deseja resetar todos os contadores?")) {
-      setRespostasCertas(0);
-      setRespostasErradas(0);
-      setProgresso(0);
-      setPulosDisponiveis(0);
-      setBarrasCompletadas(0);
-      setRespostasSeguidas(0);
-      setRodadasPreso(0);
-      setMensagem("Contadores resetados!");
-      setTimeout(() => setMensagem(""), 2000);
-    }
-  };
-
-  const toggleDica = () => {
-    if (respostasSeguidas >= 3 && cartaAtual?.dica) {
-      setMostrarDica(!mostrarDica);
-      setRespostasSeguidas((prev) => prev - 3);
-    } else if (!cartaAtual?.dica) {
-      setMensagem("Esta carta não possui dica.");
-    } else {
-      setMensagem(
-        "Você precisa de pelo menos 3 respostas corretas seguidas para usar a dica!"
-      );
-    }
-  };
-
-  const toggleFontes = () => {
-    setMostrarFontes(!mostrarFontes);
-  };
-
-  const pularPergunta = () => {
-    if (pulosDisponiveis > 0) {
-      setPulosDisponiveis((prev) => prev - 1);
-      selecionarCartaAleatoria();
-    }
-  };
-
-  const removerProgressoBarra = () => {
-    if (barrasCompletadas > 0) {
-      setBarrasCompletadas((prev) => prev - 1);
-      setMensagem("Barra de progresso removida!");
-    } else {
-      setMensagem("Nenhuma barra de progresso para remover!");
-    }
-  };
-
-  const incrementarProgressoBarra = () => {
-    setBarrasCompletadas((prev) => prev + 1);
-    setMensagem("Barra de progresso adicionada!");
-  };
-
-  const eliminarRespostaErrada = () => {
-    if (respostasSeguidas >= 6 && cartaAtual) {
-      const opcoesErradas = cartaAtual.opcoes.filter((opcao: Opcao) => {
-        if (Array.isArray(cartaAtual.respostaCorreta)) {
-          return !cartaAtual.respostaCorreta.includes(opcao.id);
-        } else {
-          return opcao.id !== cartaAtual.respostaCorreta;
-        }
-      });
-
-      const opcoesRestantes = opcoesErradas.filter(
-        (opcao: Opcao) => !opcoesEliminadas.includes(opcao.id)
-      );
-
-      if (opcoesRestantes.length > 0) {
-        const indiceAleatorio = Math.floor(
-          Math.random() * opcoesRestantes.length
-        );
-        const opcaoEliminada = opcoesRestantes[indiceAleatorio].id;
-
-        setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
-        setRespostasSeguidas((prev) => prev - 6);
-        setMensagem("Uma resposta errada foi eliminada!");
-      }
-    } else {
-      setMensagem("Você precisa de pelo menos 6 respostas corretas seguidas!");
-    }
-  };
-
-  const voltarTelaInicial = () => {
-    setJogoIniciado(false);
-  };
-
-  const incrementarRodadasPreso = () => {
-    setRodadasPreso((prev) => prev + 1);
-    setMensagem("Uma rodada adicionada!");
-  };
-
-  const diminuirRodadasPreso = () => {
-    setRodadasPreso((prev) => (prev > 0 ? prev - 1 : 0));
-    setMensagem("Uma rodada removida!");
-  };
-
-  const diminuirAcertos = () => {
-    setRespostasCertas((prev) => (prev > 0 ? prev - 1 : 0));
-    setMensagem("Acerto removido!");
-  };
-
-  const diminuirErros = () => {
-    setRespostasErradas((prev) => (prev > 0 ? prev - 1 : 0));
-    setMensagem("Erro removido!");
-  };
-
-  const renderizarConteudoPergunta = () => {
-    if (!cartaAtual) return null;
-
-    const conteudo = cartaAtual.pergunta
-      .split("\n")
-      .map((linha: string, index: number) => {
-        if (linha.includes("<img")) {
-          const imgRegex = /<img src="([^"]+)" alt="([^"]+)" class="([^"]+)" \/>/;
-          const match = imgRegex.exec(linha);
-
-          if (match) {
-            const [_, src, alt, className] = match;
-            return (
-              <Zoom key={index}>
-                <Image
-                  src={src}
-                  alt={alt}
-                  width={500}
-                  height={300}
-                  className={`${className} img-zoom`}
-                />
-              </Zoom>
-            );
-          }
-        }
-        return <p key={index} dangerouslySetInnerHTML={{ __html: linha }} />;
-      });
-
-    return conteudo;
-  };
-
-  if (!jogoIniciado) {
-    return (
-      <TelaInicial
-        onStartGame={() => setJogoIniciado(true)}
-        onReset={resetarContadores}
-        categoriasDisponiveis={categoriasDisponiveis}
-        categoriasSelecionadas={categoriasSelecionadas}
-        setCategoriasSelecionadas={setCategoriasSelecionadas}
-      />
-    );
-  }
-
-  if (!cartaAtual) return null;
-
-  const obterEstiloCarta = () => {
-    switch (cartaAtual.tipo) {
-      case "Outras":
-        return "border-blue-200 bg-blue-50";
-      case "Vantagem":
-        return "border-green-200 bg-green-50";
-      case "Desvantagem":
-        return "border-red-200 bg-red-50";
-      default:
-        return mostrarSomentePerguntas
-          ? "border-blue-500 bg-gray-50"
-          : "border-gray-200 bg-white";
-    }
-  };
-
-  return (
-    <Card className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}>
-      <CardHeader>
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center space-x-2">
-            <Button
-              onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
-              size="sm"
-              variant="outline"
-            >
-              <Filter className="h-4 w-4" />
-            </Button>
-            <CardTitle className="text-xl font-bold">
-              {cartaAtual.titulo}
-            </CardTitle>
-          </div>
-          <Badge
-            variant={
-              cartaAtual.dificuldade === "facil"
-                ? "secondary"
-                : cartaAtual.dificuldade === "normal"
-                ? "default"
-                : "destructive"
-            }
-          >
-            {cartaAtual.dificuldade}
-          </Badge>
-        </div>
-        <ScrollArea className="h-56 rounded-md border p-4">
-          <div className="text-sm">{renderizarConteudoPergunta()}</div>
-        </ScrollArea>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          {cartaAtual.opcoes.map((opcao: Opcao) => (
-            <Button
-              key={opcao.id}
-              onClick={() => handleSelecao(opcao.id)}
-              variant={selecionado === opcao.id ? "secondary" : "outline"}
-              className={`w-full justify-start text-sm ${
-                respondido &&
-                (Array.isArray(cartaAtual.respostaCorreta)
-                  ? cartaAtual.respostaCorreta.includes(opcao.id)
-                  : cartaAtual.respostaCorreta === opcao.id)
-                  ? "bg-green-100"
-                  : ""
-              } ${
-                respondido &&
-                selecionado === opcao.id &&
-                !(
-                  Array.isArray(cartaAtual.respostaCorreta)
-                    ? cartaAtual.respostaCorreta.includes(opcao.id)
-                    : cartaAtual.respostaCorreta === opcao.id
-                )
-                  ? "bg-red-100"
-                  : ""
-              } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
-              disabled={opcoesEliminadas.includes(opcao.id)}
-            >
-              {opcao.texto}
-              {respondido &&
-                (Array.isArray(cartaAtual.respostaCorreta)
-                  ? cartaAtual.respostaCorreta.includes(opcao.id)
-                  : cartaAtual.respostaCorreta === opcao.id) && (
-                  <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
-                )}
-              {respondido &&
-                selecionado === opcao.id &&
-                !(
-                  Array.isArray(cartaAtual.respostaCorreta)
-                    ? cartaAtual.respostaCorreta.includes(opcao.id)
-                    : cartaAtual.respostaCorreta === opcao.id
-                ) && (
-                  <XCircle className="ml-auto h-4 w-4 text-red-500" />
-                )}
-            </Button>
-          ))}
-        </div>
-        {mostrarDica && (
-          <Alert className="mt-4">
-            <AlertDescription>{cartaAtual.dica}</AlertDescription>
-          </Alert>
-        )}
-        {mostrarFontes && (
-          <Alert className="mt-4">
-            <AlertDescription>
-              <ul className="list-disc list-inside">
-                {cartaAtual.fontes.map((fonte: string, index: number) => (
-                  <li key={index}>{fonte}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
-      </CardContent>
-      <CardFooter className="flex flex-col items-center">
-        <div className="flex flex-wrap justify-between w-full mb-1 space-x-2">
-          <Button onClick={toggleFontes} size="sm" variant="outline">
-            <BookOpen className="h-4 w-4" />
-          </Button>
-          <Button
-            onClick={pularPergunta}
-            size="sm"
-            variant={pulosDisponiveis === 0 ? "outline" : "secondary"}
-            disabled={pulosDisponiveis === 0 || cartaAtual.tipo !== "Pergunta"}
-          >
-            <SkipForward className="h-4 w-4" />
-          </Button>
-          <Button
-            onClick={toggleDica}
-            size="sm"
-            variant={
-              respostasSeguidas < 3 || !cartaAtual.dica
-                ? "outline"
-                : "secondary"
-            }
-            disabled={respostasSeguidas < 3 || !cartaAtual.dica}
-          >
-            <HelpCircle className="h-4 w-4" />
-          </Button>
-          <Button
-            onClick={eliminarRespostaErrada}
-            size="sm"
-            variant={respostasSeguidas < 6 ? "outline" : "secondary"}
-            disabled={respostasSeguidas < 6}
-          >
-            <MinusCircle className="h-4 w-4" />
-          </Button>
-          <Button onClick={resetarContadores} size="sm" variant="outline">
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-          <Button onClick={voltarTelaInicial} size="sm" variant="outline">
-            <Home className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="flex flex-wrap justify-between w-full space-x-2">
-          <Button onClick={diminuirAcertos} size="sm" variant="outline">
-            <ThumbsDown className="h-4 w-4 text-green-500" />
-          </Button>
-          <Button onClick={diminuirErros} size="sm" variant="outline">
-            <ThumbsUp className="h-4 w-4 text-red-500" />
-          </Button>
-          <Button
-            onClick={removerProgressoBarra}
-            size="sm"
-            variant={barrasCompletadas === 0 ? "outline" : "secondary"}
-            disabled={barrasCompletadas === 0}
-          >
-            <Star className="h-4 w-4 text-red-500" />
-          </Button>
-          <Button onClick={incrementarProgressoBarra} size="sm" variant="outline">
-            <Star className="h-4 w-4 text-yellow-500" />
-          </Button>
-          <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
-            <ChevronUp className="h-4 w-4 text-purple-500 transform rotate-180" />
-          </Button>
-          <Button onClick={incrementarRodadasPreso} size="sm" variant="outline">
-            <ChevronUp className="h-4 w-4 text-purple-500" />
-          </Button>
-        </div>
-        <div className="flex justify-between w-full mb-4">
-          {!respondido ? (
-            <Button
-              onClick={verificarResposta}
-              disabled={selecionado === null}
-              className="w-full mt-2"
-            >
-              Verificar
-            </Button>
-          ) : (
-            <Button onClick={selecionarCartaAleatoria} className="w-full mt-2">
-              Próxima Carta
-            </Button>
-          )}
-        </div>
-        {mensagem && (
-          <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
-        )}
-        <Progress
-          value={progresso}
-          className={`w-full ${progresso === 100 ? "bg-green-500" : ""}`}
-        />
-        <div className="flex justify-between w-full mt-4 text-sm">
-          <div className="flex items-center space-x-1">
-            <ChevronUp className="h-4 w-4 text-purple-500" />
-            <span>{rodadasPreso}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <Star className="h-4 w-4 text-yellow-500" />
-            <span>{barrasCompletadas}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <SkipForward className="h-4 w-4" />
-            <span>{pulosDisponiveis}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <ThumbsUp className="h-4 w-4 text-green-500" />
-            <span>{respostasCertas}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <ThumbsDown className="h-4 w-4 text-red-500" />
-            <span>{respostasErradas}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <Zap className="h-4 w-4 text-purple-500" />
-            <span>{respostasSeguidas}</span>
-          </div>
-        </div>
-      </CardFooter>
-    </Card>
-  );
-};
-
-export default EcoChallenge;
-
+export default cartas;
