@@ -182,7 +182,11 @@ const EcoChallenge: React.FC = () => {
       (carta) =>
         carta.categorias.some((categoria) =>
           categoriasSelecionadas.includes(categoria)
-        ) && (!mostrarSomentePerguntas || carta.tipo === "Pergunta")
+        ) &&
+        (!mostrarSomentePerguntas ||
+          carta.tipo === "Pergunta" ||
+          carta.tipo === "MultiplaEscolha" ||
+          carta.tipo === "Ordem")
     );
 
     const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
@@ -554,7 +558,14 @@ const EcoChallenge: React.FC = () => {
                   ? handleSelecaoOrdem(opcao.id)
                   : handleSelecao(opcao.id)
               }
-              variant={selecionado === opcao.id ? "secondary" : "outline"}
+              variant={
+                (selecionado === opcao.id ||
+                  selecoesMultiplas.includes(opcao.id) ||
+                  ordemSelecoes.includes(opcao.id)) &&
+                !respondido
+                  ? "secondary"
+                  : "outline"
+              }
               className={`w-full justify-start text-sm ${
                 respondido &&
                 (Array.isArray(cartaAtual.respostaCorreta)
@@ -564,25 +575,33 @@ const EcoChallenge: React.FC = () => {
                   : ""
               } ${
                 respondido &&
-                selecionado === opcao.id &&
                 !(
                   Array.isArray(cartaAtual.respostaCorreta)
                     ? cartaAtual.respostaCorreta.includes(opcao.id)
                     : cartaAtual.respostaCorreta === opcao.id
-                )
+                ) &&
+                (selecionado === opcao.id ||
+                  selecoesMultiplas.includes(opcao.id) ||
+                  ordemSelecoes.includes(opcao.id))
                   ? "bg-red-100"
                   : ""
-              } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
+              } ${
+                respondido &&
+                Array.isArray(cartaAtual.respostaCorreta) &&
+                !selecoesMultiplas.includes(opcao.id) &&
+                cartaAtual.respostaCorreta.includes(opcao.id)
+                  ? "bg-blue-100"
+                  : ""
+              } ${
+                opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""
+              }`}
               disabled={opcoesEliminadas.includes(opcao.id)}
             >
               {opcao.texto}
               {cartaAtual.tipo === "MultiplaEscolha" && (
-                <input
-                  type="checkbox"
-                  checked={selecoesMultiplas.includes(opcao.id)}
-                  readOnly
-                  className="ml-2"
-                />
+                <span className="ml-2">
+                  {selecoesMultiplas.includes(opcao.id) ? "✓" : ""}
+                </span>
               )}
               {cartaAtual.tipo === "Ordem" &&
                 ordemSelecoes.includes(opcao.id) && (
@@ -597,13 +616,27 @@ const EcoChallenge: React.FC = () => {
                   <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
                 )}
               {respondido &&
-                selecionado === opcao.id &&
                 !(
                   Array.isArray(cartaAtual.respostaCorreta)
                     ? cartaAtual.respostaCorreta.includes(opcao.id)
                     : cartaAtual.respostaCorreta === opcao.id
-                ) && (
+                ) &&
+                (selecionado === opcao.id ||
+                  selecoesMultiplas.includes(opcao.id) ||
+                  ordemSelecoes.includes(opcao.id)) && (
                   <XCircle className="ml-auto h-4 w-4 text-red-500" />
+                )}
+              {respondido &&
+                cartaAtual.tipo === "Ordem" &&
+                ordemSelecoes.includes(opcao.id) && (
+                  <span className="ml-2">
+                    (
+                    {ordemSelecoes.indexOf(opcao.id) + 1}/
+                    {(cartaAtual.respostaCorreta as number[]).indexOf(
+                      opcao.id
+                    ) + 1}
+                    )
+                  </span>
                 )}
             </Button>
           ))}
@@ -634,7 +667,12 @@ const EcoChallenge: React.FC = () => {
             onClick={pularPergunta}
             size="sm"
             variant={pulosDisponiveis === 0 ? "outline" : "secondary"}
-            disabled={pulosDisponiveis === 0 || cartaAtual.tipo !== "Pergunta"}
+            disabled={
+              pulosDisponiveis === 0 ||
+              (cartaAtual.tipo !== "Pergunta" &&
+                cartaAtual.tipo !== "MultiplaEscolha" &&
+                cartaAtual.tipo !== "Ordem")
+            }
           >
             <SkipForward className="h-4 w-4" />
           </Button>
@@ -694,7 +732,11 @@ const EcoChallenge: React.FC = () => {
           {!respondido ? (
             <Button
               onClick={verificarResposta}
-              disabled={selecionado === null && selecoesMultiplas.length === 0 && ordemSelecoes.length === 0}
+              disabled={
+                selecionado === null &&
+                selecoesMultiplas.length === 0 &&
+                ordemSelecoes.length === 0
+              }
               className="w-full mt-2"
             >
               Verificar
@@ -705,9 +747,12 @@ const EcoChallenge: React.FC = () => {
             </Button>
           )}
         </div>
-        {cartaAtual.tipo === "Pergunta" && mensagem && (
-          <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
-        )}
+        {(cartaAtual.tipo === "Pergunta" ||
+          cartaAtual.tipo === "MultiplaEscolha" ||
+          cartaAtual.tipo === "Ordem") &&
+          mensagem && (
+            <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
+          )}
         <Progress
           value={progresso}
           className={`w-full ${progresso === 100 ? "bg-green-500" : ""}`}
