@@ -32,15 +32,43 @@ import "react-medium-image-zoom/dist/styles.css";
 import Image from "next/image";
 import cartas from "./cartas";
 
+// Definição de Tipos
+interface Opcao {
+  id: number;
+  texto: string;
+}
+
+interface Carta {
+  tipo: string;
+  titulo: string;
+  pergunta: string;
+  opcoes: Opcao[];
+  respostaCorreta: number | number[];
+  dificuldade: string;
+  categorias: string[];
+  fontes: string[];
+  vantagem: string;
+  desvantagem: string;
+  dica: string;
+}
+
+interface TelaInicialProps {
+  onStartGame: (categoriasSelecionadas: string[]) => void;
+  onReset: () => void;
+  categoriasDisponiveis: string[];
+  categoriasSelecionadas: string[];
+  setCategoriasSelecionadas: (categorias: string[]) => void;
+}
+
 // Componente Tela Inicial
-const TelaInicial = ({
+const TelaInicial: React.FC<TelaInicialProps> = ({
   onStartGame,
   onReset,
   categoriasDisponiveis,
   categoriasSelecionadas,
   setCategoriasSelecionadas,
 }) => {
-  const [termoBusca, setTermoBusca] = useState("");
+  const [termoBusca, setTermoBusca] = useState<string>("");
 
   const categoriasFiltradas = categoriasDisponiveis.filter((categoria) =>
     categoria.toLowerCase().includes(termoBusca.toLowerCase())
@@ -119,25 +147,28 @@ const TelaInicial = ({
 };
 
 // Componente Principal EcoChallenge
-const EcoChallenge = () => {
-  const [cartaAtual, setCartaAtual] = useState(null);
-  const [selecionado, setSelecionado] = useState(null);
-  const [respondido, setRespondido] = useState(false);
-  const [respostasCertas, setRespostasCertas] = useState(0);
-  const [respostasErradas, setRespostasErradas] = useState(0);
-  const [respostasSeguidas, setRespostasSeguidas] = useState(0);
-  const [mensagem, setMensagem] = useState("");
-  const [progresso, setProgresso] = useState(0);
-  const [mostrarDica, setMostrarDica] = useState(false);
-  const [mostrarFontes, setMostrarFontes] = useState(false);
-  const [pulosDisponiveis, setPulosDisponiveis] = useState(0);
-  const [jogoIniciado, setJogoIniciado] = useState(false);
-  const [barrasCompletadas, setBarrasCompletadas] = useState(0);
-  const [opcoesEliminadas, setOpcoesEliminadas] = useState([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState([]);
-  const [rodadasPreso, setRodadasPreso] = useState(0);
+const EcoChallenge: React.FC = () => {
+  const [cartaAtual, setCartaAtual] = useState<Carta | null>(null);
+  const [selecionado, setSelecionado] = useState<number | null>(null);
+  const [respondido, setRespondido] = useState<boolean>(false);
+  const [respostasCertas, setRespostasCertas] = useState<number>(0);
+  const [respostasErradas, setRespostasErradas] = useState<number>(0);
+  const [respostasSeguidas, setRespostasSeguidas] = useState<number>(0);
+  const [mensagem, setMensagem] = useState<string>("");
+  const [progresso, setProgresso] = useState<number>(0);
+  const [mostrarDica, setMostrarDica] = useState<boolean>(false);
+  const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
+  const [pulosDisponiveis, setPulosDisponiveis] = useState<number>(0);
+  const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
+  const [barrasCompletadas, setBarrasCompletadas] = useState<number>(0);
+  const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
+  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
+    string[]
+  >([]);
+  const [rodadasPreso, setRodadasPreso] = useState<number>(0);
+
   const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
-    useState(false);
+    useState<boolean>(false);
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
@@ -167,7 +198,7 @@ const EcoChallenge = () => {
     }
   }, [jogoIniciado, selecionarCartaAleatoria]);
 
-  const handleSelecao = (id) => {
+  const handleSelecao = (id: number) => {
     if (!respondido) {
       setSelecionado(id);
     }
@@ -198,34 +229,14 @@ const EcoChallenge = () => {
             setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
           }
         }
-        if (!mostrarSomentePerguntas) {
-          if (cartaAtual.tipo === "Vantagem") {
-            setMensagem(`Correto! ${cartaAtual.vantagem}`);
-          } else if (cartaAtual.tipo === "Outras") {
-            setMensagem(`Correto! ${cartaAtual.vantagem}`);
-          } else if (cartaAtual.tipo === "Desvantagem") {
-            setMensagem("Correto!");
-          }
-        } else {
-          setMensagem("Correto!");
-        }
+        setMensagem(`Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`);
       } else {
         if (cartaAtual.tipo === "Pergunta") {
           setRespostasErradas((prev) => prev + 1);
           if (respostasSeguidas >= 5) {
             setMensagem("Resposta incorreta, mas você não será penalizado!");
           } else {
-            if (!mostrarSomentePerguntas) {
-              if (cartaAtual.tipo === "Vantagem") {
-                setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
-              } else if (cartaAtual.tipo === "Outras") {
-                setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
-              } else if (cartaAtual.tipo === "Desvantagem") {
-                setMensagem("Incorreto.");
-              }
-            } else {
-              setMensagem("Incorreto.");
-            }
+            setMensagem(`Incorreto. ${mostrarSomentePerguntas ? "" : cartaAtual.desvantagem}`);
           }
           setProgresso((prev) => Math.max(prev - 10, 0));
           setRespostasSeguidas(0);
@@ -288,7 +299,7 @@ const EcoChallenge = () => {
 
   const eliminarRespostaErrada = () => {
     if (respostasSeguidas >= 6 && cartaAtual) {
-      const opcoesErradas = cartaAtual.opcoes.filter((opcao) => {
+      const opcoesErradas = cartaAtual.opcoes.filter((opcao: Opcao) => {
         if (Array.isArray(cartaAtual.respostaCorreta)) {
           return !cartaAtual.respostaCorreta.includes(opcao.id);
         } else {
@@ -297,7 +308,7 @@ const EcoChallenge = () => {
       });
 
       const opcoesRestantes = opcoesErradas.filter(
-        (opcao) => !opcoesEliminadas.includes(opcao.id)
+        (opcao: Opcao) => !opcoesEliminadas.includes(opcao.id)
       );
 
       if (opcoesRestantes.length > 0) {
@@ -344,7 +355,7 @@ const EcoChallenge = () => {
 
     const conteudo = cartaAtual.pergunta
       .split("\n")
-      .map((linha, index) => {
+      .map((linha: string, index: number) => {
         if (linha.includes("<img")) {
           const imgRegex = /<img src="([^"]+)" alt="([^"]+)" class="([^"]+)" \/>/;
           const match = imgRegex.exec(linha);
@@ -433,7 +444,7 @@ const EcoChallenge = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {cartaAtual.opcoes.map((opcao) => (
+          {cartaAtual.opcoes.map((opcao: Opcao) => (
             <Button
               key={opcao.id}
               onClick={() => handleSelecao(opcao.id)}
@@ -486,7 +497,7 @@ const EcoChallenge = () => {
           <Alert className="mt-4">
             <AlertDescription>
               <ul className="list-disc list-inside">
-                {cartaAtual.fontes.map((fonte, index) => (
+                {cartaAtual.fontes.map((fonte: string, index: number) => (
                   <li key={index}>{fonte}</li>
                 ))}
               </ul>
@@ -574,7 +585,7 @@ const EcoChallenge = () => {
             </Button>
           )}
         </div>
-        {mensagem && (
+        {cartaAtual.tipo === "Pergunta" && mensagem && (
           <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
         )}
         <Progress
