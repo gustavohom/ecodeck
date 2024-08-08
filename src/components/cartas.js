@@ -48,7 +48,7 @@ const cartas = [
 
   // Pergunta Fácil com 5 Alternativas e Duas Respostas Corretas
   {
-    "tipo": "Pergunta",
+    "tipo": "MultiplaEscolha",
     "titulo": "Plantas Medicinais",
     "pergunta": "Quais dessas plantas são conhecidas por suas propriedades medicinais?",
     "opcoes": [
@@ -192,6 +192,8 @@ const cartas = [
     "desvantagem": "Perca uma rodada e 5 pontos.",
     "dica": ""
   },
+
+  // Carta para Resetar Contadores
   {
     "tipo": "Outras",
     "titulo": "Reset seus contadores",
@@ -207,6 +209,26 @@ const cartas = [
     "desvantagem": "",
     "dica": ""
   },
+
+  // Nova Carta de Ordem
+  {
+    "tipo": "Ordem",
+    "titulo": "Ordem das Etapas",
+    "pergunta": "Coloque as etapas na ordem correta para fazer um café:",
+    "opcoes": [
+      { "id": 1, "texto": "Colocar açúcar na água" },
+      { "id": 2, "texto": "Colocar água na panela" },
+      { "id": 3, "texto": "Passar o café no coador" },
+      { "id": 4, "texto": "Colocar pó de café no coador" }
+    ],
+    "respostaCorreta": [2, 1, 4, 3],
+    "dificuldade": "normal",
+    "categorias": ["Rotinas Diárias"],
+    "fontes": [],
+    "vantagem": "Ganhe 3 pontos!",
+    "desvantagem": "Perde 1 ponto.",
+    "dica": "Pense na sequência lógica das etapas."
+  }
 ];
 
 export default cartas;
