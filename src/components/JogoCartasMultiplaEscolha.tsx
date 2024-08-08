@@ -216,7 +216,7 @@ const EcoChallenge: React.FC = () => {
         if (cartaAtual.tipo === "Pergunta") {
           setRespostasCertas((prev) => prev + 1);
           setRespostasSeguidas((prev) => prev + 1);
-          setMensagem(`Correto! ${cartaAtual.vantagem}`);
+          setMensagem("Correto!");
           const novoProgresso = progresso + 20;
           if (novoProgresso >= 100) {
             setProgresso(0);
@@ -236,7 +236,7 @@ const EcoChallenge: React.FC = () => {
           if (respostasSeguidas >= 5) {
             setMensagem("Resposta incorreta, mas você não será penalizado!");
           } else {
-            setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
+            setMensagem("Incorreto.");
           }
           setProgresso((prev) => Math.max(prev - 10, 0));
           setRespostasSeguidas(0);
