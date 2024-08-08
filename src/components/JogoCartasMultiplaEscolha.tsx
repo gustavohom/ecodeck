@@ -234,7 +234,7 @@ const EcoChallenge: React.FC = () => {
         if (cartaAtual.tipo === "Pergunta") {
           setRespostasErradas((prev) => prev + 1);
           if (respostasSeguidas >= 5) {
-            setMensagem("Resposta incorreta, mas você não será penalizado!");
+            setMensagem("Resposta incorreta, que pena, você tinha ido tão longe!");
           } else {
             setMensagem(`Incorreto. ${mostrarSomentePerguntas ? "" : cartaAtual.desvantagem}`);
           }
