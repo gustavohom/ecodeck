@@ -418,12 +418,12 @@ const EcoChallenge: React.FC = () => {
 
   const incrementarRodadasPreso = () => {
     setRodadasPreso((prev) => prev + 1);
-    setMensagem("Uma rodada adicionada!");
+    setMensagem("Um contador adicionado!");
   };
 
   const diminuirRodadasPreso = () => {
     setRodadasPreso((prev) => (prev > 0 ? prev - 1 : 0));
-    setMensagem("Uma rodada removida!");
+    setMensagem("Uma contador removido!");
   };
 
   const diminuirAcertos = () => {
