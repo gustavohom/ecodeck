@@ -718,9 +718,11 @@ const EcoChallenge: React.FC = () => {
             <Button
               onClick={verificarResposta}
               disabled={
-                selecionado === null &&
-                selecoesMultiplas.length === 0 &&
-                ordemSelecoes.length === 0
+                (cartaAtual.tipo === "Ordem" &&
+                  ordemSelecoes.length !== cartaAtual.opcoes.length) ||
+                (cartaAtual.tipo !== "Ordem" &&
+                  selecionado === null &&
+                  selecoesMultiplas.length === 0)
               }
               className="w-full mt-2"
             >
