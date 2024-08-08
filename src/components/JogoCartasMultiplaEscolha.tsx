@@ -150,8 +150,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 const EcoChallenge: React.FC = () => {
   const [cartaAtual, setCartaAtual] = useState<Carta | null>(null);
   const [selecionado, setSelecionado] = useState<number | null>(null);
-  const [selecoesMultiplas, setSelecoesMultiplas] = useState<number[]>([]);
-  const [ordemSelecoes, setOrdemSelecoes] = useState<number[]>([]);
   const [respondido, setRespondido] = useState<boolean>(false);
   const [respostasCertas, setRespostasCertas] = useState<number>(0);
   const [respostasErradas, setRespostasErradas] = useState<number>(0);
@@ -164,9 +162,16 @@ const EcoChallenge: React.FC = () => {
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [barrasCompletadas, setBarrasCompletadas] = useState<number>(0);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>([]);
+  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
+    string[]
+  >([]);
   const [rodadasPreso, setRodadasPreso] = useState<number>(0);
-  const [mostrarSomentePerguntas, setMostrarSomentePerguntas] = useState<boolean>(false);
+
+  const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
+    useState<boolean>(false);
+
+  const [selecoesMultiplas, setSelecoesMultiplas] = useState<number[]>([]);
+  const [ordemSelecoes, setOrdemSelecoes] = useState<number[]>([]);
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
@@ -177,7 +182,7 @@ const EcoChallenge: React.FC = () => {
       (carta) =>
         carta.categorias.some((categoria) =>
           categoriasSelecionadas.includes(categoria)
-        ) && (!mostrarSomentePerguntas || ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo))
+        ) && (!mostrarSomentePerguntas || carta.tipo === "Pergunta")
     );
 
     const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
@@ -206,37 +211,34 @@ const EcoChallenge: React.FC = () => {
 
   const handleSelecaoMultipla = (id: number) => {
     if (!respondido) {
-      setSelecoesMultiplas((prev) =>
-        prev.includes(id) ? prev.filter((opcaoId) => opcaoId !== id) : [...prev, id]
+      setSelecoesMultiplas((prevSelecoes) =>
+        prevSelecoes.includes(id)
+          ? prevSelecoes.filter((selecaoId) => selecaoId !== id)
+          : [...prevSelecoes, id]
       );
     }
   };
 
   const handleSelecaoOrdem = (id: number) => {
     if (!respondido) {
-      setOrdemSelecoes((prev) => {
-        const novaOrdem = [...prev];
-        const index = novaOrdem.indexOf(id);
-        if (index === -1) {
-          novaOrdem.push(id);
-        } else {
-          novaOrdem.splice(index, 1);
-        }
-        return novaOrdem;
-      });
+      setOrdemSelecoes((prevSelecoes) =>
+        prevSelecoes.includes(id)
+          ? prevSelecoes.filter((selecaoId) => selecaoId !== id)
+          : [...prevSelecoes, id]
+      );
     }
   };
 
   const verificarResposta = () => {
-    if (cartaAtual) {
+    if (selecionado !== null && cartaAtual) {
       setRespondido(true);
 
-      if (cartaAtual.tipo === "Pergunta" && selecionado !== null) {
-        const isCorrect = Array.isArray(cartaAtual.respostaCorreta)
-          ? cartaAtual.respostaCorreta.includes(selecionado)
-          : cartaAtual.respostaCorreta === selecionado;
+      const isCorrect = Array.isArray(cartaAtual.respostaCorreta)
+        ? cartaAtual.respostaCorreta.includes(selecionado)
+        : cartaAtual.respostaCorreta === selecionado;
 
-        if (isCorrect) {
+      if (isCorrect) {
+        if (cartaAtual.tipo === "Pergunta") {
           setRespostasCertas((prev) => prev + 1);
           setRespostasSeguidas((prev) => prev + 1);
           const novoProgresso = progresso + 20;
@@ -251,75 +253,94 @@ const EcoChallenge: React.FC = () => {
           if (cartaAtual.dificuldade === "dificil") {
             setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
           }
-          setMensagem(`Correto! ${cartaAtual.vantagem}`);
-        } else {
+        }
+        setMensagem(
+          `Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`
+        );
+      } else {
+        if (cartaAtual.tipo === "Pergunta") {
           setRespostasErradas((prev) => prev + 1);
           if (respostasSeguidas >= 5) {
-            setMensagem("Resposta incorreta, que pena, você tinha ido tão longe!");
+            setMensagem(
+              "Resposta incorreta, mas você não será penalizado!"
+            );
           } else {
-            setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
+            setMensagem(
+              `Incorreto. ${
+                mostrarSomentePerguntas ? "" : cartaAtual.desvantagem
+              }`
+            );
           }
           setProgresso((prev) => Math.max(prev - 10, 0));
           setRespostasSeguidas(0);
         }
-      } else if (cartaAtual.tipo === "MultiplaEscolha" && selecoesMultiplas.length > 0) {
-        const isCorrect = selecoesMultiplas.sort().toString() === cartaAtual.respostaCorreta.sort().toString();
+      }
+    } else if (
+      cartaAtual &&
+      cartaAtual.tipo === "MultiplaEscolha" &&
+      selecoesMultiplas.length > 0
+    ) {
+      const isCorrect =
+        Array.isArray(cartaAtual.respostaCorreta) &&
+        selecoesMultiplas.sort().toString() ===
+          (cartaAtual.respostaCorreta as number[]).sort().toString();
 
-        if (isCorrect) {
-          setRespostasCertas((prev) => prev + 1);
-          setRespostasSeguidas((prev) => prev + 1);
-          const novoProgresso = progresso + 20;
-          if (novoProgresso >= 100) {
-            setProgresso(0);
-            setMensagem("Correto! Bônus extra! Barra completada!");
-            setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-            setBarrasCompletadas((prev) => prev + 1);
-          } else {
-            setProgresso(novoProgresso);
-          }
-          if (cartaAtual.dificuldade === "dificil") {
-            setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-          }
-          setMensagem(`Correto! ${cartaAtual.vantagem}`);
-        } else {
-          setRespostasErradas((prev) => prev + 1);
-          if (respostasSeguidas >= 5) {
-            setMensagem("Resposta incorreta, que pena, você tinha ido tão longe!");
-          } else {
-            setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
-          }
-          setProgresso((prev) => Math.max(prev - 10, 0));
-          setRespostasSeguidas(0);
-        }
-      } else if (cartaAtual.tipo === "Ordem" && ordemSelecoes.length > 0) {
-        const isCorrect = ordemSelecoes.toString() === cartaAtual.respostaCorreta.toString();
+      setRespondido(true);
 
-        if (isCorrect) {
-          setRespostasCertas((prev) => prev + 1);
-          setRespostasSeguidas((prev) => prev + 1);
-          const novoProgresso = progresso + 20;
-          if (novoProgresso >= 100) {
-            setProgresso(0);
-            setMensagem("Correto! Bônus extra! Barra completada!");
-            setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-            setBarrasCompletadas((prev) => prev + 1);
-          } else {
-            setProgresso(novoProgresso);
-          }
-          if (cartaAtual.dificuldade === "dificil") {
-            setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-          }
-          setMensagem(`Correto! ${cartaAtual.vantagem}`);
+      if (isCorrect) {
+        setRespostasCertas((prev) => prev + 1);
+        setRespostasSeguidas((prev) => prev + 1);
+        const novoProgresso = progresso + 20;
+        if (novoProgresso >= 100) {
+          setProgresso(0);
+          setMensagem("Correto! Bônus extra! Barra completada!");
+          setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
+          setBarrasCompletadas((prev) => prev + 1);
         } else {
-          setRespostasErradas((prev) => prev + 1);
-          if (respostasSeguidas >= 5) {
-            setMensagem("Resposta incorreta, que pena, você tinha ido tão longe!");
-          } else {
-            setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
-          }
-          setProgresso((prev) => Math.max(prev - 10, 0));
-          setRespostasSeguidas(0);
+          setProgresso(novoProgresso);
         }
+        if (cartaAtual.dificuldade === "dificil") {
+          setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
+        }
+        setMensagem(
+          `Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`
+        );
+      } else {
+        setRespostasErradas((prev) => prev + 1);
+        setMensagem(
+          `Incorreto. ${
+            mostrarSomentePerguntas ? "" : cartaAtual.desvantagem
+          }`
+        );
+        setProgresso((prev) => Math.max(prev - 10, 0));
+        setRespostasSeguidas(0);
+      }
+    } else if (cartaAtual && cartaAtual.tipo === "Ordem" && ordemSelecoes.length > 0) {
+      const isCorrect = ordemSelecoes.toString() === (cartaAtual.respostaCorreta as number[]).toString();
+
+      setRespondido(true);
+
+      if (isCorrect) {
+        setRespostasCertas((prev) => prev + 1);
+        setRespostasSeguidas((prev) => prev + 1);
+        const novoProgresso = progresso + 20;
+        if (novoProgresso >= 100) {
+          setProgresso(0);
+          setMensagem("Correto! Bônus extra! Barra completada!");
+          setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
+          setBarrasCompletadas((prev) => prev + 1);
+        } else {
+          setProgresso(novoProgresso);
+        }
+        if (cartaAtual.dificuldade === "dificil") {
+          setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
+        }
+        setMensagem(`Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`);
+      } else {
+        setRespostasErradas((prev) => prev + 1);
+        setMensagem(`Incorreto. ${mostrarSomentePerguntas ? "" : cartaAtual.desvantagem}`);
+        setProgresso((prev) => Math.max(prev - 10, 0));
+        setRespostasSeguidas(0);
       }
     }
   };
@@ -377,7 +398,7 @@ const EcoChallenge: React.FC = () => {
   };
 
   const eliminarRespostaErrada = () => {
-    if (respostasSeguidas >= 4 && cartaAtual) {
+    if (respostasSeguidas >= 6 && cartaAtual) {
       const opcoesErradas = cartaAtual.opcoes.filter((opcao: Opcao) => {
         if (Array.isArray(cartaAtual.respostaCorreta)) {
           return !cartaAtual.respostaCorreta.includes(opcao.id);
@@ -397,7 +418,7 @@ const EcoChallenge: React.FC = () => {
         const opcaoEliminada = opcoesRestantes[indiceAleatorio].id;
 
         setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
-        setRespostasSeguidas((prev) => prev - 4);
+        setRespostasSeguidas((prev) => prev - 6);
         setMensagem("Uma resposta errada foi eliminada!");
       }
     } else {
@@ -526,24 +547,14 @@ const EcoChallenge: React.FC = () => {
           {cartaAtual.opcoes.map((opcao: Opcao) => (
             <Button
               key={opcao.id}
-              onClick={() => {
-                if (cartaAtual.tipo === "MultiplaEscolha") {
-                  handleSelecaoMultipla(opcao.id);
-                } else if (cartaAtual.tipo === "Ordem") {
-                  handleSelecaoOrdem(opcao.id);
-                } else {
-                  handleSelecao(opcao.id);
-                }
-              }}
-              variant={
+              onClick={() =>
                 cartaAtual.tipo === "MultiplaEscolha"
-                  ? selecoesMultiplas.includes(opcao.id)
-                    ? "secondary"
-                    : "outline"
-                  : selecionado === opcao.id
-                  ? "secondary"
-                  : "outline"
+                  ? handleSelecaoMultipla(opcao.id)
+                  : cartaAtual.tipo === "Ordem"
+                  ? handleSelecaoOrdem(opcao.id)
+                  : handleSelecao(opcao.id)
               }
+              variant={selecionado === opcao.id ? "secondary" : "outline"}
               className={`w-full justify-start text-sm ${
                 respondido &&
                 (Array.isArray(cartaAtual.respostaCorreta)
@@ -565,6 +576,20 @@ const EcoChallenge: React.FC = () => {
               disabled={opcoesEliminadas.includes(opcao.id)}
             >
               {opcao.texto}
+              {cartaAtual.tipo === "MultiplaEscolha" && (
+                <input
+                  type="checkbox"
+                  checked={selecoesMultiplas.includes(opcao.id)}
+                  readOnly
+                  className="ml-2"
+                />
+              )}
+              {cartaAtual.tipo === "Ordem" &&
+                ordemSelecoes.includes(opcao.id) && (
+                  <span className="ml-2">
+                    {ordemSelecoes.indexOf(opcao.id) + 1}
+                  </span>
+                )}
               {respondido &&
                 (Array.isArray(cartaAtual.respostaCorreta)
                   ? cartaAtual.respostaCorreta.includes(opcao.id)
@@ -580,14 +605,6 @@ const EcoChallenge: React.FC = () => {
                 ) && (
                   <XCircle className="ml-auto h-4 w-4 text-red-500" />
                 )}
-              {cartaAtual.tipo === "MultiplaEscolha" && (
-                <span className="ml-2">
-                  {selecoesMultiplas.includes(opcao.id) ? "☑️" : "⬜️"}
-                </span>
-              )}
-              {cartaAtual.tipo === "Ordem" && ordemSelecoes.includes(opcao.id) && (
-                <span className="ml-2">{ordemSelecoes.indexOf(opcao.id) + 1}</span>
-              )}
             </Button>
           ))}
         </div>
@@ -677,7 +694,7 @@ const EcoChallenge: React.FC = () => {
           {!respondido ? (
             <Button
               onClick={verificarResposta}
-              disabled={cartaAtual.tipo === "MultiplaEscolha" ? selecoesMultiplas.length === 0 : cartaAtual.tipo === "Ordem" ? ordemSelecoes.length === 0 : selecionado === null}
+              disabled={selecionado === null && selecoesMultiplas.length === 0 && ordemSelecoes.length === 0}
               className="w-full mt-2"
             >
               Verificar
@@ -688,7 +705,7 @@ const EcoChallenge: React.FC = () => {
             </Button>
           )}
         </div>
-        {mensagem && (
+        {cartaAtual.tipo === "Pergunta" && mensagem && (
           <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
         )}
         <Progress
