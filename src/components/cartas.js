@@ -228,22 +228,18 @@ const EcoChallenge: React.FC = () => {
           if (cartaAtual.dificuldade === "dificil") {
             setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
           }
-          setMensagem(`Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`);
-        } else {
-          setMensagem(`Correto! ${mostrarSomentePerguntas ? "" : ""}`);
         }
+        setMensagem(Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem});
       } else {
         if (cartaAtual.tipo === "Pergunta") {
           setRespostasErradas((prev) => prev + 1);
           if (respostasSeguidas >= 5) {
             setMensagem("Resposta incorreta, mas você não será penalizado!");
           } else {
-            setMensagem(`Incorreto. ${mostrarSomentePerguntas ? "" : cartaAtual.desvantagem}`);
+            setMensagem(Incorreto. ${mostrarSomentePerguntas ? "" : cartaAtual.desvantagem});
           }
           setProgresso((prev) => Math.max(prev - 10, 0));
           setRespostasSeguidas(0);
-        } else {
-          setMensagem(`Incorreto. ${mostrarSomentePerguntas ? "" : ""}`);
         }
       }
     }
@@ -373,7 +369,7 @@ const EcoChallenge: React.FC = () => {
                   alt={alt}
                   width={500}
                   height={300}
-                  className={`${className} img-zoom`}
+                  className={${className} img-zoom}
                 />
               </Zoom>
             );
@@ -415,7 +411,7 @@ const EcoChallenge: React.FC = () => {
   };
 
   return (
-    <Card className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}>
+    <Card className={w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}}>
       <CardHeader>
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center space-x-2">
@@ -453,7 +449,7 @@ const EcoChallenge: React.FC = () => {
               key={opcao.id}
               onClick={() => handleSelecao(opcao.id)}
               variant={selecionado === opcao.id ? "secondary" : "outline"}
-              className={`w-full justify-start text-sm ${
+              className={w-full justify-start text-sm ${
                 respondido &&
                 (Array.isArray(cartaAtual.respostaCorreta)
                   ? cartaAtual.respostaCorreta.includes(opcao.id)
@@ -470,7 +466,7 @@ const EcoChallenge: React.FC = () => {
                 )
                   ? "bg-red-100"
                   : ""
-              } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
+              } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}}
               disabled={opcoesEliminadas.includes(opcao.id)}
             >
               {opcao.texto}
@@ -594,7 +590,7 @@ const EcoChallenge: React.FC = () => {
         )}
         <Progress
           value={progresso}
-          className={`w-full ${progresso === 100 ? "bg-green-500" : ""}`}
+          className={w-full ${progresso === 100 ? "bg-green-500" : ""}}
         />
         <div className="flex justify-between w-full mt-4 text-sm">
           <div className="flex items-center space-x-1">
