@@ -255,16 +255,10 @@ const EcoChallenge: React.FC = () => {
         if (cartaAtual.dificuldade === "dificil") {
           setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
         }
-        setMensagem(
-          `Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`
-        );
+        setMensagem(`Correto! ${cartaAtual.vantagem}`);
       } else {
         setRespostasErradas((prev) => prev + 1);
-        setMensagem(
-          `Incorreto. ${
-            mostrarSomentePerguntas ? "" : cartaAtual.desvantagem
-          }`
-        );
+        setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
         setProgresso((prev) => Math.max(prev - 10, 0));
         setRespostasSeguidas(0);
       }
@@ -290,10 +284,10 @@ const EcoChallenge: React.FC = () => {
         if (cartaAtual.dificuldade === "dificil") {
           setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
         }
-        setMensagem(`Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`);
+        setMensagem(`Correto! ${cartaAtual.vantagem}`);
       } else {
         setRespostasErradas((prev) => prev + 1);
-        setMensagem(`Incorreto. ${mostrarSomentePerguntas ? "" : cartaAtual.desvantagem}`);
+        setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
         setProgresso((prev) => Math.max(prev - 10, 0));
         setRespostasSeguidas(0);
       }
@@ -321,22 +315,14 @@ const EcoChallenge: React.FC = () => {
             setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
           }
         }
-        setMensagem(
-          `Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`
-        );
+        setMensagem(`Correto! ${cartaAtual.vantagem}`);
       } else {
         if (["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)) {
           setRespostasErradas((prev) => prev + 1);
           if (respostasSeguidas >= 5) {
-            setMensagem(
-              "Resposta incorreta, mas você não será penalizado!"
-            );
+            setMensagem("Resposta incorreta, mas você não será penalizado!");
           } else {
-            setMensagem(
-              `Incorreto. ${
-                mostrarSomentePerguntas ? "" : cartaAtual.desvantagem
-              }`
-            );
+            setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
           }
           setProgresso((prev) => Math.max(prev - 10, 0));
           setRespostasSeguidas(0);
@@ -732,8 +718,9 @@ const EcoChallenge: React.FC = () => {
             <Button
               onClick={verificarResposta}
               disabled={
-                (cartaAtual.tipo === "Ordem" && ordemSelecoes.length !== cartaAtual.opcoes.length) ||
-                (cartaAtual.tipo !== "Ordem" && selecionado === null && selecoesMultiplas.length === 0)
+                selecionado === null &&
+                selecoesMultiplas.length === 0 &&
+                ordemSelecoes.length === 0
               }
               className="w-full mt-2"
             >
@@ -745,9 +732,8 @@ const EcoChallenge: React.FC = () => {
             </Button>
           )}
         </div>
-        {mensagem && (
-          <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
-        )}
+        {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
+          mensagem && <p className="text-center font-bold text-sm mb-2">{mensagem}</p>}
         <Progress
           value={progresso}
           className={`w-full ${progresso === 100 ? "bg-green-500" : ""}`}
