@@ -162,9 +162,9 @@ const EcoChallenge: React.FC = () => {
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [barrasCompletadas, setBarrasCompletadas] = useState<number>(0);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>(
-    []
-  );
+  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
+    string[]
+  >([]);
   const [rodadasPreso, setRodadasPreso] = useState<number>(0);
 
   const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
@@ -232,54 +232,7 @@ const EcoChallenge: React.FC = () => {
   };
 
   const verificarResposta = () => {
-    if (selecionado !== null && cartaAtual) {
-      setRespondido(true);
-
-      const isCorrect = Array.isArray(cartaAtual.respostaCorreta)
-        ? cartaAtual.respostaCorreta.includes(selecionado)
-        : cartaAtual.respostaCorreta === selecionado;
-
-      if (isCorrect) {
-        if (cartaAtual.tipo === "Pergunta") {
-          setRespostasCertas((prev) => prev + 1);
-          setRespostasSeguidas((prev) => prev + 1);
-          const novoProgresso = progresso + 20;
-          if (novoProgresso >= 100) {
-            setProgresso(0);
-            setMensagem("Correto! Bônus extra! Barra completada!");
-            setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-            setBarrasCompletadas((prev) => prev + 1);
-          } else {
-            setProgresso(novoProgresso);
-          }
-          if (cartaAtual.dificuldade === "dificil") {
-            setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-          }
-        }
-        setMensagem(
-          `Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`
-        );
-      } else {
-        if (cartaAtual.tipo === "Pergunta") {
-          setRespostasErradas((prev) => prev + 1);
-          if (respostasSeguidas >= 5) {
-            setMensagem("Resposta incorreta, mas você não será penalizado!");
-          } else {
-            setMensagem(
-              `Incorreto. ${
-                mostrarSomentePerguntas ? "" : cartaAtual.desvantagem
-              }`
-            );
-          }
-          setProgresso((prev) => Math.max(prev - 10, 0));
-          setRespostasSeguidas(0);
-        }
-      }
-    } else if (
-      cartaAtual &&
-      cartaAtual.tipo === "MultiplaEscolha" &&
-      selecoesMultiplas.length > 0
-    ) {
+    if (cartaAtual?.tipo === "MultiplaEscolha" && selecoesMultiplas.length > 0) {
       const isCorrect =
         Array.isArray(cartaAtual.respostaCorreta) &&
         selecoesMultiplas.sort().toString() ===
@@ -315,11 +268,7 @@ const EcoChallenge: React.FC = () => {
         setProgresso((prev) => Math.max(prev - 10, 0));
         setRespostasSeguidas(0);
       }
-    } else if (
-      cartaAtual &&
-      cartaAtual.tipo === "Ordem" &&
-      ordemSelecoes.length > 0
-    ) {
+    } else if (cartaAtual?.tipo === "Ordem" && ordemSelecoes.length > 0) {
       const isCorrect =
         ordemSelecoes.toString() ===
         (cartaAtual.respostaCorreta as number[]).toString();
@@ -341,28 +290,58 @@ const EcoChallenge: React.FC = () => {
         if (cartaAtual.dificuldade === "dificil") {
           setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
         }
+        setMensagem(`Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`);
+      } else {
+        setRespostasErradas((prev) => prev + 1);
+        setMensagem(`Incorreto. ${mostrarSomentePerguntas ? "" : cartaAtual.desvantagem}`);
+        setProgresso((prev) => Math.max(prev - 10, 0));
+        setRespostasSeguidas(0);
+      }
+    } else if (cartaAtual && selecionado !== null) {
+      setRespondido(true);
+
+      const isCorrect = Array.isArray(cartaAtual.respostaCorreta)
+        ? cartaAtual.respostaCorreta.includes(selecionado)
+        : cartaAtual.respostaCorreta === selecionado;
+
+      if (isCorrect) {
+        if (["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)) {
+          setRespostasCertas((prev) => prev + 1);
+          setRespostasSeguidas((prev) => prev + 1);
+          const novoProgresso = progresso + 20;
+          if (novoProgresso >= 100) {
+            setProgresso(0);
+            setMensagem("Correto! Bônus extra! Barra completada!");
+            setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
+            setBarrasCompletadas((prev) => prev + 1);
+          } else {
+            setProgresso(novoProgresso);
+          }
+          if (cartaAtual.dificuldade === "dificil") {
+            setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
+          }
+        }
         setMensagem(
           `Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`
         );
       } else {
-        setRespostasErradas((prev) => prev + 1);
-        setMensagem(
-          `Incorreto. ${
-            mostrarSomentePerguntas ? "" : cartaAtual.desvantagem
-          }`
-        );
-        setProgresso((prev) => Math.max(prev - 10, 0));
-        setRespostasSeguidas(0);
+        if (["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)) {
+          setRespostasErradas((prev) => prev + 1);
+          if (respostasSeguidas >= 5) {
+            setMensagem(
+              "Resposta incorreta, mas você não será penalizado!"
+            );
+          } else {
+            setMensagem(
+              `Incorreto. ${
+                mostrarSomentePerguntas ? "" : cartaAtual.desvantagem
+              }`
+            );
+          }
+          setProgresso((prev) => Math.max(prev - 10, 0));
+          setRespostasSeguidas(0);
+        }
       }
-    } else if (cartaAtual && cartaAtual.tipo === "Desvantagem") {
-      setRespondido(true);
-      setMensagem(cartaAtual.desvantagem);
-    } else if (cartaAtual && cartaAtual.tipo === "Vantagem") {
-      setRespondido(true);
-      setMensagem(cartaAtual.vantagem);
-    } else if (cartaAtual && cartaAtual.tipo === "Outras") {
-      setRespondido(true);
-      setMensagem("Ação registrada!");
     }
   };
 
@@ -593,32 +572,63 @@ const EcoChallenge: React.FC = () => {
                 )
                   ? "bg-red-100"
                   : ""
-              } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""} ${
-                cartaAtual.tipo === "Desvantagem" && respondido
+              } ${
+                respondido &&
+                cartaAtual.tipo === "MultiplaEscolha" &&
+                Array.isArray(cartaAtual.respostaCorreta) &&
+                !cartaAtual.respostaCorreta.includes(opcao.id) &&
+                selecoesMultiplas.includes(opcao.id)
                   ? "bg-red-100"
                   : ""
               } ${
-                cartaAtual.tipo === "Outras" && respondido
+                respondido &&
+                cartaAtual.tipo === "MultiplaEscolha" &&
+                Array.isArray(cartaAtual.respostaCorreta) &&
+                cartaAtual.respostaCorreta.includes(opcao.id) &&
+                !selecoesMultiplas.includes(opcao.id)
                   ? "bg-blue-100"
                   : ""
-              }`}
+              } ${
+                respondido &&
+                cartaAtual.tipo === "Ordem" &&
+                ordemSelecoes.includes(opcao.id) &&
+                ordemSelecoes.indexOf(opcao.id) + 1 !==
+                  (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
+                  ? "bg-red-100"
+                  : ""
+              } ${
+                respondido &&
+                cartaAtual.tipo === "Ordem" &&
+                ordemSelecoes.includes(opcao.id) &&
+                ordemSelecoes.indexOf(opcao.id) + 1 ===
+                  (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
+                  ? "bg-green-100"
+                  : ""
+              } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
               disabled={opcoesEliminadas.includes(opcao.id)}
             >
               {opcao.texto}
               {cartaAtual.tipo === "MultiplaEscolha" && (
-                <input
-                  type="checkbox"
-                  checked={selecoesMultiplas.includes(opcao.id)}
-                  readOnly
-                  className="ml-2"
-                />
+                <span className="ml-2">
+                  {selecoesMultiplas.includes(opcao.id) ? (
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <span className="h-4 w-4 border rounded" />
+                  )}
+                </span>
               )}
-              {cartaAtual.tipo === "Ordem" &&
-                ordemSelecoes.includes(opcao.id) && (
-                  <span className="ml-2">
-                    {ordemSelecoes.indexOf(opcao.id) + 1}
-                  </span>
-                )}
+              {cartaAtual.tipo === "Ordem" && ordemSelecoes.includes(opcao.id) && (
+                <span className="ml-2">
+                  {ordemSelecoes.indexOf(opcao.id) + 1}
+                  {respondido &&
+                    ordemSelecoes.indexOf(opcao.id) + 1 !==
+                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1 && (
+                      <span className="ml-1 text-blue-500">
+                        ({(cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1})
+                      </span>
+                    )}
+                </span>
+              )}
               {respondido &&
                 (Array.isArray(cartaAtual.respostaCorreta)
                   ? cartaAtual.respostaCorreta.includes(opcao.id)
@@ -671,9 +681,7 @@ const EcoChallenge: React.FC = () => {
             onClick={toggleDica}
             size="sm"
             variant={
-              respostasSeguidas < 3 || !cartaAtual.dica
-                ? "outline"
-                : "secondary"
+              respostasSeguidas < 3 || !cartaAtual.dica ? "outline" : "secondary"
             }
             disabled={respostasSeguidas < 3 || !cartaAtual.dica}
           >
@@ -738,7 +746,7 @@ const EcoChallenge: React.FC = () => {
             </Button>
           )}
         </div>
-        {cartaAtual.tipo !== "Outras" && mensagem && (
+        {cartaAtual.tipo === "Pergunta" && mensagem && (
           <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
         )}
         <Progress
