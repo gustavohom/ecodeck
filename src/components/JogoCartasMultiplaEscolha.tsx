@@ -659,7 +659,10 @@ const EcoChallenge: React.FC = () => {
             onClick={pularPergunta}
             size="sm"
             variant={pulosDisponiveis === 0 ? "outline" : "secondary"}
-            disabled={pulosDisponiveis === 0 || cartaAtual.tipo !== "Pergunta"}
+            disabled={
+              pulosDisponiveis === 0 ||
+              !["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)
+            }
           >
             <SkipForward className="h-4 w-4" />
           </Button>
