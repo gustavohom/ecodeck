@@ -162,9 +162,9 @@ const EcoChallenge: React.FC = () => {
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [barrasCompletadas, setBarrasCompletadas] = useState<number>(0);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
-    string[]
-  >([]);
+  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>(
+    []
+  );
   const [rodadasPreso, setRodadasPreso] = useState<number>(0);
 
   const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
