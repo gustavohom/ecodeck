@@ -16,9 +16,14 @@ export default function Home() {
         <li>Use o botão de dica se precisar de ajuda.</li>
         <li>As fontes das informações estão indicadas no final de cada carta.</li>
       </ul>
-      <Link href="/jogo">
-        <Button>Começar o Jogo</Button>
-      </Link>
+      <div className="flex space-x-4">
+        <Link href="/jogo">
+          <Button>Começar o Jogo</Button>
+        </Link>
+        <a href="/regras/regras.pdf" target="_blank" rel="noopener noreferrer">
+          <Button>Ver Regras</Button>
+        </a>
+      </div>
     </div>
   );
 }
