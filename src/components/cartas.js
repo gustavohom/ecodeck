@@ -585,7 +585,7 @@ const EcoChallenge: React.FC = () => {
             </Button>
           )}
         </div>
-        {cartaAtual.tipo === "Pergunta" && mensagem && (
+        {mensagem && (
           <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
         )}
         <Progress
@@ -624,3 +624,4 @@ const EcoChallenge: React.FC = () => {
 };
 
 export default EcoChallenge;
+
