@@ -298,7 +298,7 @@ const EcoChallenge: React.FC = () => {
   };
 
   const eliminarRespostaErrada = () => {
-    if (respostasSeguidas >= 6 && cartaAtual) {
+    if (respostasSeguidas >= 4 && cartaAtual) {
       const opcoesErradas = cartaAtual.opcoes.filter((opcao: Opcao) => {
         if (Array.isArray(cartaAtual.respostaCorreta)) {
           return !cartaAtual.respostaCorreta.includes(opcao.id);
@@ -318,7 +318,7 @@ const EcoChallenge: React.FC = () => {
         const opcaoEliminada = opcoesRestantes[indiceAleatorio].id;
 
         setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
-        setRespostasSeguidas((prev) => prev - 6);
+        setRespostasSeguidas((prev) => prev - 4);
         setMensagem("Uma resposta errada foi eliminada!");
       }
     } else {
