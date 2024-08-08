@@ -384,7 +384,7 @@ const EcoChallenge: React.FC = () => {
   };
 
   const eliminarRespostaErrada = () => {
-    if (respostasSeguidas >= 6 && cartaAtual) {
+    if (respostasSeguidas >= 4 && cartaAtual) {
       const opcoesErradas = cartaAtual.opcoes.filter((opcao: Opcao) => {
         if (Array.isArray(cartaAtual.respostaCorreta)) {
           return !cartaAtual.respostaCorreta.includes(opcao.id);
@@ -404,11 +404,11 @@ const EcoChallenge: React.FC = () => {
         const opcaoEliminada = opcoesRestantes[indiceAleatorio].id;
 
         setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
-        setRespostasSeguidas((prev) => prev - 6);
+        setRespostasSeguidas((prev) => prev - 4);
         setMensagem("Uma resposta errada foi eliminada!");
       }
     } else {
-      setMensagem("Você precisa de pelo menos 6 respostas corretas seguidas!");
+      setMensagem("Você precisa de pelo menos 4 respostas corretas seguidas!");
     }
   };
 
@@ -679,8 +679,8 @@ const EcoChallenge: React.FC = () => {
           <Button
             onClick={eliminarRespostaErrada}
             size="sm"
-            variant={respostasSeguidas < 6 ? "outline" : "secondary"}
-            disabled={respostasSeguidas < 6}
+            variant={respostasSeguidas < 4 ? "outline" : "secondary"}
+            disabled={respostasSeguidas < 4}
           >
             <MinusCircle className="h-4 w-4" />
           </Button>
