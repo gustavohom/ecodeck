@@ -162,9 +162,9 @@ const EcoChallenge: React.FC = () => {
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [barrasCompletadas, setBarrasCompletadas] = useState<number>(0);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>(
-    []
-  );
+  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
+    string[]
+  >([]);
   const [rodadasPreso, setRodadasPreso] = useState<number>(0);
 
   const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
@@ -255,16 +255,10 @@ const EcoChallenge: React.FC = () => {
         if (cartaAtual.dificuldade === "dificil") {
           setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
         }
-        setMensagem(
-          `Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`
-        );
+        setMensagem(`Correto! ${cartaAtual.vantagem}`);
       } else {
         setRespostasErradas((prev) => prev + 1);
-        setMensagem(
-          `Incorreto. ${
-            mostrarSomentePerguntas ? "" : cartaAtual.desvantagem
-          }`
-        );
+        setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
         setProgresso((prev) => Math.max(prev - 10, 0));
         setRespostasSeguidas(0);
       }
@@ -290,10 +284,10 @@ const EcoChallenge: React.FC = () => {
         if (cartaAtual.dificuldade === "dificil") {
           setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
         }
-        setMensagem(`Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`);
+        setMensagem(`Correto! ${cartaAtual.vantagem}`);
       } else {
         setRespostasErradas((prev) => prev + 1);
-        setMensagem(`Incorreto. ${mostrarSomentePerguntas ? "" : cartaAtual.desvantagem}`);
+        setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
         setProgresso((prev) => Math.max(prev - 10, 0));
         setRespostasSeguidas(0);
       }
@@ -321,22 +315,14 @@ const EcoChallenge: React.FC = () => {
             setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
           }
         }
-        setMensagem(
-          `Correto! ${mostrarSomentePerguntas ? "" : cartaAtual.vantagem}`
-        );
+        setMensagem(`Correto! ${cartaAtual.vantagem}`);
       } else {
         if (["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)) {
           setRespostasErradas((prev) => prev + 1);
           if (respostasSeguidas >= 5) {
-            setMensagem(
-              "Resposta incorreta, mas você não será penalizado!"
-            );
+            setMensagem("Resposta incorreta, mas você não será penalizado!");
           } else {
-            setMensagem(
-              `Incorreto. ${
-                mostrarSomentePerguntas ? "" : cartaAtual.desvantagem
-              }`
-            );
+            setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
           }
           setProgresso((prev) => Math.max(prev - 10, 0));
           setRespostasSeguidas(0);
@@ -611,7 +597,7 @@ const EcoChallenge: React.FC = () => {
               {cartaAtual.tipo === "MultiplaEscolha" && (
                 <span className="ml-2">
                   {selecoesMultiplas.includes(opcao.id) ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <CheckCircle2 className="h-4 w-4 text-blue-500" />
                   ) : (
                     <span className="h-4 w-4 border rounded" />
                   )}
@@ -733,8 +719,9 @@ const EcoChallenge: React.FC = () => {
               onClick={verificarResposta}
               disabled={
                 selecionado === null &&
-                selecoesMultiplas.length === 0 &&
-                ordemSelecoes.length === 0
+                (selecoesMultiplas.length === 0 ||
+                  (cartaAtual.tipo === "Ordem" &&
+                    ordemSelecoes.length !== cartaAtual.opcoes.length))
               }
               className="w-full mt-2"
             >
