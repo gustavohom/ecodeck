@@ -2047,10 +2047,7 @@ const cartas = [
     vantagem: "Avance uma casa!",
     desvantagem: "Volte uma casa.",
     dica: "Monitoramento deve focar no sucesso das plantas reintroduzidas."
-  }
-];
-const cartas = [
-  // Pergunta Múltipla Escolha - 2 Respostas Corretas
+  },
   {
     tipo: "MultiplaEscolha",
     titulo: "Fatores de Sucesso na Recuperação",
