@@ -1922,12 +1922,7 @@ const cartas = [
     vantagem: "Ganhe 3 pontos!",
     desvantagem: "Perde 2 pontos.",
     dica: "Sempre comece identificando as áreas de maior necessidade."
-  }
-];
-
-
-const cartas = [
-  // Pergunta Múltipla Escolha - 1 Resposta Correta
+  },
   {
     tipo: "MultiplaEscolha",
     titulo: "Tipos de Florestas",
