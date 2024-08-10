@@ -1824,11 +1824,7 @@ const cartas = [
     vantagem: "Ganhe 3 pontos!",
     desvantagem: "Perda de 2 pontos.",
     dica: "A recuperação visa neutralizar vários impactos."
-  }
-];
-
-const cartas = [
-  // Ordem: Etapas para Recuperação de Áreas Degradadas
+  },
   {
     tipo: "Ordem",
     titulo: "Etapas da Recuperação",
