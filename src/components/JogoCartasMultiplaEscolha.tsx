@@ -597,6 +597,10 @@ const EcoChallenge: React.FC = () => {
                 height: "auto", // Altura automática até o limite de 100px
                 overflowY: "auto", // Barra de rolagem vertical, se necessário
                 whiteSpace: "normal", // Quebra automática de linha
+                alignItems: "flex-start", // Alinha o conteúdo ao topo
+                display: 'flex',  // Garante que o conteúdo ocupe o espaço do botão
+                textAlign: 'left', // Alinha o texto à esquerda
+                padding: '8px', // Garante que o texto não fique colado nas bordas
               }}
             >
               {opcao.texto}
