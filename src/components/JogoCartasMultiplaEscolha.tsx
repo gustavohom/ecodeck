@@ -496,9 +496,6 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
-  const limiteCaracteres = 50; // Limite de caracteres antes de expandir o botão
-  const tamanhoExpandido = "h-20"; // Tamanho expandido do botão
-
   return (
     <Card className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}>
       <CardHeader>
@@ -534,116 +531,115 @@ const EcoChallenge: React.FC = () => {
       <CardContent>
         <div className="space-y-2">
           {cartaAtual.opcoes.map((opcao: Opcao) => (
-            <Button
-              key={opcao.id}
-              onClick={() =>
-                cartaAtual.tipo === "MultiplaEscolha"
-                  ? handleSelecaoMultipla(opcao.id)
-                  : cartaAtual.tipo === "Ordem"
-                  ? handleSelecaoOrdem(opcao.id)
-                  : handleSelecao(opcao.id)
-              }
-              variant={selecionado === opcao.id ? "secondary" : "outline"}
-              className={`w-full justify-start text-sm relative ${
-                respondido &&
-                (Array.isArray(cartaAtual.respostaCorreta)
-                  ? cartaAtual.respostaCorreta.includes(opcao.id)
-                  : cartaAtual.respostaCorreta === opcao.id)
-                  ? "bg-green-100"
-                  : ""
-              } ${
-                respondido &&
-                selecionado === opcao.id &&
-                !(
-                  Array.isArray(cartaAtual.respostaCorreta)
-                    ? cartaAtual.respostaCorreta.includes(opcao.id)
-                    : cartaAtual.respostaCorreta === opcao.id
-                )
-                  ? "bg-red-100"
-                  : ""
-              } ${
-                respondido &&
-                cartaAtual.tipo === "MultiplaEscolha" &&
-                Array.isArray(cartaAtual.respostaCorreta) &&
-                !cartaAtual.respostaCorreta.includes(opcao.id) &&
-                selecoesMultiplas.includes(opcao.id)
-                  ? "bg-red-100"
-                  : ""
-              } ${
-                respondido &&
-                cartaAtual.tipo === "MultiplaEscolha" &&
-                Array.isArray(cartaAtual.respostaCorreta) &&
-                cartaAtual.respostaCorreta.includes(opcao.id) &&
-                !selecoesMultiplas.includes(opcao.id)
-                  ? "bg-blue-100"
-                  : ""
-              } ${
-                respondido &&
-                cartaAtual.tipo === "Ordem" &&
-                ordemSelecoes.includes(opcao.id) &&
-                ordemSelecoes.indexOf(opcao.id) + 1 !==
-                  (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
-                  ? "bg-red-100"
-                  : ""
-              } ${
-                respondido &&
-                cartaAtual.tipo === "Ordem" &&
-                ordemSelecoes.includes(opcao.id) &&
-                ordemSelecoes.indexOf(opcao.id) + 1 ===
-                  (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
-                  ? "bg-green-100"
-                  : ""
-              } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
-              disabled={opcoesEliminadas.includes(opcao.id)}
-              style={{
-                height:
-                  opcao.texto.length > limiteCaracteres ? tamanhoExpandido : "",
-              }}
-            >
+            <div key={opcao.id} className="relative">
               <ScrollArea
-                className={`${
-                  opcao.texto.length > limiteCaracteres ? "h-full" : ""
-                }`}
+                className="w-full max-h-12 overflow-y-auto"
+                style={{
+                  maxHeight: selecionado === opcao.id ? "10rem" : "3rem",
+                }}
               >
-                {opcao.texto}
-              </ScrollArea>
-              {cartaAtual.tipo === "MultiplaEscolha" && (
-                <span className="ml-2">
-                  {selecoesMultiplas.includes(opcao.id) ? (
-                    <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                  ) : (
-                    <span className="h-4 w-4 border rounded" />
-                  )}
-                </span>
-              )}
-              {cartaAtual.tipo === "Ordem" && ordemSelecoes.includes(opcao.id) && (
-                <span className="ml-2">
-                  {ordemSelecoes.indexOf(opcao.id) + 1}
-                  {respondido &&
+                <Button
+                  onClick={() =>
+                    cartaAtual.tipo === "MultiplaEscolha"
+                      ? handleSelecaoMultipla(opcao.id)
+                      : cartaAtual.tipo === "Ordem"
+                      ? handleSelecaoOrdem(opcao.id)
+                      : handleSelecao(opcao.id)
+                  }
+                  variant={selecionado === opcao.id ? "secondary" : "outline"}
+                  className={`w-full justify-start text-sm ${
+                    respondido &&
+                    (Array.isArray(cartaAtual.respostaCorreta)
+                      ? cartaAtual.respostaCorreta.includes(opcao.id)
+                      : cartaAtual.respostaCorreta === opcao.id)
+                      ? "bg-green-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    selecionado === opcao.id &&
+                    !(
+                      Array.isArray(cartaAtual.respostaCorreta)
+                        ? cartaAtual.respostaCorreta.includes(opcao.id)
+                        : cartaAtual.respostaCorreta === opcao.id
+                    )
+                      ? "bg-red-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    cartaAtual.tipo === "MultiplaEscolha" &&
+                    Array.isArray(cartaAtual.respostaCorreta) &&
+                    !cartaAtual.respostaCorreta.includes(opcao.id) &&
+                    selecoesMultiplas.includes(opcao.id)
+                      ? "bg-red-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    cartaAtual.tipo === "MultiplaEscolha" &&
+                    Array.isArray(cartaAtual.respostaCorreta) &&
+                    cartaAtual.respostaCorreta.includes(opcao.id) &&
+                    !selecoesMultiplas.includes(opcao.id)
+                      ? "bg-blue-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    cartaAtual.tipo === "Ordem" &&
+                    ordemSelecoes.includes(opcao.id) &&
                     ordemSelecoes.indexOf(opcao.id) + 1 !==
-                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1 && (
-                      <span className="ml-1 text-blue-500">
-                        ({(cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1})
+                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
+                      ? "bg-red-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    cartaAtual.tipo === "Ordem" &&
+                    ordemSelecoes.includes(opcao.id) &&
+                    ordemSelecoes.indexOf(opcao.id) + 1 ===
+                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
+                      ? "bg-green-100"
+                      : ""
+                  } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
+                  disabled={opcoesEliminadas.includes(opcao.id)}
+                >
+                  {opcao.texto}
+                  {cartaAtual.tipo === "MultiplaEscolha" && (
+                    <span className="ml-2">
+                      {selecoesMultiplas.includes(opcao.id) ? (
+                        <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                      ) : (
+                        <span className="h-4 w-4 border rounded" />
+                      )}
+                    </span>
+                  )}
+                  {cartaAtual.tipo === "Ordem" &&
+                    ordemSelecoes.includes(opcao.id) && (
+                      <span className="ml-2">
+                        {ordemSelecoes.indexOf(opcao.id) + 1}
+                        {respondido &&
+                          ordemSelecoes.indexOf(opcao.id) + 1 !==
+                            (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1 && (
+                            <span className="ml-1 text-blue-500">
+                              ({(cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1})
+                            </span>
+                          )}
                       </span>
                     )}
-                </span>
-              )}
-              {respondido &&
-                (Array.isArray(cartaAtual.respostaCorreta)
-                  ? cartaAtual.respostaCorreta.includes(opcao.id)
-                  : cartaAtual.respostaCorreta === opcao.id) && (
-                  <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
-                )}
-              {respondido &&
-                selecionado === opcao.id &&
-                !(
-                  Array.isArray(cartaAtual.respostaCorreta)
-                    ? cartaAtual.respostaCorreta.includes(opcao.id)
-                    : cartaAtual.respostaCorreta === opcao.id
-                ) && (
-                  <XCircle className="ml-auto h-4 w-4 text-red-500" />
-                )}
-            </Button>
+                  {respondido &&
+                    (Array.isArray(cartaAtual.respostaCorreta)
+                      ? cartaAtual.respostaCorreta.includes(opcao.id)
+                      : cartaAtual.respostaCorreta === opcao.id) && (
+                      <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
+                    )}
+                  {respondido &&
+                    selecionado === opcao.id &&
+                    !(
+                      Array.isArray(cartaAtual.respostaCorreta)
+                        ? cartaAtual.respostaCorreta.includes(opcao.id)
+                        : cartaAtual.respostaCorreta === opcao.id
+                    ) && (
+                      <XCircle className="ml-auto h-4 w-4 text-red-500" />
+                    )}
+                </Button>
+              </ScrollArea>
+            </div>
           ))}
         </div>
         {mostrarDica && (
@@ -788,3 +784,4 @@ const EcoChallenge: React.FC = () => {
 };
 
 export default EcoChallenge;
+
