@@ -593,7 +593,7 @@ const EcoChallenge: React.FC = () => {
               } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
               disabled={opcoesEliminadas.includes(opcao.id)}
               style={{
-                maxHeight: "75px", // Altura máxima do botão
+                maxHeight: "60px", // Altura máxima do botão
                 height: "auto", // Altura automática até o limite de 100px
                 overflowY: "auto", // Barra de rolagem vertical, se necessário
                 whiteSpace: "normal", // Quebra automática de linha
