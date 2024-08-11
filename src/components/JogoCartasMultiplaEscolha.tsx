@@ -496,6 +496,9 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
+  const limiteCaracteres = 50; // Limite de caracteres antes de expandir o botão
+  const tamanhoExpandido = "h-20"; // Tamanho expandido do botão
+
   return (
     <Card className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}>
       <CardHeader>
@@ -541,7 +544,7 @@ const EcoChallenge: React.FC = () => {
                   : handleSelecao(opcao.id)
               }
               variant={selecionado === opcao.id ? "secondary" : "outline"}
-              className={`w-full justify-start text-sm max-h-12 overflow-hidden overflow-y-auto ${
+              className={`w-full justify-start text-sm relative ${
                 respondido &&
                 (Array.isArray(cartaAtual.respostaCorreta)
                   ? cartaAtual.respostaCorreta.includes(opcao.id)
@@ -592,8 +595,18 @@ const EcoChallenge: React.FC = () => {
                   : ""
               } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
               disabled={opcoesEliminadas.includes(opcao.id)}
+              style={{
+                height:
+                  opcao.texto.length > limiteCaracteres ? tamanhoExpandido : "",
+              }}
             >
-              {opcao.texto}
+              <ScrollArea
+                className={`${
+                  opcao.texto.length > limiteCaracteres ? "h-full" : ""
+                }`}
+              >
+                {opcao.texto}
+              </ScrollArea>
               {cartaAtual.tipo === "MultiplaEscolha" && (
                 <span className="ml-2">
                   {selecoesMultiplas.includes(opcao.id) ? (
@@ -775,4 +788,3 @@ const EcoChallenge: React.FC = () => {
 };
 
 export default EcoChallenge;
-
