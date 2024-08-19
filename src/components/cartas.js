@@ -2035,7 +2035,7 @@ const cartas = [
       { id: 3, texto: "Custo das operações de recuperação" },
       { id: 4, texto: "Quantidade de chuva na área" }
     ],
-    respostaCorreta: 2,
+    respostaCorreta: [2],
     dificuldade: "facil",
     categorias: ["Monitoramento", "Recuperação Ambiental"],
     fontes: ["1. Apostila de Recuperação de Áreas Degradadas."],
