@@ -27,7 +27,7 @@ O **EcoCDeck** é um jogo interativo e educativo que combina cartas dinâmicas e
 
 ## Licença e Contribuição
 
-O **EcoChallenge** é um jogo de código aberto, disponível para ser modificado e adaptado conforme as suas necessidades. Você é livre para fazer *fork* ou *clone* deste repositório, uma vez que ele está licenciado sob a licença **MIT**, que permite a edição e modificação do código.
+O **EcoDeck** é um jogo de código aberto, disponível para ser modificado e adaptado conforme as suas necessidades. Você é livre para fazer *fork* ou *clone* deste repositório, uma vez que ele está licenciado sob a licença **MIT**, que permite a edição e modificação do código.
 
 ## Contato
 
