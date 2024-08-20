@@ -1,40 +1,40 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# EcoDeck - O Jogo da Sustentabilidade
 
-## Getting Started
+<img src="ecodeck_icon.png">
 
-First, run the development server:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Visão Geral
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+O **EcoCDeck** é um jogo interativo e educativo que combina cartas dinâmicas e um tabuleiro físico para testar e expandir o conhecimento dos jogadores sobre sustentabilidade. Os jogadores enfrentam desafios, tomam decisões que impactam o meio ambiente e avançam no tabuleiro à medida que progridem no jogo.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## Recursos Principais
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+- **Cartas Dinâmicas:** O jogo inclui perguntas, desafios de múltipla escolha e tarefas em ordem para envolver os jogadores.
+- **Tabuleiro Físico:** O jogo pode ser jogado com um tabuleiro impresso, onde os jogadores avançam conforme suas decisões e desempenho nas cartas.
+- **Progressão:** O progresso dos jogadores é monitorado através de contadores de acertos, erros e barras completadas.
+- **Dicas e Fontes:** Os jogadores podem acessar dicas e fontes de informação para promover aprendizado contínuo.
+- **Personalização:** O jogo permite a seleção de categorias de interesse, proporcionando uma experiência personalizada.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## Tecnologias Utilizadas
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- **React.js:** Biblioteca JavaScript para construção de interfaces de usuário.
+- **Next.js:** Framework React para renderização do lado do servidor e geração de sites estáticos.
+- **TypeScript:** Linguagem de programação que adiciona tipos ao JavaScript, melhorando a robustez do código.
+- **Lucide-React:** Conjunto de ícones para melhorar a interface visual.
+- **React-Medium-Image-Zoom:** Biblioteca para zoom em imagens.
+- **Editor de Slider:** Um editor de slider foi incorporado ao jogo para facilitar ajustes dinâmicos na interface do usuário.
+- **Impressão de Tabuleiro:** O tabuleiro do jogo pode ser impresso, permitindo uma experiência de jogo físico em combinação com a interação digital.
 
-## Learn More
+## Licença e Contribuição
 
-To learn more about Next.js, take a look at the following resources:
+O **EcoChallenge** é um jogo de código aberto, disponível para ser modificado e adaptado conforme as suas necessidades. Você é livre para fazer *fork* ou *clone* deste repositório, uma vez que ele está licenciado sob a licença **MIT**, que permite a edição e modificação do código.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contato
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Para mais informações, entre em contato através de:
+- **Email:** seuemail@example.com
+- **LinkedIn:** [SeuNome](https://www.linkedin.com/in/seunome/)
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+**Divirta-se aprendendo com o EcoChallenge e faça parte da mudança para um mundo mais sustentável!**
