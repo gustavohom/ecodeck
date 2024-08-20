@@ -32,8 +32,8 @@ O **EcoDeck** é um jogo de código aberto, disponível para ser modificado e ad
 ## Contato
 
 Para mais informações, entre em contato através de:
-- **Email:** seuemail@example.com
-- **LinkedIn:** [SeuNome](https://www.linkedin.com/in/seunome/)
+- **Email:** gustavo-mourao@hotmail.com
+- **LinkedIn:** [Gustavo Mourão](https://www.linkedin.com/in/gustavomourao1/)
 
 ---
 
