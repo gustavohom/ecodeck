@@ -1,6 +1,6 @@
 // cartas_simples.ts
 
-const cartasSimples: [
+const cartasSimples = [
   {
     tipo: "Pergunta",
     titulo: "Simples - Pergunta 1",
