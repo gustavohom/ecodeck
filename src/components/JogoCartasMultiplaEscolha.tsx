@@ -30,7 +30,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import Image from "next/image";
-import cartas from "./cartas";
+import cartasSimples from "./cartas_simples";
+import cartasComplexas from "./cartas_complexas";
+
+// Combine as cartas simples e complexas em um único array
+const cartas = [...cartasSimples, ...cartasComplexas];
+
+
+// import cartas from "./cartas";
 
 // Definição de Tipos
 interface Opcao {
