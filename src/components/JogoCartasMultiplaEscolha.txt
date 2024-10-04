@@ -30,7 +30,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import Image from "next/image";
-import cartas from "./cartas";
+import cartasSimples from "./cartas";
+import cartasComplexas from "./cartas_complexas";
+
+// Combine as cartas simples e complexas em um único array
+const cartas = [...cartasSimples, ...cartasComplexas];
+
+
+// import cartas from "./cartas";
 
 // Definição de Tipos
 interface Opcao {
@@ -592,6 +599,16 @@ const EcoChallenge: React.FC = () => {
                   : ""
               } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
               disabled={opcoesEliminadas.includes(opcao.id)}
+              style={{
+                maxHeight: "60px", // Altura máxima do botão
+                height: "auto", // Altura automática até o limite de 100px
+                overflowY: "auto", // Barra de rolagem vertical, se necessário
+                whiteSpace: "normal", // Quebra automática de linha
+                alignItems: "flex-start", // Alinha o conteúdo ao topo
+                display: 'flex',  // Garante que o conteúdo ocupe o espaço do botão
+                textAlign: 'left', // Alinha o texto à esquerda
+                padding: '8px', // Garante que o texto não fique colado nas bordas
+              }}
             >
               {opcao.texto}
               {cartaAtual.tipo === "MultiplaEscolha" && (
