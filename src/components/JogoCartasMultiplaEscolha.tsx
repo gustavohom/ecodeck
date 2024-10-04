@@ -165,6 +165,7 @@ const EcoChallenge: React.FC = () => {
   const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
   const [pulosDisponiveis, setPulosDisponiveis] = useState<number>(0);
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
+  const [contadorDeEstrelas, setContadorDeEstrelas] = useState<number>(0); // Renomeado de barrasCompletadas
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
   const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
     string[]
@@ -177,8 +178,7 @@ const EcoChallenge: React.FC = () => {
   const [selecoesMultiplas, setSelecoesMultiplas] = useState<number[]>([]);
   const [ordemSelecoes, setOrdemSelecoes] = useState<number[]>([]);
 
-  const [fixedStars, setFixedStars] = useState<number>(0); // Novo contador fixo
-  const [variableStars, setVariableStars] = useState<number>(0); // Contador variável
+  const [fixedStars, setFixedStars] = useState<number>(0); // Novo contador
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
@@ -255,7 +255,7 @@ const EcoChallenge: React.FC = () => {
           setProgresso(0);
           setMensagem("Correto! Bônus extra! Barra completada!");
           setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-          setFixedStars((prev) => prev + 1); // Incrementa o contador fixo
+          setFixedStars((prev) => prev + 1); // Incrementa o contador fixedStars
         } else {
           setProgresso(novoProgresso);
         }
@@ -284,7 +284,7 @@ const EcoChallenge: React.FC = () => {
           setProgresso(0);
           setMensagem("Correto! Bônus extra! Barra completada!");
           setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-          setFixedStars((prev) => prev + 1); // Incrementa o contador fixo
+          setFixedStars((prev) => prev + 1); // Incrementa o contador fixedStars
         } else {
           setProgresso(novoProgresso);
         }
@@ -314,7 +314,7 @@ const EcoChallenge: React.FC = () => {
             setProgresso(0);
             setMensagem("Correto! Bônus extra! Barra completada!");
             setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-            setFixedStars((prev) => prev + 1); // Incrementa o contador fixo
+            setFixedStars((prev) => prev + 1); // Incrementa o contador fixedStars
           } else {
             setProgresso(novoProgresso);
           }
@@ -346,7 +346,7 @@ const EcoChallenge: React.FC = () => {
       setPulosDisponiveis(0);
       setRespostasSeguidas(0);
       setRodadasPreso(0);
-      setVariableStars(0); // Reseta as estrelas variáveis
+      setContadorDeEstrelas(0); // Reseta o contador de estrelas
       setMensagem("Contadores resetados!");
       setTimeout(() => setMensagem(""), 2000);
     }
@@ -415,7 +415,7 @@ const EcoChallenge: React.FC = () => {
   };
 
   const diminuirRodadasPreso = () => {
-    setRodadasPreso((prev) => prev - 1); // Permite valores negativos
+    setRodadasPreso((prev) => prev - 1); // Agora permite valores negativos
     setMensagem("Um contador removido!");
   };
 
@@ -429,14 +429,18 @@ const EcoChallenge: React.FC = () => {
     setMensagem("Erro removido!");
   };
 
-  const incrementarVariableStars = () => {
-    setVariableStars((prev) => prev + 1);
+  const incrementarContadorDeEstrelas = () => {
+    setContadorDeEstrelas((prev) => prev + 1);
     setMensagem("Estrela adicionada!");
   };
 
-  const diminuirVariableStars = () => {
-    setVariableStars((prev) => prev - 1);
-    setMensagem("Estrela removida!");
+  const diminuirContadorDeEstrelas = () => {
+    if (contadorDeEstrelas > 0) {
+      setContadorDeEstrelas((prev) => prev - 1);
+      setMensagem("Estrela removida!");
+    } else {
+      setMensagem("Nenhuma estrela para remover!");
+    }
   };
 
   const renderizarConteudoPergunta = () => {
@@ -711,11 +715,11 @@ const EcoChallenge: React.FC = () => {
           <Button onClick={diminuirErros} size="sm" variant="outline">
             <ThumbsUp className="h-4 w-4 text-red-500" />
           </Button>
-          <Button onClick={diminuirVariableStars} size="sm" variant="outline">
-            <ThumbsDown className="h-4 w-4 text-yellow-500" />
+          <Button onClick={diminuirContadorDeEstrelas} size="sm" variant="outline">
+            <Star className="h-4 w-4 text-red-500" />
           </Button>
-          <Button onClick={incrementarVariableStars} size="sm" variant="outline">
-            <ThumbsUp className="h-4 w-4 text-yellow-500" />
+          <Button onClick={incrementarContadorDeEstrelas} size="sm" variant="outline">
+            <Star className="h-4 w-4 text-yellow-500" />
           </Button>
           <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
             <ChevronUp className="h-4 w-4 text-purple-500 transform rotate-180" />
@@ -762,7 +766,7 @@ const EcoChallenge: React.FC = () => {
           </div>
           <div className="flex items-center space-x-1">
             <Star className="h-4 w-4 text-yellow-500" />
-            <span>{variableStars}</span>
+            <span>{contadorDeEstrelas}</span>
           </div>
           <div className="flex items-center space-x-1">
             <SkipForward className="h-4 w-4" />
