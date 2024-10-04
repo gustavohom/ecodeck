@@ -141,10 +141,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
         {hasSavedGame && (
-          <Button
-            onClick={onContinueGame}
-            className="w-full"
-          >
+          <Button onClick={onContinueGame} className="w-full">
             Continuar Jogo
           </Button>
         )}
@@ -196,21 +193,28 @@ const EcoChallenge: React.FC = () => {
     new Set(cartas.flatMap((carta) => carta.categorias))
   );
 
+  // Verifica se há um jogo salvo no localStorage
+  const hasSavedGame =
+    typeof window !== "undefined" &&
+    !!localStorage.getItem("estadoEcoChallenge");
+
   // Função para carregar o estado do jogo do localStorage
   const carregarEstado = useCallback(() => {
-    const estadoSalvo = localStorage.getItem("estadoEcoChallenge");
-    if (estadoSalvo) {
-      const estado = JSON.parse(estadoSalvo);
-      setFixedStars(estado.fixedStars || 0);
-      setRespostasCertas(estado.respostasCertas || 0);
-      setRespostasErradas(estado.respostasErradas || 0);
-      setRespostasSeguidas(estado.respostasSeguidas || 0);
-      setProgresso(estado.progresso || 0);
-      setPulosDisponiveis(estado.pulosDisponiveis || 0);
-      setContadorDeEstrelas(estado.contadorDeEstrelas || 0);
-      setRodadasPreso(estado.rodadasPreso || 0);
-      setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
-      setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
+    if (typeof window !== "undefined") {
+      const estadoSalvo = localStorage.getItem("estadoEcoChallenge");
+      if (estadoSalvo) {
+        const estado = JSON.parse(estadoSalvo);
+        setFixedStars(estado.fixedStars || 0);
+        setRespostasCertas(estado.respostasCertas || 0);
+        setRespostasErradas(estado.respostasErradas || 0);
+        setRespostasSeguidas(estado.respostasSeguidas || 0);
+        setProgresso(estado.progresso || 0);
+        setPulosDisponiveis(estado.pulosDisponiveis || 0);
+        setContadorDeEstrelas(estado.contadorDeEstrelas || 0);
+        setRodadasPreso(estado.rodadasPreso || 0);
+        setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
+        setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
+      }
     }
   }, []);
 
@@ -221,19 +225,21 @@ const EcoChallenge: React.FC = () => {
 
   // Salva o estado no localStorage sempre que algum estado relevante mudar
   useEffect(() => {
-    const estado = {
-      fixedStars,
-      respostasCertas,
-      respostasErradas,
-      respostasSeguidas,
-      progresso,
-      pulosDisponiveis,
-      contadorDeEstrelas,
-      rodadasPreso,
-      categoriasSelecionadas,
-      mostrarSomentePerguntas,
-    };
-    localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
+    if (typeof window !== "undefined") {
+      const estado = {
+        fixedStars,
+        respostasCertas,
+        respostasErradas,
+        respostasSeguidas,
+        progresso,
+        pulosDisponiveis,
+        contadorDeEstrelas,
+        rodadasPreso,
+        categoriasSelecionadas,
+        mostrarSomentePerguntas,
+      };
+      localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
+    }
   }, [
     fixedStars,
     respostasCertas,
@@ -419,7 +425,9 @@ const EcoChallenge: React.FC = () => {
     // Reseta tudo, incluindo fixedStars
     setFixedStars(0);
     resetarContadores();
-    localStorage.removeItem("estadoEcoChallenge");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("estadoEcoChallenge");
+    }
   };
 
   const toggleDica = () => {
@@ -543,9 +551,6 @@ const EcoChallenge: React.FC = () => {
 
     return conteudo;
   };
-
-  // Verifica se há um jogo salvo no localStorage
-  const hasSavedGame = !!localStorage.getItem("estadoEcoChallenge");
 
   if (!jogoIniciado) {
     return (
