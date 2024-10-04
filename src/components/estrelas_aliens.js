@@ -1498,20 +1498,6 @@ const estrelas_aliens = [
     vantagem: "",
     desvantagem: "",
     dica: "",
-  },
-  {
-    tipo: "",
-    titulo: "",
-    pergunta: "Nós estudamos cada movimento seu, e agora, chegou a hora de atacar. Este é o golpe final, o que mudará tudo para sempre. Está preparado, jogador?",
-    opcoes: [
-    ],
-    respostaCorreta: [],
-    dificuldade: "facil",
-    categorias: ["Estrelas vs Aliens"],
-    fontes: ["Imagens: Fonte na descrição do jogo"],
-    vantagem: "",
-    desvantagem: "",
-    dica: "",
   }
 ];
 
