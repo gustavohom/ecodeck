@@ -15,7 +15,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Solaris, a Máquina Estelar",
     pergunta: "Você enfrentou desafios inigualáveis, superou todos os obstáculos e agora está diante do último passo. A vitória está ao seu alcance, mas lembre-se, o preço da vitória é alto. Está pronto para fazer o sacrifício final e conquistar o que é seu por direito? O cosmos espera pela sua decisão.",
     opcoes: [
@@ -32,7 +32,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Estrela Amarela Líder",
     pergunta: "A batalha final está próxima, e nunca precisaremos tanto de alianças como agora. As estrelas devem se unir uma última vez para enfrentar as trevas. Você, jogador, tem a chave para essa união. Como líder, sua escolha decidirá o destino de todos. Que caminho você seguirá?",
     opcoes: [
@@ -48,7 +48,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Estrela Vermelha Renegada",
     pergunta: "Você achou que as estrelas estavam ao seu lado, mas a verdade é que a lealdade é uma moeda fácil de ser trocada. Nós, as Estrelas Vermelhas, nunca fomos completamente leais. A rebelião está em nosso sangue, e agora chegou o momento de reivindicar o que é nosso. Jogador, prepare-se para enfrentar a traição em sua forma mais pura.",
     opcoes: [
@@ -306,7 +306,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Estrela Amarela Líder",
     pergunta: "A união é a chave para a vitória. Quando trabalhamos juntos, não há escuridão que possamos temer.",
     opcoes: [
@@ -321,7 +321,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Morphos, o Alien Metamorfo",
     pergunta: "Você nunca pode prever o caos, jogador. Cada movimento pode ser o início de algo novo e inesperado.",
     opcoes: [
@@ -351,7 +351,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Stronberis",
     pergunta: "Minha fome não conhece limites, e meu poder cresce a cada estrela consumida. Você será o próximo.",
     opcoes: [
@@ -396,7 +396,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "A Ofensiva Alienígena",
     pergunta: "Você achou que tinha vencido, mas nós somos implacáveis. Prepare-se para o ataque que mudará tudo.",
     opcoes: [
@@ -456,7 +456,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Alien Comandante",
     pergunta: "Jogador, você lutou bem, mas agora é hora de ceder ao poder dos Aliens. Este é o golpe final, e não haverá piedade.",
     opcoes: [
@@ -486,7 +486,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "A Sombra da Stronberis",
     pergunta: "Minha fome nunca será saciada, e estou aqui para devorar tudo o que você tem. Prepare-se para o fim, jogador.",
     opcoes: [
@@ -666,7 +666,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "A União das Estrelas",
     pergunta: "Jogador, a união é nossa maior força. Com você ao nosso lado, podemos vencer qualquer batalha e restaurar a paz no cosmos. Vamos juntos garantir que nossa luz nunca se apague.",
     opcoes: [
@@ -711,7 +711,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "A Luz da Supernova",
     pergunta: "Quando a Supernova explode, ela cria novas possibilidades. Use essa energia para recomeçar e se fortalecer. Este é seu momento de brilhar, jogador.",
     opcoes: [
@@ -786,7 +786,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "A Confusão de Morphos",
     pergunta: "O caos reina, jogador, e estou aqui para garantir que nada permaneça igual. Está preparado para enfrentar o inesperado? Nada é o que parece, tudo pode mudar num piscar de olhos.",
     opcoes: [
@@ -863,7 +863,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "A Confusão de Morphos",
     pergunta: "Nada é certo no caos, e eu estou aqui para garantir que a confusão reine. Vamos ver como você lida com isso.",
     opcoes: [
@@ -878,7 +878,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Morphos, o Alien Metamorfo",
     pergunta: "O caos está aqui para garantir que tudo mude. Prepare-se para a última reviravolta.",
     opcoes: [
@@ -924,7 +924,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Estrela Amarela Estrategista",
     pergunta: "Estamos no momento decisivo. Sacrifícios são necessários para alcançar a vitória.",
     opcoes: [
@@ -939,7 +939,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Stronberis (Máquina)",
     pergunta: "Minha fome nunca será saciada, e estou aqui para devorar tudo o que você tem. Prepare-se para o fim.",
     opcoes: [
@@ -969,7 +969,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Krono, o Macaco Crononauta",
     pergunta: "Jogador, você deve saber que o tempo é como uma correnteza - fluida, incontrolável, e muitas vezes, imprevisível. Eu sou o guardião deste rio do tempo, e com um simples toque, posso mudar tudo. Agora, você se vê em um ponto onde tudo que conhece pode ser virado de cabeça para baixo. Mas cuidado, pois brincar com o tempo pode ter consequências inesperadas. Está pronto para mergulhar nas profundezas do passado?",
     opcoes: [
@@ -984,7 +984,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Morphos, o Alien Metamorfo",
     pergunta: "No caos, tudo pode mudar num piscar de olhos. Está preparado para ver o inesperado acontecer?"",
     opcoes: [
@@ -999,7 +999,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Estrela Vermelha Traidora",
     pergunta: "Confiança é uma ilusão. Agora, sinta o peso da traição e veja sua luz se apagar.",
     opcoes: [
@@ -1138,7 +1138,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Krono, o Macaco Crononauta",
     pergunta: "O tempo está do seu lado, mas também pode ser seu maior inimigo. Com um simples movimento, posso mudar tudo.",
     opcoes: [
@@ -1274,7 +1274,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "A Sombria Decisão",
     pergunta: "A escuridão tem suas próprias recompensas, jogador. Mas cada escolha que você faz a aproxima mais do abismo. O que vai escolher?",
     opcoes: [
@@ -1380,7 +1380,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Morphos, o Alien Metamorfo",
     pergunta: "Ah, o caos... meu velho amigo. Você pensou que poderia prever os movimentos no tabuleiro? Que tolice! Eu sou o agente do caos, e onde quer que eu vá, a ordem é destruída. Vamos ver como você se sai quando tudo o que conhecia vira de cabeça para baixo.",
     opcoes: [
@@ -1425,7 +1425,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Krono, o Macaco Crononauta",
     pergunta: "Krono é um macaco inteligente que, por acidente, foi exposto a uma anomalia temporal. Agora, ele tem a habilidade de viajar no tempo, usando sua astúcia para alterar eventos e ajudar ou atrapalhar tanto estrelas quanto aliens. Krono gosta de brincar com as linhas temporais, mas sempre com o objetivo de encontrar a "linha perfeita" onde todos os eventos se alinham a seu favor.",
     opcoes: [
@@ -1440,7 +1440,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Alien Metamorfo",
     pergunta: "Morphos é um alienígena mutante capaz de alterar sua forma e identidade à vontade. Ele pode assumir a forma de qualquer estrela ou alienígena, usando essa habilidade para infiltrar-se nas fileiras inimigas e causar caos. Sua verdadeira forma é desconhecida, e ele é motivado pelo puro prazer de manipular e enganar.",
     opcoes: [
@@ -1485,7 +1485,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outra",
+    tipo: "Outras",
     titulo: "Alien Cientista",
     pergunta: "Nós estudamos cada movimento seu, e agora, chegou a hora de atacar. Este é o golpe final, o que mudará tudo para sempre. Está preparado, jogador?",
     opcoes: [
