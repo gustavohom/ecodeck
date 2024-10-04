@@ -1427,7 +1427,7 @@ const estrelas_aliens = [
   {
     tipo: "Outras",
     titulo: "Krono, o Macaco Crononauta",
-    pergunta: "Krono é um macaco inteligente que, por acidente, foi exposto a uma anomalia temporal. Agora, ele tem a habilidade de viajar no tempo, usando sua astúcia para alterar eventos e ajudar ou atrapalhar tanto estrelas quanto aliens. Krono gosta de brincar com as linhas temporais, mas sempre com o objetivo de encontrar a "linha perfeita" onde todos os eventos se alinham a seu favor.",
+    pergunta: "Krono é um macaco inteligente que, por acidente, foi exposto a uma anomalia temporal. Agora, ele tem a habilidade de viajar no tempo, usando sua astúcia para alterar eventos e ajudar ou atrapalhar tanto estrelas quanto aliens. Krono gosta de brincar com as linhas temporais, mas sempre com o objetivo de encontrar a 'linha perfeita' onde todos os eventos se alinham a seu favor.",
     opcoes: [
       { id: 1, texto: "O próximo movimento do jogador a sua esquerda será espelhado por você (você faz o mesmo movimento que ele). Os efeitos das casas não são aplicados." },
     ],
