@@ -83,7 +83,7 @@ const estrelas_aliens = [
     titulo: "Impacto do Buraco Negro",
     pergunta: "O Buraco Negro é uma força implacável, capaz de devorar tudo em seu caminho. Mas para aqueles corajosos o suficiente, ele também é uma oportunidade de começar de novo, de reescrever seu destino. Jogador, você está diante de um poder que pode tanto destruir quanto criar. O que você escolherá: ser consumido pela escuridão ou emergir vitorioso?",
     opcoes: [
-      { id: 1, texto: "Seja sugado pelo Buraco Negro (vá para casa "Jeitinho Brasileiro") e fique com o dobro das estrelas que você tem agora" },
+      { id: 1, texto: "Seja sugado pelo Buraco Negro (vá para casa 'Jeitinho Brasileiro') e fique com o dobro das estrelas que você tem agora" },
       { id: 2, texto: "Perca metade das suas estrelas para permanecer na posição atual (se a divisão for decimal, fique com o menor inteiro)." },
     ],
     respostaCorreta: [1, 2],
