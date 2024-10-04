@@ -18,6 +18,7 @@ import {
   Home,
   SkipForward,
   Star,
+  Award,
   MinusCircle,
   ChevronUp,
   Zap,
@@ -35,9 +36,6 @@ import cartasComplexas from "./cartas_complexas";
 
 // Combine as cartas simples e complexas em um único array
 const cartas = [...cartasSimples, ...cartasComplexas];
-
-
-// import cartas from "./cartas";
 
 // Definição de Tipos
 interface Opcao {
@@ -167,7 +165,6 @@ const EcoChallenge: React.FC = () => {
   const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
   const [pulosDisponiveis, setPulosDisponiveis] = useState<number>(0);
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
-  const [barrasCompletadas, setBarrasCompletadas] = useState<number>(0);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
   const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
     string[]
@@ -179,6 +176,9 @@ const EcoChallenge: React.FC = () => {
 
   const [selecoesMultiplas, setSelecoesMultiplas] = useState<number[]>([]);
   const [ordemSelecoes, setOrdemSelecoes] = useState<number[]>([]);
+
+  const [fixedStars, setFixedStars] = useState<number>(0); // Novo contador fixo
+  const [variableStars, setVariableStars] = useState<number>(0); // Contador variável
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
@@ -255,7 +255,7 @@ const EcoChallenge: React.FC = () => {
           setProgresso(0);
           setMensagem("Correto! Bônus extra! Barra completada!");
           setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-          setBarrasCompletadas((prev) => prev + 1);
+          setFixedStars((prev) => prev + 1); // Incrementa o contador fixo
         } else {
           setProgresso(novoProgresso);
         }
@@ -284,7 +284,7 @@ const EcoChallenge: React.FC = () => {
           setProgresso(0);
           setMensagem("Correto! Bônus extra! Barra completada!");
           setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-          setBarrasCompletadas((prev) => prev + 1);
+          setFixedStars((prev) => prev + 1); // Incrementa o contador fixo
         } else {
           setProgresso(novoProgresso);
         }
@@ -314,7 +314,7 @@ const EcoChallenge: React.FC = () => {
             setProgresso(0);
             setMensagem("Correto! Bônus extra! Barra completada!");
             setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-            setBarrasCompletadas((prev) => prev + 1);
+            setFixedStars((prev) => prev + 1); // Incrementa o contador fixo
           } else {
             setProgresso(novoProgresso);
           }
@@ -344,9 +344,9 @@ const EcoChallenge: React.FC = () => {
       setRespostasErradas(0);
       setProgresso(0);
       setPulosDisponiveis(0);
-      setBarrasCompletadas(0);
       setRespostasSeguidas(0);
       setRodadasPreso(0);
+      setVariableStars(0); // Reseta as estrelas variáveis
       setMensagem("Contadores resetados!");
       setTimeout(() => setMensagem(""), 2000);
     }
@@ -374,20 +374,6 @@ const EcoChallenge: React.FC = () => {
       setPulosDisponiveis((prev) => prev - 1);
       selecionarCartaAleatoria();
     }
-  };
-
-  const removerProgressoBarra = () => {
-    if (barrasCompletadas > 0) {
-      setBarrasCompletadas((prev) => prev - 1);
-      setMensagem("Barra de progresso removida!");
-    } else {
-      setMensagem("Nenhuma barra de progresso para remover!");
-    }
-  };
-
-  const incrementarProgressoBarra = () => {
-    setBarrasCompletadas((prev) => prev + 1);
-    setMensagem("Barra de progresso adicionada!");
   };
 
   const eliminarRespostaErrada = () => {
@@ -429,8 +415,8 @@ const EcoChallenge: React.FC = () => {
   };
 
   const diminuirRodadasPreso = () => {
-    setRodadasPreso((prev) => (prev > 0 ? prev - 1 : 0));
-    setMensagem("Uma contador removido!");
+    setRodadasPreso((prev) => prev - 1); // Permite valores negativos
+    setMensagem("Um contador removido!");
   };
 
   const diminuirAcertos = () => {
@@ -441,6 +427,16 @@ const EcoChallenge: React.FC = () => {
   const diminuirErros = () => {
     setRespostasErradas((prev) => (prev > 0 ? prev - 1 : 0));
     setMensagem("Erro removido!");
+  };
+
+  const incrementarVariableStars = () => {
+    setVariableStars((prev) => prev + 1);
+    setMensagem("Estrela adicionada!");
+  };
+
+  const diminuirVariableStars = () => {
+    setVariableStars((prev) => prev - 1);
+    setMensagem("Estrela removida!");
   };
 
   const renderizarConteudoPergunta = () => {
@@ -600,14 +596,14 @@ const EcoChallenge: React.FC = () => {
               } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
               disabled={opcoesEliminadas.includes(opcao.id)}
               style={{
-                maxHeight: "60px", // Altura máxima do botão
-                height: "auto", // Altura automática até o limite de 100px
-                overflowY: "auto", // Barra de rolagem vertical, se necessário
-                whiteSpace: "normal", // Quebra automática de linha
-                alignItems: "flex-start", // Alinha o conteúdo ao topo
-                display: 'flex',  // Garante que o conteúdo ocupe o espaço do botão
-                textAlign: 'left', // Alinha o texto à esquerda
-                padding: '8px', // Garante que o texto não fique colado nas bordas
+                maxHeight: "60px",
+                height: "auto",
+                overflowY: "auto",
+                whiteSpace: "normal",
+                alignItems: "flex-start",
+                display: 'flex',
+                textAlign: 'left',
+                padding: '8px',
               }}
             >
               {opcao.texto}
@@ -715,16 +711,11 @@ const EcoChallenge: React.FC = () => {
           <Button onClick={diminuirErros} size="sm" variant="outline">
             <ThumbsUp className="h-4 w-4 text-red-500" />
           </Button>
-          <Button
-            onClick={removerProgressoBarra}
-            size="sm"
-            variant={barrasCompletadas === 0 ? "outline" : "secondary"}
-            disabled={barrasCompletadas === 0}
-          >
-            <Star className="h-4 w-4 text-red-500" />
+          <Button onClick={diminuirVariableStars} size="sm" variant="outline">
+            <ThumbsDown className="h-4 w-4 text-yellow-500" />
           </Button>
-          <Button onClick={incrementarProgressoBarra} size="sm" variant="outline">
-            <Star className="h-4 w-4 text-yellow-500" />
+          <Button onClick={incrementarVariableStars} size="sm" variant="outline">
+            <ThumbsUp className="h-4 w-4 text-yellow-500" />
           </Button>
           <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
             <ChevronUp className="h-4 w-4 text-purple-500 transform rotate-180" />
@@ -766,8 +757,12 @@ const EcoChallenge: React.FC = () => {
             <span>{rodadasPreso}</span>
           </div>
           <div className="flex items-center space-x-1">
+            <Award className="h-4 w-4 text-yellow-500" />
+            <span>{fixedStars}</span>
+          </div>
+          <div className="flex items-center space-x-1">
             <Star className="h-4 w-4 text-yellow-500" />
-            <span>{barrasCompletadas}</span>
+            <span>{variableStars}</span>
           </div>
           <div className="flex items-center space-x-1">
             <SkipForward className="h-4 w-4" />
