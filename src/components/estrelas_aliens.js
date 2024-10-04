@@ -54,7 +54,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Troque de lugar com o jogador a sua esquerda e em seguida volte 5 casas" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -101,7 +101,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Role o dado. Se tirar um número ímpar, todos os jogadores trocam suas posições com o jogador à sua esquerda. Se tirar um número par, você troca de posição com o jogador a sua direita. Todos efeitos de casas são anulados para os jogadores que trocarem de posição, inclusive prisão e rodadas sem jogar." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -161,7 +161,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Escolha um jogador para trocar de lugar com você." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -176,7 +176,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "O próximo jogador a jogar perde uma estrela para cada casa que avançar na sua próxima jogada." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -222,7 +222,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Some todas as estrelas dos jogadores e todos avançam a metade (ou menor inteiro da divisão) deste valor." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -237,7 +237,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Avance 3 casas e escolha um jogador para recuar 3 casas (os efeitos das casas não se aplicam)." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -297,7 +297,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Escolha um jogador para perder todas as suas estrelas e avançar 10 casas" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -312,7 +312,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Cada jogador dá uma estrela para o jogador com menos estrelas. Se mais de um jogador com menos estrela, divida igualmente entre eles (descarte a estrela que não for possivel dividir ou os jogadores com menor estrela podem decidir que fica com a estrela que não pode ser dividida). Se todos tiverem a mesma quantidade, todos avançam 4 casas." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -327,7 +327,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Escolha um jogador e desafie-o. Rolem os dados, e quem tirar o número maior avança 5 casas e o outro recua 5 casas. Se tirarem números iguais, os dois avançam 10 casas e ganham duas estrelas." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -342,7 +342,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Escolha dois jogadores para trocar de lugar (você não pode se escolher)" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -357,7 +357,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Perda todas as suas estrelas e avance o número de casas igual ao número de estrelas perdidas." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -372,7 +372,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Sorteie um jogador. Sortei o dado novamente. Ele perde o numero de estrelas sorteado na segunda vez e recua uma casa para cada estrela perdida. Você avança o número de estrelas que ele perdeu.Os efeitos das casas não são aplicados" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -387,7 +387,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "O jogador a sua esquerda perde seu próximo turno." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -402,7 +402,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Escolha um número entre 1 e 6. Role o dado, e se o número corresponder, avance 15 casas. Caso contrário, recua 3 casas." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -417,7 +417,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Escolha um jogador. Ele perde a próxima rodada" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -432,7 +432,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Se você tiver menos estrelas, avance 5 casas." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -447,7 +447,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Se você tiver mais estrelas, avance 5 casas." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -462,7 +462,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Recuem  3 casas todos os jogadores com menos de 3 estrelas. Se alguém tiver mais de 4 estrelas, ele avança 4 casas." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -477,7 +477,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Ganhe 2 estrela. Escolha outro jogador para avançar 4 casas (não pode se escolhar). Os efeitos das casas não se aplicam." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -492,7 +492,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Todos os jogadores perdem uma estrela. Se alguém ficar sem nenhuma estrela, ele avança 3 casas. Os efeitos das casas não se aplicam." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -507,7 +507,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Escolha um jogador. Somem suas estrelas e avancem o total dividido por 2. Ambos ganham 1 estrela." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -537,7 +537,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Ganhe 1 estrela. Avance 4 casas. Se tiver menos de 3 estrelas, avance 2 casas adicionais." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -567,7 +567,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Ganhe 2 estrelas" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -597,7 +597,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Se você tiver menos estrelas, avance 4 casas." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -627,7 +627,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Ganhe 2 estrelas. Avance o número de casas igual ao número de estrelas que você tem" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -657,7 +657,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Todos os jogadores, exceto você, perdem uma estrela" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -672,7 +672,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Sorteie um jogador. Somem suas estrelas. Se a soma for impar, ambos avançam 4 casas, se for par, recuem a quantidade de erros que possuem (os efeitos das casas não se aplicam)" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -687,7 +687,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Se você tiver mais estrelas você pode optar por avançar de zero à quantidade de estrelas que possui. Exemplo: Se tiver 3 estrelas você pode escolher avançar 0, 1,  2 ou 3 casas. Os efeitos das casas se aplicam." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -702,7 +702,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Se tiver menos de 3 estrelas, ganhe 1 estrela adicional." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -717,7 +717,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Sorteie outro jogador para ganhar mais 2 estrelas e depois avançar o número de casas igual ao número de estrelas dele." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -747,7 +747,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Avance o número de casas igual à soma das estrelas que você tem" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -777,7 +777,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Escolha dois jogadores. Ambos, incluindo você, perdem 1 estrela." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -792,7 +792,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Todos os jogadores jogam o dado. Quem tirar o número maior troca de lugar com o jogador que tirou o menor número. Se jogadores com maior ou menor numero empatarem, jogam o dado para desempatar." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -824,7 +824,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Escolha o jogador com mais estrelas. Troque todas as suas estrelas com ele." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -869,7 +869,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Jogue o dado.Em seguida os jogadores devem começar a jogar o dado em ordem. Se tirarem valor menor que o seu, devem recuar o valor que você tirou nos dados. Se tirarem valor maior que o seu, devem perder uma estrela. Se alguém tirar o mesmo valor que você, você deve trocar de lugar com esse jogador. Faça isso até que todos joguem o dado." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -884,7 +884,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Some o número de estrelas de todos os jogadores. Se o total for maior que 15, todos os jogadores avançam 5 casas, se for menor, todos os jogadores vão para a casa 'Jeitinho Brasileiro', com exceção dos jogadores na zona segura." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -930,7 +930,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Sacrifique 2 estrelas. Escolha outro jogador para ganhar essas estrelas e ambos avançam 4 casas.Os efeitos das casas não se aplicam" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -945,7 +945,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Todos os jogadores jogam o dado. Quem tirar o maior número avança o total das casas tiradas no dado, multiplicado por dois." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -975,7 +975,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Se você não estiver na zona segura, jogue o dado e vá para a casa avião correspondente ao número tirado." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -990,7 +990,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Se você tem de 1 a 6 estrelas, vá para a casa avião referente a quantidade de estrelas que possui" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1005,7 +1005,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Escolha um jogador com menos estrelas que você. Dê a ele uma estrela e depois avance o número de casas igual à diferença entre suas estrelas e as dele, multiplicado por 3. Se suas estrelas menos as deles der um valor negativo, recue ao invés de avançar." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1036,7 +1036,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Jogue o dado. Avance o número tirado multiplicado pelo número de estrelas que você tem" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1051,7 +1051,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Avance o número de casas equivalente à quantidade de estrelas que você tem. Se tiver menos de 3 estrelas, avance 1 casa adicional." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1066,7 +1066,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Some todas as estrelas dos jogadores. Se o total for maior que 10, todos ganham uma estrela." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1144,7 +1144,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Jogue o dados. Se cair par fique duas rodadas sem jogar, se cair impar escolha um jogador pra ficar duas rodadas sem jogar." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1159,7 +1159,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Ganhe 2 estrela" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1205,7 +1205,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Ganhe 1 estrela" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1235,7 +1235,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Ganhe 2 estrelas e avance 2 casas" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1250,7 +1250,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Ganhe 1 estrelas e avance 1 casas." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1265,7 +1265,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Jogue o dado, todos os jogadores recuam o valor retirado e você avança. Os efeitos das casas não são aplicados." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1311,7 +1311,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Todos os jogadores, exceto você, voltam 3 casas no tabuleiro. Os efeitos das casas não se aplicam" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1326,7 +1326,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Ganhe 2 estrelas e avance 3 casas" },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1386,7 +1386,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Troque todas as suas estrelas com o jogador à sua direita." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1431,7 +1431,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "O próximo movimento do jogador a sua esquerda será espelhado por você (você faz o mesmo movimento que ele). Os efeitos das casas não são aplicados." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1446,7 +1446,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Troque de posição no tabuleiro com qualquer jogador à sua escolha (exceto aqueles que estão na zona segura)." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1461,7 +1461,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Sorteie a quantidade de estrelas no dado, e ganhe elas.Todos os outros jogadores perdem duas estrelas." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1476,7 +1476,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Cada jogador deve te dar uma estrela. Caso algum jogador nao consiga te dar uma estrela, ele fica preso duas rodadas." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
@@ -1491,7 +1491,7 @@ const estrelas_aliens = [
     opcoes: [
       { id: 1, texto: "Todos os jogadores com zero estrelas, ficam uma rodada sem jogar." },
     ],
-    respostaCorreta: [],
+    respostaCorreta: [1],
     dificuldade: "facil",
     categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
