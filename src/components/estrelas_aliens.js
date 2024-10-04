@@ -986,7 +986,7 @@ const estrelas_aliens = [
   {
     tipo: "Outras",
     titulo: "Morphos, o Alien Metamorfo",
-    pergunta: "No caos, tudo pode mudar num piscar de olhos. Está preparado para ver o inesperado acontecer?"",
+    pergunta: "No caos, tudo pode mudar num piscar de olhos. Está preparado para ver o inesperado acontecer?",
     opcoes: [
       { id: 1, texto: "Se você tem de 1 a 6 estrelas, vá para a casa avião referente a quantidade de estrelas que possui" },
     ],
