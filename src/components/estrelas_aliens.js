@@ -1,4 +1,4 @@
-const estrlas_aliens = [
+const estrelas_aliens = [
   {
     tipo: "Vantagem",
     titulo: "As Estrelas",
@@ -1515,4 +1515,4 @@ const estrlas_aliens = [
   }
 ];
 
-export default cartas;
+export default estrelas_aliens;
