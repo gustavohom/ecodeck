@@ -762,7 +762,7 @@ const EcoChallenge: React.FC = () => {
           </div>
           <div className="flex items-center space-x-1">
             <Award className="h-4 w-4 text-yellow-500" />
-            <span>{fixedStars + contadorDeEstrelas}</span>
+            <span>{fixedStars}</span>
           </div>
           <div className="flex items-center space-x-1">
             <Star className="h-4 w-4 text-yellow-500" />
