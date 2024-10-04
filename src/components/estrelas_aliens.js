@@ -278,7 +278,7 @@ const estrelas_aliens = [
   {
     tipo: "Desvantagem",
     titulo: "O Impacto do Buraco Negro",
-    pergunta: "Nada pode escapar da gravidade do Buraco Negro. O que você faz agora determinará o seu destino."",
+    pergunta: "Nada pode escapar da gravidade do Buraco Negro. O que você faz agora determinará o seu destino.",
     opcoes: [
       { id: 1, texto: "Todos os jogadores recuam duas casas (os efeitos das casas não se aplicam)" },
     ],
