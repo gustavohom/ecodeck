@@ -2,7 +2,7 @@ const estrelas_aliens = [
   {
     tipo: "Vantagem",
     titulo: "As Estrelas",
-    pergunta: `<div style="text-align: center;"><img src="/5.jpg" style="width: 150px; height: auto;/> </div>
+    pergunta: `<div style="text-align: center;"><img src="/5.jpg" style="width: 100px; height: auto;/> </div>
       Saudações, <b>jogador(a)</b>! <br> <br> Somos as estrelas, <br>os seres antigos e sábios que iluminam o cosmos. Por eras, mantivemos o equilíbrio e a harmonia do universo. Mas uma nova ameaça surgiu, os alienígenas com sua terrível máquina, a Stronberis. Precisamos de sua ajuda para proteger a galáxia e impedir que eles dominem tudo com suas tecnologias malignas. Contamos com você.`,
     opcoes: [
       { id: 1, texto: "Ganhe 1 estrela" },
