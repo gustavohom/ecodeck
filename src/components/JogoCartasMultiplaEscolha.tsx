@@ -33,9 +33,10 @@ import "react-medium-image-zoom/dist/styles.css";
 import Image from "next/image";
 import cartasSimples from "./cartas";
 import cartasComplexas from "./cartas_complexas";
+import cartasComplexas from "./estrelas_aliens";
 
 // Combine as cartas simples e complexas em um único array
-const cartas = [...cartasSimples, ...cartasComplexas];
+const cartas = [...cartasSimples, ...cartasComplexas, ...estrelas_aliens];
 
 // Definição de Tipos
 interface Opcao {
