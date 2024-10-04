@@ -59,19 +59,23 @@ interface Carta {
 
 interface TelaInicialProps {
   onStartGame: (categoriasSelecionadas: string[]) => void;
+  onContinueGame: () => void;
   onReset: () => void;
   categoriasDisponiveis: string[];
   categoriasSelecionadas: string[];
   setCategoriasSelecionadas: (categorias: string[]) => void;
+  hasSavedGame: boolean;
 }
 
 // Componente Tela Inicial
 const TelaInicial: React.FC<TelaInicialProps> = ({
   onStartGame,
+  onContinueGame,
   onReset,
   categoriasDisponiveis,
   categoriasSelecionadas,
   setCategoriasSelecionadas,
+  hasSavedGame,
 }) => {
   const [termoBusca, setTermoBusca] = useState<string>("");
 
@@ -135,16 +139,24 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
           Limpar Todas
         </Button>
       </CardContent>
-      <CardFooter className="flex justify-between">
+      <CardFooter className="flex flex-col space-y-2">
+        {hasSavedGame && (
+          <Button
+            onClick={onContinueGame}
+            className="w-full"
+          >
+            Continuar Jogo
+          </Button>
+        )}
         <Button
-          onClick={() => onStartGame(categoriasSelecionadas)}
-          className="flex-1 mr-2"
+          onClick={() => {
+            onReset(); // Reseta tudo, inclusive fixedStars
+            onStartGame(categoriasSelecionadas);
+          }}
+          className="w-full"
           disabled={categoriasSelecionadas.length === 0}
         >
-          Iniciar Jogo
-        </Button>
-        <Button onClick={onReset} variant="outline" className="flex-1 ml-2">
-          Resetar
+          Iniciar Novo Jogo
         </Button>
       </CardFooter>
     </Card>
@@ -165,7 +177,7 @@ const EcoChallenge: React.FC = () => {
   const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
   const [pulosDisponiveis, setPulosDisponiveis] = useState<number>(0);
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
-  const [contadorDeEstrelas, setContadorDeEstrelas] = useState<number>(0); // Renomeado de barrasCompletadas
+  const [contadorDeEstrelas, setContadorDeEstrelas] = useState<number>(0);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
   const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
     string[]
@@ -178,11 +190,62 @@ const EcoChallenge: React.FC = () => {
   const [selecoesMultiplas, setSelecoesMultiplas] = useState<number[]>([]);
   const [ordemSelecoes, setOrdemSelecoes] = useState<number[]>([]);
 
-  const [fixedStars, setFixedStars] = useState<number>(0); // Novo contador
+  const [fixedStars, setFixedStars] = useState<number>(0);
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
   );
+
+  // Função para carregar o estado do jogo do localStorage
+  const carregarEstado = useCallback(() => {
+    const estadoSalvo = localStorage.getItem("estadoEcoChallenge");
+    if (estadoSalvo) {
+      const estado = JSON.parse(estadoSalvo);
+      setFixedStars(estado.fixedStars || 0);
+      setRespostasCertas(estado.respostasCertas || 0);
+      setRespostasErradas(estado.respostasErradas || 0);
+      setRespostasSeguidas(estado.respostasSeguidas || 0);
+      setProgresso(estado.progresso || 0);
+      setPulosDisponiveis(estado.pulosDisponiveis || 0);
+      setContadorDeEstrelas(estado.contadorDeEstrelas || 0);
+      setRodadasPreso(estado.rodadasPreso || 0);
+      setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
+      setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
+    }
+  }, []);
+
+  // Carrega o estado ao montar o componente
+  useEffect(() => {
+    carregarEstado();
+  }, [carregarEstado]);
+
+  // Salva o estado no localStorage sempre que algum estado relevante mudar
+  useEffect(() => {
+    const estado = {
+      fixedStars,
+      respostasCertas,
+      respostasErradas,
+      respostasSeguidas,
+      progresso,
+      pulosDisponiveis,
+      contadorDeEstrelas,
+      rodadasPreso,
+      categoriasSelecionadas,
+      mostrarSomentePerguntas,
+    };
+    localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
+  }, [
+    fixedStars,
+    respostasCertas,
+    respostasErradas,
+    respostasSeguidas,
+    progresso,
+    pulosDisponiveis,
+    contadorDeEstrelas,
+    rodadasPreso,
+    categoriasSelecionadas,
+    mostrarSomentePerguntas,
+  ]);
 
   const selecionarCartaAleatoria = useCallback(() => {
     const cartasFiltradas = cartas.filter(
@@ -255,7 +318,7 @@ const EcoChallenge: React.FC = () => {
           setProgresso(0);
           setMensagem("Correto! Bônus extra! Barra completada!");
           setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-          setFixedStars((prev) => prev + 1); // Incrementa o contador fixedStars
+          setFixedStars((prev) => prev + 1);
         } else {
           setProgresso(novoProgresso);
         }
@@ -284,7 +347,7 @@ const EcoChallenge: React.FC = () => {
           setProgresso(0);
           setMensagem("Correto! Bônus extra! Barra completada!");
           setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-          setFixedStars((prev) => prev + 1); // Incrementa o contador fixedStars
+          setFixedStars((prev) => prev + 1);
         } else {
           setProgresso(novoProgresso);
         }
@@ -314,7 +377,7 @@ const EcoChallenge: React.FC = () => {
             setProgresso(0);
             setMensagem("Correto! Bônus extra! Barra completada!");
             setPulosDisponiveis((prev) => Math.min(prev + 1, 2));
-            setFixedStars((prev) => prev + 1); // Incrementa o contador fixedStars
+            setFixedStars((prev) => prev + 1);
           } else {
             setProgresso(novoProgresso);
           }
@@ -346,10 +409,17 @@ const EcoChallenge: React.FC = () => {
       setPulosDisponiveis(0);
       setRespostasSeguidas(0);
       setRodadasPreso(0);
-      setContadorDeEstrelas(0); // Reseta o contador de estrelas
+      setContadorDeEstrelas(0);
       setMensagem("Contadores resetados!");
       setTimeout(() => setMensagem(""), 2000);
     }
+  };
+
+  const resetarTudo = () => {
+    // Reseta tudo, incluindo fixedStars
+    setFixedStars(0);
+    resetarContadores();
+    localStorage.removeItem("estadoEcoChallenge");
   };
 
   const toggleDica = () => {
@@ -474,14 +544,25 @@ const EcoChallenge: React.FC = () => {
     return conteudo;
   };
 
+  // Verifica se há um jogo salvo no localStorage
+  const hasSavedGame = !!localStorage.getItem("estadoEcoChallenge");
+
   if (!jogoIniciado) {
     return (
       <TelaInicial
-        onStartGame={() => setJogoIniciado(true)}
-        onReset={resetarContadores}
+        onStartGame={() => {
+          setJogoIniciado(true);
+        }}
+        onContinueGame={() => {
+          setJogoIniciado(true);
+        }}
+        onReset={() => {
+          resetarTudo(); // Reseta tudo, inclusive fixedStars
+        }}
         categoriasDisponiveis={categoriasDisponiveis}
         categoriasSelecionadas={categoriasSelecionadas}
         setCategoriasSelecionadas={setCategoriasSelecionadas}
+        hasSavedGame={hasSavedGame}
       />
     );
   }
@@ -605,9 +686,9 @@ const EcoChallenge: React.FC = () => {
                 overflowY: "auto",
                 whiteSpace: "normal",
                 alignItems: "flex-start",
-                display: 'flex',
-                textAlign: 'left',
-                padding: '8px',
+                display: "flex",
+                textAlign: "left",
+                padding: "8px",
               }}
             >
               {opcao.texto}
@@ -625,9 +706,16 @@ const EcoChallenge: React.FC = () => {
                   {ordemSelecoes.indexOf(opcao.id) + 1}
                   {respondido &&
                     ordemSelecoes.indexOf(opcao.id) + 1 !==
-                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1 && (
+                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
+                        1 && (
                       <span className="ml-1 text-blue-500">
-                        ({(cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1})
+                        (
+                        {
+                          (cartaAtual.respostaCorreta as number[]).indexOf(
+                            opcao.id
+                          ) + 1
+                        }
+                        )
                       </span>
                     )}
                 </span>
@@ -715,10 +803,18 @@ const EcoChallenge: React.FC = () => {
           <Button onClick={diminuirErros} size="sm" variant="outline">
             <ThumbsUp className="h-4 w-4 text-red-500" />
           </Button>
-          <Button onClick={diminuirContadorDeEstrelas} size="sm" variant="outline">
+          <Button
+            onClick={diminuirContadorDeEstrelas}
+            size="sm"
+            variant="outline"
+          >
             <Star className="h-4 w-4 text-red-500" />
           </Button>
-          <Button onClick={incrementarContadorDeEstrelas} size="sm" variant="outline">
+          <Button
+            onClick={incrementarContadorDeEstrelas}
+            size="sm"
+            variant="outline"
+          >
             <Star className="h-4 w-4 text-yellow-500" />
           </Button>
           <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
@@ -750,7 +846,9 @@ const EcoChallenge: React.FC = () => {
           )}
         </div>
         {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
-          mensagem && <p className="text-center font-bold text-sm mb-2">{mensagem}</p>}
+          mensagem && (
+            <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
+          )}
         <Progress
           value={progresso}
           className={`w-full ${progresso === 100 ? "bg-green-500" : ""}`}
