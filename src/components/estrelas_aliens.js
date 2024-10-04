@@ -882,7 +882,7 @@ const estrelas_aliens = [
     titulo: "Morphos, o Alien Metamorfo",
     pergunta: "O caos está aqui para garantir que tudo mude. Prepare-se para a última reviravolta.",
     opcoes: [
-      { id: 1, texto: "Some o número de estrelas de todos os jogadores. Se o total for maior que 15, todos os jogadores avançam 5 casas, se for menor, todos os jogadores vão para a casa "Jeitinho Brasileiro", com exceção dos jogadores na zona segura." },
+      { id: 1, texto: "Some o número de estrelas de todos os jogadores. Se o total for maior que 15, todos os jogadores avançam 5 casas, se for menor, todos os jogadores vão para a casa 'Jeitinho Brasileiro', com exceção dos jogadores na zona segura." },
     ],
     respostaCorreta: [],
     dificuldade: "facil",
