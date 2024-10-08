@@ -951,6 +951,9 @@ const EcoChallenge: React.FC = () => {
     return (
       <div className="flex flex-col items-center">
         <p className="mt-4 text-center">Carregando jogo... Por favor, aguarde.</p>
+        <Button onClick={voltarTelaInicial} className="mt-4">
+          Voltar para a Tela Inicial
+        </Button>
       </div>
     );
   }
