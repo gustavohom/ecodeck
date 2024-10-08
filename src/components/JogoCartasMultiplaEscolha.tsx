@@ -286,7 +286,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                     }}
                   />
                   {player.showColorPicker && (
-                    <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-5 gap-1">
+                    <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-4 gap-4">
                       {predefinedColors.map((color, idx) => (
                         <button
                           key={idx}
@@ -430,12 +430,6 @@ const EcoChallenge: React.FC = () => {
         (!mostrarSomentePerguntas ||
           ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo))
     );
-
-    if (cartasFiltradas.length === 0) {
-      setCartaAtual(null);
-      setMensagem("Não há cartas disponíveis para as categorias selecionadas.");
-      return;
-    }
 
     const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
     setCartaAtual(cartasFiltradas[indiceAleatorio]);
@@ -636,9 +630,7 @@ const EcoChallenge: React.FC = () => {
 
   const resetarTudo = () => {
     if (window.confirm("Tem certeza que deseja resetar todo o jogo?")) {
-      // Redefinir players e currentPlayerId aqui
-      setPlayers([]);
-      setCurrentPlayerId(null);
+      // Não redefinir players e currentPlayerId aqui
       setCategoriasSelecionadas([]);
       setMensagem("Jogo resetado!");
       if (typeof window !== "undefined") {
@@ -724,8 +716,7 @@ const EcoChallenge: React.FC = () => {
   const diminuirRodadasPreso = () => {
     if (!currentPlayer) return;
     updateCurrentPlayer({
-      rodadasPreso:
-        currentPlayer.rodadasPreso > 0 ? currentPlayer.rodadasPreso - 1 : 0,
+      rodadasPreso: currentPlayer.rodadasPreso - 1,
     });
     setMensagem("Um contador removido!");
   };
@@ -805,7 +796,7 @@ const EcoChallenge: React.FC = () => {
 
   const handlePlayersSetup = (initializedPlayers: Player[]) => {
     setPlayers(initializedPlayers);
-    setCurrentPlayerId(initializedPlayers[0]?.id || null);
+    setCurrentPlayerId(initializedPlayers[0].id);
   };
 
   if (!jogoIniciado) {
@@ -815,9 +806,7 @@ const EcoChallenge: React.FC = () => {
           setJogoIniciado(true);
         }}
         onContinueGame={() => {
-          if (hasSavedGame) {
-            setJogoIniciado(true);
-          }
+          setJogoIniciado(true);
         }}
         onReset={() => {
           resetarTudo(); // Reseta tudo, inclusive fixedStars
@@ -833,16 +822,7 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
-  if (!cartaAtual || !currentPlayer) {
-    return (
-      <div className="flex flex-col items-center">
-        <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
-        <Button onClick={voltarTelaInicial} className="mt-4">
-          Voltar à Tela Inicial
-        </Button>
-      </div>
-    );
-  }
+  if (!cartaAtual || !currentPlayer) return null;
 
   const obterEstiloCarta = () => {
     switch (cartaAtual.tipo) {
