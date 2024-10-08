@@ -286,7 +286,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                     }}
                   />
                   {player.showColorPicker && (
-                    <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-4 gap-10">
+                    <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-4 gap-4">
                       {predefinedColors.map((color, idx) => (
                         <button
                           key={idx}
