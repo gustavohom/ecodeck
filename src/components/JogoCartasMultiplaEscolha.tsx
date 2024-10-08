@@ -950,9 +950,7 @@ const EcoChallenge: React.FC = () => {
   if (!cartaAtual || !currentPlayer) {
     return (
       <div className="flex flex-col items-center">
-        <p className="mt-4 text-center">
-          Carregando jogo... Por favor, aguarde.
-        </p>
+        <p className="mt-4 text-center">Carregando jogo... Por favor, aguarde.</p>
       </div>
     );
   }
