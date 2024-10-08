@@ -95,13 +95,44 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   onPlayersSetup,
 }) => {
   const [termoBusca, setTermoBusca] = useState<string>("");
+  const predefinedColors = [
+    "#FF0000", // Vermelho
+    "#0000FF", // Azul
+    "#008000", // Verde
+    "#FFFF00", // Amarelo
+    "#FFA500", // Laranja
+    "#800080", // Roxo
+    "#00FFFF", // Ciano
+    "#FFC0CB", // Rosa
+    "#808080", // Cinza
+    "#000000", // Preto
+    "#FFFFFF", // Branco
+    "#00FF00", // Lima
+    "#800000", // Marrom
+    "#000080", // Azul Marinho
+    "#FFD700", // Dourado
+    "#A52A2A", // Castanho
+  ];
+
+  // Inicialize o primeiro jogador com uma cor padrão
   const [playerInputs, setPlayerInputs] = useState<
     { name: string; color: string }[]
-  >([{ name: "", color: "#000000" }]);
+  >([
+    {
+      name: "",
+      color: predefinedColors[0],
+    },
+  ]);
 
   const addPlayerInput = () => {
     if (playerInputs.length < 8) {
-      setPlayerInputs([...playerInputs, { name: "", color: "#000000" }]);
+      setPlayerInputs([
+        ...playerInputs,
+        {
+          name: "",
+          color: predefinedColors[playerInputs.length % predefinedColors.length],
+        },
+      ]);
     }
   };
 
@@ -119,7 +150,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const initializedPlayers: Player[] = playerInputs.map((input, index) => ({
       id: index,
       name: input.name || `Jogador ${index + 1}`,
-      color: input.color || "#000000",
+      color: input.color || predefinedColors[index % predefinedColors.length],
       fixedStars: 0,
       respostasCertas: 0,
       respostasErradas: 0,
@@ -195,23 +226,37 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         <div className="mb-4 mt-4">
           <h2 className="text-lg font-bold mb-2">Adicionar Jogadores</h2>
           {playerInputs.map((player, index) => (
-            <div key={index} className="flex items-center mb-2 space-x-2">
-              <input
-                type="text"
-                placeholder={`Nome do Jogador ${index + 1}`}
-                value={player.name}
-                onChange={(e) =>
-                  handlePlayerChange(index, "name", e.target.value)
-                }
-                className="p-2 border rounded"
-              />
-              <input
-                type="color"
-                value={player.color}
-                onChange={(e) =>
-                  handlePlayerChange(index, "color", e.target.value)
-                }
-              />
+            <div key={index} className="mb-2">
+              <div className="flex items-center space-x-2 mb-1">
+                <input
+                  type="text"
+                  placeholder={`Nome do Jogador ${index + 1}`}
+                  value={player.name}
+                  onChange={(e) =>
+                    handlePlayerChange(index, "name", e.target.value)
+                  }
+                  className="p-2 border rounded w-full"
+                />
+              </div>
+              <div className="flex flex-wrap space-x-1">
+                {predefinedColors.map((color, idx) => (
+                  <button
+                    key={idx}
+                    style={{
+                      backgroundColor: color,
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "50%",
+                      border:
+                        player.color === color
+                          ? "2px solid black"
+                          : "1px solid #ccc",
+                      margin: "2px",
+                    }}
+                    onClick={() => handlePlayerChange(index, "color", color)}
+                  />
+                ))}
+              </div>
             </div>
           ))}
           {playerInputs.length < 8 && (
@@ -229,11 +274,12 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         )}
         <Button
           onClick={() => {
-            onReset(); // Reseta tudo, inclusive fixedStars
             startGame();
           }}
           className="w-full"
-          disabled={categoriasSelecionadas.length === 0}
+          disabled={
+            categoriasSelecionadas.length === 0 || playerInputs.length === 0
+          }
         >
           Iniciar Novo Jogo
         </Button>
@@ -521,10 +567,8 @@ const EcoChallenge: React.FC = () => {
   };
 
   const resetarTudo = () => {
-    // Reseta tudo, incluindo fixedStars
     if (window.confirm("Tem certeza que deseja resetar todo o jogo?")) {
-      setPlayers([]);
-      setCurrentPlayerId(null);
+      // Não redefinir players e currentPlayerId aqui
       setCategoriasSelecionadas([]);
       setMensagem("Jogo resetado!");
       if (typeof window !== "undefined") {
@@ -775,7 +819,11 @@ const EcoChallenge: React.FC = () => {
                   ? handleSelecaoOrdem(opcao.id)
                   : handleSelecao(opcao.id)
               }
-              variant={selecionado === opcao.id ? "secondary" : "outline"}
+              variant={
+                selecionado === opcao.id || selecoesMultiplas.includes(opcao.id)
+                  ? "secondary"
+                  : "outline"
+              }
               className={`w-full justify-start text-sm ${
                 respondido &&
                 (Array.isArray(cartaAtual.respostaCorreta)
@@ -848,28 +896,25 @@ const EcoChallenge: React.FC = () => {
                   )}
                 </span>
               )}
-              {cartaAtual.tipo === "Ordem" &&
-                ordemSelecoes.includes(opcao.id) && (
-                  <span className="ml-2">
-                    {ordemSelecoes.indexOf(opcao.id) + 1}
-                    {respondido &&
-                      ordemSelecoes.indexOf(opcao.id) + 1 !==
-                        (cartaAtual.respostaCorreta as number[]).indexOf(
-                          opcao.id
-                        ) +
-                          1 && (
-                        <span className="ml-1 text-blue-500">
-                          (
-                          {
-                            (cartaAtual.respostaCorreta as number[]).indexOf(
-                              opcao.id
-                            ) + 1
-                          }
-                          )
-                        </span>
-                      )}
-                  </span>
-                )}
+              {cartaAtual.tipo === "Ordem" && ordemSelecoes.includes(opcao.id) && (
+                <span className="ml-2">
+                  {ordemSelecoes.indexOf(opcao.id) + 1}
+                  {respondido &&
+                    ordemSelecoes.indexOf(opcao.id) + 1 !==
+                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
+                        1 && (
+                      <span className="ml-1 text-blue-500">
+                        (
+                        {
+                          (cartaAtual.respostaCorreta as number[]).indexOf(
+                            opcao.id
+                          ) + 1
+                        }
+                        )
+                      </span>
+                    )}
+                </span>
+              )}
               {respondido &&
                 (Array.isArray(cartaAtual.respostaCorreta)
                   ? cartaAtual.respostaCorreta.includes(opcao.id)
