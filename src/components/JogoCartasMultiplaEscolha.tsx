@@ -930,7 +930,16 @@ const EcoChallenge: React.FC = () => {
           </Button>
         ))}
       </div>
-      <Card className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}>
+      <Card
+        className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}
+        style={
+          players.length > 1 && currentPlayer
+            ? {
+                boxShadow: `0 0 10px 5px ${currentPlayer.color}`,
+              }
+            : {}
+        }
+      >
         <CardHeader>
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center space-x-2">
