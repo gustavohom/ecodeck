@@ -110,6 +110,20 @@ const predefinedColors = [
   "#1f78b4", // Medium Blue
   "#33a02c", // Forest Green
   "#ff7f00", // Bright Orange
+  "#e31a1c", // Bright Red
+  "#ffcc33", // Mustard Yellow
+  "#6a3d9a", // Deep Purple
+  "#b15928", // Brown
+  "#b2df8a", // Mint Green
+  "#cab2d6", // Lilac
+  "#a6cee3", // Light Sky Blue
+  "#fb9a99", // Light Coral
+  "#fdbf6f", // Peach
+  "#ffed6f", // Light Lemon
+  "#ccebc5", // Soft Green
+  "#ff6699", // Pinkish Red
+  "#999999", // Grey
+  "#ff4444", // Light Red
 ];
 
 // Componente Tela Inicial
@@ -286,7 +300,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                     }}
                   />
                   {player.showColorPicker && (
-                    <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-4 gap-4">
+                    <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-5 gap-5">
                       {predefinedColors.map((color, idx) => (
                         <button
                           key={idx}
