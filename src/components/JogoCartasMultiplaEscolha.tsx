@@ -98,8 +98,12 @@ const predefinedColors = [
   "#f46d43", // Coral
   "#fee08b", // Soft Yellow
   "#66c2a5", // Aquamarine
-  "#3288bd", // Sky Blue
   "#5e4fa2", // Indigo
+  "#ff6699", // Pinkish Red
+  "#33a02c", // Forest Green
+  "#ff7f00", // Bright Orange
+  "#3288bd", // Sky Blue
+  "#999999", // Grey
   "#8dd3c7", // Light Turquoise
   "#ffffb3", // Pale Yellow
   "#fb8072", // Salmon
@@ -108,8 +112,6 @@ const predefinedColors = [
   "#fccde5", // Light Pink
   "#bc80bd", // Lavender
   "#1f78b4", // Medium Blue
-  "#33a02c", // Forest Green
-  "#ff7f00", // Bright Orange
   "#e31a1c", // Bright Red
   "#ffcc33", // Mustard Yellow
   "#6a3d9a", // Deep Purple
@@ -121,8 +123,6 @@ const predefinedColors = [
   "#fdbf6f", // Peach
   "#ffed6f", // Light Lemon
   "#ccebc5", // Soft Green
-  "#ff6699", // Pinkish Red
-  "#999999", // Grey
   "#ff4444", // Light Red
 ];
 
