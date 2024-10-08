@@ -74,6 +74,13 @@ interface Player {
   rodadasPreso: number;
 }
 
+interface PlayerInput {
+  id: number;
+  name: string;
+  color: string;
+  showColorPicker?: boolean;
+}
+
 interface TelaInicialProps {
   onStartGame: () => void;
   onContinueGame: () => void;
@@ -121,17 +128,20 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 }) => {
   const [termoBusca, setTermoBusca] = useState<string>("");
 
-  // Inicialize os inputs dos jogadores com os dados existentes
-  const [playerInputs, setPlayerInputs] = useState<
-    { id: number; name: string; color: string }[]
-  >(
+  const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>(
     players.length > 0
-      ? players.map((p) => ({ id: p.id, name: p.name, color: p.color }))
+      ? players.map((p) => ({
+          id: p.id,
+          name: p.name,
+          color: p.color,
+          showColorPicker: false,
+        }))
       : [
           {
             id: 0,
             name: "",
             color: predefinedColors[0],
+            showColorPicker: false,
           },
         ]
   );
@@ -144,6 +154,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
           id: playerInputs.length,
           name: "",
           color: predefinedColors[playerInputs.length % predefinedColors.length],
+          showColorPicker: false,
         },
       ]);
     }
@@ -268,11 +279,13 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                   variant="outline"
                   onClick={() => {
                     const updatedPlayers = [...playerInputs];
-                    updatedPlayers[index].showColorPicker =
-                      !updatedPlayers[index].showColorPicker;
+                    updatedPlayers[index].showColorPicker = !(
+                      updatedPlayers[index].showColorPicker || false
+                    );
                     setPlayerInputs(updatedPlayers);
                   }}
                   className="w-full"
+                  style={{ backgroundColor: player.color, color: "#fff" }}
                 >
                   Selecionar Cor
                   <ChevronDown className="ml-2 h-4 w-4" />
@@ -962,28 +975,25 @@ const EcoChallenge: React.FC = () => {
                     )}
                   </span>
                 )}
-                {cartaAtual.tipo === "Ordem" &&
-                  ordemSelecoes.includes(opcao.id) && (
-                    <span className="ml-2">
-                      {ordemSelecoes.indexOf(opcao.id) + 1}
-                      {respondido &&
-                        ordemSelecoes.indexOf(opcao.id) + 1 !==
-                          (cartaAtual.respostaCorreta as number[]).indexOf(
-                            opcao.id
-                          ) +
-                            1 && (
-                          <span className="ml-1 text-blue-500">
-                            (
-                            {
-                              (cartaAtual.respostaCorreta as number[]).indexOf(
-                                opcao.id
-                              ) + 1
-                            }
-                            )
-                          </span>
-                        )}
-                    </span>
-                  )}
+                {cartaAtual.tipo === "Ordem" && ordemSelecoes.includes(opcao.id) && (
+                  <span className="ml-2">
+                    {ordemSelecoes.indexOf(opcao.id) + 1}
+                    {respondido &&
+                      ordemSelecoes.indexOf(opcao.id) + 1 !==
+                        (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
+                          1 && (
+                        <span className="ml-1 text-blue-500">
+                          (
+                          {
+                            (cartaAtual.respostaCorreta as number[]).indexOf(
+                              opcao.id
+                            ) + 1
+                          }
+                          )
+                        </span>
+                      )}
+                  </span>
+                )}
                 {respondido &&
                   (Array.isArray(cartaAtual.respostaCorreta)
                     ? cartaAtual.respostaCorreta.includes(opcao.id)
@@ -1030,9 +1040,7 @@ const EcoChallenge: React.FC = () => {
               }
               disabled={
                 currentPlayer.pulosDisponiveis === 0 ||
-                !["Pergunta", "MultiplaEscolha", "Ordem"].includes(
-                  cartaAtual.tipo
-                )
+                !["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)
               }
             >
               <SkipForward className="h-4 w-4" />
