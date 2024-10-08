@@ -372,6 +372,8 @@ const EcoChallenge: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [currentPlayerId, setCurrentPlayerId] = useState<number | null>(null);
 
+  const [noCardsAvailable, setNoCardsAvailable] = useState<boolean>(false);
+
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
   ).sort();
@@ -437,6 +439,14 @@ const EcoChallenge: React.FC = () => {
         (!mostrarSomentePerguntas ||
           ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo))
     );
+
+    if (cartasFiltradas.length === 0) {
+      setNoCardsAvailable(true);
+      setCartaAtual(null);
+      return;
+    } else {
+      setNoCardsAvailable(false);
+    }
 
     const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
     setCartaAtual(cartasFiltradas[indiceAleatorio]);
@@ -829,6 +839,55 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
+  const hasQuestionCards = cartas.some(
+    (carta) =>
+      carta.categorias.some((categoria) =>
+        categoriasSelecionadas.includes(categoria)
+      ) && ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo)
+  );
+
+  if (noCardsAvailable) {
+    return (
+      <div className="flex flex-col items-center">
+        <div
+          className={`grid gap-1 mb-1 ${
+            players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
+          }`}
+          style={{ width: "100%", maxWidth: "400px" }}
+        >
+          {players.map((player) => (
+            <Button
+              key={player.id}
+              onClick={() => setCurrentPlayerId(player.id)}
+              size="sm"
+              variant={currentPlayerId === player.id ? "default" : "outline"}
+              style={{
+                backgroundColor:
+                  currentPlayerId === player.id ? player.color : undefined,
+                color: currentPlayerId === player.id ? "#fff" : undefined,
+                width: "100%",
+              }}
+            >
+              {player.name}
+            </Button>
+          ))}
+        </div>
+        <p className="mt-4 text-center">
+          Nenhuma carta disponível com os filtros atuais.
+        </p>
+        <Button
+          onClick={() => {
+            setMostrarSomentePerguntas(false);
+            selecionarCartaAleatoria();
+          }}
+          className="mt-4"
+        >
+          Remover Filtro
+        </Button>
+      </div>
+    );
+  }
+
   if (!cartaAtual || !currentPlayer) return null;
 
   const obterEstiloCarta = () => {
@@ -879,6 +938,7 @@ const EcoChallenge: React.FC = () => {
                 onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
                 size="sm"
                 variant="outline"
+                disabled={!hasQuestionCards}
               >
                 <Filter className="h-4 w-4" />
               </Button>
@@ -915,7 +975,8 @@ const EcoChallenge: React.FC = () => {
                     : handleSelecao(opcao.id)
                 }
                 variant={
-                  selecionado === opcao.id || selecoesMultiplas.includes(opcao.id)
+                  selecionado === opcao.id ||
+                  selecoesMultiplas.includes(opcao.id)
                     ? "secondary"
                     : "outline"
                 }
@@ -991,25 +1052,28 @@ const EcoChallenge: React.FC = () => {
                     )}
                   </span>
                 )}
-                {cartaAtual.tipo === "Ordem" && ordemSelecoes.includes(opcao.id) && (
-                  <span className="ml-2">
-                    {ordemSelecoes.indexOf(opcao.id) + 1}
-                    {respondido &&
-                      ordemSelecoes.indexOf(opcao.id) + 1 !==
-                        (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
-                          1 && (
-                        <span className="ml-1 text-blue-500">
-                          (
-                          {
-                            (cartaAtual.respostaCorreta as number[]).indexOf(
-                              opcao.id
-                            ) + 1
-                          }
-                          )
-                        </span>
-                      )}
-                  </span>
-                )}
+                {cartaAtual.tipo === "Ordem" &&
+                  ordemSelecoes.includes(opcao.id) && (
+                    <span className="ml-2">
+                      {ordemSelecoes.indexOf(opcao.id) + 1}
+                      {respondido &&
+                        ordemSelecoes.indexOf(opcao.id) + 1 !==
+                          (cartaAtual.respostaCorreta as number[]).indexOf(
+                            opcao.id
+                          ) +
+                            1 && (
+                          <span className="ml-1 text-blue-500">
+                            (
+                            {
+                              (cartaAtual.respostaCorreta as number[]).indexOf(
+                                opcao.id
+                              ) + 1
+                            }
+                            )
+                          </span>
+                        )}
+                    </span>
+                  )}
                 {respondido &&
                   (Array.isArray(cartaAtual.respostaCorreta)
                     ? cartaAtual.respostaCorreta.includes(opcao.id)
@@ -1056,7 +1120,9 @@ const EcoChallenge: React.FC = () => {
               }
               disabled={
                 currentPlayer.pulosDisponiveis === 0 ||
-                !["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)
+                !["Pergunta", "MultiplaEscolha", "Ordem"].includes(
+                  cartaAtual.tipo
+                )
               }
             >
               <SkipForward className="h-4 w-4" />
