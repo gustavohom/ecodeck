@@ -842,7 +842,7 @@ const EcoChallenge: React.FC = () => {
   return (
     <div className="flex flex-col items-center">
       <div
-        className={`grid gap-2 mb-4 ${
+        className={`grid gap-1 mb-1 ${
           players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
         }`}
         style={{ width: "100%", maxWidth: "400px" }}
