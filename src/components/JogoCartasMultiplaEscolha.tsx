@@ -400,9 +400,14 @@ const EcoChallenge: React.FC = () => {
       if (estadoSalvo) {
         try {
           const estado = JSON.parse(estadoSalvo);
+
           setPlayers(estado.players || []);
-          setCurrentPlayerId(estado.currentPlayerId || null);
-          setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
+          setCurrentPlayerId(estado.currentPlayerId ?? null);
+          setCategoriasSelecionadas(
+            estado.categoriasSelecionadas && estado.categoriasSelecionadas.length > 0
+              ? estado.categoriasSelecionadas
+              : categoriasDisponiveis
+          );
           setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
           setJogoIniciado(estado.jogoIniciado || false);
           setHasSavedGame(estado.jogoIniciado === true);
@@ -413,7 +418,7 @@ const EcoChallenge: React.FC = () => {
         }
       }
     }
-  }, []);
+  }, [categoriasDisponiveis]);
 
   // Carrega o estado e verifica se há um jogo salvo ao montar o componente
   useEffect(() => {
