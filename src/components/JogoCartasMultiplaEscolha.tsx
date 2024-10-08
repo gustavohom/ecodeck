@@ -35,9 +35,10 @@ import Image from "next/image";
 import cartasSimples from "./cartas";
 import cartasComplexas from "./cartas_complexas";
 import estrelasAliens from "./estrelas_aliens";
+import estrelasAliens from "./test_card";
 
 // Combine as cartas simples e complexas em um único array
-const cartas = [...cartasSimples, ...cartasComplexas, ...estrelasAliens];
+const cartas = [...cartasSimples, ...cartasComplexas, ...estrelasAliens, ...test_card];
 
 // Definição de Tipos
 interface Opcao {
