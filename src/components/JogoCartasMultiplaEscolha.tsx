@@ -23,6 +23,8 @@ import {
   ChevronUp,
   Zap,
   Filter,
+  Trash,
+  ChevronDown,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -81,7 +83,28 @@ interface TelaInicialProps {
   setCategoriasSelecionadas: (categorias: string[]) => void;
   hasSavedGame: boolean;
   onPlayersSetup: (players: Player[]) => void;
+  players: Player[];
+  setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
 }
+
+const predefinedColors = [
+  "#FF0000", // Vermelho
+  "#0000FF", // Azul
+  "#008000", // Verde
+  "#FFFF00", // Amarelo
+  "#FFA500", // Laranja
+  "#800080", // Roxo
+  "#00FFFF", // Ciano
+  "#FFC0CB", // Rosa
+  "#808080", // Cinza
+  "#000000", // Preto
+  "#FFFFFF", // Branco
+  "#00FF00", // Lima
+  "#800000", // Marrom
+  "#000080", // Azul Marinho
+  "#FFD700", // Dourado
+  "#A52A2A", // Castanho
+];
 
 // Componente Tela Inicial
 const TelaInicial: React.FC<TelaInicialProps> = ({
@@ -93,42 +116,32 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   setCategoriasSelecionadas,
   hasSavedGame,
   onPlayersSetup,
+  players,
+  setPlayers,
 }) => {
   const [termoBusca, setTermoBusca] = useState<string>("");
-  const predefinedColors = [
-    "#FF0000", // Vermelho
-    "#0000FF", // Azul
-    "#008000", // Verde
-    "#FFFF00", // Amarelo
-    "#FFA500", // Laranja
-    "#800080", // Roxo
-    "#00FFFF", // Ciano
-    "#FFC0CB", // Rosa
-    "#808080", // Cinza
-    "#000000", // Preto
-    "#FFFFFF", // Branco
-    "#00FF00", // Lima
-    "#800000", // Marrom
-    "#000080", // Azul Marinho
-    "#FFD700", // Dourado
-    "#A52A2A", // Castanho
-  ];
 
-  // Inicialize o primeiro jogador com uma cor padrão
+  // Inicialize os inputs dos jogadores com os dados existentes
   const [playerInputs, setPlayerInputs] = useState<
-    { name: string; color: string }[]
-  >([
-    {
-      name: "",
-      color: predefinedColors[0],
-    },
-  ]);
+    { id: number; name: string; color: string }[]
+  >(
+    players.length > 0
+      ? players.map((p) => ({ id: p.id, name: p.name, color: p.color }))
+      : [
+          {
+            id: 0,
+            name: "",
+            color: predefinedColors[0],
+          },
+        ]
+  );
 
   const addPlayerInput = () => {
     if (playerInputs.length < 8) {
       setPlayerInputs([
         ...playerInputs,
         {
+          id: playerInputs.length,
           name: "",
           color: predefinedColors[playerInputs.length % predefinedColors.length],
         },
@@ -143,6 +156,11 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   ) => {
     const updatedPlayers = [...playerInputs];
     updatedPlayers[index][field] = value;
+    setPlayerInputs(updatedPlayers);
+  };
+
+  const deletePlayer = (index: number) => {
+    const updatedPlayers = playerInputs.filter((_, i) => i !== index);
     setPlayerInputs(updatedPlayers);
   };
 
@@ -226,7 +244,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         <div className="mb-4 mt-4">
           <h2 className="text-lg font-bold mb-2">Adicionar Jogadores</h2>
           {playerInputs.map((player, index) => (
-            <div key={index} className="mb-2">
+            <div key={index} className="mb-2 border p-2 rounded">
               <div className="flex items-center space-x-2 mb-1">
                 <input
                   type="text"
@@ -237,25 +255,53 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                   }
                   className="p-2 border rounded w-full"
                 />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => deletePlayer(index)}
+                >
+                  <Trash className="h-4 w-4 text-red-500" />
+                </Button>
               </div>
-              <div className="flex flex-wrap space-x-1">
-                {predefinedColors.map((color, idx) => (
-                  <button
-                    key={idx}
-                    style={{
-                      backgroundColor: color,
-                      width: "24px",
-                      height: "24px",
-                      borderRadius: "50%",
-                      border:
-                        player.color === color
-                          ? "2px solid black"
-                          : "1px solid #ccc",
-                      margin: "2px",
-                    }}
-                    onClick={() => handlePlayerChange(index, "color", color)}
-                  />
-                ))}
+              <div className="relative">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const updatedPlayers = [...playerInputs];
+                    updatedPlayers[index].showColorPicker =
+                      !updatedPlayers[index].showColorPicker;
+                    setPlayerInputs(updatedPlayers);
+                  }}
+                  className="w-full"
+                >
+                  Selecionar Cor
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+                {player.showColorPicker && (
+                  <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-4 gap-2">
+                    {predefinedColors.map((color, idx) => (
+                      <button
+                        key={idx}
+                        style={{
+                          backgroundColor: color,
+                          width: "24px",
+                          height: "24px",
+                          borderRadius: "50%",
+                          border:
+                            player.color === color
+                              ? "2px solid black"
+                              : "1px solid #ccc",
+                        }}
+                        onClick={() => {
+                          handlePlayerChange(index, "color", color);
+                          const updatedPlayers = [...playerInputs];
+                          updatedPlayers[index].showColorPicker = false;
+                          setPlayerInputs(updatedPlayers);
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -754,6 +800,8 @@ const EcoChallenge: React.FC = () => {
         setCategoriasSelecionadas={setCategoriasSelecionadas}
         hasSavedGame={hasSavedGame}
         onPlayersSetup={handlePlayersSetup}
+        players={players}
+        setPlayers={setPlayers}
       />
     );
   }
@@ -776,329 +824,340 @@ const EcoChallenge: React.FC = () => {
   };
 
   return (
-    <Card className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}>
-      <CardHeader>
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center space-x-2">
+    <div>
+      <div className="flex justify-center mb-4 space-x-2">
+        {players.map((player) => (
+          <Button
+            key={player.id}
+            onClick={() => setCurrentPlayerId(player.id)}
+            size="sm"
+            variant={currentPlayerId === player.id ? "default" : "outline"}
+            style={{
+              backgroundColor:
+                currentPlayerId === player.id ? player.color : undefined,
+              color: currentPlayerId === player.id ? "#fff" : undefined,
+            }}
+          >
+            {player.name}
+          </Button>
+        ))}
+      </div>
+      <Card className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}>
+        <CardHeader>
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center space-x-2">
+              <Button
+                onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
+                size="sm"
+                variant="outline"
+              >
+                <Filter className="h-4 w-4" />
+              </Button>
+              <CardTitle className="text-xl font-bold">
+                {cartaAtual.titulo}
+              </CardTitle>
+            </div>
+            <Badge
+              variant={
+                cartaAtual.dificuldade === "facil"
+                  ? "secondary"
+                  : cartaAtual.dificuldade === "normal"
+                  ? "default"
+                  : "destructive"
+              }
+            >
+              {cartaAtual.dificuldade}
+            </Badge>
+          </div>
+          <ScrollArea className="h-56 rounded-md border p-4">
+            <div className="text-sm">{renderizarConteudoPergunta()}</div>
+          </ScrollArea>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {cartaAtual.opcoes.map((opcao: Opcao) => (
+              <Button
+                key={opcao.id}
+                onClick={() =>
+                  cartaAtual.tipo === "MultiplaEscolha"
+                    ? handleSelecaoMultipla(opcao.id)
+                    : cartaAtual.tipo === "Ordem"
+                    ? handleSelecaoOrdem(opcao.id)
+                    : handleSelecao(opcao.id)
+                }
+                variant={
+                  selecionado === opcao.id || selecoesMultiplas.includes(opcao.id)
+                    ? "secondary"
+                    : "outline"
+                }
+                className={`w-full justify-start text-sm ${
+                  respondido &&
+                  (Array.isArray(cartaAtual.respostaCorreta)
+                    ? cartaAtual.respostaCorreta.includes(opcao.id)
+                    : cartaAtual.respostaCorreta === opcao.id)
+                    ? "bg-green-100"
+                    : ""
+                } ${
+                  respondido &&
+                  selecionado === opcao.id &&
+                  !(
+                    Array.isArray(cartaAtual.respostaCorreta)
+                      ? cartaAtual.respostaCorreta.includes(opcao.id)
+                      : cartaAtual.respostaCorreta === opcao.id
+                  )
+                    ? "bg-red-100"
+                    : ""
+                } ${
+                  respondido &&
+                  cartaAtual.tipo === "MultiplaEscolha" &&
+                  Array.isArray(cartaAtual.respostaCorreta) &&
+                  !cartaAtual.respostaCorreta.includes(opcao.id) &&
+                  selecoesMultiplas.includes(opcao.id)
+                    ? "bg-red-100"
+                    : ""
+                } ${
+                  respondido &&
+                  cartaAtual.tipo === "MultiplaEscolha" &&
+                  Array.isArray(cartaAtual.respostaCorreta) &&
+                  cartaAtual.respostaCorreta.includes(opcao.id) &&
+                  !selecoesMultiplas.includes(opcao.id)
+                    ? "bg-blue-100"
+                    : ""
+                } ${
+                  respondido &&
+                  cartaAtual.tipo === "Ordem" &&
+                  ordemSelecoes.includes(opcao.id) &&
+                  ordemSelecoes.indexOf(opcao.id) + 1 !==
+                    (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
+                    ? "bg-red-100"
+                    : ""
+                } ${
+                  respondido &&
+                  cartaAtual.tipo === "Ordem" &&
+                  ordemSelecoes.includes(opcao.id) &&
+                  ordemSelecoes.indexOf(opcao.id) + 1 ===
+                    (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
+                    ? "bg-green-100"
+                    : ""
+                } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
+                disabled={opcoesEliminadas.includes(opcao.id)}
+                style={{
+                  maxHeight: "60px",
+                  height: "auto",
+                  overflowY: "auto",
+                  whiteSpace: "normal",
+                  alignItems: "flex-start",
+                  display: "flex",
+                  textAlign: "left",
+                  padding: "8px",
+                }}
+              >
+                {opcao.texto}
+                {cartaAtual.tipo === "MultiplaEscolha" && (
+                  <span className="ml-2">
+                    {selecoesMultiplas.includes(opcao.id) ? (
+                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                    ) : (
+                      <span className="h-4 w-4 border rounded" />
+                    )}
+                  </span>
+                )}
+                {cartaAtual.tipo === "Ordem" &&
+                  ordemSelecoes.includes(opcao.id) && (
+                    <span className="ml-2">
+                      {ordemSelecoes.indexOf(opcao.id) + 1}
+                      {respondido &&
+                        ordemSelecoes.indexOf(opcao.id) + 1 !==
+                          (cartaAtual.respostaCorreta as number[]).indexOf(
+                            opcao.id
+                          ) +
+                            1 && (
+                          <span className="ml-1 text-blue-500">
+                            (
+                            {
+                              (cartaAtual.respostaCorreta as number[]).indexOf(
+                                opcao.id
+                              ) + 1
+                            }
+                            )
+                          </span>
+                        )}
+                    </span>
+                  )}
+                {respondido &&
+                  (Array.isArray(cartaAtual.respostaCorreta)
+                    ? cartaAtual.respostaCorreta.includes(opcao.id)
+                    : cartaAtual.respostaCorreta === opcao.id) && (
+                    <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
+                  )}
+                {respondido &&
+                  selecionado === opcao.id &&
+                  !(
+                    Array.isArray(cartaAtual.respostaCorreta)
+                      ? cartaAtual.respostaCorreta.includes(opcao.id)
+                      : cartaAtual.respostaCorreta === opcao.id
+                  ) && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
+              </Button>
+            ))}
+          </div>
+          {mostrarDica && (
+            <Alert className="mt-4">
+              <AlertDescription>{cartaAtual.dica}</AlertDescription>
+            </Alert>
+          )}
+          {mostrarFontes && (
+            <Alert className="mt-4">
+              <AlertDescription>
+                <ul className="list-disc list-inside">
+                  {cartaAtual.fontes.map((fonte: string, index: number) => (
+                    <li key={index}>{fonte}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+        <CardFooter className="flex flex-col items-center">
+          <div className="flex flex-wrap justify-between w-full mb-1 space-x-2">
+            <Button onClick={toggleFontes} size="sm" variant="outline">
+              <BookOpen className="h-4 w-4" />
+            </Button>
             <Button
-              onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
+              onClick={pularPergunta}
+              size="sm"
+              variant={
+                currentPlayer.pulosDisponiveis === 0 ? "outline" : "secondary"
+              }
+              disabled={
+                currentPlayer.pulosDisponiveis === 0 ||
+                !["Pergunta", "MultiplaEscolha", "Ordem"].includes(
+                  cartaAtual.tipo
+                )
+              }
+            >
+              <SkipForward className="h-4 w-4" />
+            </Button>
+            <Button
+              onClick={toggleDica}
+              size="sm"
+              variant={
+                currentPlayer.respostasSeguidas < 3 || !cartaAtual.dica
+                  ? "outline"
+                  : "secondary"
+              }
+              disabled={currentPlayer.respostasSeguidas < 3 || !cartaAtual.dica}
+            >
+              <HelpCircle className="h-4 w-4" />
+            </Button>
+            <Button
+              onClick={eliminarRespostaErrada}
+              size="sm"
+              variant={
+                currentPlayer.respostasSeguidas < 4 ? "outline" : "secondary"
+              }
+              disabled={currentPlayer.respostasSeguidas < 4}
+            >
+              <MinusCircle className="h-4 w-4" />
+            </Button>
+            <Button onClick={resetarContadores} size="sm" variant="outline">
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+            <Button onClick={voltarTelaInicial} size="sm" variant="outline">
+              <Home className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex flex-wrap justify-between w-full space-x-2">
+            <Button onClick={diminuirAcertos} size="sm" variant="outline">
+              <ThumbsDown className="h-4 w-4 text-green-500" />
+            </Button>
+            <Button onClick={diminuirErros} size="sm" variant="outline">
+              <ThumbsUp className="h-4 w-4 text-red-500" />
+            </Button>
+            <Button
+              onClick={diminuirContadorDeEstrelas}
               size="sm"
               variant="outline"
             >
-              <Filter className="h-4 w-4" />
+              <Star className="h-4 w-4 text-red-500" />
             </Button>
-            <CardTitle className="text-xl font-bold">
-              {cartaAtual.titulo}
-            </CardTitle>
-          </div>
-          <Badge
-            variant={
-              cartaAtual.dificuldade === "facil"
-                ? "secondary"
-                : cartaAtual.dificuldade === "normal"
-                ? "default"
-                : "destructive"
-            }
-          >
-            {cartaAtual.dificuldade}
-          </Badge>
-        </div>
-        <ScrollArea className="h-56 rounded-md border p-4">
-          <div className="text-sm">{renderizarConteudoPergunta()}</div>
-        </ScrollArea>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          {cartaAtual.opcoes.map((opcao: Opcao) => (
             <Button
-              key={opcao.id}
-              onClick={() =>
-                cartaAtual.tipo === "MultiplaEscolha"
-                  ? handleSelecaoMultipla(opcao.id)
-                  : cartaAtual.tipo === "Ordem"
-                  ? handleSelecaoOrdem(opcao.id)
-                  : handleSelecao(opcao.id)
-              }
-              variant={
-                selecionado === opcao.id || selecoesMultiplas.includes(opcao.id)
-                  ? "secondary"
-                  : "outline"
-              }
-              className={`w-full justify-start text-sm ${
-                respondido &&
-                (Array.isArray(cartaAtual.respostaCorreta)
-                  ? cartaAtual.respostaCorreta.includes(opcao.id)
-                  : cartaAtual.respostaCorreta === opcao.id)
-                  ? "bg-green-100"
-                  : ""
-              } ${
-                respondido &&
-                selecionado === opcao.id &&
-                !(
-                  Array.isArray(cartaAtual.respostaCorreta)
-                    ? cartaAtual.respostaCorreta.includes(opcao.id)
-                    : cartaAtual.respostaCorreta === opcao.id
-                )
-                  ? "bg-red-100"
-                  : ""
-              } ${
-                respondido &&
-                cartaAtual.tipo === "MultiplaEscolha" &&
-                Array.isArray(cartaAtual.respostaCorreta) &&
-                !cartaAtual.respostaCorreta.includes(opcao.id) &&
-                selecoesMultiplas.includes(opcao.id)
-                  ? "bg-red-100"
-                  : ""
-              } ${
-                respondido &&
-                cartaAtual.tipo === "MultiplaEscolha" &&
-                Array.isArray(cartaAtual.respostaCorreta) &&
-                cartaAtual.respostaCorreta.includes(opcao.id) &&
-                !selecoesMultiplas.includes(opcao.id)
-                  ? "bg-blue-100"
-                  : ""
-              } ${
-                respondido &&
-                cartaAtual.tipo === "Ordem" &&
-                ordemSelecoes.includes(opcao.id) &&
-                ordemSelecoes.indexOf(opcao.id) + 1 !==
-                  (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
-                  ? "bg-red-100"
-                  : ""
-              } ${
-                respondido &&
-                cartaAtual.tipo === "Ordem" &&
-                ordemSelecoes.includes(opcao.id) &&
-                ordemSelecoes.indexOf(opcao.id) + 1 ===
-                  (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
-                  ? "bg-green-100"
-                  : ""
-              } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
-              disabled={opcoesEliminadas.includes(opcao.id)}
-              style={{
-                maxHeight: "60px",
-                height: "auto",
-                overflowY: "auto",
-                whiteSpace: "normal",
-                alignItems: "flex-start",
-                display: "flex",
-                textAlign: "left",
-                padding: "8px",
-              }}
-            >
-              {opcao.texto}
-              {cartaAtual.tipo === "MultiplaEscolha" && (
-                <span className="ml-2">
-                  {selecoesMultiplas.includes(opcao.id) ? (
-                    <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                  ) : (
-                    <span className="h-4 w-4 border rounded" />
-                  )}
-                </span>
-              )}
-              {cartaAtual.tipo === "Ordem" && ordemSelecoes.includes(opcao.id) && (
-                <span className="ml-2">
-                  {ordemSelecoes.indexOf(opcao.id) + 1}
-                  {respondido &&
-                    ordemSelecoes.indexOf(opcao.id) + 1 !==
-                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
-                        1 && (
-                      <span className="ml-1 text-blue-500">
-                        (
-                        {
-                          (cartaAtual.respostaCorreta as number[]).indexOf(
-                            opcao.id
-                          ) + 1
-                        }
-                        )
-                      </span>
-                    )}
-                </span>
-              )}
-              {respondido &&
-                (Array.isArray(cartaAtual.respostaCorreta)
-                  ? cartaAtual.respostaCorreta.includes(opcao.id)
-                  : cartaAtual.respostaCorreta === opcao.id) && (
-                  <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
-                )}
-              {respondido &&
-                selecionado === opcao.id &&
-                !(
-                  Array.isArray(cartaAtual.respostaCorreta)
-                    ? cartaAtual.respostaCorreta.includes(opcao.id)
-                    : cartaAtual.respostaCorreta === opcao.id
-                ) && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
-            </Button>
-          ))}
-        </div>
-        {mostrarDica && (
-          <Alert className="mt-4">
-            <AlertDescription>{cartaAtual.dica}</AlertDescription>
-          </Alert>
-        )}
-        {mostrarFontes && (
-          <Alert className="mt-4">
-            <AlertDescription>
-              <ul className="list-disc list-inside">
-                {cartaAtual.fontes.map((fonte: string, index: number) => (
-                  <li key={index}>{fonte}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
-      </CardContent>
-      <CardFooter className="flex flex-col items-center">
-        <div className="flex justify-center mb-4 space-x-2">
-          {players.map((player) => (
-            <Button
-              key={player.id}
-              onClick={() => setCurrentPlayerId(player.id)}
+              onClick={incrementarContadorDeEstrelas}
               size="sm"
-              variant={currentPlayerId === player.id ? "default" : "outline"}
-              style={{ backgroundColor: player.color }}
+              variant="outline"
             >
-              {player.name}
+              <Star className="h-4 w-4 text-yellow-500" />
             </Button>
-          ))}
-        </div>
-        <div className="flex flex-wrap justify-between w-full mb-1 space-x-2">
-          <Button onClick={toggleFontes} size="sm" variant="outline">
-            <BookOpen className="h-4 w-4" />
-          </Button>
-          <Button
-            onClick={pularPergunta}
-            size="sm"
-            variant={
-              currentPlayer.pulosDisponiveis === 0 ? "outline" : "secondary"
-            }
-            disabled={
-              currentPlayer.pulosDisponiveis === 0 ||
-              !["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)
-            }
-          >
-            <SkipForward className="h-4 w-4" />
-          </Button>
-          <Button
-            onClick={toggleDica}
-            size="sm"
-            variant={
-              currentPlayer.respostasSeguidas < 3 || !cartaAtual.dica
-                ? "outline"
-                : "secondary"
-            }
-            disabled={currentPlayer.respostasSeguidas < 3 || !cartaAtual.dica}
-          >
-            <HelpCircle className="h-4 w-4" />
-          </Button>
-          <Button
-            onClick={eliminarRespostaErrada}
-            size="sm"
-            variant={
-              currentPlayer.respostasSeguidas < 4 ? "outline" : "secondary"
-            }
-            disabled={currentPlayer.respostasSeguidas < 4}
-          >
-            <MinusCircle className="h-4 w-4" />
-          </Button>
-          <Button onClick={resetarContadores} size="sm" variant="outline">
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-          <Button onClick={voltarTelaInicial} size="sm" variant="outline">
-            <Home className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="flex flex-wrap justify-between w-full space-x-2">
-          <Button onClick={diminuirAcertos} size="sm" variant="outline">
-            <ThumbsDown className="h-4 w-4 text-green-500" />
-          </Button>
-          <Button onClick={diminuirErros} size="sm" variant="outline">
-            <ThumbsUp className="h-4 w-4 text-red-500" />
-          </Button>
-          <Button
-            onClick={diminuirContadorDeEstrelas}
-            size="sm"
-            variant="outline"
-          >
-            <Star className="h-4 w-4 text-red-500" />
-          </Button>
-          <Button
-            onClick={incrementarContadorDeEstrelas}
-            size="sm"
-            variant="outline"
-          >
-            <Star className="h-4 w-4 text-yellow-500" />
-          </Button>
-          <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
-            <ChevronUp className="h-4 w-4 text-purple-500 transform rotate-180" />
-          </Button>
-          <Button onClick={incrementarRodadasPreso} size="sm" variant="outline">
-            <ChevronUp className="h-4 w-4 text-purple-500" />
-          </Button>
-        </div>
-        <div className="flex justify-between w-full mb-4">
-          {!respondido ? (
-            <Button
-              onClick={verificarResposta}
-              disabled={
-                (cartaAtual.tipo === "Ordem" &&
-                  ordemSelecoes.length !== cartaAtual.opcoes.length) ||
-                (cartaAtual.tipo !== "Ordem" &&
-                  selecionado === null &&
-                  selecoesMultiplas.length === 0)
-              }
-              className="w-full mt-2"
-            >
-              Verificar
+            <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
+              <ChevronUp className="h-4 w-4 text-purple-500 transform rotate-180" />
             </Button>
-          ) : (
-            <Button onClick={selecionarCartaAleatoria} className="w-full mt-2">
-              Próxima Carta
+            <Button onClick={incrementarRodadasPreso} size="sm" variant="outline">
+              <ChevronUp className="h-4 w-4 text-purple-500" />
             </Button>
-          )}
-        </div>
-        {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
-          mensagem && (
-            <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
-          )}
-        <Progress
-          value={currentPlayer.progresso}
-          className={`w-full ${
-            currentPlayer.progresso === 100 ? "bg-green-500" : ""
-          }`}
-        />
-        <div className="flex justify-between w-full mt-4 text-sm">
-          <div className="flex items-center space-x-1">
-            <ChevronUp className="h-4 w-4 text-purple-500" />
-            <span>{currentPlayer.rodadasPreso}</span>
           </div>
-          <div className="flex items-center space-x-1">
-            <Award className="h-4 w-4 text-yellow-500" />
-            <span>{currentPlayer.fixedStars}</span>
+          <div className="flex justify-between w-full mb-4">
+            {!respondido ? (
+              <Button
+                onClick={verificarResposta}
+                disabled={
+                  (cartaAtual.tipo === "Ordem" &&
+                    ordemSelecoes.length !== cartaAtual.opcoes.length) ||
+                  (cartaAtual.tipo !== "Ordem" &&
+                    selecionado === null &&
+                    selecoesMultiplas.length === 0)
+                }
+                className="w-full mt-2"
+              >
+                Verificar
+              </Button>
+            ) : (
+              <Button onClick={selecionarCartaAleatoria} className="w-full mt-2">
+                Próxima Carta
+              </Button>
+            )}
           </div>
-          <div className="flex items-center space-x-1">
-            <Star className="h-4 w-4 text-yellow-500" />
-            <span>{currentPlayer.contadorDeEstrelas}</span>
+          {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
+            mensagem && (
+              <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
+            )}
+          <Progress
+            value={currentPlayer.progresso}
+            className={`w-full ${
+              currentPlayer.progresso === 100 ? "bg-green-500" : ""
+            }`}
+          />
+          <div className="flex justify-between w-full mt-4 text-sm">
+            <div className="flex items-center space-x-1">
+              <ChevronUp className="h-4 w-4 text-purple-500" />
+              <span>{currentPlayer.rodadasPreso}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Award className="h-4 w-4 text-yellow-500" />
+              <span>{currentPlayer.fixedStars}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Star className="h-4 w-4 text-yellow-500" />
+              <span>{currentPlayer.contadorDeEstrelas}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <SkipForward className="h-4 w-4" />
+              <span>{currentPlayer.pulosDisponiveis}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <ThumbsUp className="h-4 w-4 text-green-500" />
+              <span>{currentPlayer.respostasCertas}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <ThumbsDown className="h-4 w-4 text-red-500" />
+              <span>{currentPlayer.respostasErradas}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Zap className="h-4 w-4 text-purple-500" />
+              <span>{currentPlayer.respostasSeguidas}</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-1">
-            <SkipForward className="h-4 w-4" />
-            <span>{currentPlayer.pulosDisponiveis}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <ThumbsUp className="h-4 w-4 text-green-500" />
-            <span>{currentPlayer.respostasCertas}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <ThumbsDown className="h-4 w-4 text-red-500" />
-            <span>{currentPlayer.respostasErradas}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <Zap className="h-4 w-4 text-purple-500" />
-            <span>{currentPlayer.respostasSeguidas}</span>
-          </div>
-        </div>
-      </CardFooter>
-    </Card>
+        </CardFooter>
+      </Card>
+    </div>
   );
 };
 
