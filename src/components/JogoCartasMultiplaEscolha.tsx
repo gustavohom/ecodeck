@@ -94,22 +94,22 @@ interface TelaInicialProps {
 }
 
 const predefinedColors = [
-  "#FF0000", // Vermelho
-  "#0000FF", // Azul
-  "#008000", // Verde
-  "#FFFF00", // Amarelo
-  "#FFA500", // Laranja
-  "#800080", // Roxo
-  "#00FFFF", // Ciano
-  "#FFC0CB", // Rosa
-  "#808080", // Cinza
-  "#000000", // Preto
-  "#FFFFFF", // Branco
-  "#00FF00", // Lima
-  "#800000", // Marrom
-  "#000080", // Azul Marinho
-  "#FFD700", // Dourado
-  "#A52A2A", // Castanho
+  "#9e0142", // Crimson
+  "#f46d43", // Coral
+  "#fee08b", // Soft Yellow
+  "#66c2a5", // Aquamarine
+  "#3288bd", // Sky Blue
+  "#5e4fa2", // Indigo
+  "#8dd3c7", // Light Turquoise
+  "#ffffb3", // Pale Yellow
+  "#fb8072", // Salmon
+  "#80b1d3", // Light Blue
+  "#b3de69", // Lime Green
+  "#fccde5", // Light Pink
+  "#bc80bd", // Lavender
+  "#1f78b4", // Medium Blue
+  "#33a02c", // Forest Green
+  "#ff7f00", // Bright Orange
 ];
 
 // Componente Tela Inicial
