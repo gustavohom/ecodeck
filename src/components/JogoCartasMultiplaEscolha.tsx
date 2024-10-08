@@ -366,6 +366,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 
 // Componente Principal EcoChallenge
 const EcoChallenge: React.FC = () => {
+  // Variáveis de estado
   const [cartaAtual, setCartaAtual] = useState<Carta | null>(null);
   const [selecionado, setSelecionado] = useState<number | null>(null);
   const [respondido, setRespondido] = useState<boolean>(false);
@@ -374,9 +375,9 @@ const EcoChallenge: React.FC = () => {
   const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
-    string[]
-  >([]);
+  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>(
+    []
+  );
   const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
     useState<boolean>(false);
 
@@ -449,6 +450,14 @@ const EcoChallenge: React.FC = () => {
     jogoIniciado,
   ]);
 
+  // Ajuste no useEffect para evitar loop infinito
+  useEffect(() => {
+    if (jogoIniciado) {
+      selecionarCartaAleatoria();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jogoIniciado]);
+
   const selecionarCartaAleatoria = useCallback(() => {
     const cartasFiltradas = cartas.filter(
       (carta) =>
@@ -478,12 +487,6 @@ const EcoChallenge: React.FC = () => {
     setMostrarFontes(false);
     setOpcoesEliminadas([]);
   }, [categoriasSelecionadas, mostrarSomentePerguntas]);
-
-  useEffect(() => {
-    if (jogoIniciado) {
-      selecionarCartaAleatoria();
-    }
-  }, [jogoIniciado, selecionarCartaAleatoria]);
 
   const handleSelecao = (id: number) => {
     if (!respondido) {
@@ -912,7 +915,7 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
-  // Adicionando verificação para currentPlayer e cartaAtual
+  // Verificação para currentPlayer e cartaAtual
   if (!cartaAtual || !currentPlayer) {
     return (
       <div className="flex flex-col items-center">
@@ -1104,16 +1107,16 @@ const EcoChallenge: React.FC = () => {
                             opcao.id
                           ) +
                             1 && (
-                        <span className="ml-1 text-blue-500">
-                          (
-                          {
-                            (cartaAtual.respostaCorreta as number[]).indexOf(
-                              opcao.id
-                            ) + 1
-                          }
-                          )
-                        </span>
-                      )}
+                          <span className="ml-1 text-blue-500">
+                            (
+                            {
+                              (cartaAtual.respostaCorreta as number[]).indexOf(
+                                opcao.id
+                              ) + 1
+                            }
+                            )
+                          </span>
+                        )}
                     </span>
                   )}
                 {respondido &&
