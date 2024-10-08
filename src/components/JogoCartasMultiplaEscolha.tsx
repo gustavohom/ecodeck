@@ -964,7 +964,7 @@ const EcoChallenge: React.FC = () => {
                 } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
                 disabled={opcoesEliminadas.includes(opcao.id)}
                 style={{
-                  maxHeight: "60px",
+                  maxHeight: "80px",
                   height: "auto",
                   overflowY: "auto",
                   whiteSpace: "normal",
