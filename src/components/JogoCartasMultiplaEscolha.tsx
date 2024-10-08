@@ -376,10 +376,17 @@ const EcoChallenge: React.FC = () => {
     new Set(cartas.flatMap((carta) => carta.categorias))
   ).sort();
 
-  // Verifica se há um jogo salvo no localStorage
+  // Verifica se há um jogo salvo no localStorage e se o jogo foi iniciado
   const hasSavedGame =
     typeof window !== "undefined" &&
-    !!localStorage.getItem("estadoEcoChallenge");
+    (() => {
+      const estadoSalvo = localStorage.getItem("estadoEcoChallenge");
+      if (estadoSalvo) {
+        const estado = JSON.parse(estadoSalvo);
+        return estado.jogoIniciado === true;
+      }
+      return false;
+    })();
 
   // Função para carregar o estado do jogo do localStorage
   const carregarEstado = useCallback(() => {
