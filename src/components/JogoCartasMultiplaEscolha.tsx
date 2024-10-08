@@ -412,6 +412,17 @@ const EcoChallenge: React.FC = () => {
           setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
           setJogoIniciado(estado.jogoIniciado || false);
           setHasSavedGame(estado.jogoIniciado === true);
+
+          // Restaurar estados adicionais
+          setCartaAtual(estado.cartaAtual || null);
+          setSelecionado(estado.selecionado || null);
+          setSelecoesMultiplas(estado.selecoesMultiplas || []);
+          setOrdemSelecoes(estado.ordemSelecoes || []);
+          setRespondido(estado.respondido || false);
+          setMensagem(estado.mensagem || "");
+          setMostrarDica(estado.mostrarDica || false);
+          setMostrarFontes(estado.mostrarFontes || false);
+          setOpcoesEliminadas(estado.opcoesEliminadas || []);
         } catch (e) {
           console.error("Erro ao carregar o estado:", e);
           localStorage.removeItem("estadoEcoChallenge");
@@ -435,6 +446,15 @@ const EcoChallenge: React.FC = () => {
         categoriasSelecionadas,
         mostrarSomentePerguntas,
         jogoIniciado,
+        cartaAtual,
+        selecionado,
+        selecoesMultiplas,
+        ordemSelecoes,
+        respondido,
+        mensagem,
+        mostrarDica,
+        mostrarFontes,
+        opcoesEliminadas,
       };
       try {
         localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
@@ -448,11 +468,20 @@ const EcoChallenge: React.FC = () => {
     categoriasSelecionadas,
     mostrarSomentePerguntas,
     jogoIniciado,
+    cartaAtual,
+    selecionado,
+    selecoesMultiplas,
+    ordemSelecoes,
+    respondido,
+    mensagem,
+    mostrarDica,
+    mostrarFontes,
+    opcoesEliminadas,
   ]);
 
   // Ajuste no useEffect para evitar loop infinito
   useEffect(() => {
-    if (jogoIniciado) {
+    if (jogoIniciado && !cartaAtual) {
       selecionarCartaAleatoria();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -848,9 +877,11 @@ const EcoChallenge: React.FC = () => {
       <TelaInicial
         onStartGame={() => {
           setJogoIniciado(true);
+          selecionarCartaAleatoria();
         }}
         onContinueGame={() => {
           setJogoIniciado(true);
+          // Não precisamos chamar selecionarCartaAleatoria(), pois o estado foi restaurado
         }}
         onReset={() => {
           resetarTudo(); // Reseta tudo, inclusive fixedStars
