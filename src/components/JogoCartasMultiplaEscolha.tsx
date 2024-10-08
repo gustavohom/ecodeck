@@ -286,7 +286,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                     }}
                   />
                   {player.showColorPicker && (
-                    <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-4 gap-1">
+                    <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-4 gap-4">
                       {predefinedColors.map((color, idx) => (
                         <button
                           key={idx}
@@ -330,12 +330,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
         {hasSavedGame && (
-          <Button
-            onClick={() => {
-              onContinueGame();
-            }}
-            className="w-full"
-          >
+          <Button onClick={onContinueGame} className="w-full">
             Continuar Jogo
           </Button>
         )}
@@ -435,12 +430,6 @@ const EcoChallenge: React.FC = () => {
         (!mostrarSomentePerguntas ||
           ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo))
     );
-
-    if (cartasFiltradas.length === 0) {
-      setCartaAtual(null);
-      setMensagem("Não há cartas disponíveis para as categorias selecionadas.");
-      return;
-    }
 
     const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
     setCartaAtual(cartasFiltradas[indiceAleatorio]);
@@ -641,10 +630,8 @@ const EcoChallenge: React.FC = () => {
 
   const resetarTudo = () => {
     if (window.confirm("Tem certeza que deseja resetar todo o jogo?")) {
+      // Não redefinir players e currentPlayerId aqui
       setCategoriasSelecionadas([]);
-      setPlayers([]);
-      setCurrentPlayerId(null);
-      setJogoIniciado(false);
       setMensagem("Jogo resetado!");
       if (typeof window !== "undefined") {
         localStorage.removeItem("estadoEcoChallenge");
@@ -729,8 +716,7 @@ const EcoChallenge: React.FC = () => {
   const diminuirRodadasPreso = () => {
     if (!currentPlayer) return;
     updateCurrentPlayer({
-      rodadasPreso:
-        currentPlayer.rodadasPreso > 0 ? currentPlayer.rodadasPreso - 1 : 0,
+      rodadasPreso: currentPlayer.rodadasPreso - 1,
     });
     setMensagem("Um contador removido!");
   };
@@ -810,25 +796,17 @@ const EcoChallenge: React.FC = () => {
 
   const handlePlayersSetup = (initializedPlayers: Player[]) => {
     setPlayers(initializedPlayers);
-    setCurrentPlayerId(initializedPlayers[0]?.id || null);
+    setCurrentPlayerId(initializedPlayers[0].id);
   };
 
   if (!jogoIniciado) {
     return (
       <TelaInicial
         onStartGame={() => {
-          if (categoriasSelecionadas.length === 0) {
-            alert("Selecione pelo menos uma categoria para iniciar o jogo.");
-          } else {
-            setJogoIniciado(true);
-          }
+          setJogoIniciado(true);
         }}
         onContinueGame={() => {
-          if (hasSavedGame) {
-            setJogoIniciado(true);
-          } else {
-            alert("Nenhum jogo salvo encontrado. Inicie um novo jogo.");
-          }
+          setJogoIniciado(true);
         }}
         onReset={() => {
           resetarTudo(); // Reseta tudo, inclusive fixedStars
@@ -844,19 +822,7 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
-  if (!cartaAtual || !currentPlayer) {
-    return (
-      <div className="flex flex-col items-center mt-8">
-        <p className="text-center font-bold text-sm mb-2">
-          {mensagem ||
-            "Não há cartas disponíveis para as categorias selecionadas."}
-        </p>
-        <Button onClick={voltarTelaInicial} className="mt-4">
-          Voltar à Tela Inicial
-        </Button>
-      </div>
-    );
-  }
+  if (!cartaAtual || !currentPlayer) return null;
 
   const obterEstiloCarta = () => {
     switch (cartaAtual.tipo) {
@@ -871,22 +837,6 @@ const EcoChallenge: React.FC = () => {
           ? "border-blue-500 bg-gray-50"
           : "border-gray-200 bg-white";
     }
-  };
-
-  const hasPerguntas = cartas.some(
-    (carta) =>
-      carta.categorias.some((categoria) =>
-        categoriasSelecionadas.includes(categoria)
-      ) && ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo)
-  );
-
-  const handleFilterToggle = () => {
-    if (!hasPerguntas) {
-      alert("Não há perguntas disponíveis para filtrar nas categorias selecionadas.");
-      return;
-    }
-    setMostrarSomentePerguntas((prev) => !prev);
-    selecionarCartaAleatoria(); // Re-seleciona uma carta com o novo filtro
   };
 
   return (
@@ -919,10 +869,9 @@ const EcoChallenge: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center space-x-2">
               <Button
-                onClick={handleFilterToggle}
+                onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
                 size="sm"
                 variant="outline"
-                disabled={!hasPerguntas}
               >
                 <Filter className="h-4 w-4" />
               </Button>
@@ -1183,9 +1132,10 @@ const EcoChallenge: React.FC = () => {
               </Button>
             )}
           </div>
-          {mensagem && (
-            <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
-          )}
+          {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
+            mensagem && (
+              <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
+            )}
           <Progress
             value={currentPlayer.progresso}
             className={`w-full ${
