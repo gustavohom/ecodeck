@@ -24,7 +24,6 @@ import {
   Zap,
   Filter,
   Trash,
-  ChevronDown,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -841,8 +840,13 @@ const EcoChallenge: React.FC = () => {
   };
 
   return (
-    <div className="flex">
-      <div className="flex flex-col-reverse space-y-2 mr-4">
+    <div className="flex flex-col items-center">
+      <div
+        className={`grid gap-2 mb-4 ${
+          players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
+        }`}
+        style={{ width: "100%", maxWidth: "400px" }}
+      >
         {players.map((player) => (
           <Button
             key={player.id}
@@ -853,7 +857,7 @@ const EcoChallenge: React.FC = () => {
               backgroundColor:
                 currentPlayerId === player.id ? player.color : undefined,
               color: currentPlayerId === player.id ? "#fff" : undefined,
-              width: "100px",
+              width: "100%",
             }}
           >
             {player.name}
