@@ -387,40 +387,48 @@ const EcoChallenge: React.FC = () => {
   const [currentPlayerId, setCurrentPlayerId] = useState<number | null>(null);
 
   const [noCardsAvailable, setNoCardsAvailable] = useState<boolean>(false);
+  const [hasSavedGame, setHasSavedGame] = useState<boolean>(false);
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
   ).sort();
 
-  // Verifica se há um jogo salvo no localStorage e se o jogo foi iniciado
-  const hasSavedGame =
-    typeof window !== "undefined" &&
-    (() => {
-      const estadoSalvo = localStorage.getItem("estadoEcoChallenge");
-      if (estadoSalvo) {
-        const estado = JSON.parse(estadoSalvo);
-        return estado.jogoIniciado === true;
-      }
-      return false;
-    })();
-
-  // Função para carregar o estado do jogo do localStorage
+  // Carrega o estado do jogo do localStorage
   const carregarEstado = useCallback(() => {
     if (typeof window !== "undefined") {
       const estadoSalvo = localStorage.getItem("estadoEcoChallenge");
       if (estadoSalvo) {
-        const estado = JSON.parse(estadoSalvo);
-        setPlayers(estado.players || []);
-        setCurrentPlayerId(estado.currentPlayerId || null);
-        setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
-        setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
-        setJogoIniciado(estado.jogoIniciado || false);
+        try {
+          const estado = JSON.parse(estadoSalvo);
+          setPlayers(estado.players || []);
+          setCurrentPlayerId(estado.currentPlayerId || null);
+          setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
+          setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
+          setJogoIniciado(estado.jogoIniciado || false);
+        } catch (e) {
+          console.error("Erro ao carregar o estado:", e);
+          localStorage.removeItem("estadoEcoChallenge");
+        }
       }
     }
   }, []);
 
-  // Carrega o estado ao montar o componente
+  // Carrega o estado e verifica se há um jogo salvo ao montar o componente
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const estadoSalvo = localStorage.getItem("estadoEcoChallenge");
+      if (estadoSalvo) {
+        try {
+          const estado = JSON.parse(estadoSalvo);
+          if (estado.jogoIniciado === true) {
+            setHasSavedGame(true);
+          }
+        } catch (e) {
+          console.error("Erro ao verificar jogo salvo:", e);
+          localStorage.removeItem("estadoEcoChallenge");
+        }
+      }
+    }
     carregarEstado();
   }, [carregarEstado]);
 
@@ -667,6 +675,10 @@ const EcoChallenge: React.FC = () => {
       if (typeof window !== "undefined") {
         localStorage.removeItem("estadoEcoChallenge");
       }
+      setJogoIniciado(false);
+      setPlayers([]);
+      setCurrentPlayerId(null);
+      setHasSavedGame(false);
     }
   };
 
