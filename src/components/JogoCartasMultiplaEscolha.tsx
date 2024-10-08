@@ -843,7 +843,19 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
-  if (!cartaAtual || !currentPlayer) return null;
+  if (!cartaAtual || !currentPlayer) {
+    return (
+      <div className="flex flex-col items-center mt-8">
+        <p className="text-center font-bold text-sm mb-2">
+          {mensagem ||
+            "Não há cartas disponíveis para as categorias selecionadas."}
+        </p>
+        <Button onClick={voltarTelaInicial} className="mt-4">
+          Voltar à Tela Inicial
+        </Button>
+      </div>
+    );
+  }
 
   const obterEstiloCarta = () => {
     switch (cartaAtual.tipo) {
@@ -866,6 +878,14 @@ const EcoChallenge: React.FC = () => {
         categoriasSelecionadas.includes(categoria)
       ) && ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo)
   );
+
+  const handleFilterToggle = () => {
+    if (!hasPerguntas) {
+      setMensagem("Não há perguntas disponíveis para filtrar.");
+      return;
+    }
+    setMostrarSomentePerguntas((prev) => !prev);
+  };
 
   return (
     <div className="flex flex-col items-center">
@@ -897,7 +917,7 @@ const EcoChallenge: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center space-x-2">
               <Button
-                onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
+                onClick={handleFilterToggle}
                 size="sm"
                 variant="outline"
                 disabled={!hasPerguntas}
