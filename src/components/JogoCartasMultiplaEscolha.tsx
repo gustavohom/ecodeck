@@ -405,9 +405,11 @@ const EcoChallenge: React.FC = () => {
           setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
           setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
           setJogoIniciado(estado.jogoIniciado || false);
+          setHasSavedGame(estado.jogoIniciado === true);
         } catch (e) {
           console.error("Erro ao carregar o estado:", e);
           localStorage.removeItem("estadoEcoChallenge");
+          setHasSavedGame(false);
         }
       }
     }
@@ -415,20 +417,6 @@ const EcoChallenge: React.FC = () => {
 
   // Carrega o estado e verifica se há um jogo salvo ao montar o componente
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const estadoSalvo = localStorage.getItem("estadoEcoChallenge");
-      if (estadoSalvo) {
-        try {
-          const estado = JSON.parse(estadoSalvo);
-          if (estado.jogoIniciado === true) {
-            setHasSavedGame(true);
-          }
-        } catch (e) {
-          console.error("Erro ao verificar jogo salvo:", e);
-          localStorage.removeItem("estadoEcoChallenge");
-        }
-      }
-    }
     carregarEstado();
   }, [carregarEstado]);
 
@@ -442,7 +430,11 @@ const EcoChallenge: React.FC = () => {
         mostrarSomentePerguntas,
         jogoIniciado,
       };
-      localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
+      try {
+        localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
+      } catch (e) {
+        console.error("Erro ao salvar o estado:", e);
+      }
     }
   }, [
     players,
@@ -669,7 +661,6 @@ const EcoChallenge: React.FC = () => {
 
   const resetarTudo = () => {
     if (window.confirm("Tem certeza que deseja resetar todo o jogo?")) {
-      // Não redefinir players e currentPlayerId aqui
       setCategoriasSelecionadas([]);
       setMensagem("Jogo resetado!");
       if (typeof window !== "undefined") {
@@ -679,6 +670,7 @@ const EcoChallenge: React.FC = () => {
       setPlayers([]);
       setCurrentPlayerId(null);
       setHasSavedGame(false);
+      setCartaAtual(null); // Adicionado para evitar erros
     }
   };
 
@@ -759,7 +751,8 @@ const EcoChallenge: React.FC = () => {
   const diminuirRodadasPreso = () => {
     if (!currentPlayer) return;
     updateCurrentPlayer({
-      rodadasPreso: currentPlayer.rodadasPreso - 1,
+      rodadasPreso:
+        currentPlayer.rodadasPreso > 0 ? currentPlayer.rodadasPreso - 1 : 0,
     });
     setMensagem("Um contador removido!");
   };
@@ -914,7 +907,16 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
-  if (!cartaAtual || !currentPlayer) return null;
+  // Adicionando verificação para currentPlayer e cartaAtual
+  if (!cartaAtual || !currentPlayer) {
+    return (
+      <div className="flex flex-col items-center">
+        <p className="mt-4 text-center">
+          Carregando jogo... Por favor, aguarde.
+        </p>
+      </div>
+    );
+  }
 
   const obterEstiloCarta = () => {
     switch (cartaAtual.tipo) {
@@ -1097,16 +1099,16 @@ const EcoChallenge: React.FC = () => {
                             opcao.id
                           ) +
                             1 && (
-                          <span className="ml-1 text-blue-500">
-                            (
-                            {
-                              (cartaAtual.respostaCorreta as number[]).indexOf(
-                                opcao.id
-                              ) + 1
-                            }
-                            )
-                          </span>
-                        )}
+                        <span className="ml-1 text-blue-500">
+                          (
+                          {
+                            (cartaAtual.respostaCorreta as number[]).indexOf(
+                              opcao.id
+                            ) + 1
+                          }
+                          )
+                        </span>
+                      )}
                     </span>
                   )}
                 {respondido &&
