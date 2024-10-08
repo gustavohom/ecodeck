@@ -286,7 +286,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                     }}
                   />
                   {player.showColorPicker && (
-                    <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-4 gap-4">
+                    <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-4 gap-1">
                       {predefinedColors.map((color, idx) => (
                         <button
                           key={idx}
@@ -430,6 +430,12 @@ const EcoChallenge: React.FC = () => {
         (!mostrarSomentePerguntas ||
           ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo))
     );
+
+    if (cartasFiltradas.length === 0) {
+      setCartaAtual(null);
+      setMensagem("Não há cartas disponíveis para as categorias selecionadas.");
+      return;
+    }
 
     const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
     setCartaAtual(cartasFiltradas[indiceAleatorio]);
@@ -630,7 +636,6 @@ const EcoChallenge: React.FC = () => {
 
   const resetarTudo = () => {
     if (window.confirm("Tem certeza que deseja resetar todo o jogo?")) {
-      // Não redefinir players e currentPlayerId aqui
       setCategoriasSelecionadas([]);
       setMensagem("Jogo resetado!");
       if (typeof window !== "undefined") {
@@ -796,7 +801,7 @@ const EcoChallenge: React.FC = () => {
 
   const handlePlayersSetup = (initializedPlayers: Player[]) => {
     setPlayers(initializedPlayers);
-    setCurrentPlayerId(initializedPlayers[0].id);
+    setCurrentPlayerId(initializedPlayers[0]?.id || null);
   };
 
   if (!jogoIniciado) {
@@ -806,7 +811,11 @@ const EcoChallenge: React.FC = () => {
           setJogoIniciado(true);
         }}
         onContinueGame={() => {
-          setJogoIniciado(true);
+          if (hasSavedGame) {
+            setJogoIniciado(true);
+          } else {
+            setMensagem("Nenhum jogo salvo encontrado. Inicie um novo jogo.");
+          }
         }}
         onReset={() => {
           resetarTudo(); // Reseta tudo, inclusive fixedStars
@@ -822,7 +831,16 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
-  if (!cartaAtual || !currentPlayer) return null;
+  if (!cartaAtual || !currentPlayer) {
+    return (
+      <div className="flex flex-col items-center">
+        <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
+        <Button onClick={voltarTelaInicial} className="mt-4">
+          Voltar à Tela Inicial
+        </Button>
+      </div>
+    );
+  }
 
   const obterEstiloCarta = () => {
     switch (cartaAtual.tipo) {
@@ -837,6 +855,22 @@ const EcoChallenge: React.FC = () => {
           ? "border-blue-500 bg-gray-50"
           : "border-gray-200 bg-white";
     }
+  };
+
+  const handleFilterToggle = () => {
+    const hasPerguntas = cartas.some(
+      (carta) =>
+        carta.categorias.some((categoria) =>
+          categoriasSelecionadas.includes(categoria)
+        ) && ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo)
+    );
+
+    if (!hasPerguntas) {
+      setMensagem("Não há perguntas disponíveis para filtrar.");
+      return;
+    }
+
+    setMostrarSomentePerguntas((prev) => !prev);
   };
 
   return (
@@ -869,9 +903,20 @@ const EcoChallenge: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center space-x-2">
               <Button
-                onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
+                onClick={handleFilterToggle}
                 size="sm"
                 variant="outline"
+                disabled={
+                  !cartas.some(
+                    (carta) =>
+                      carta.categorias.some((categoria) =>
+                        categoriasSelecionadas.includes(categoria)
+                      ) &&
+                      ["Pergunta", "MultiplaEscolha", "Ordem"].includes(
+                        carta.tipo
+                      )
+                  )
+                }
               >
                 <Filter className="h-4 w-4" />
               </Button>
@@ -1132,10 +1177,9 @@ const EcoChallenge: React.FC = () => {
               </Button>
             )}
           </div>
-          {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
-            mensagem && (
-              <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
-            )}
+          {mensagem && (
+            <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
+          )}
           <Progress
             value={currentPlayer.progresso}
             className={`w-full ${
