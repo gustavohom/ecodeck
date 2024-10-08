@@ -193,9 +193,11 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     onStartGame();
   };
 
-  const categoriasFiltradas = categoriasDisponiveis.filter((categoria) =>
-    categoria.toLowerCase().includes(termoBusca.toLowerCase())
-  );
+  const categoriasFiltradas = categoriasDisponiveis
+    .filter((categoria) =>
+      categoria.toLowerCase().includes(termoBusca.toLowerCase())
+    )
+    .sort();
 
   return (
     <Card className="w-full max-w-sm mx-auto mt-8">
@@ -261,11 +263,55 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                   type="text"
                   placeholder={`Nome do Jogador ${index + 1}`}
                   value={player.name}
+                  maxLength={10}
                   onChange={(e) =>
                     handlePlayerChange(index, "name", e.target.value)
                   }
                   className="p-2 border rounded w-full"
                 />
+                <div className="relative">
+                  <button
+                    onClick={() => {
+                      const updatedPlayers = [...playerInputs];
+                      updatedPlayers[index].showColorPicker = !(
+                        updatedPlayers[index].showColorPicker || false
+                      );
+                      setPlayerInputs(updatedPlayers);
+                    }}
+                    style={{
+                      backgroundColor: player.color,
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "4px",
+                      border: "1px solid #ccc",
+                    }}
+                  />
+                  {player.showColorPicker && (
+                    <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-4 gap-2">
+                      {predefinedColors.map((color, idx) => (
+                        <button
+                          key={idx}
+                          style={{
+                            backgroundColor: color,
+                            width: "24px",
+                            height: "24px",
+                            borderRadius: "4px",
+                            border:
+                              player.color === color
+                                ? "2px solid black"
+                                : "1px solid #ccc",
+                          }}
+                          onClick={() => {
+                            handlePlayerChange(index, "color", color);
+                            const updatedPlayers = [...playerInputs];
+                            updatedPlayers[index].showColorPicker = false;
+                            setPlayerInputs(updatedPlayers);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -273,48 +319,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                 >
                   <Trash className="h-4 w-4 text-red-500" />
                 </Button>
-              </div>
-              <div className="relative">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    const updatedPlayers = [...playerInputs];
-                    updatedPlayers[index].showColorPicker = !(
-                      updatedPlayers[index].showColorPicker || false
-                    );
-                    setPlayerInputs(updatedPlayers);
-                  }}
-                  className="w-full"
-                  style={{ backgroundColor: player.color, color: "#fff" }}
-                >
-                  Selecionar Cor
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-                {player.showColorPicker && (
-                  <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-4 gap-2">
-                    {predefinedColors.map((color, idx) => (
-                      <button
-                        key={idx}
-                        style={{
-                          backgroundColor: color,
-                          width: "24px",
-                          height: "24px",
-                          borderRadius: "50%",
-                          border:
-                            player.color === color
-                              ? "2px solid black"
-                              : "1px solid #ccc",
-                        }}
-                        onClick={() => {
-                          handlePlayerChange(index, "color", color);
-                          const updatedPlayers = [...playerInputs];
-                          updatedPlayers[index].showColorPicker = false;
-                          setPlayerInputs(updatedPlayers);
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
           ))}
@@ -371,7 +375,7 @@ const EcoChallenge: React.FC = () => {
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
-  );
+  ).sort();
 
   // Verifica se há um jogo salvo no localStorage
   const hasSavedGame =
@@ -837,8 +841,8 @@ const EcoChallenge: React.FC = () => {
   };
 
   return (
-    <div>
-      <div className="flex justify-center mb-4 space-x-2">
+    <div className="flex">
+      <div className="flex flex-col-reverse space-y-2 mr-4">
         {players.map((player) => (
           <Button
             key={player.id}
@@ -849,6 +853,7 @@ const EcoChallenge: React.FC = () => {
               backgroundColor:
                 currentPlayerId === player.id ? player.color : undefined,
               color: currentPlayerId === player.id ? "#fff" : undefined,
+              width: "100px",
             }}
           >
             {player.name}
