@@ -329,11 +329,21 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         </div>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
-        {hasSavedGame && (
-          <Button onClick={onContinueGame} className="w-full">
-            Continuar Jogo
-          </Button>
-        )}
+        <Button
+          onClick={() => {
+            if (hasSavedGame) {
+              onContinueGame();
+            } else {
+              startGame();
+            }
+          }}
+          className="w-full"
+          disabled={
+            categoriasSelecionadas.length === 0 || playerInputs.length === 0
+          }
+        >
+          Continuar Jogo
+        </Button>
         <Button
           onClick={() => {
             startGame();
@@ -721,7 +731,8 @@ const EcoChallenge: React.FC = () => {
   const diminuirRodadasPreso = () => {
     if (!currentPlayer) return;
     updateCurrentPlayer({
-      rodadasPreso: currentPlayer.rodadasPreso - 1,
+      rodadasPreso:
+        currentPlayer.rodadasPreso > 0 ? currentPlayer.rodadasPreso - 1 : 0,
     });
     setMensagem("Um contador removido!");
   };
@@ -814,7 +825,8 @@ const EcoChallenge: React.FC = () => {
           if (hasSavedGame) {
             setJogoIniciado(true);
           } else {
-            setMensagem("Nenhum jogo salvo encontrado. Inicie um novo jogo.");
+            // Se não há jogo salvo, inicia um novo jogo
+            setJogoIniciado(true);
           }
         }}
         onReset={() => {
@@ -831,16 +843,7 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
-  if (!cartaAtual || !currentPlayer) {
-    return (
-      <div className="flex flex-col items-center">
-        <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
-        <Button onClick={voltarTelaInicial} className="mt-4">
-          Voltar à Tela Inicial
-        </Button>
-      </div>
-    );
-  }
+  if (!cartaAtual || !currentPlayer) return null;
 
   const obterEstiloCarta = () => {
     switch (cartaAtual.tipo) {
@@ -857,21 +860,12 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
-  const handleFilterToggle = () => {
-    const hasPerguntas = cartas.some(
-      (carta) =>
-        carta.categorias.some((categoria) =>
-          categoriasSelecionadas.includes(categoria)
-        ) && ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo)
-    );
-
-    if (!hasPerguntas) {
-      setMensagem("Não há perguntas disponíveis para filtrar.");
-      return;
-    }
-
-    setMostrarSomentePerguntas((prev) => !prev);
-  };
+  const hasPerguntas = cartas.some(
+    (carta) =>
+      carta.categorias.some((categoria) =>
+        categoriasSelecionadas.includes(categoria)
+      ) && ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo)
+  );
 
   return (
     <div className="flex flex-col items-center">
@@ -903,20 +897,10 @@ const EcoChallenge: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center space-x-2">
               <Button
-                onClick={handleFilterToggle}
+                onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
                 size="sm"
                 variant="outline"
-                disabled={
-                  !cartas.some(
-                    (carta) =>
-                      carta.categorias.some((categoria) =>
-                        categoriasSelecionadas.includes(categoria)
-                      ) &&
-                      ["Pergunta", "MultiplaEscolha", "Ordem"].includes(
-                        carta.tipo
-                      )
-                  )
-                }
+                disabled={!hasPerguntas}
               >
                 <Filter className="h-4 w-4" />
               </Button>
