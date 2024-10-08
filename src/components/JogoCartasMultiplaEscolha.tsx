@@ -98,12 +98,8 @@ const predefinedColors = [
   "#f46d43", // Coral
   "#fee08b", // Soft Yellow
   "#66c2a5", // Aquamarine
-  "#5e4fa2", // Indigo
-  "#ff6699", // Pinkish Red
-  "#33a02c", // Forest Green
-  "#ff7f00", // Bright Orange
   "#3288bd", // Sky Blue
-  "#999999", // Grey
+  "#5e4fa2", // Indigo
   "#8dd3c7", // Light Turquoise
   "#ffffb3", // Pale Yellow
   "#fb8072", // Salmon
@@ -112,18 +108,8 @@ const predefinedColors = [
   "#fccde5", // Light Pink
   "#bc80bd", // Lavender
   "#1f78b4", // Medium Blue
-  "#e31a1c", // Bright Red
-  "#ffcc33", // Mustard Yellow
-  "#6a3d9a", // Deep Purple
-  "#b15928", // Brown
-  "#b2df8a", // Mint Green
-  "#cab2d6", // Lilac
-  "#a6cee3", // Light Sky Blue
-  "#fb9a99", // Light Coral
-  "#fdbf6f", // Peach
-  "#ffed6f", // Light Lemon
-  "#ccebc5", // Soft Green
-  "#ff4444", // Light Red
+  "#33a02c", // Forest Green
+  "#ff7f00", // Bright Orange
 ];
 
 // Componente Tela Inicial
@@ -300,7 +286,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                     }}
                   />
                   {player.showColorPicker && (
-                    <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-5 gap-5">
+                    <div className="absolute z-10 bg-white border rounded mt-1 p-2 grid grid-cols-4 gap-4">
                       {predefinedColors.map((color, idx) => (
                         <button
                           key={idx}
@@ -366,7 +352,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 
 // Componente Principal EcoChallenge
 const EcoChallenge: React.FC = () => {
-  // Variáveis de estado
   const [cartaAtual, setCartaAtual] = useState<Carta | null>(null);
   const [selecionado, setSelecionado] = useState<number | null>(null);
   const [respondido, setRespondido] = useState<boolean>(false);
@@ -375,9 +360,9 @@ const EcoChallenge: React.FC = () => {
   const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>(
-    []
-  );
+  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
+    string[]
+  >([]);
   const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
     useState<boolean>(false);
 
@@ -388,51 +373,39 @@ const EcoChallenge: React.FC = () => {
   const [currentPlayerId, setCurrentPlayerId] = useState<number | null>(null);
 
   const [noCardsAvailable, setNoCardsAvailable] = useState<boolean>(false);
-  const [hasSavedGame, setHasSavedGame] = useState<boolean>(false);
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
   ).sort();
 
-  // Carrega o estado do jogo do localStorage
+  // Verifica se há um jogo salvo no localStorage e se o jogo foi iniciado
+  const hasSavedGame =
+    typeof window !== "undefined" &&
+    (() => {
+      const estadoSalvo = localStorage.getItem("estadoEcoChallenge");
+      if (estadoSalvo) {
+        const estado = JSON.parse(estadoSalvo);
+        return estado.jogoIniciado === true;
+      }
+      return false;
+    })();
+
+  // Função para carregar o estado do jogo do localStorage
   const carregarEstado = useCallback(() => {
     if (typeof window !== "undefined") {
       const estadoSalvo = localStorage.getItem("estadoEcoChallenge");
       if (estadoSalvo) {
-        try {
-          const estado = JSON.parse(estadoSalvo);
-
-          setPlayers(estado.players || []);
-          setCurrentPlayerId(estado.currentPlayerId ?? null);
-          setCategoriasSelecionadas(
-            estado.categoriasSelecionadas && estado.categoriasSelecionadas.length > 0
-              ? estado.categoriasSelecionadas
-              : categoriasDisponiveis
-          );
-          setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
-          setJogoIniciado(estado.jogoIniciado || false);
-          setHasSavedGame(estado.jogoIniciado === true);
-
-          // Restaurar estados adicionais
-          setCartaAtual(estado.cartaAtual || null);
-          setSelecionado(estado.selecionado || null);
-          setSelecoesMultiplas(estado.selecoesMultiplas || []);
-          setOrdemSelecoes(estado.ordemSelecoes || []);
-          setRespondido(estado.respondido || false);
-          setMensagem(estado.mensagem || "");
-          setMostrarDica(estado.mostrarDica || false);
-          setMostrarFontes(estado.mostrarFontes || false);
-          setOpcoesEliminadas(estado.opcoesEliminadas || []);
-        } catch (e) {
-          console.error("Erro ao carregar o estado:", e);
-          localStorage.removeItem("estadoEcoChallenge");
-          setHasSavedGame(false);
-        }
+        const estado = JSON.parse(estadoSalvo);
+        setPlayers(estado.players || []);
+        setCurrentPlayerId(estado.currentPlayerId || null);
+        setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
+        setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
+        setJogoIniciado(estado.jogoIniciado || false);
       }
     }
-  }, [categoriasDisponiveis]);
+  }, []);
 
-  // Carrega o estado e verifica se há um jogo salvo ao montar o componente
+  // Carrega o estado ao montar o componente
   useEffect(() => {
     carregarEstado();
   }, [carregarEstado]);
@@ -446,21 +419,8 @@ const EcoChallenge: React.FC = () => {
         categoriasSelecionadas,
         mostrarSomentePerguntas,
         jogoIniciado,
-        cartaAtual,
-        selecionado,
-        selecoesMultiplas,
-        ordemSelecoes,
-        respondido,
-        mensagem,
-        mostrarDica,
-        mostrarFontes,
-        opcoesEliminadas,
       };
-      try {
-        localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
-      } catch (e) {
-        console.error("Erro ao salvar o estado:", e);
-      }
+      localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
     }
   }, [
     players,
@@ -468,24 +428,7 @@ const EcoChallenge: React.FC = () => {
     categoriasSelecionadas,
     mostrarSomentePerguntas,
     jogoIniciado,
-    cartaAtual,
-    selecionado,
-    selecoesMultiplas,
-    ordemSelecoes,
-    respondido,
-    mensagem,
-    mostrarDica,
-    mostrarFontes,
-    opcoesEliminadas,
   ]);
-
-  // Ajuste no useEffect para evitar loop infinito
-  useEffect(() => {
-    if (jogoIniciado && !cartaAtual) {
-      selecionarCartaAleatoria();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jogoIniciado]);
 
   const selecionarCartaAleatoria = useCallback(() => {
     const cartasFiltradas = cartas.filter(
@@ -516,6 +459,12 @@ const EcoChallenge: React.FC = () => {
     setMostrarFontes(false);
     setOpcoesEliminadas([]);
   }, [categoriasSelecionadas, mostrarSomentePerguntas]);
+
+  useEffect(() => {
+    if (jogoIniciado) {
+      selecionarCartaAleatoria();
+    }
+  }, [jogoIniciado, selecionarCartaAleatoria]);
 
   const handleSelecao = (id: number) => {
     if (!respondido) {
@@ -698,16 +647,12 @@ const EcoChallenge: React.FC = () => {
 
   const resetarTudo = () => {
     if (window.confirm("Tem certeza que deseja resetar todo o jogo?")) {
+      // Não redefinir players e currentPlayerId aqui
       setCategoriasSelecionadas([]);
       setMensagem("Jogo resetado!");
       if (typeof window !== "undefined") {
         localStorage.removeItem("estadoEcoChallenge");
       }
-      setJogoIniciado(false);
-      setPlayers([]);
-      setCurrentPlayerId(null);
-      setHasSavedGame(false);
-      setCartaAtual(null); // Adicionado para evitar erros
     }
   };
 
@@ -788,8 +733,7 @@ const EcoChallenge: React.FC = () => {
   const diminuirRodadasPreso = () => {
     if (!currentPlayer) return;
     updateCurrentPlayer({
-      rodadasPreso:
-        currentPlayer.rodadasPreso > 0 ? currentPlayer.rodadasPreso - 1 : 0,
+      rodadasPreso: currentPlayer.rodadasPreso - 1,
     });
     setMensagem("Um contador removido!");
   };
@@ -877,11 +821,9 @@ const EcoChallenge: React.FC = () => {
       <TelaInicial
         onStartGame={() => {
           setJogoIniciado(true);
-          selecionarCartaAleatoria();
         }}
         onContinueGame={() => {
           setJogoIniciado(true);
-          // Não precisamos chamar selecionarCartaAleatoria(), pois o estado foi restaurado
         }}
         onReset={() => {
           resetarTudo(); // Reseta tudo, inclusive fixedStars
@@ -946,17 +888,7 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
-  // Verificação para currentPlayer e cartaAtual
-  if (!cartaAtual || !currentPlayer) {
-    return (
-      <div className="flex flex-col items-center">
-        <p className="mt-4 text-center">Carregando jogo... Por favor, aguarde.</p>
-        <Button onClick={voltarTelaInicial} className="mt-4">
-          Voltar para a Tela Inicial
-        </Button>
-      </div>
-    );
-  }
+  if (!cartaAtual || !currentPlayer) return null;
 
   const obterEstiloCarta = () => {
     switch (cartaAtual.tipo) {
@@ -998,16 +930,7 @@ const EcoChallenge: React.FC = () => {
           </Button>
         ))}
       </div>
-      <Card
-        className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}
-        style={
-          players.length > 1 && currentPlayer
-            ? {
-                boxShadow: `0 0 10px 5px ${currentPlayer.color}`,
-              }
-            : {}
-        }
-      >
+      <Card className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}>
         <CardHeader>
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center space-x-2">
