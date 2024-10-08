@@ -374,9 +374,9 @@ const EcoChallenge: React.FC = () => {
   const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
-    string[]
-  >([]);
+  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>(
+    []
+  );
   const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
     useState<boolean>(false);
 
@@ -902,7 +902,17 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
-  if (!cartaAtual || !currentPlayer) return null;
+  // Modificação para mostrar o botão de voltar à tela inicial
+  if (!cartaAtual || !currentPlayer) {
+    return (
+      <div className="flex flex-col items-center">
+        <p className="mt-4 text-center">O jogo não pôde ser carregado.</p>
+        <Button onClick={voltarTelaInicial} className="mt-4">
+          Voltar para a Tela Inicial
+        </Button>
+      </div>
+    );
+  }
 
   const obterEstiloCarta = () => {
     switch (cartaAtual.tipo) {
