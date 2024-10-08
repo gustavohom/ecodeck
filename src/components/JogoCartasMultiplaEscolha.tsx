@@ -329,21 +329,16 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         </div>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
-        <Button
-          onClick={() => {
-            if (hasSavedGame) {
+        {hasSavedGame && (
+          <Button
+            onClick={() => {
               onContinueGame();
-            } else {
-              startGame();
-            }
-          }}
-          className="w-full"
-          disabled={
-            categoriasSelecionadas.length === 0 || playerInputs.length === 0
-          }
-        >
-          Continuar Jogo
-        </Button>
+            }}
+            className="w-full"
+          >
+            Continuar Jogo
+          </Button>
+        )}
         <Button
           onClick={() => {
             startGame();
@@ -647,6 +642,9 @@ const EcoChallenge: React.FC = () => {
   const resetarTudo = () => {
     if (window.confirm("Tem certeza que deseja resetar todo o jogo?")) {
       setCategoriasSelecionadas([]);
+      setPlayers([]);
+      setCurrentPlayerId(null);
+      setJogoIniciado(false);
       setMensagem("Jogo resetado!");
       if (typeof window !== "undefined") {
         localStorage.removeItem("estadoEcoChallenge");
@@ -819,14 +817,17 @@ const EcoChallenge: React.FC = () => {
     return (
       <TelaInicial
         onStartGame={() => {
-          setJogoIniciado(true);
+          if (categoriasSelecionadas.length === 0) {
+            alert("Selecione pelo menos uma categoria para iniciar o jogo.");
+          } else {
+            setJogoIniciado(true);
+          }
         }}
         onContinueGame={() => {
           if (hasSavedGame) {
             setJogoIniciado(true);
           } else {
-            // Se não há jogo salvo, inicia um novo jogo
-            setJogoIniciado(true);
+            alert("Nenhum jogo salvo encontrado. Inicie um novo jogo.");
           }
         }}
         onReset={() => {
@@ -881,10 +882,11 @@ const EcoChallenge: React.FC = () => {
 
   const handleFilterToggle = () => {
     if (!hasPerguntas) {
-      setMensagem("Não há perguntas disponíveis para filtrar.");
+      alert("Não há perguntas disponíveis para filtrar nas categorias selecionadas.");
       return;
     }
     setMostrarSomentePerguntas((prev) => !prev);
+    selecionarCartaAleatoria(); // Re-seleciona uma carta com o novo filtro
   };
 
   return (
