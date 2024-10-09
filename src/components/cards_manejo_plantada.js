@@ -28,7 +28,7 @@ const manejoPlantadas = [
     titulo: "Implementação de Amostragem Sistemática",
     pergunta: "Você adotou um delineamento de amostragem sistemática em seu inventário.",
     opcoes: [
-      { id: 1, texto: "Aplicar a metodologia sistemática para maior precisão." }
+      { id: 1, texto: "Aplicar a metodologia sistemática para maior precisão. Ganhe 2 estrelas e avance 2 casas." }
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
@@ -126,7 +126,7 @@ const manejoPlantadas = [
     titulo: "Melhoria da Acessibilidade",
     pergunta: "Você melhorou a acessibilidade nas áreas de plantação.",
     opcoes: [
-      { id: 1, texto: "Facilitar o acesso para manejo e colheita." }
+      { id: 1, texto: "Facilitar o acesso para manejo e colheita. Ganhe 3 moedas e avance 2 casas." }
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
@@ -183,7 +183,7 @@ const manejoPlantadas = [
     titulo: "Tecnologia de Monitoramento",
     pergunta: "Você implementou tecnologia de monitoramento remoto em sua plantação.",
     opcoes: [
-      { id: 1, texto: "Utilizar dados para otimizar o manejo." }
+      { id: 1, texto: "Utilizar dados para otimizar o manejo. Ganhe 2 estrelas e 3 moedas." }
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
@@ -264,7 +264,7 @@ const manejoPlantadas = [
     titulo: "Integração Lavoura-Floresta",
     pergunta: "Você implementou um sistema de integração lavoura-floresta.",
     opcoes: [
-      { id: 1, texto: "Combinar produção agrícola com manejo florestal." }
+      { id: 1, texto: "Combinar produção agrícola com manejo florestal. Ganhe 2 estrelas e 3 moedas." }
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
@@ -344,7 +344,7 @@ const manejoPlantadas = [
     titulo: "Melhoria Genética",
     pergunta: "Você iniciou um programa de melhoramento genético nas plantadas.",
     opcoes: [
-      { id: 1, texto: "Selecionar clones com melhores características de crescimento." }
+      { id: 1, texto: "Selecionar clones com melhores características de crescimento. Ganhe 2 estrelas e 3 moedas." }
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
@@ -425,7 +425,7 @@ const manejoPlantadas = [
     titulo: "Planejamento de Rotação",
     pergunta: "Você implementou um planejamento de rotação eficiente em sua plantação.",
     opcoes: [
-      { id: 1, texto: "Planejar cortes de acordo com o crescimento das árvores." }
+      { id: 1, texto: "Planejar cortes de acordo com o crescimento das árvores. Ganhe 2 estrelas e avance 3 casas." }
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
@@ -524,7 +524,7 @@ const manejoPlantadas = [
     titulo: "Implementação de Plano de Manejo",
     pergunta: "Você desenvolveu e implementou um plano de manejo detalhado para sua plantação.",
     opcoes: [
-      { id: 1, texto: "Seguir o plano para maximizar a produtividade e sustentabilidade." }
+      { id: 1, texto: "Seguir o plano para maximizar a produtividade e sustentabilidade. Ganhe 4 moedas e 2 estrelas." }
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
@@ -581,7 +581,7 @@ const manejoPlantadas = [
     titulo: "Adoção de Sistemas Agroflorestais",
     pergunta: "Você integrou sistemas agroflorestais em sua plantação.",
     opcoes: [
-      { id: 1, texto: "Combinar produção agrícola com manejo florestal." }
+      { id: 1, texto: "Combinar produção agrícola com manejo florestal. Ganhe 3 estrelas e 4 moedas." }
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
@@ -662,7 +662,7 @@ const manejoPlantadas = [
     titulo: "Melhoria da Qualidade do Solo",
     pergunta: "Você implementou práticas para melhorar a qualidade do solo em sua plantação.",
     opcoes: [
-      { id: 1, texto: "Aplicar cobertura morta e rotação de culturas." }
+      { id: 1, texto: "Aplicar cobertura morta e rotação de culturas. Ganhe 2 estrelas e 3 moedas." }
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
@@ -742,7 +742,7 @@ const manejoPlantadas = [
     titulo: "Uso de Drones para Monitoramento",
     pergunta: "Você implementou o uso de drones para monitorar sua plantação.",
     opcoes: [
-      { id: 1, texto: "Coletar dados precisos e em tempo real." }
+      { id: 1, texto: "Coletar dados precisos e em tempo real. Ganhe 3 moedas e avance 2 casas." }
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
@@ -823,7 +823,7 @@ const manejoPlantadas = [
     titulo: "Uso de Fertilizantes Orgânicos",
     pergunta: "Você começou a usar fertilizantes orgânicos em sua plantação.",
     opcoes: [
-      { id: 1, texto: "Melhorar a saúde do solo e promover crescimento sustentável." }
+      { id: 1, texto: "Melhorar a saúde do solo e promover crescimento sustentável. Ganhe 3 moedas e 1 estrela." }
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
@@ -880,7 +880,7 @@ const manejoPlantadas = [
     titulo: "Implementação de Sistemas de Irrigação",
     pergunta: "Você implementou sistemas de irrigação eficientes em sua plantação.",
     opcoes: [
-      { id: 1, texto: "Garantir uma distribuição uniforme de água." }
+      { id: 1, texto: "Garantir uma distribuição uniforme de água. Ganhe 3 moedas e avance 2 casas." }
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
