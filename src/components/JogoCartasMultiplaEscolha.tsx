@@ -32,9 +32,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import Image from "next/image";
-import manejoPlantadas from "./cards_manejo_plantada.js";
-import manejoNativas from "./cards_manejo_nativa.js";
-import ecologiaFlorestal from "./cards_ecologia_florestal.js";
+import manejoPlantadas from "./cards_manejo_plantada";
+import manejoNativas from "./cards_manejo_nativa";
+import ecologiaFlorestal from "./cards_ecologia_florestal";
 import estrelasAliens from "./estrelas_aliens";
 import testCards from "./test_card";
 
