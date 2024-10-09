@@ -32,13 +32,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import Image from "next/image";
-import cartasSimples from "./cartas";
-import cartasComplexas from "./cartas_complexas";
+import manejoPlantadas from "./cards_manejo_plantada.js";
+import manejoNativas from "./cards_manejo_nativa.js";
+import ecologiaFlorestal from "./cards_ecologia_florestal.js";
 import estrelasAliens from "./estrelas_aliens";
-import test_card from "./test_card";
+import testCards from "./test_card";
 
 // Combine as cartas simples e complexas em um único array
-const cartas = [...cartasSimples, ...cartasComplexas, ...estrelasAliens, ...test_card];
+const cartas = [...manejoPlantadas, ...manejoNativas, ...ecologiaFlorestal, ...estrelasAliens, ...testCards];
 
 // Definição de Tipos
 interface Opcao {
