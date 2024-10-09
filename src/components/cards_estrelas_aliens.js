@@ -9,7 +9,7 @@ const estrelas_aliens = [
     ],
     respostaCorreta: [1],
     dificuldade: "facil",
-    categorias: ["Teste Estrelas vs Aliens"],
+    categorias: ["Estrelas vs Aliens"],
     fontes: ["Imagens: Fonte na descrição do jogo"],
     vantagem: "",
     desvantagem: "",
