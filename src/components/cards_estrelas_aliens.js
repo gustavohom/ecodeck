@@ -661,7 +661,7 @@ const estrelas_aliens = [
   {
     tipo: "Desvantagem",
     titulo: "Alien Comandante",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/aliens/irritado.png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Jogador, você pensou que poderia nos deter, mas agora é hora de enfrentar nossa força total. Este é o golpe final, e não haverá piedade.`,
     opcoes: [
       { id: 1, texto: "Se alguém tiver menos de 2 estrelas, ele recua 5 casas." },
@@ -677,7 +677,7 @@ const estrelas_aliens = [
   {
     tipo: "Vantagem",
     titulo: "O Impacto da Supernova",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/espancao_estrelas/grande-explosao.png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Com a explosão da Supernova, o universo muda. Novas possibilidades surgem, mas com elas vêm novos desafios. Use essa energia com sabedoria, jogador.`,
     opcoes: [
       { id: 1, texto: "Ganhe 2 estrelas. Avance o número de casas igual ao número de estrelas que você tem" },
@@ -693,7 +693,7 @@ const estrelas_aliens = [
   {
     tipo: "Desvantagem",
     titulo: "Estrela Amarela Estrategista",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/espancao_estrelas/estrelas (86).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Estamos no momento decisivo, jogador. A vitória está ao nosso alcance, mas exigirá um sacrifício. Está pronto para abrir mão do que é mais precioso para garantir a vitória?`,
     opcoes: [
       { id: 1, texto: "Escolha um jogador com menos estrelas. Dê a ele 2 estrelas e ambos avancem 3 casas." },
@@ -708,8 +708,8 @@ const estrelas_aliens = [
   },
   {
     tipo: "Vantagem",
-    titulo: "A Fúria da Stronberis",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    titulo: "A Fúria dos Aliens",
+    pergunta: `<img src="/img/aliens/fogo.png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Você achou que poderia escapar, mas minha fome nunca se apaga. Eu estou aqui para devorar tudo o que você tem. Prepare-se para o fim, jogador.`,
     opcoes: [
       { id: 1, texto: "Todos os jogadores, exceto você, perdem uma estrela" },
@@ -725,7 +725,7 @@ const estrelas_aliens = [
   {
     tipo: "Outras",
     titulo: "A União das Estrelas",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/espancao_estrelas/estrelas (38).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Jogador, a união é nossa maior força. Com você ao nosso lado, podemos vencer qualquer batalha e restaurar a paz no cosmos. Vamos juntos garantir que nossa luz nunca se apague.`,
     opcoes: [
       { id: 1, texto: "Sorteie um jogador. Somem suas estrelas. Se a soma for impar, ambos avançam 4 casas, se for par, recuem a quantidade de erros que possuem (os efeitos das casas não se aplicam)" },
@@ -741,7 +741,7 @@ const estrelas_aliens = [
   {
     tipo: "Vantagem",
     titulo: "A Reviravolta de Morphos",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/aliens/estrangeiro (2).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Jogador, você achou que estava seguro? O caos está sempre à espreita, pronto para virar tudo de cabeça para baixo. Está preparado para a reviravolta que vai mudar o jogo?`,
     opcoes: [
       { id: 1, texto: "Se você tiver mais estrelas você pode optar por avançar de zero à quantidade de estrelas que possui. Exemplo: Se tiver 3 estrelas você pode escolher avançar 0, 1,  2 ou 3 casas. Os efeitos das casas se aplicam." },
@@ -757,7 +757,7 @@ const estrelas_aliens = [
   {
     tipo: "Vantagem",
     titulo: "A Luz da Esperança",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/espancao_estrelas/estrelas (59).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Quando tudo parece perdido, a esperança é a última a morrer. Use essa luz para guiar seu caminho, mas saiba que a estrada à frente é perigosa.`,
     opcoes: [
       { id: 1, texto: "Se tiver menos de 3 estrelas, ganhe 1 estrela adicional." },
@@ -773,7 +773,7 @@ const estrelas_aliens = [
   {
     tipo: "Outras",
     titulo: "A Luz da Supernova",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/espancao_estrelas/estrelas (101).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Quando a Supernova explode, ela cria novas possibilidades. Use essa energia para recomeçar e se fortalecer. Este é seu momento de brilhar, jogador.`,
     opcoes: [
       { id: 1, texto: "Sorteie outro jogador para ganhar mais 2 estrelas e depois avançar o número de casas igual ao número de estrelas dele." },
@@ -789,7 +789,7 @@ const estrelas_aliens = [
   {
     tipo: "Desvantagem",
     titulo: "Estrela Vermelha Traidora",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/espancao_estrelas/estrelas (119).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Você confiou em mim, e isso foi seu maior erro. Agora, a escuridão reivindica o que é dela por direito. Minha traição será a sua ruína, jogador. Está pronto para enfrentar as consequências?`,
     opcoes: [
       { id: 1, texto: "Perca 1 estrela. Se te restarem mais de 3 estrelas, recue 6 casas caso contrario recue 2 casas." },
@@ -805,7 +805,7 @@ const estrelas_aliens = [
   {
     tipo: "Vantagem",
     titulo: "A Luz da Esperança",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/espancao_estrelas/estrelas (73).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Quando tudo parece perdido, a esperança é a última a morrer. Use essa luz para guiar seu caminho, mas saiba que a estrada à frente é perigosa.`,
     opcoes: [
       { id: 1, texto: "Avance o número de casas igual à soma das estrelas que você tem" },
@@ -837,7 +837,7 @@ const estrelas_aliens = [
   {
     tipo: "Vantagem",
     titulo: "A Traição da Estrela Vermelha",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/espancao_estrelas/estrelas (110).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Jogador, você confiou em mim, e isso foi seu maior erro. Agora verá o que a escuridão pode fazer. Minha traição será a sua ruína. Está preparado para enfrentar as consequências de suas escolhas?`,
     opcoes: [
       { id: 1, texto: "Escolha dois jogadores. Ambos, incluindo você, perdem 1 estrela." },
@@ -853,7 +853,7 @@ const estrelas_aliens = [
   {
     tipo: "Outras",
     titulo: "A Confusão de Morphos",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/aliens/estrangeiro (5).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     O caos reina, jogador, e estou aqui para garantir que nada permaneça igual. Está preparado para enfrentar o inesperado? Nada é o que parece, tudo pode mudar num piscar de olhos.`,
     opcoes: [
       { id: 1, texto: "Todos os jogadores jogam o dado. Quem tirar o número maior troca de lugar com o jogador que tirou o menor número. Se jogadores com maior ou menor numero empatarem, jogam o dado para desempatar." },
@@ -868,8 +868,8 @@ const estrelas_aliens = [
   },
   {
     tipo: "Desvantagem",
-    titulo: "Alien Comandante",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    titulo: "Alien",
+    pergunta: `<img src="/img/aliens/envergonhado.png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Jogador, você lutou bem, mas agora é hora de ceder ao poder dos Aliens. Este é o golpe final, e não haverá piedade.`,
     opcoes: [
       { id: 1, texto: "Perca 1 estrela" },
@@ -886,8 +886,8 @@ const estrelas_aliens = [
   },
   {
     tipo: "Vantagem",
-    titulo: "A Traição de Morphos",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    titulo: "Morphos",
+    pergunta: `<img src="/img/aliens/estrangeiro (17).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Jogador, você achou que estava seguro? O caos não tem lealdade, e agora estou aqui para virar o jogo mais uma vez. Está pronto para lidar com as consequências?`,
     opcoes: [
       { id: 1, texto: "Escolha o jogador com mais estrelas. Troque todas as suas estrelas com ele." },
@@ -983,7 +983,7 @@ const estrelas_aliens = [
   {
     tipo: "Vantagem",
     titulo: "A Luz da Supernova",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/espancao_estrelas/estrelas (102).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
       O poder de uma Supernova cria novas oportunidades. Aproveite essa explosão de energia para mudar seu destino.`,
     opcoes: [
       { id: 1, texto: "Avance 5 casas" },
@@ -1000,7 +1000,7 @@ const estrelas_aliens = [
   {
     tipo: "Outras",
     titulo: "Estrela Amarela Estrategista",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/espancao_estrelas/estrelas (20).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Estamos no momento decisivo. Sacrifícios são necessários para alcançar a vitória.`,
     opcoes: [
       { id: 1, texto: "Sacrifique 2 estrelas. Escolha outro jogador para ganhar essas estrelas e ambos avançam 4 casas.Os efeitos das casas não se aplicam" },
@@ -1015,8 +1015,8 @@ const estrelas_aliens = [
   },
   {
     tipo: "Outras",
-    titulo: "Stronberis (Máquina)",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    titulo: "Aliens",
+    pergunta: `<img src="/img/aliens/detetive.png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
       Minha fome nunca será saciada, e estou aqui para devorar tudo o que você tem. Prepare-se para o fim.`,
     opcoes: [
       { id: 1, texto: "Todos os jogadores jogam o dado. Quem tirar o maior número avança o total das casas tiradas no dado, multiplicado por dois." },
@@ -1032,7 +1032,7 @@ const estrelas_aliens = [
   {
     tipo: "Desvantagem",
     titulo: "Estrela Vermelha Renegada",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/espancao_estrelas/estrelas (110).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
       Ah, jogador, como é ingênuo pensar que a luz sempre prevalecerá. A escuridão que você teme tem suas próprias recompensas, e eu, mais do que ninguém, sei como aproveitar essas oportunidades. 
       Cada escolha que você faz o aproxima mais da escuridão que inevitavelmente virá. Mas lembre-se, o poder que você busca na escuridão tem um preço alto. Está disposto a pagar esse preço? Às vezes, 
       as decisões mais sombrias são as mais lucrativas.`,
@@ -1050,7 +1050,7 @@ const estrelas_aliens = [
   {
     tipo: "Outras",
     titulo: "Krono, o Macaco Crononauta",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/macaco/ape (60).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Jogador, você deve saber que o tempo é como uma correnteza - fluida, incontrolável, e muitas vezes, imprevisível. Eu sou o guardião deste rio do tempo, e com um simples toque,
      posso mudar tudo. Agora, você se vê em um ponto onde tudo que conhece pode ser virado de cabeça para baixo. Mas cuidado, pois brincar com o tempo pode ter consequências inesperadas. 
      Está pronto para mergulhar nas profundezas do passado?`,
@@ -1084,7 +1084,7 @@ const estrelas_aliens = [
   {
     tipo: "Outras",
     titulo: "Estrela Vermelha Traidora",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/espancao_estrelas/estrelas (105).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Confiança é uma ilusão. Agora, sinta o peso da traição e veja sua luz se apagar.`,
     opcoes: [
       { id: 1, texto: "Escolha um jogador com menos estrelas que você. Dê a ele uma estrela e depois avance o número de casas igual à diferença entre suas estrelas e as dele, multiplicado por 3. Se suas estrelas menos as deles der um valor negativo, recue ao invés de avançar." },
@@ -1099,8 +1099,8 @@ const estrelas_aliens = [
   },
   {
     tipo: "Vantagem",
-    titulo: "Alien Comandante",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    titulo: "Alien",
+    pergunta: `<img src="/img/aliens/frio.png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Você lutou bem, mas agora é hora de ceder ao poder dos Aliens. Este é o golpe final que garantirá nossa vitória.`,
     opcoes: [
       { id: 1, texto: "Avance 3 casas" },
