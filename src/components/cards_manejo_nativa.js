@@ -397,9 +397,6 @@ const manejo_nativas_cards = [
     dica: ""
   },
 
-const manejo_nativas_cards = [
-  // Cartas 1 a 20 já foram fornecidas anteriormente.
-
   // Carta 21: Pergunta Fácil
   {
     tipo: "Pergunta",
@@ -991,10 +988,7 @@ const manejo_nativas_cards = [
     desvantagem: "",
     dica: ""
   },
-
-const manejo_nativas_cards = [
-  // Cartas 1 a 50 já foram fornecidas anteriormente.
-
+ 
   // Carta 51: Pergunta Fácil
   {
     tipo: "Pergunta",
@@ -1964,9 +1958,8 @@ const manejo_nativas_cards = [
     vantagem: "Ganhe 2 contadores de progresso e 3 moedas.",
     desvantagem: "Perde 1 estrela.",
     dica: "GIS é fundamental para análise espacial."
-  }
-
-
+  },
+ 
     // Carta 101 Pergunta Fácil - Integrando Contadores
   {
     tipo: "Pergunta",
