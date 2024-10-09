@@ -1720,7 +1720,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "normal",
-    categorias: ["Manejo de Nativas],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Barros, S. (2018). Corredores Ecológicos e Conectividade.",
       "2. Costa, L. (2019). Conservação de Paisagens."
