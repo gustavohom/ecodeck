@@ -821,7 +821,7 @@ const estrelas_aliens = [
   {
     tipo: "Desvantagem",
     titulo: "Buraco Negro",
-    pergunta: `<img src="/img/buraco-negro (8).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    pergunta: `<img src="/img/espancao_estrelas/buraco-negro (8).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     Nada pode escapar do meu alcance, jogador. Você terá que sacrificar algo para sobreviver. O que será? Sua decisão pode mudar tudo.`,
     opcoes: [
       { id: 1, texto: "Todos os jogadores recuam o número de casas igual ao número de estrelas que possuem. Se alguém não possuir  estrelas, ele deve reiniciar todos os seus contadores." },
