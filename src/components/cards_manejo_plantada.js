@@ -1,4 +1,4 @@
-const manejo_plantadas_cards = [
+const manejoPlantadas = [
   // Carta 1: Pergunta Fácil
   {
     tipo: "Pergunta",
@@ -2341,3 +2341,4 @@ const manejo_plantadas_cards = [
   }
 ];
 
+export default manejoPlantadas;
