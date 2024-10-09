@@ -13,7 +13,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "facil",
-    categorias: ["Estrutura Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Silva, J. (2020). Ecologia Florestal.",
       "2. Pereira, L. (2019). Botânica Florestal."
@@ -33,7 +33,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Manejo Sustentável"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 3 estrelas!",
     desvantagem: "",
@@ -50,7 +50,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "normal",
-    categorias: ["Manejo de Riscos"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 2 estrelas e volte 3 casas.",
@@ -70,7 +70,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 3,
     dificuldade: "normal",
-    categorias: ["Dinâmica Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Lima, F. (2018). Dinâmica de Ecossistemas.",
       "2. Mendes, A. (2019). Populações Florestais."
@@ -90,7 +90,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [1],
     dificuldade: "normal",
-    categorias: ["Manejo Participativo"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 5 moedas e remova 2 erros do seu contador.",
     desvantagem: "",
@@ -111,7 +111,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 3,
     dificuldade: "dificil",
-    categorias: ["Manejo Sustentável"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Carvalho, D. (2021). Técnicas de Manejo Florestal.",
       "2. Santos, E. (2020). Práticas Sustentáveis."
@@ -131,7 +131,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Dinâmica Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 2 estrelas e avance 3 casas.",
     desvantagem: "",
@@ -148,7 +148,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "normal",
-    categorias: ["Sanidade Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 3 moedas e fique uma rodada sem jogar.",
@@ -168,7 +168,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "facil",
-    categorias: ["Ecologia Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Rodrigues, V. (2018). Sucessão Ecológica.",
       "2. Barros, T. (2019). Dinâmica de Espécies."
@@ -188,7 +188,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Gestão Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 10 moedas e 1 estrela.",
     desvantagem: "",
@@ -208,7 +208,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "normal",
-    categorias: ["Manejo Sustentável"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Gomes, P. (2020). Certificação Florestal.",
       "2. Lima, R. (2019). Sustentabilidade em Manejo."
@@ -228,7 +228,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "normal",
-    categorias: ["Manejo Participativo"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 5 moedas ou 2 estrelas.",
@@ -249,7 +249,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "dificil",
-    categorias: ["Botânica Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Fernandes, H. (2021). Flora da Mata Atlântica.",
       "2. Costa, S. (2020). Espécies Arbóreas Brasileiras."
@@ -269,7 +269,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Inovação Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Remova 2 erros do seu contador ou ganhe 1 estrela.",
     desvantagem: "",
@@ -289,7 +289,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "facil",
-    categorias: ["Dinâmica Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Barros, S. (2018). Regeneração de Ecossistemas.",
       "2. Costa, L. (2019). Ecologia Florestal."
@@ -309,7 +309,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "normal",
-    categorias: ["Sanidade Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 2 estrelas ou 4 moedas.",
@@ -329,7 +329,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "normal",
-    categorias: ["Conservação"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Nascimento, L. (2019). Conectividade Florestal.",
       "2. Albuquerque, M. (2020). Ecologia da Paisagem."
@@ -349,7 +349,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Gestão de Pessoas"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 1 contador de progresso.",
     desvantagem: "",
@@ -370,7 +370,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "dificil",
-    categorias: ["Legislação Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Oliveira, F. (2021). Legislação Ambiental.",
       "2. Martins, C. (2020). Política Florestal."
@@ -390,7 +390,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "dificil",
-    categorias: ["Legislação Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 10 moedas ou 2 estrelas.",
@@ -410,7 +410,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "facil",
-    categorias: ["Ecologia Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Silva, J. (2018). Sucessão Ecológica.",
       "2. Pereira, L. (2019). Dinâmica de Ecossistemas."
@@ -430,7 +430,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Conservação do Solo"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 3 moedas e 1 estrela.",
     desvantagem: "",
@@ -447,7 +447,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "normal",
-    categorias: ["Conservação do Solo"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 2 estrelas e volte 2 casas.",
@@ -467,7 +467,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "normal",
-    categorias: ["Ecologia Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Lima, F. (2018). Biodiversidade e Ecossistemas.",
       "2. Mendes, A. (2019). Conservação da Biodiversidade."
@@ -487,7 +487,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [1],
     dificuldade: "facil",
-    categorias: ["Reflorestamento"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 1 estrela e 2 moedas.",
     desvantagem: "",
@@ -508,7 +508,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "dificil",
-    categorias: ["Manejo Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Carvalho, D. (2021). Planejamento Florestal.",
       "2. Santos, E. (2020). Manejo Sustentável."
@@ -528,7 +528,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Gestão Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 5 moedas e 1 estrela.",
     desvantagem: "",
@@ -545,7 +545,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "normal",
-    categorias: ["Sanidade Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 1 estrela e fique uma rodada sem jogar.",
@@ -565,7 +565,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "facil",
-    categorias: ["Conservação"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Nascimento, L. (2019). Matas Ciliares.",
       "2. Albuquerque, M. (2020). Preservação de Rios."
@@ -585,7 +585,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Serviços Ambientais"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 8 moedas.",
     desvantagem: "",
@@ -605,7 +605,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "normal",
-    categorias: ["Ecologia da Paisagem"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Lima, M. (2020). Fragmentação de Ecossistemas.",
       "2. Andrade, F. (2019). Impactos Ambientais."
@@ -625,7 +625,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "normal",
-    categorias: ["Gestão de Riscos"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 4 moedas e 1 estrela.",
@@ -646,7 +646,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "dificil",
-    categorias: ["Manejo Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Ferreira, G. (2019). Taxas de Exploração.",
       "2. Almeida, S. (2020). Planejamento Sustentável."
@@ -666,7 +666,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Reflorestamento"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 2 estrelas e 3 moedas.",
     desvantagem: "",
@@ -686,7 +686,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Biodiversidade"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Silva, K. (2018). Espécies Endêmicas.",
       "2. Ramos, J. (2019). Conservação da Fauna e Flora."
@@ -706,7 +706,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "normal",
-    categorias: ["Gestão de Riscos"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 2 estrelas e 2 moedas.",
@@ -726,7 +726,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Dendrocronologia"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Fernandes, H. (2021). Estudo dos Anéis de Crescimento.",
       "2. Costa, S. (2020). Idade das Árvores."
@@ -746,7 +746,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Certificação Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 5 moedas e 1 estrela.",
     desvantagem: "",
@@ -767,7 +767,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "dificil",
-    categorias: ["Legislação Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Oliveira, F. (2021). Legislação Ambiental.",
       "2. Martins, C. (2020). Política Florestal."
@@ -787,7 +787,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "normal",
-    categorias: ["Sanidade Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 1 estrela e 2 moedas.",
@@ -807,7 +807,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "facil",
-    categorias: ["Fisiologia Vegetal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Silva, J. (2018). Fisiologia das Plantas.",
       "2. Pereira, L. (2019). Processos Vegetais."
@@ -827,7 +827,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Gestão Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 5 moedas e 2 estrelas.",
     desvantagem: "",
@@ -847,7 +847,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "normal",
-    categorias: ["Inventário Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Ferreira, G. (2019). Métodos de Inventário.",
       "2. Almeida, S. (2020). Técnicas de Amostragem."
@@ -867,7 +867,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "dificil",
-    categorias: ["Legislação Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 5 moedas ou 2 estrelas.",
@@ -884,7 +884,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Educação Ambiental"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 1 estrela e remova 2 erros do seu contador.",
     desvantagem: "",
@@ -905,7 +905,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 3,
     dificuldade: "dificil",
-    categorias: ["Ecologia Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Nascimento, L. (2019). Ecossistemas Aquáticos.",
       "2. Albuquerque, M. (2020). Áreas Ripárias."
@@ -925,7 +925,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "dificil",
-    categorias: ["Gestão de Riscos"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 2 estrelas e fique uma rodada sem jogar.",
@@ -945,7 +945,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 3,
     dificuldade: "facil",
-    categorias: ["Ecologia Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Silva, J. (2018). Sucessão Ecológica.",
       "2. Pereira, L. (2019). Comunidades Vegetais."
@@ -965,7 +965,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Gestão Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 5 moedas e 1 estrela.",
     desvantagem: "",
@@ -982,7 +982,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [1],
     dificuldade: "normal",
-    categorias: ["Educação e Pesquisa"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Remova 2 erros do seu contador ou ganhe 1 estrela.",
     desvantagem: "",
@@ -1002,7 +1002,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Estrutura Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Silva, J. (2020). Ecologia Florestal.",
       "2. Pereira, L. (2019). Botânica Florestal."
@@ -1022,7 +1022,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Silvicultura"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 3 estrelas e avance 3 casas.",
     desvantagem: "",
@@ -1039,7 +1039,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "dificil",
-    categorias: ["Gestão de Riscos"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 3 estrelas e 5 moedas.",
@@ -1059,7 +1059,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 4,
     dificuldade: "normal",
-    categorias: ["Estrutura Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Lima, F. (2018). Dinâmica de Ecossistemas.",
       "2. Mendes, A. (2019). Cobertura Vegetal em Florestas."
@@ -1079,7 +1079,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [1],
     dificuldade: "normal",
-    categorias: ["Pesquisa e Desenvolvimento"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 1 contador de progresso e 2 estrelas.",
     desvantagem: "",
@@ -1100,7 +1100,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 3,
     dificuldade: "dificil",
-    categorias: ["Ecologia"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Carvalho, D. (2021). Ecologia Funcional.",
       "2. Santos, E. (2020). Biodiversidade e Funcionalidade."
@@ -1120,7 +1120,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Gestão Integrada"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 4 moedas e 1 estrela.",
     desvantagem: "",
@@ -1137,7 +1137,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "normal",
-    categorias: ["Gestão de Recursos"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 2 moedas e 1 estrela.",
@@ -1157,7 +1157,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "facil",
-    categorias: ["Biodiversidade"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Silva, K. (2018). Espécies Indígenas.",
       "2. Ramos, J. (2019). Conservação de Espécies Nativas."
@@ -1177,7 +1177,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Tecnologia Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 3 moedas e 1 contador de progresso.",
     desvantagem: "",
@@ -1194,7 +1194,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "dificil",
-    categorias: ["Conservação"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 3 estrelas e 2 contadores de progresso.",
@@ -1214,7 +1214,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "normal",
-    categorias: ["Serviços Ecossistêmicos"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Lima, M. (2020). Serviços Ecossistêmicos.",
       "2. Andrade, F. (2019). Ecologia Aplicada."
@@ -1234,7 +1234,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [1],
     dificuldade: "normal",
-    categorias: ["Planejamento Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 2 estrelas e remova 1 erro do seu contador.",
     desvantagem: "",
@@ -1254,7 +1254,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "facil",
-    categorias: ["Fisiologia Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Barros, S. (2018). Biomassa e Ecossistemas.",
       "2. Costa, L. (2019). Estudos de Biomassa."
@@ -1274,7 +1274,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Colaboração"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 4 moedas e 1 estrela.",
     desvantagem: "",
@@ -1291,7 +1291,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "dificil",
-    categorias: ["Sanidade Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 3 estrelas e 2 contadores de progresso.",
@@ -1311,7 +1311,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "normal",
-    categorias: ["Manejo de Espécies"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Lima, F. (2018). Manejo de Espécies.",
       "2. Mendes, A. (2019). Diversidade e Saúde Florestal."
@@ -1331,7 +1331,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [1],
     dificuldade: "normal",
-    categorias: ["Infraestrutura Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 3 moedas e avance 2 casas.",
     desvantagem: "",
@@ -1351,7 +1351,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "facil",
-    categorias: ["Serviços Ecossistêmicos"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Lima, M. (2020). Serviços Ecossistêmicos.",
       "2. Andrade, F. (2019). Ecologia Aplicada."
@@ -1371,7 +1371,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Conservação da Água"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 2 estrelas e remova 1 erro do contador.",
     desvantagem: "",
@@ -1388,7 +1388,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "dificil",
-    categorias: ["Segurança no Manejo"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 2 estrelas e 3 moedas.",
@@ -1408,7 +1408,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "normal",
-    categorias: ["Sucessão Ecológica"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Silva, J. (2018). Sucessão Ecológica.",
       "2. Pereira, L. (2019). Dinâmica de Ecossistemas."
@@ -1428,7 +1428,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [1],
     dificuldade: "normal",
-    categorias: ["Educação e Pesquisa"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 3 moedas e 1 contador de progresso.",
     desvantagem: "",
@@ -1448,7 +1448,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "facil",
-    categorias: ["Conservação"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Lima, M. (2020). Conservação Florestal.",
       "2. Andrade, F. (2019). Proteção de Biodiversidade."
@@ -1468,7 +1468,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Tecnologia Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 4 moedas e 1 estrela.",
     desvantagem: "",
@@ -1485,7 +1485,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "normal",
-    categorias: ["Gestão de Pessoas"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 2 estrelas e 3 moedas.",
@@ -1505,7 +1505,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Ecologia Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Silva, J. (2018). Ciclo de Nutrientes.",
       "2. Pereira, L. (2019). Ecologia de Solos."
@@ -1525,7 +1525,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [1],
     dificuldade: "normal",
-    categorias: ["Legislação Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 3 moedas e remova 1 erro do contador.",
     desvantagem: "",
@@ -1545,7 +1545,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "facil",
-    categorias: ["Reflorestamento"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Barros, S. (2018). Técnicas de Reflorestamento.",
       "2. Costa, L. (2019). Recuperação de Áreas Degradadas."
@@ -1565,7 +1565,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Tecnologia Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 4 moedas e 1 estrela.",
     desvantagem: "",
@@ -1584,7 +1584,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 3,
     dificuldade: "facil",
-    categorias: ["Estrutura Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Silva, J. (2020). Estrutura Vertical das Florestas.",
       "2. Pereira, L. (2019). Botânica Florestal."
@@ -1604,7 +1604,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Conservação"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 3 moedas e 1 estrela.",
     desvantagem: "",
@@ -1621,7 +1621,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "dificil",
-    categorias: ["Sanidade Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 2 estrelas e 3 moedas.",
@@ -1641,7 +1641,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 3,
     dificuldade: "normal",
-    categorias: ["Estrutura Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Lima, F. (2018). Estrutura das Florestas Tropicais.",
       "2. Mendes, A. (2019). Ecologia de Florestas."
@@ -1661,7 +1661,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [1],
     dificuldade: "normal",
-    categorias: ["Agroflorestas"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 3 moedas e remova 1 erro do contador.",
     desvantagem: "",
@@ -1681,7 +1681,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 3,
     dificuldade: "facil",
-    categorias: ["Sucessão Ecológica"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Silva, J. (2018). Sucessão Ecológica.",
       "2. Pereira, L. (2019). Comunidades Vegetais."
@@ -1701,7 +1701,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Tecnologia Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 3 moedas e 1 contador de progresso.",
     desvantagem: "",
@@ -1720,7 +1720,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "normal",
-    categorias: ["Conservação", "Dinâmica Florestal"],
+    categorias: ["Manejo de Nativas],
     fontes: [
       "1. Barros, S. (2018). Corredores Ecológicos e Conectividade.",
       "2. Costa, L. (2019). Conservação de Paisagens."
@@ -1740,7 +1740,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Manejo Sustentável", "Agricultura Sustentável"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 2 estrelas e avance 3 casas.",
     desvantagem: "",
@@ -1757,7 +1757,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "dificil",
-    categorias: ["Legislação Florestal", "Gestão de Riscos"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 5 moedas e 2 estrelas.",
@@ -1778,7 +1778,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 3,
     dificuldade: "dificil",
-    categorias: ["Silvicultura", "Manejo Sustentável"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Carvalho, D. (2021). Técnicas de Manejo Florestal.",
       "2. Santos, E. (2020). Práticas Sustentáveis em Florestas Nativas."
@@ -1798,7 +1798,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "facil",
-    categorias: ["Conservação", "Gestão de Biodiversidade"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 3 estrelas e 5 moedas.",
     desvantagem: "",
@@ -1815,7 +1815,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "normal",
-    categorias: ["Sanidade Florestal", "Conservação"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 2 estrelas e 3 moedas.",
@@ -1835,7 +1835,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 3,
     dificuldade: "normal",
-    categorias: ["Ecologia Florestal", "Manejo Sustentável"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Lima, F. (2018). Ciclo Hidrológico em Ecossistemas.",
       "2. Mendes, A. (2019). Gestão de Recursos Hídricos."
@@ -1855,7 +1855,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Pesquisa e Desenvolvimento"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 4 moedas e 1 estrela.",
     desvantagem: "",
@@ -1872,7 +1872,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "dificil",
-    categorias: ["Conservação", "Gestão de Biodiversidade"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 3 estrelas e 4 moedas.",
@@ -1892,7 +1892,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 2,
     dificuldade: "facil",
-    categorias: ["Estrutura Florestal"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Silva, J. (2020). Estrutura das Florestas Tropicais.",
       "2. Pereira, L. (2019). Fisiologia Vegetal."
@@ -1912,7 +1912,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "normal",
-    categorias: ["Agricultura Sustentável", "Manejo Integrado"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "Ganhe 3 estrelas e 4 moedas.",
     desvantagem: "",
@@ -1929,7 +1929,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: [],
     dificuldade: "dificil",
-    categorias: ["Reflorestamento", "Gestão de Projetos"],
+    categorias: ["Manejo de Nativas"],
     fontes: [],
     vantagem: "",
     desvantagem: "Perde 2 estrelas e 3 moedas.",
@@ -1950,7 +1950,7 @@ const manejo_nativas_cards = [
     ],
     respostaCorreta: 1,
     dificuldade: "dificil",
-    categorias: ["Modelagem Florestal", "Tecnologia em Manejo"],
+    categorias: ["Manejo de Nativas"],
     fontes: [
       "1. Fernandes, H. (2021). Ferramentas de Modelagem Florestal.",
       "2. Costa, S. (2020). Tecnologias em Gestão Florestal."
