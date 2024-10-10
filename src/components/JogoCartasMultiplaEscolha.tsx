@@ -178,8 +178,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         {
           id: playerInputs.length,
           name: "",
-          color:
-            predefinedColors[playerInputs.length % predefinedColors.length],
+          color: predefinedColors[playerInputs.length % predefinedColors.length],
           showColorPicker: false,
         },
       ]);
@@ -205,8 +204,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const initializedPlayers: Player[] = playerInputs.map((input, index) => ({
       id: index,
       name: input.name || `Jogador ${index + 1}`,
-      color:
-        input.color || predefinedColors[index % predefinedColors.length],
+      color: input.color || predefinedColors[index % predefinedColors.length],
       fixedStars: 0,
       respostasCertas: 0,
       respostasErradas: 0,
@@ -282,8 +280,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
           Limpar Todas
         </Button>
 
-        {/* Opção "Sempre Visível" */}
-        <div className="flex items-center mt-4">
+        {/* Adicionar a opção "Sempre Visível" */}
+        <div className="flex items-center mt-4 mb-4">
           <input
             type="checkbox"
             id="sempreVisivel"
@@ -576,7 +574,7 @@ const EcoChallenge: React.FC = () => {
       isCorrect =
         ordemSelecoes.toString() ===
         (cartaAtual.respostaCorreta as number[]).toString();
-    } else if (cartaAtual.tipo !== "MultiplaEscolha" && cartaAtual.tipo !== "Ordem" && selecionado !== null) {
+    } else if (cartaAtual && selecionado !== null) {
       isCorrect = Array.isArray(cartaAtual.respostaCorreta)
         ? cartaAtual.respostaCorreta.includes(selecionado)
         : cartaAtual.respostaCorreta === selecionado;
@@ -589,6 +587,7 @@ const EcoChallenge: React.FC = () => {
         respostasCertas: currentPlayer.respostasCertas + 1,
         respostasSeguidas: currentPlayer.respostasSeguidas + 1,
       });
+
       const novoProgresso = currentPlayer.progresso + 20;
       if (novoProgresso >= 100) {
         updateCurrentPlayer({
@@ -601,6 +600,7 @@ const EcoChallenge: React.FC = () => {
         updateCurrentPlayer({ progresso: novoProgresso });
         setMensagem(`Correto! ${cartaAtual.vantagem}`);
       }
+
       if (cartaAtual.dificuldade === "dificil") {
         updateCurrentPlayer({
           pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
@@ -615,12 +615,27 @@ const EcoChallenge: React.FC = () => {
       setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
     }
 
-    // Se "Sempre Visível" está ativado, carregar a próxima carta automaticamente
+    // Após verificar a resposta, ajustar conforme "sempreVisivel"
     if (sempreVisivel) {
+      // Se estiver sempre visível, carregar a próxima carta automaticamente após exibir a mensagem
       setTimeout(() => {
         selecionarCartaAleatoria();
-      }, 2000); // Ajuste o tempo conforme necessário
+      }, 2000); // Espera 2 segundos antes de carregar a próxima carta
     }
+  };
+
+  const carregarProximaCarta = () => {
+    if (sempreVisivel) {
+      selecionarCartaAleatoria();
+    } else {
+      setMostrarGenerico(true);
+    }
+  };
+
+  const revelarCarta = () => {
+    setMostrarGenerico(false);
+    setRespondido(false);
+    setMensagem("");
   };
 
   const resetarContadores = () => {
@@ -649,11 +664,11 @@ const EcoChallenge: React.FC = () => {
       // Não redefinir players e currentPlayerId aqui
       setCategoriasSelecionadas([]);
       setMensagem("Jogo resetado!");
-      setMostrarGenerico(false);
       if (typeof window !== "undefined") {
         localStorage.removeItem("estadoEcoChallenge");
         localStorage.removeItem("sempreVisivel");
       }
+      setJogoIniciado(false);
     }
   };
 
@@ -721,7 +736,6 @@ const EcoChallenge: React.FC = () => {
 
   const voltarTelaInicial = () => {
     setJogoIniciado(false);
-    setMostrarGenerico(false);
   };
 
   const incrementarRodadasPreso = () => {
@@ -868,8 +882,7 @@ const EcoChallenge: React.FC = () => {
               style={{
                 backgroundColor:
                   currentPlayerId === player.id ? player.color : undefined,
-                color:
-                  currentPlayerId === player.id ? "#fff" : undefined,
+                color: currentPlayerId === player.id ? "#fff" : undefined,
                 width: "100%",
               }}
             >
@@ -997,7 +1010,8 @@ const EcoChallenge: React.FC = () => {
                 cartaAtual.tipo === "Ordem" &&
                 ordemSelecoes.includes(opcao.id) &&
                 ordemSelecoes.indexOf(opcao.id) + 1 !==
-                  (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
+                  (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
+                    1
                   ? "bg-red-100"
                   : ""
               } ${
@@ -1005,7 +1019,8 @@ const EcoChallenge: React.FC = () => {
                 cartaAtual.tipo === "Ordem" &&
                 ordemSelecoes.includes(opcao.id) &&
                 ordemSelecoes.indexOf(opcao.id) + 1 ===
-                  (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
+                  (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
+                    1
                   ? "bg-green-100"
                   : ""
               } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
@@ -1071,7 +1086,6 @@ const EcoChallenge: React.FC = () => {
             </Button>
           ))}
         </div>
-        {/* Alert de dica e fontes */}
         {!mostrarGenerico && mostrarDica && (
           <Alert className="mt-4">
             <AlertDescription>{cartaAtual.dica}</AlertDescription>
@@ -1090,13 +1104,6 @@ const EcoChallenge: React.FC = () => {
         )}
       </CardContent>
     );
-  };
-
-  // Função para revelar a carta real a partir da carta genérica
-  const revelarCarta = () => {
-    setMostrarGenerico(false);
-    setRespondido(false);
-    setMensagem("");
   };
 
   return (
@@ -1189,7 +1196,7 @@ const EcoChallenge: React.FC = () => {
                 !["Pergunta", "MultiplaEscolha", "Ordem"].includes(
                   cartaAtual.tipo
                 ) ||
-                mostrarGenerico
+                mostrarGenerico // Desativar se estiver na carta genérica
               }
             >
               <SkipForward className="h-4 w-4" />
@@ -1205,7 +1212,7 @@ const EcoChallenge: React.FC = () => {
               disabled={
                 currentPlayer.respostasSeguidas < 3 ||
                 !cartaAtual.dica ||
-                mostrarGenerico
+                mostrarGenerico // Desativar se estiver na carta genérica
               }
             >
               <HelpCircle className="h-4 w-4" />
@@ -1218,7 +1225,7 @@ const EcoChallenge: React.FC = () => {
               }
               disabled={
                 currentPlayer.respostasSeguidas < 4 ||
-                mostrarGenerico
+                mostrarGenerico // Desativar se estiver na carta genérica
               }
             >
               <MinusCircle className="h-4 w-4" />
@@ -1268,7 +1275,7 @@ const EcoChallenge: React.FC = () => {
                   (cartaAtual.tipo !== "Ordem" &&
                     selecionado === null &&
                     selecoesMultiplas.length === 0) ||
-                  mostrarGenerico
+                  mostrarGenerico // Desativar se estiver na carta genérica
                 }
                 className="w-full mt-2"
               >
@@ -1279,12 +1286,11 @@ const EcoChallenge: React.FC = () => {
                 Próxima Carta
               </Button>
             )}
+            {/* Botão "Próxima Carta" não aparece se "Sempre Visível" estiver ativo */}
           </div>
           {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
             mensagem && (
-              <p className="text-center font-bold text-sm mb-2">
-                {mensagem}
-              </p>
+              <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
             )}
           <Progress
             value={currentPlayer.progresso}
