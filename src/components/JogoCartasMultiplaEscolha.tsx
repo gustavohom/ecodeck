@@ -32,6 +32,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import Image from "next/image";
+import TelaInicial from "./TelaInicial"; // Assegure-se de que o caminho está correto
 import manejoPlantadas from "./cards_manejo_plantada";
 import manejoNativas from "./cards_manejo_nativa";
 import ecologiaFlorestal from "./cards_ecologia_florestal";
@@ -88,21 +89,6 @@ interface PlayerInput {
   showColorPicker?: boolean;
 }
 
-interface TelaInicialProps {
-  onStartGame: () => void;
-  onContinueGame: () => void;
-  onReset: () => void;
-  categoriasDisponiveis: string[];
-  categoriasSelecionadas: string[];
-  setCategoriasSelecionadas: (categorias: string[]) => void;
-  hasSavedGame: boolean;
-  onPlayersSetup: (players: Player[]) => void;
-  players: Player[];
-  setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
-  sempreVisivel: boolean;
-  setSempreVisivel: (val: boolean) => void;
-}
-
 const predefinedColors = [
   "#9e0142", // Crimson
   "#f46d43", // Coral
@@ -137,7 +123,16 @@ const predefinedColors = [
 ];
 
 // Componente Tela Inicial
-const TelaInicial: React.FC<TelaInicialProps> = ({
+const TelaInicialComponent: React.FC<{
+  onStartGame: () => void;
+  onContinueGame: () => void;
+  onReset: () => void;
+  categoriasDisponiveis: string[];
+  categoriasSelecionadas: string[];
+  setCategoriasSelecionadas: (categorias: string[]) => void;
+  hasSavedGame: boolean;
+  onPlayersSetup: (players: Player[]) => void;
+}> = ({
   onStartGame,
   onContinueGame,
   onReset,
@@ -146,30 +141,18 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   setCategoriasSelecionadas,
   hasSavedGame,
   onPlayersSetup,
-  players,
-  setPlayers,
-  sempreVisivel,
-  setSempreVisivel,
 }) => {
   const [termoBusca, setTermoBusca] = useState<string>("");
+  const [sempreVisivel, setSempreVisivel] = useState<boolean>(false);
 
-  const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>(
-    players.length > 0
-      ? players.map((p) => ({
-          id: p.id,
-          name: p.name,
-          color: p.color,
-          showColorPicker: false,
-        }))
-      : [
-          {
-            id: 0,
-            name: "",
-            color: predefinedColors[0],
-            showColorPicker: false,
-          },
-        ]
-  );
+  const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>([
+    {
+      id: 0,
+      name: "",
+      color: predefinedColors[0],
+      showColorPicker: false,
+    },
+  ]);
 
   const addPlayerInput = () => {
     if (playerInputs.length < 8) {
@@ -431,6 +414,11 @@ const EcoChallenge: React.FC = () => {
   // Novo estado para controlar a exibição da carta genérica
   const [mostrarGenerico, setMostrarGenerico] = useState<boolean>(false);
 
+  // Estado do botão: "verificar" | "proxima" | "revelar"
+  const [botaoState, setBotaoState] = useState<"verificar" | "proxima" | "revelar">(
+    "verificar"
+  );
+
   // Verifica se há um jogo salvo no localStorage e se o jogo foi iniciado
   const hasSavedGame =
     typeof window !== "undefined" &&
@@ -516,6 +504,7 @@ const EcoChallenge: React.FC = () => {
     setMostrarFontes(false);
     setOpcoesEliminadas([]);
     setMostrarGenerico(false); // Resetar a carta genérica
+    setBotaoState("verificar"); // Resetar o estado do botão
   }, [categoriasSelecionadas, mostrarSomentePerguntas]);
 
   useEffect(() => {
@@ -621,21 +610,22 @@ const EcoChallenge: React.FC = () => {
       setTimeout(() => {
         selecionarCartaAleatoria();
       }, 2000); // Espera 2 segundos antes de carregar a próxima carta
+    } else {
+      // Caso contrário, mudar o estado do botão para "proxima"
+      setBotaoState("proxima");
     }
   };
 
   const carregarProximaCarta = () => {
-    if (sempreVisivel) {
-      selecionarCartaAleatoria();
-    } else {
-      setMostrarGenerico(true);
-    }
+    setMostrarGenerico(true);
+    setBotaoState("revelar");
   };
 
   const revelarCarta = () => {
     setMostrarGenerico(false);
     setRespondido(false);
     setMensagem("");
+    setBotaoState("verificar");
   };
 
   const resetarContadores = () => {
@@ -834,7 +824,7 @@ const EcoChallenge: React.FC = () => {
 
   if (!jogoIniciado) {
     return (
-      <TelaInicial
+      <TelaInicialComponent
         onStartGame={() => {
           setJogoIniciado(true);
         }}
@@ -849,10 +839,6 @@ const EcoChallenge: React.FC = () => {
         setCategoriasSelecionadas={setCategoriasSelecionadas}
         hasSavedGame={hasSavedGame}
         onPlayersSetup={handlePlayersSetup}
-        players={players}
-        setPlayers={setPlayers}
-        sempreVisivel={sempreVisivel}
-        setSempreVisivel={setSempreVisivel}
       />
     );
   }
@@ -1266,7 +1252,7 @@ const EcoChallenge: React.FC = () => {
             </Button>
           </div>
           <div className="flex justify-between w-full mb-4">
-            {!respondido ? (
+            {botaoState === "verificar" && (
               <Button
                 onClick={verificarResposta}
                 disabled={
@@ -1281,12 +1267,17 @@ const EcoChallenge: React.FC = () => {
               >
                 Verificar
               </Button>
-            ) : sempreVisivel ? null : (
+            )}
+            {botaoState === "proxima" && !sempreVisivel && (
               <Button onClick={carregarProximaCarta} className="w-full mt-2">
                 Próxima Carta
               </Button>
             )}
-            {/* Botão "Próxima Carta" não aparece se "Sempre Visível" estiver ativo */}
+            {botaoState === "revelar" && (
+              <Button onClick={revelarCarta} className="w-full mt-2">
+                Revelar Carta
+              </Button>
+            )}
           </div>
           {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
             mensagem && (
