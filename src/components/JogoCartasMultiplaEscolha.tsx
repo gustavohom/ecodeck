@@ -404,6 +404,7 @@ const EcoChallenge: React.FC = () => {
   const [respondido, setRespondido] = useState<boolean>(false);
   const [mensagem, setMensagem] = useState<string>("");
   const [mostrarDica, setMostrarDica] = useState<boolean>(false);
+  const [dicaUsada, setDicaUsada] = useState<boolean>(false); // Novo estado
   const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
@@ -516,6 +517,7 @@ const EcoChallenge: React.FC = () => {
     setRespondido(false);
     setMensagem("");
     setMostrarDica(false);
+    setDicaUsada(false); // Resetar dicaUsada aqui
     setMostrarFontes(false);
     setOpcoesEliminadas([]);
     setCartaRevelada(!ocultarCarta); // Se não estiver ocultando, já revela a carta
@@ -721,8 +723,15 @@ const EcoChallenge: React.FC = () => {
 
   const toggleDica = () => {
     if (!currentPlayer || !cartaAtual) return;
+
+    if (dicaUsada) {
+      setMensagem("Você já usou a dica para esta pergunta.");
+      return;
+    }
+
     if (currentPlayer.respostasSeguidas >= 2 && cartaAtual.dica) {
-      setMostrarDica(!mostrarDica);
+      setMostrarDica(true);
+      setDicaUsada(true);
       updateCurrentPlayer({
         respostasSeguidas: currentPlayer.respostasSeguidas - 2,
       });
@@ -1325,14 +1334,17 @@ const EcoChallenge: React.FC = () => {
               onClick={toggleDica}
               size="sm"
               variant={
-                currentPlayer.respostasSeguidas < 2 || !cartaAtual.dica
+                currentPlayer.respostasSeguidas < 2 ||
+                !cartaAtual.dica ||
+                dicaUsada
                   ? "outline"
                   : "secondary"
               }
               disabled={
                 currentPlayer.respostasSeguidas < 2 ||
                 !cartaAtual.dica ||
-                (ocultarCarta && !cartaRevelada)
+                (ocultarCarta && !cartaRevelada) ||
+                dicaUsada
               }
             >
               <HelpCircle className="h-4 w-4" />
