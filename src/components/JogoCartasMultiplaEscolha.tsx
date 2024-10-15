@@ -388,9 +388,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             startGame();
           }}
           className="w-full"
-          disabled={
-            categoriasSelecionadas.length === 0 || playerInputs.length === 0
-          }
+          disabled={categoriasSelecionadas.length === 0 || playerInputs.length === 0}
         >
           Iniciar Novo Jogo
         </Button>
@@ -805,9 +803,7 @@ const EcoChallenge: React.FC = () => {
     if (!currentPlayer) return;
     updateCurrentPlayer({
       respostasCertas:
-        currentPlayer.respostasCertas > 0
-          ? currentPlayer.respostasCertas - 1
-          : 0,
+        currentPlayer.respostasCertas > 0 ? currentPlayer.respostasCertas - 1 : 0,
     });
     setMensagem("Acerto removido!");
   };
@@ -1136,8 +1132,7 @@ const EcoChallenge: React.FC = () => {
                       : handleSelecao(opcao.id)
                   }
                   variant={
-                    selecionado === opcao.id ||
-                    selecoesMultiplas.includes(opcao.id)
+                    selecionado === opcao.id || selecoesMultiplas.includes(opcao.id)
                       ? "secondary"
                       : "outline"
                   }
@@ -1179,8 +1174,7 @@ const EcoChallenge: React.FC = () => {
                     cartaAtual.tipo === "Ordem" &&
                     ordemSelecoes.includes(opcao.id) &&
                     ordemSelecoes.indexOf(opcao.id) + 1 !==
-                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
-                        1
+                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
                       ? "bg-red-100"
                       : ""
                   } ${
@@ -1188,8 +1182,7 @@ const EcoChallenge: React.FC = () => {
                     cartaAtual.tipo === "Ordem" &&
                     ordemSelecoes.includes(opcao.id) &&
                     ordemSelecoes.indexOf(opcao.id) + 1 ===
-                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
-                        1
+                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
                       ? "bg-green-100"
                       : ""
                   } ${
@@ -1217,34 +1210,31 @@ const EcoChallenge: React.FC = () => {
                       )}
                     </span>
                   )}
-                  {cartaAtual.tipo === "Ordem" &&
-                    ordemSelecoes.includes(opcao.id) && (
-                      <span className="ml-2">
-                        {ordemSelecoes.indexOf(opcao.id) + 1}
-                        {respondido &&
-                          ordemSelecoes.indexOf(opcao.id) + 1 !==
-                            (cartaAtual.respostaCorreta as number[]).indexOf(
-                              opcao.id
-                            ) +
-                              1 && (
-                            <span className="ml-1 text-blue-500">
+                  {cartaAtual.tipo === "Ordem" && ordemSelecoes.includes(opcao.id) && (
+                    <span className="ml-2">
+                      {ordemSelecoes.indexOf(opcao.id) + 1}
+                      {respondido &&
+                        ordemSelecoes.indexOf(opcao.id) + 1 !==
+                          (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
+                            1 && (
+                          <span className="ml-1 text-blue-500">
+                            (
+                            {
                               (
-                              {
-                                (
-                                  cartaAtual.respostaCorreta as number[]
-                                ).indexOf(opcao.id) + 1
-                              }
-                              )
-                            </span>
-                          )}
-                      </span>
-                    )}
+                                cartaAtual.respostaCorreta as number[]
+                              ).indexOf(opcao.id) + 1
+                            }
+                            )
+                          </span>
+                        )}
+                    </span>
+                  )}
                   {respondido &&
                     (Array.isArray(cartaAtual.respostaCorreta)
                       ? cartaAtual.respostaCorreta.includes(opcao.id)
                       : cartaAtual.respostaCorreta === opcao.id) && (
-                    <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
-                  )}
+                      <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
+                    )}
                   {respondido &&
                     selecionado === opcao.id &&
                     !(
@@ -1435,21 +1425,19 @@ const EcoChallenge: React.FC = () => {
       {/* Modal para mostrar o número do dado quando a carta está revelada */}
       {isDieModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center relative w-200 h-200">
+          <div className="bg-white p-8 rounded-lg shadow-lg text-center relative w-96 h-96 flex flex-col justify-center">
             <Button
-              className="absolute top-2 right-2"
+              className="absolute top-4 right-4"
               variant="ghost"
               onClick={() => setIsDieModalOpen(false)}
             >
-              <XIcon className="h-6 w-6 text-gray-500" />
+              <XIcon className="h-8 w-8 text-gray-500" />
             </Button>
-            <p className="text-2xl font-bold mb-4">
-              Você rolou um {rolledNumber}
-            </p>
-            <Button onClick={rolarDado} className="mb-2">
-              Rolar Novamente
+            <p className="text-lg mb-2">Você sorteou um</p>
+            <p className="text-6xl font-bold mb-6">{rolledNumber}</p>
+            <Button onClick={rolarDado}>
+              <Dice6 className="h-6 w-6" />
             </Button>
-            <Button onClick={() => setIsDieModalOpen(false)}>Fechar</Button>
           </div>
         </div>
       )}
