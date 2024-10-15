@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
@@ -193,7 +194,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   const startGame = () => {
     const initializedPlayers: Player[] = playerInputs.map((input, index) => ({
       id: index,
-      name: input.name || Jogador ${index + 1},
+      name: input.name || `Jogador ${index + 1}`,
       color: input.color || predefinedColors[index % predefinedColors.length],
       fixedStars: 0,
       respostasCertas: 0,
@@ -276,7 +277,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
               <div className="flex items-center space-x-2 mb-1">
                 <input
                   type="text"
-                  placeholder={Nome do Jogador ${index + 1}}
+                  placeholder={`Nome do Jogador ${index + 1}`}
                   value={player.name}
                   maxLength={10}
                   onChange={(e) =>
@@ -550,14 +551,14 @@ const EcoChallenge: React.FC = () => {
             pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
           });
         }
-        setMensagem(Correto! ${cartaAtual.vantagem});
+        setMensagem(`Correto! ${cartaAtual.vantagem}`);
       } else {
         updateCurrentPlayer({
           respostasErradas: currentPlayer.respostasErradas + 1,
           respostasSeguidas: 0,
           progresso: Math.max(currentPlayer.progresso - 10, 0),
         });
-        setMensagem(Incorreto. ${cartaAtual.desvantagem});
+        setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
       }
     } else if (cartaAtual?.tipo === "Ordem" && ordemSelecoes.length > 0) {
       const isCorrect =
@@ -587,14 +588,14 @@ const EcoChallenge: React.FC = () => {
             pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
           });
         }
-        setMensagem(Correto! ${cartaAtual.vantagem});
+        setMensagem(`Correto! ${cartaAtual.vantagem}`);
       } else {
         updateCurrentPlayer({
           respostasErradas: currentPlayer.respostasErradas + 1,
           respostasSeguidas: 0,
           progresso: Math.max(currentPlayer.progresso - 10, 0),
         });
-        setMensagem(Incorreto. ${cartaAtual.desvantagem});
+        setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
       }
     } else if (cartaAtual && selecionado !== null) {
       setRespondido(true);
@@ -626,7 +627,7 @@ const EcoChallenge: React.FC = () => {
             });
           }
         }
-        setMensagem(Correto! ${cartaAtual.vantagem});
+        setMensagem(`Correto! ${cartaAtual.vantagem}`);
       } else {
         if (["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)) {
           updateCurrentPlayer({
@@ -634,7 +635,7 @@ const EcoChallenge: React.FC = () => {
             respostasSeguidas: 0,
             progresso: Math.max(currentPlayer.progresso - 10, 0),
           });
-          setMensagem(Incorreto. ${cartaAtual.desvantagem});
+          setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
         }
       }
     }
@@ -815,7 +816,7 @@ const EcoChallenge: React.FC = () => {
                   alt={alt}
                   width={500}
                   height={300}
-                  className={${className} img-zoom}
+                  className={`${className} img-zoom`}
                 />
               </Zoom>
             );
@@ -866,9 +867,9 @@ const EcoChallenge: React.FC = () => {
     return (
       <div className="flex flex-col items-center">
         <div
-          className={grid gap-1 mb-1 ${
-            players.length > 4 ? "grid-cols-4" : grid-cols-${players.length}
-          }}
+          className={`grid gap-1 mb-1 ${
+            players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
+          }`}
           style={{ width: "100%", maxWidth: "400px" }}
         >
           {players.map((player) => (
@@ -934,9 +935,9 @@ const EcoChallenge: React.FC = () => {
   return (
     <div className="flex flex-col items-center">
       <div
-        className={grid gap-1 mb-1 ${
-          players.length > 4 ? "grid-cols-4" : grid-cols-${players.length}
-        }}
+        className={`grid gap-1 mb-1 ${
+          players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
+        }`}
         style={{ width: "100%", maxWidth: "400px" }}
       >
         {players.map((player) => (
@@ -957,11 +958,11 @@ const EcoChallenge: React.FC = () => {
         ))}
       </div>
       <Card
-        className={w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}}
+        className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}
         style={
           players.length > 1 && currentPlayer
             ? {
-                boxShadow: 0 0 10px 5px ${currentPlayer.color},
+                boxShadow: `0 0 10px 5px ${currentPlayer.color}`,
               }
             : {}
         }
@@ -1015,7 +1016,7 @@ const EcoChallenge: React.FC = () => {
                     ? "secondary"
                     : "outline"
                 }
-                className={w-full justify-start text-sm ${
+                className={`w-full justify-start text-sm ${
                   respondido &&
                   (Array.isArray(cartaAtual.respostaCorreta)
                     ? cartaAtual.respostaCorreta.includes(opcao.id)
@@ -1064,7 +1065,7 @@ const EcoChallenge: React.FC = () => {
                     (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
                     ? "bg-green-100"
                     : ""
-                } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}}
+                } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
                 disabled={opcoesEliminadas.includes(opcao.id)}
                 style={{
                   maxHeight: "80px",
@@ -1246,9 +1247,9 @@ const EcoChallenge: React.FC = () => {
             )}
           <Progress
             value={currentPlayer.progresso}
-            className={w-full ${
+            className={`w-full ${
               currentPlayer.progresso === 100 ? "bg-green-500" : ""
-            }}
+            }`}
           />
           <div className="flex justify-between w-full mt-4 text-sm">
             <div className="flex items-center space-x-1">
