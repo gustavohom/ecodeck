@@ -717,7 +717,7 @@ const EcoChallenge: React.FC = () => {
     if (currentPlayer.respostasSeguidas >= 2 && cartaAtual.dica) {
       setMostrarDica(!mostrarDica);
       updateCurrentPlayer({
-        respostasSeguidas: currentPlayer.respostasSeguidas -2,
+        respostasSeguidas: currentPlayer.respostasSeguidas - 2,
       });
     } else if (!cartaAtual.dica) {
       setMensagem("Esta carta não possui dica.");
@@ -765,7 +765,7 @@ const EcoChallenge: React.FC = () => {
 
         setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
         updateCurrentPlayer({
-          respostasSeguidas: currentPlayer.respostasSeguidas -2,
+          respostasSeguidas: currentPlayer.respostasSeguidas - 2,
         });
         setMensagem("Uma resposta errada foi eliminada!");
       }
@@ -1184,22 +1184,17 @@ const EcoChallenge: React.FC = () => {
                 </Button>
               ))}
             </div>
-            {mostrarDica && (
-              <Alert className="mt-4">
-                <AlertDescription>{cartaAtual.dica}</AlertDescription>
-              </Alert>
-            )}
-            {mostrarFontes && (
-              <Alert className="mt-4">
-                <AlertDescription>
-                  <ul className="list-disc list-inside">
-                    {cartaAtual.fontes.map((fonte: string, index: number) => (
-                      <li key={index}>{fonte}</li>
-                    ))}
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            )}
+            {/* Mover a mensagem e a barra de progresso para cá */}
+            {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
+              mensagem && (
+                <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
+              )}
+            <Progress
+              value={currentPlayer.progresso}
+              className={`w-full ${
+                currentPlayer.progresso === 100 ? "bg-green-500" : ""
+              }`}
+            />
           </CardContent>
         ) : null}
         <CardFooter className="flex flex-col items-center">
@@ -1324,16 +1319,7 @@ const EcoChallenge: React.FC = () => {
               </Button>
             )}
           </div>
-          {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
-            mensagem && (
-              <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
-            )}
-          <Progress
-            value={currentPlayer.progresso}
-            className={`w-full ${
-              currentPlayer.progresso === 100 ? "bg-green-500" : ""
-            }`}
-          />
+          {/* Remover a mensagem e a barra de progresso daqui */}
           <div className="flex justify-between w-full mt-4 text-sm">
             <div className="flex items-center space-x-1">
               <ChevronUp className="h-4 w-4 text-purple-500" />
