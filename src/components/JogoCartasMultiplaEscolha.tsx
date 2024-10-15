@@ -425,7 +425,9 @@ const EcoChallenge: React.FC = () => {
   const [cartaRevelada, setCartaRevelada] = useState<boolean>(false);
 
   const [rolledNumber, setRolledNumber] = useState<number | null>(null); // Estado para o número sorteado
+  const [rollingNumber, setRollingNumber] = useState<number | null>(null); // Número durante a animação
   const [isDieModalOpen, setIsDieModalOpen] = useState<boolean>(false); // Estado para o modal do dado
+  const [isRolling, setIsRolling] = useState<boolean>(false); // Estado para verificar se o dado está rolando
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
@@ -892,16 +894,27 @@ const EcoChallenge: React.FC = () => {
   };
 
   const rolarDado = () => {
-    const randomNum = Math.floor(Math.random() * 6) + 1;
-    setRolledNumber(randomNum);
+    if (isRolling) return; // Evita múltiplas rolagens simultâneas
 
-    if (ocultarCarta && !cartaRevelada) {
-      // Se a carta está oculta, mostrar o número na carta
-      // O número será mostrado no card
-    } else {
-      // Se a carta está revelada, mostrar um popup
-      setIsDieModalOpen(true);
-    }
+    setIsRolling(true);
+    setIsDieModalOpen(true);
+
+    let rollCount = 0;
+    const maxRolls = 10; // Número de vezes que o número muda durante a animação
+
+    const rollInterval = setInterval(() => {
+      const randomNum = Math.floor(Math.random() * 6) + 1;
+      setRollingNumber(randomNum);
+      rollCount++;
+
+      if (rollCount >= maxRolls) {
+        clearInterval(rollInterval);
+        const finalNumber = Math.floor(Math.random() * 6) + 1;
+        setRolledNumber(finalNumber);
+        setRollingNumber(null);
+        setIsRolling(false);
+      }
+    }, 100); // Intervalo de 100ms para a animação
   };
 
   // Calcular se o botão deve estar desabilitado
@@ -915,12 +928,11 @@ const EcoChallenge: React.FC = () => {
 
   // Construir as propriedades do botão
   const verificarRespostaProps = {
-    onClick: verificarResposta,
     className: `w-full mt-2 ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`,
     onMouseDown: handleLongPressStart,
     onMouseUp: handleLongPressEnd,
     onMouseLeave: handleLongPressEnd,
-    ...(isDisabled ? {} : {}),
+    ...(isDisabled ? {} : { onClick: verificarResposta }),
   };
 
   if (!jogoIniciado) {
@@ -1430,14 +1442,26 @@ const EcoChallenge: React.FC = () => {
               className="absolute top-4 right-4"
               variant="ghost"
               onClick={() => setIsDieModalOpen(false)}
+              disabled={isRolling}
             >
               <XIcon className="h-8 w-8 text-gray-500" />
             </Button>
-            <p className="text-lg mb-2">Você sorteou um</p>
-            <p className="text-6xl font-bold mb-6">{rolledNumber}</p>
-            <Button onClick={rolarDado}>
-              <Dice6 className="h-6 w-6" />
-            </Button>
+            {isRolling ? (
+              <>
+                <p className="text-lg mb-2">Rolando o dado...</p>
+                <p className="text-6xl font-bold mb-6 animate-bounce">
+                  {rollingNumber}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-lg mb-2">Você sorteou um</p>
+                <p className="text-6xl font-bold mb-6">{rolledNumber}</p>
+                <Button onClick={rolarDado}>
+                  <Dice6 className="h-6 w-6" />
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
