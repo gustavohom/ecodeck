@@ -893,6 +893,14 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
+  // Adicionar manipulador para cancelamento do toque
+  const handleLongPressCancel = () => {
+    if (longPressTimeout.current) {
+      clearTimeout(longPressTimeout.current);
+      longPressTimeout.current = null;
+    }
+  };
+
   const rolarDado = () => {
     if (isRolling) return; // Evita múltiplas rolagens simultâneas
 
@@ -932,6 +940,9 @@ const EcoChallenge: React.FC = () => {
     onMouseDown: handleLongPressStart,
     onMouseUp: handleLongPressEnd,
     onMouseLeave: handleLongPressEnd,
+    onTouchStart: handleLongPressStart,
+    onTouchEnd: handleLongPressEnd,
+    onTouchCancel: handleLongPressCancel,
     ...(isDisabled ? {} : { onClick: verificarResposta }),
   };
 
@@ -1123,7 +1134,17 @@ const EcoChallenge: React.FC = () => {
               {rolledNumber !== null && (
                 <p className="text-xl font-bold">Você rolou um {rolledNumber}</p>
               )}
-              <Button onClick={rolarDado} variant="outline" className="mt-2">
+              <Button
+                onClick={rolarDado}
+                variant="outline"
+                className="mt-2"
+                onTouchStart={handleLongPressStart}
+                onTouchEnd={handleLongPressEnd}
+                onTouchCancel={handleLongPressCancel}
+                onMouseDown={handleLongPressStart}
+                onMouseUp={handleLongPressEnd}
+                onMouseLeave={handleLongPressEnd}
+              >
                 <Dice6 className="h-6 w-6" />
                 Rolar Dado
               </Button>
@@ -1227,8 +1248,7 @@ const EcoChallenge: React.FC = () => {
                       {ordemSelecoes.indexOf(opcao.id) + 1}
                       {respondido &&
                         ordemSelecoes.indexOf(opcao.id) + 1 !==
-                          (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
-                            1 && (
+                          (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1 && (
                           <span className="ml-1 text-blue-500">
                             (
                             {
@@ -1386,6 +1406,9 @@ const EcoChallenge: React.FC = () => {
                 onMouseDown={handleLongPressStart}
                 onMouseUp={handleLongPressEnd}
                 onMouseLeave={handleLongPressEnd}
+                onTouchStart={handleLongPressStart}
+                onTouchEnd={handleLongPressEnd}
+                onTouchCancel={handleLongPressCancel}
               >
                 Próxima Carta
               </Button>
