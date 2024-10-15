@@ -24,8 +24,6 @@ import {
   Zap,
   Filter,
   Trash,
-  EyeOff,
-  Eye,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -41,13 +39,7 @@ import estrelasAliens from "./cards_estrelas_aliens";
 import testCards from "./test_card";
 
 // Combine as cartas simples e complexas em um único array
-const cartas = [
-  ...manejoPlantadas,
-  ...manejoNativas,
-  ...ecologiaFlorestal,
-  ...estrelasAliens,
-  ...testCards,
-];
+const cartas = [...manejoPlantadas, ...manejoNativas, ...ecologiaFlorestal, ...estrelasAliens, ...testCards];
 
 // Definição de Tipos
 interface Opcao {
@@ -101,8 +93,6 @@ interface TelaInicialProps {
   onPlayersSetup: (players: Player[]) => void;
   players: Player[];
   setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
-  ocultarCarta: boolean;
-  setOcultarCarta: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const predefinedColors = [
@@ -150,8 +140,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   onPlayersSetup,
   players,
   setPlayers,
-  ocultarCarta,
-  setOcultarCarta,
 }) => {
   const [termoBusca, setTermoBusca] = useState<string>("");
 
@@ -205,7 +193,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   const startGame = () => {
     const initializedPlayers: Player[] = playerInputs.map((input, index) => ({
       id: index,
-      name: input.name || `Jogador ${index + 1}`,
+      name: input.name || Jogador ${index + 1},
       color: input.color || predefinedColors[index % predefinedColors.length],
       fixedStars: 0,
       respostasCertas: 0,
@@ -288,7 +276,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
               <div className="flex items-center space-x-2 mb-1">
                 <input
                   type="text"
-                  placeholder={`Nome do Jogador ${index + 1}`}
+                  placeholder={Nome do Jogador ${index + 1}}
                   value={player.name}
                   maxLength={10}
                   onChange={(e) =>
@@ -355,25 +343,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             </Button>
           )}
         </div>
-        <div className="mt-4">
-          <Button
-            onClick={() => setOcultarCarta(!ocultarCarta)}
-            variant={ocultarCarta ? "default" : "outline"}
-            className="w-full"
-          >
-            {ocultarCarta ? (
-              <>
-                <EyeOff className="h-4 w-4 mr-2" />
-                Ocultar Carta Ativado
-              </>
-            ) : (
-              <>
-                <Eye className="h-4 w-4 mr-2" />
-                Ocultar Carta Desativado
-              </>
-            )}
-          </Button>
-        </div>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
         {hasSavedGame && (
@@ -421,9 +390,6 @@ const EcoChallenge: React.FC = () => {
 
   const [noCardsAvailable, setNoCardsAvailable] = useState<boolean>(false);
 
-  const [ocultarCarta, setOcultarCarta] = useState<boolean>(true);
-  const [cartaRevelada, setCartaRevelada] = useState<boolean>(false);
-
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
   ).sort();
@@ -451,9 +417,6 @@ const EcoChallenge: React.FC = () => {
         setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
         setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
         setJogoIniciado(estado.jogoIniciado || false);
-        setOcultarCarta(
-          estado.ocultarCarta !== undefined ? estado.ocultarCarta : true
-        );
       }
     }
   }, []);
@@ -472,7 +435,6 @@ const EcoChallenge: React.FC = () => {
         categoriasSelecionadas,
         mostrarSomentePerguntas,
         jogoIniciado,
-        ocultarCarta,
       };
       localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
     }
@@ -482,7 +444,6 @@ const EcoChallenge: React.FC = () => {
     categoriasSelecionadas,
     mostrarSomentePerguntas,
     jogoIniciado,
-    ocultarCarta,
   ]);
 
   const selecionarCartaAleatoria = useCallback(() => {
@@ -513,8 +474,7 @@ const EcoChallenge: React.FC = () => {
     setMostrarDica(false);
     setMostrarFontes(false);
     setOpcoesEliminadas([]);
-    setCartaRevelada(!ocultarCarta); // Se não estiver ocultando, já revela a carta
-  }, [categoriasSelecionadas, mostrarSomentePerguntas, ocultarCarta]);
+  }, [categoriasSelecionadas, mostrarSomentePerguntas]);
 
   useEffect(() => {
     if (jogoIniciado) {
@@ -590,14 +550,14 @@ const EcoChallenge: React.FC = () => {
             pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
           });
         }
-        setMensagem(`Correto! ${cartaAtual.vantagem}`);
+        setMensagem(Correto! ${cartaAtual.vantagem});
       } else {
         updateCurrentPlayer({
           respostasErradas: currentPlayer.respostasErradas + 1,
           respostasSeguidas: 0,
           progresso: Math.max(currentPlayer.progresso - 10, 0),
         });
-        setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
+        setMensagem(Incorreto. ${cartaAtual.desvantagem});
       }
     } else if (cartaAtual?.tipo === "Ordem" && ordemSelecoes.length > 0) {
       const isCorrect =
@@ -627,14 +587,14 @@ const EcoChallenge: React.FC = () => {
             pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
           });
         }
-        setMensagem(`Correto! ${cartaAtual.vantagem}`);
+        setMensagem(Correto! ${cartaAtual.vantagem});
       } else {
         updateCurrentPlayer({
           respostasErradas: currentPlayer.respostasErradas + 1,
           respostasSeguidas: 0,
           progresso: Math.max(currentPlayer.progresso - 10, 0),
         });
-        setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
+        setMensagem(Incorreto. ${cartaAtual.desvantagem});
       }
     } else if (cartaAtual && selecionado !== null) {
       setRespondido(true);
@@ -666,7 +626,7 @@ const EcoChallenge: React.FC = () => {
             });
           }
         }
-        setMensagem(`Correto! ${cartaAtual.vantagem}`);
+        setMensagem(Correto! ${cartaAtual.vantagem});
       } else {
         if (["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)) {
           updateCurrentPlayer({
@@ -674,7 +634,7 @@ const EcoChallenge: React.FC = () => {
             respostasSeguidas: 0,
             progresso: Math.max(currentPlayer.progresso - 10, 0),
           });
-          setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
+          setMensagem(Incorreto. ${cartaAtual.desvantagem});
         }
       }
     }
@@ -714,16 +674,16 @@ const EcoChallenge: React.FC = () => {
 
   const toggleDica = () => {
     if (!currentPlayer || !cartaAtual) return;
-    if (currentPlayer.respostasSeguidas >= 2 && cartaAtual.dica) {
+    if (currentPlayer.respostasSeguidas >= 3 && cartaAtual.dica) {
       setMostrarDica(!mostrarDica);
       updateCurrentPlayer({
-        respostasSeguidas: currentPlayer.respostasSeguidas - 2,
+        respostasSeguidas: currentPlayer.respostasSeguidas - 3,
       });
     } else if (!cartaAtual.dica) {
       setMensagem("Esta carta não possui dica.");
     } else {
       setMensagem(
-        "Você precisa de pelo menos 2 respostas corretas seguidas para usar a dica!"
+        "Você precisa de pelo menos 3 respostas corretas seguidas para usar a dica!"
       );
     }
   };
@@ -744,7 +704,7 @@ const EcoChallenge: React.FC = () => {
 
   const eliminarRespostaErrada = () => {
     if (!currentPlayer || !cartaAtual) return;
-    if (currentPlayer.respostasSeguidas >= 2 && cartaAtual) {
+    if (currentPlayer.respostasSeguidas >= 4 && cartaAtual) {
       const opcoesErradas = cartaAtual.opcoes.filter((opcao: Opcao) => {
         if (Array.isArray(cartaAtual.respostaCorreta)) {
           return !cartaAtual.respostaCorreta.includes(opcao.id);
@@ -765,12 +725,12 @@ const EcoChallenge: React.FC = () => {
 
         setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
         updateCurrentPlayer({
-          respostasSeguidas: currentPlayer.respostasSeguidas - 2,
+          respostasSeguidas: currentPlayer.respostasSeguidas - 4,
         });
         setMensagem("Uma resposta errada foi eliminada!");
       }
     } else {
-      setMensagem("Você precisa de pelo menos 2 respostas corretas seguidas!");
+      setMensagem("Você precisa de pelo menos 4 respostas corretas seguidas!");
     }
   };
 
@@ -855,7 +815,7 @@ const EcoChallenge: React.FC = () => {
                   alt={alt}
                   width={500}
                   height={300}
-                  className={`${className} img-zoom`}
+                  className={${className} img-zoom}
                 />
               </Zoom>
             );
@@ -891,8 +851,6 @@ const EcoChallenge: React.FC = () => {
         onPlayersSetup={handlePlayersSetup}
         players={players}
         setPlayers={setPlayers}
-        ocultarCarta={ocultarCarta}
-        setOcultarCarta={setOcultarCarta}
       />
     );
   }
@@ -908,9 +866,9 @@ const EcoChallenge: React.FC = () => {
     return (
       <div className="flex flex-col items-center">
         <div
-          className={`grid gap-1 mb-1 ${
-            players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
-          }`}
+          className={grid gap-1 mb-1 ${
+            players.length > 4 ? "grid-cols-4" : grid-cols-${players.length}
+          }}
           style={{ width: "100%", maxWidth: "400px" }}
         >
           {players.map((player) => (
@@ -946,6 +904,7 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
+  // Modificação para mostrar o botão de voltar à tela inicial
   if (!cartaAtual || !currentPlayer) {
     return (
       <div className="flex flex-col items-center">
@@ -958,9 +917,6 @@ const EcoChallenge: React.FC = () => {
   }
 
   const obterEstiloCarta = () => {
-    if (ocultarCarta && !cartaRevelada) {
-      return "border-gray-200 bg-white"; // Cor única para a carta genérica
-    }
     switch (cartaAtual.tipo) {
       case "Outras":
         return "border-blue-200 bg-blue-50";
@@ -978,9 +934,9 @@ const EcoChallenge: React.FC = () => {
   return (
     <div className="flex flex-col items-center">
       <div
-        className={`grid gap-1 mb-1 ${
-          players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
-        }`}
+        className={grid gap-1 mb-1 ${
+          players.length > 4 ? "grid-cols-4" : grid-cols-${players.length}
+        }}
         style={{ width: "100%", maxWidth: "400px" }}
       >
         {players.map((player) => (
@@ -1001,11 +957,11 @@ const EcoChallenge: React.FC = () => {
         ))}
       </div>
       <Card
-        className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}
+        className={w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}}
         style={
-          players.length > 1 && currentPlayer && !(ocultarCarta && !cartaRevelada)
+          players.length > 1 && currentPlayer
             ? {
-                boxShadow: `0 0 10px 5px ${currentPlayer.color}`,
+                boxShadow: 0 0 10px 5px ${currentPlayer.color},
               }
             : {}
         }
@@ -1016,195 +972,179 @@ const EcoChallenge: React.FC = () => {
               <Button
                 onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
                 size="sm"
-                variant={mostrarSomentePerguntas ? "default" : "outline"}
+                variant="outline"
                 disabled={!hasQuestionCards}
               >
                 <Filter className="h-4 w-4" />
               </Button>
               <CardTitle className="text-xl font-bold">
-                {ocultarCarta && !cartaRevelada
-                  ? "Carta Oculta"
-                  : cartaAtual.titulo}
+                {cartaAtual.titulo}
               </CardTitle>
             </div>
-            {!ocultarCarta || cartaRevelada ? (
-              <Badge
-                variant={
-                  cartaAtual.dificuldade === "facil"
-                    ? "secondary"
-                    : cartaAtual.dificuldade === "normal"
-                    ? "default"
-                    : "destructive"
-                }
-              >
-                {cartaAtual.dificuldade}
-              </Badge>
-            ) : null}
+            <Badge
+              variant={
+                cartaAtual.dificuldade === "facil"
+                  ? "secondary"
+                  : cartaAtual.dificuldade === "normal"
+                  ? "default"
+                  : "destructive"
+              }
+            >
+              {cartaAtual.dificuldade}
+            </Badge>
           </div>
-          {!ocultarCarta || cartaRevelada ? (
-            <ScrollArea className="h-56 rounded-md border p-4">
-              <div className="text-sm">{renderizarConteudoPergunta()}</div>
-            </ScrollArea>
-          ) : (
-            <div className="h-56 flex items-center justify-center">
-              <p className="text-sm">Conteúdo da carta oculto</p>
-            </div>
-          )}
+          <ScrollArea className="h-56 rounded-md border p-4">
+            <div className="text-sm">{renderizarConteudoPergunta()}</div>
+          </ScrollArea>
         </CardHeader>
-        {!ocultarCarta || cartaRevelada ? (
-          <CardContent>
-            <div className="space-y-2">
-              {cartaAtual.opcoes.map((opcao: Opcao) => (
-                <Button
-                  key={opcao.id}
-                  onClick={() =>
-                    cartaAtual.tipo === "MultiplaEscolha"
-                      ? handleSelecaoMultipla(opcao.id)
-                      : cartaAtual.tipo === "Ordem"
-                      ? handleSelecaoOrdem(opcao.id)
-                      : handleSelecao(opcao.id)
-                  }
-                  variant={
-                    selecionado === opcao.id ||
-                    selecoesMultiplas.includes(opcao.id)
-                      ? "secondary"
-                      : "outline"
-                  }
-                  className={`w-full justify-start text-sm ${
-                    respondido &&
-                    (Array.isArray(cartaAtual.respostaCorreta)
+        <CardContent>
+          <div className="space-y-2">
+            {cartaAtual.opcoes.map((opcao: Opcao) => (
+              <Button
+                key={opcao.id}
+                onClick={() =>
+                  cartaAtual.tipo === "MultiplaEscolha"
+                    ? handleSelecaoMultipla(opcao.id)
+                    : cartaAtual.tipo === "Ordem"
+                    ? handleSelecaoOrdem(opcao.id)
+                    : handleSelecao(opcao.id)
+                }
+                variant={
+                  selecionado === opcao.id ||
+                  selecoesMultiplas.includes(opcao.id)
+                    ? "secondary"
+                    : "outline"
+                }
+                className={w-full justify-start text-sm ${
+                  respondido &&
+                  (Array.isArray(cartaAtual.respostaCorreta)
+                    ? cartaAtual.respostaCorreta.includes(opcao.id)
+                    : cartaAtual.respostaCorreta === opcao.id)
+                    ? "bg-green-100"
+                    : ""
+                } ${
+                  respondido &&
+                  selecionado === opcao.id &&
+                  !(
+                    Array.isArray(cartaAtual.respostaCorreta)
                       ? cartaAtual.respostaCorreta.includes(opcao.id)
-                      : cartaAtual.respostaCorreta === opcao.id)
-                      ? "bg-green-100"
-                      : ""
-                  } ${
-                    respondido &&
-                    selecionado === opcao.id &&
-                    !(
-                      Array.isArray(cartaAtual.respostaCorreta)
-                        ? cartaAtual.respostaCorreta.includes(opcao.id)
-                        : cartaAtual.respostaCorreta === opcao.id
-                    )
-                      ? "bg-red-100"
-                      : ""
-                  } ${
-                    respondido &&
-                    cartaAtual.tipo === "MultiplaEscolha" &&
-                    Array.isArray(cartaAtual.respostaCorreta) &&
-                    !cartaAtual.respostaCorreta.includes(opcao.id) &&
-                    selecoesMultiplas.includes(opcao.id)
-                      ? "bg-red-100"
-                      : ""
-                  } ${
-                    respondido &&
-                    cartaAtual.tipo === "MultiplaEscolha" &&
-                    Array.isArray(cartaAtual.respostaCorreta) &&
-                    cartaAtual.respostaCorreta.includes(opcao.id) &&
-                    !selecoesMultiplas.includes(opcao.id)
-                      ? "bg-blue-100"
-                      : ""
-                  } ${
-                    respondido &&
-                    cartaAtual.tipo === "Ordem" &&
-                    ordemSelecoes.includes(opcao.id) &&
-                    ordemSelecoes.indexOf(opcao.id) + 1 !==
-                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
-                        1
-                      ? "bg-red-100"
-                      : ""
-                  } ${
-                    respondido &&
-                    cartaAtual.tipo === "Ordem" &&
-                    ordemSelecoes.includes(opcao.id) &&
-                    ordemSelecoes.indexOf(opcao.id) + 1 ===
-                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
-                        1
-                      ? "bg-green-100"
-                      : ""
-                  } ${
-                    opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""
-                  }`}
-                  disabled={opcoesEliminadas.includes(opcao.id)}
-                  style={{
-                    maxHeight: "80px",
-                    height: "auto",
-                    overflowY: "auto",
-                    whiteSpace: "normal",
-                    alignItems: "flex-start",
-                    display: "flex",
-                    textAlign: "left",
-                    padding: "8px",
-                  }}
-                >
-                  {opcao.texto}
-                  {cartaAtual.tipo === "MultiplaEscolha" && (
+                      : cartaAtual.respostaCorreta === opcao.id
+                  )
+                    ? "bg-red-100"
+                    : ""
+                } ${
+                  respondido &&
+                  cartaAtual.tipo === "MultiplaEscolha" &&
+                  Array.isArray(cartaAtual.respostaCorreta) &&
+                  !cartaAtual.respostaCorreta.includes(opcao.id) &&
+                  selecoesMultiplas.includes(opcao.id)
+                    ? "bg-red-100"
+                    : ""
+                } ${
+                  respondido &&
+                  cartaAtual.tipo === "MultiplaEscolha" &&
+                  Array.isArray(cartaAtual.respostaCorreta) &&
+                  cartaAtual.respostaCorreta.includes(opcao.id) &&
+                  !selecoesMultiplas.includes(opcao.id)
+                    ? "bg-blue-100"
+                    : ""
+                } ${
+                  respondido &&
+                  cartaAtual.tipo === "Ordem" &&
+                  ordemSelecoes.includes(opcao.id) &&
+                  ordemSelecoes.indexOf(opcao.id) + 1 !==
+                    (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
+                    ? "bg-red-100"
+                    : ""
+                } ${
+                  respondido &&
+                  cartaAtual.tipo === "Ordem" &&
+                  ordemSelecoes.includes(opcao.id) &&
+                  ordemSelecoes.indexOf(opcao.id) + 1 ===
+                    (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
+                    ? "bg-green-100"
+                    : ""
+                } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}}
+                disabled={opcoesEliminadas.includes(opcao.id)}
+                style={{
+                  maxHeight: "80px",
+                  height: "auto",
+                  overflowY: "auto",
+                  whiteSpace: "normal",
+                  alignItems: "flex-start",
+                  display: "flex",
+                  textAlign: "left",
+                  padding: "8px",
+                }}
+              >
+                {opcao.texto}
+                {cartaAtual.tipo === "MultiplaEscolha" && (
+                  <span className="ml-2">
+                    {selecoesMultiplas.includes(opcao.id) ? (
+                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                    ) : (
+                      <span className="h-4 w-4 border rounded" />
+                    )}
+                  </span>
+                )}
+                {cartaAtual.tipo === "Ordem" &&
+                  ordemSelecoes.includes(opcao.id) && (
                     <span className="ml-2">
-                      {selecoesMultiplas.includes(opcao.id) ? (
-                        <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                      ) : (
-                        <span className="h-4 w-4 border rounded" />
-                      )}
+                      {ordemSelecoes.indexOf(opcao.id) + 1}
+                      {respondido &&
+                        ordemSelecoes.indexOf(opcao.id) + 1 !==
+                          (cartaAtual.respostaCorreta as number[]).indexOf(
+                            opcao.id
+                          ) +
+                            1 && (
+                          <span className="ml-1 text-blue-500">
+                            (
+                            {
+                              (cartaAtual.respostaCorreta as number[]).indexOf(
+                                opcao.id
+                              ) + 1
+                            }
+                            )
+                          </span>
+                        )}
                     </span>
                   )}
-                  {cartaAtual.tipo === "Ordem" &&
-                    ordemSelecoes.includes(opcao.id) && (
-                      <span className="ml-2">
-                        {ordemSelecoes.indexOf(opcao.id) + 1}
-                        {respondido &&
-                          ordemSelecoes.indexOf(opcao.id) + 1 !==
-                            (cartaAtual.respostaCorreta as number[]).indexOf(
-                              opcao.id
-                            ) +
-                              1 && (
-                            <span className="ml-1 text-blue-500">
-                              (
-                              {
-                                (
-                                  cartaAtual.respostaCorreta as number[]
-                                ).indexOf(opcao.id) + 1
-                              }
-                              )
-                            </span>
-                          )}
-                      </span>
-                    )}
-                  {respondido &&
-                    (Array.isArray(cartaAtual.respostaCorreta)
+                {respondido &&
+                  (Array.isArray(cartaAtual.respostaCorreta)
+                    ? cartaAtual.respostaCorreta.includes(opcao.id)
+                    : cartaAtual.respostaCorreta === opcao.id) && (
+                    <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
+                  )}
+                {respondido &&
+                  selecionado === opcao.id &&
+                  !(
+                    Array.isArray(cartaAtual.respostaCorreta)
                       ? cartaAtual.respostaCorreta.includes(opcao.id)
-                      : cartaAtual.respostaCorreta === opcao.id) && (
-                      <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
-                    )}
-                  {respondido &&
-                    selecionado === opcao.id &&
-                    !(
-                      Array.isArray(cartaAtual.respostaCorreta)
-                        ? cartaAtual.respostaCorreta.includes(opcao.id)
-                        : cartaAtual.respostaCorreta === opcao.id
-                    ) && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
-                </Button>
-              ))}
-            </div>
-            {/* Mover a mensagem e a barra de progresso para cá */}
-            {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
-              mensagem && (
-                <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
-              )}
-            <Progress
-              value={currentPlayer.progresso}
-              className={`w-full ${
-                currentPlayer.progresso === 100 ? "bg-green-500" : ""
-              }`}
-            />
-          </CardContent>
-        ) : null}
+                      : cartaAtual.respostaCorreta === opcao.id
+                  ) && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
+              </Button>
+            ))}
+          </div>
+          {mostrarDica && (
+            <Alert className="mt-4">
+              <AlertDescription>{cartaAtual.dica}</AlertDescription>
+            </Alert>
+          )}
+          {mostrarFontes && (
+            <Alert className="mt-4">
+              <AlertDescription>
+                <ul className="list-disc list-inside">
+                  {cartaAtual.fontes.map((fonte: string, index: number) => (
+                    <li key={index}>{fonte}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
         <CardFooter className="flex flex-col items-center">
           <div className="flex flex-wrap justify-between w-full mb-1 space-x-2">
-            <Button
-              onClick={toggleFontes}
-              size="sm"
-              variant="outline"
-              disabled={ocultarCarta && !cartaRevelada}
-            >
+            <Button onClick={toggleFontes} size="sm" variant="outline">
               <BookOpen className="h-4 w-4" />
             </Button>
             <Button
@@ -1214,11 +1154,10 @@ const EcoChallenge: React.FC = () => {
                 currentPlayer.pulosDisponiveis === 0 ? "outline" : "secondary"
               }
               disabled={
-                (currentPlayer.pulosDisponiveis === 0 ||
-                  !["Pergunta", "MultiplaEscolha", "Ordem"].includes(
-                    cartaAtual.tipo
-                  )) ||
-                (ocultarCarta && !cartaRevelada)
+                currentPlayer.pulosDisponiveis === 0 ||
+                !["Pergunta", "MultiplaEscolha", "Ordem"].includes(
+                  cartaAtual.tipo
+                )
               }
             >
               <SkipForward className="h-4 w-4" />
@@ -1227,15 +1166,11 @@ const EcoChallenge: React.FC = () => {
               onClick={toggleDica}
               size="sm"
               variant={
-                currentPlayer.respostasSeguidas < 2 || !cartaAtual.dica
+                currentPlayer.respostasSeguidas < 3 || !cartaAtual.dica
                   ? "outline"
                   : "secondary"
               }
-              disabled={
-                currentPlayer.respostasSeguidas < 2 ||
-                !cartaAtual.dica ||
-                (ocultarCarta && !cartaRevelada)
-              }
+              disabled={currentPlayer.respostasSeguidas < 3 || !cartaAtual.dica}
             >
               <HelpCircle className="h-4 w-4" />
             </Button>
@@ -1243,12 +1178,9 @@ const EcoChallenge: React.FC = () => {
               onClick={eliminarRespostaErrada}
               size="sm"
               variant={
-                currentPlayer.respostasSeguidas < 2 ? "outline" : "secondary"
+                currentPlayer.respostasSeguidas < 4 ? "outline" : "secondary"
               }
-              disabled={
-                currentPlayer.respostasSeguidas < 2 ||
-                (ocultarCarta && !cartaRevelada)
-              }
+              disabled={currentPlayer.respostasSeguidas < 4}
             >
               <MinusCircle className="h-4 w-4" />
             </Button>
@@ -1283,23 +1215,12 @@ const EcoChallenge: React.FC = () => {
             <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
               <ChevronUp className="h-4 w-4 text-purple-500 transform rotate-180" />
             </Button>
-            <Button
-              onClick={incrementarRodadasPreso}
-              size="sm"
-              variant="outline"
-            >
+            <Button onClick={incrementarRodadasPreso} size="sm" variant="outline">
               <ChevronUp className="h-4 w-4 text-purple-500" />
             </Button>
           </div>
           <div className="flex justify-between w-full mb-4">
-            {ocultarCarta && !cartaRevelada ? (
-              <Button
-                onClick={() => setCartaRevelada(true)}
-                className="w-full mt-2"
-              >
-                Revelar
-              </Button>
-            ) : !respondido ? (
+            {!respondido ? (
               <Button
                 onClick={verificarResposta}
                 disabled={
@@ -1319,7 +1240,16 @@ const EcoChallenge: React.FC = () => {
               </Button>
             )}
           </div>
-          {/* Remover a mensagem e a barra de progresso daqui */}
+          {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
+            mensagem && (
+              <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
+            )}
+          <Progress
+            value={currentPlayer.progresso}
+            className={w-full ${
+              currentPlayer.progresso === 100 ? "bg-green-500" : ""
+            }}
+          />
           <div className="flex justify-between w-full mt-4 text-sm">
             <div className="flex items-center space-x-1">
               <ChevronUp className="h-4 w-4 text-purple-500" />
