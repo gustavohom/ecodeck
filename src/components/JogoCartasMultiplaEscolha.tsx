@@ -26,6 +26,7 @@ import {
   Trash,
   EyeOff,
   Eye,
+  Dice6, // Imported Dice6 icon
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -424,6 +425,8 @@ const EcoChallenge: React.FC = () => {
   const [ocultarCarta, setOcultarCarta] = useState<boolean>(true);
   const [cartaRevelada, setCartaRevelada] = useState<boolean>(false);
 
+  const [rolledNumber, setRolledNumber] = useState<number | null>(null); // State to store the rolled number
+
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
   ).sort();
@@ -514,6 +517,7 @@ const EcoChallenge: React.FC = () => {
     setMostrarFontes(false);
     setOpcoesEliminadas([]);
     setCartaRevelada(!ocultarCarta); // Se não estiver ocultando, já revela a carta
+    setRolledNumber(null); // Reset rolled number when selecting a new card
   }, [categoriasSelecionadas, mostrarSomentePerguntas, ocultarCarta]);
 
   useEffect(() => {
@@ -717,7 +721,7 @@ const EcoChallenge: React.FC = () => {
     if (currentPlayer.respostasSeguidas >= 2 && cartaAtual.dica) {
       setMostrarDica(!mostrarDica);
       updateCurrentPlayer({
-        respostasSeguidas: currentPlayer.respostasSeguidas -2,
+        respostasSeguidas: currentPlayer.respostasSeguidas - 2,
       });
     } else if (!cartaAtual.dica) {
       setMensagem("Esta carta não possui dica.");
@@ -765,7 +769,7 @@ const EcoChallenge: React.FC = () => {
 
         setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
         updateCurrentPlayer({
-          respostasSeguidas: currentPlayer.respostasSeguidas -2,
+          respostasSeguidas: currentPlayer.respostasSeguidas - 2,
         });
         setMensagem("Uma resposta errada foi eliminada!");
       }
@@ -1003,7 +1007,9 @@ const EcoChallenge: React.FC = () => {
       <Card
         className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}
         style={
-          players.length > 1 && currentPlayer && !(ocultarCarta && !cartaRevelada)
+          players.length > 1 &&
+          currentPlayer &&
+          !(ocultarCarta && !cartaRevelada)
             ? {
                 boxShadow: `0 0 10px 5px ${currentPlayer.color}`,
               }
@@ -1021,33 +1027,68 @@ const EcoChallenge: React.FC = () => {
               >
                 <Filter className="h-4 w-4" />
               </Button>
-              <CardTitle className="text-xl font-bold">
-                {ocultarCarta && !cartaRevelada
-                  ? "Carta Oculta"
-                  : cartaAtual.titulo}
-              </CardTitle>
+              <div className="flex flex-col">
+                <CardTitle className="text-xl font-bold">
+                  {ocultarCarta && !cartaRevelada
+                    ? "Carta Oculta"
+                    : cartaAtual.titulo}
+                </CardTitle>
+                {!ocultarCarta || cartaRevelada ? (
+                  <p className="text-xs text-gray-500">
+                    {cartaAtual.categorias.join(", ")}
+                  </p>
+                ) : null}
+              </div>
             </div>
-            {!ocultarCarta || cartaRevelada ? (
-              <Badge
-                variant={
-                  cartaAtual.dificuldade === "facil"
-                    ? "secondary"
-                    : cartaAtual.dificuldade === "normal"
-                    ? "default"
-                    : "destructive"
-                }
-              >
-                {cartaAtual.dificuldade}
-              </Badge>
-            ) : null}
+            <div className="flex items-center space-x-2">
+              {!ocultarCarta || cartaRevelada ? (
+                <>
+                  <Badge
+                    variant={
+                      cartaAtual.dificuldade === "facil"
+                        ? "secondary"
+                        : cartaAtual.dificuldade === "normal"
+                        ? "default"
+                        : "destructive"
+                    }
+                  >
+                    {cartaAtual.dificuldade}
+                  </Badge>
+                  <Button
+                    onClick={() => {
+                      const randomNum = Math.floor(Math.random() * 6) + 1;
+                      setRolledNumber(randomNum);
+                    }}
+                    size="sm"
+                    variant="outline"
+                  >
+                    <Dice6 className="h-4 w-4" />
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={() => {
+                    const randomNum = Math.floor(Math.random() * 6) + 1;
+                    setRolledNumber(randomNum);
+                  }}
+                  size="sm"
+                  variant="outline"
+                >
+                  <Dice6 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
           {!ocultarCarta || cartaRevelada ? (
             <ScrollArea className="h-56 rounded-md border p-4">
               <div className="text-sm">{renderizarConteudoPergunta()}</div>
             </ScrollArea>
           ) : (
-            <div className="h-56 flex items-center justify-center">
+            <div className="h-56 flex flex-col items-center justify-center space-y-2">
               <p className="text-sm">Conteúdo da carta oculto</p>
+              {rolledNumber !== null && (
+                <p className="text-xl font-bold">Você rolou um {rolledNumber}</p>
+              )}
             </div>
           )}
         </CardHeader>
@@ -1156,16 +1197,16 @@ const EcoChallenge: React.FC = () => {
                               opcao.id
                             ) +
                               1 && (
-                            <span className="ml-1 text-blue-500">
-                              (
-                              {
+                              <span className="ml-1 text-blue-500">
                                 (
-                                  cartaAtual.respostaCorreta as number[]
-                                ).indexOf(opcao.id) + 1
-                              }
-                              )
-                            </span>
-                          )}
+                                {
+                                  (
+                                    cartaAtual.respostaCorreta as number[]
+                                  ).indexOf(opcao.id) + 1
+                                }
+                                )
+                              </span>
+                            )}
                       </span>
                     )}
                   {respondido &&
