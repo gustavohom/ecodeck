@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -26,7 +26,6 @@ import {
   Trash,
   EyeOff,
   Eye,
-  Dice6, // Imported Dice6 icon
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -426,6 +425,7 @@ const EcoChallenge: React.FC = () => {
   const [cartaRevelada, setCartaRevelada] = useState<boolean>(false);
 
   const [rolledNumber, setRolledNumber] = useState<number | null>(null); // State to store the rolled number
+  const [isDieModalOpen, setIsDieModalOpen] = useState<boolean>(false); // State for die modal
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
@@ -518,6 +518,7 @@ const EcoChallenge: React.FC = () => {
     setOpcoesEliminadas([]);
     setCartaRevelada(!ocultarCarta); // Se não estiver ocultando, já revela a carta
     setRolledNumber(null); // Reset rolled number when selecting a new card
+    setIsDieModalOpen(false); // Close die modal when selecting a new card
   }, [categoriasSelecionadas, mostrarSomentePerguntas, ocultarCarta]);
 
   useEffect(() => {
@@ -876,6 +877,35 @@ const EcoChallenge: React.FC = () => {
     setCurrentPlayerId(initializedPlayers[0].id);
   };
 
+  // Implementação do long-press para rolar o dado
+  const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const handleLongPressStart = () => {
+    longPressTimeout.current = setTimeout(() => {
+      rolarDado();
+    }, 2000); // 2 segundos
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimeout.current) {
+      clearTimeout(longPressTimeout.current);
+      longPressTimeout.current = null;
+    }
+  };
+
+  const rolarDado = () => {
+    const randomNum = Math.floor(Math.random() * 6) + 1;
+    setRolledNumber(randomNum);
+
+    if (ocultarCarta && !cartaRevelada) {
+      // Se a carta está oculta, mostrar o número na carta
+      // O número será mostrado no card
+    } else {
+      // Se a carta está revelada, mostrar um popup
+      setIsDieModalOpen(true);
+    }
+  };
+
   if (!jogoIniciado) {
     return (
       <TelaInicial
@@ -1061,6 +1091,11 @@ const EcoChallenge: React.FC = () => {
           ) : (
             <div className="h-56 flex flex-col items-center justify-center space-y-2">
               <p className="text-sm">Conteúdo da carta oculto</p>
+              {rolledNumber !== null && (
+                <p className="text-xl font-bold">
+                  Você rolou um {rolledNumber}
+                </p>
+              )}
             </div>
           )}
         </CardHeader>
@@ -1185,8 +1220,8 @@ const EcoChallenge: React.FC = () => {
                     (Array.isArray(cartaAtual.respostaCorreta)
                       ? cartaAtual.respostaCorreta.includes(opcao.id)
                       : cartaAtual.respostaCorreta === opcao.id) && (
-                      <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
-                    )}
+                    <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
+                  )}
                   {respondido &&
                     selecionado === opcao.id &&
                     !(
@@ -1311,87 +1346,42 @@ const EcoChallenge: React.FC = () => {
           </div>
           <div className="flex justify-between w-full mb-4">
             {ocultarCarta && !cartaRevelada ? (
-              <div className="flex w-full mt-2 space-x-2">
-                <Button
-                  onClick={() => setCartaRevelada(true)}
-                  className="flex-1"
-                >
-                  Revelar
-                </Button>
-                <Button
-                  onClick={() => {
-                    const randomNum = Math.floor(Math.random() * 6) + 1;
-                    setRolledNumber(randomNum);
-                  }}
-                  size="sm"
-                  variant="outline"
-                  className="relative"
-                >
-                  <Dice6 className="h-4 w-4" />
-                  {rolledNumber !== null && (
-                    <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
-                      {rolledNumber}
-                    </span>
-                  )}
-                </Button>
-              </div>
+              <Button
+                onClick={() => setCartaRevelada(true)}
+                className="w-full mt-2"
+                onMouseDown={handleLongPressStart}
+                onMouseUp={handleLongPressEnd}
+                onMouseLeave={handleLongPressEnd}
+              >
+                Revelar
+              </Button>
             ) : !respondido ? (
-              <div className="flex w-full mt-2 space-x-2">
-                <Button
-                  onClick={verificarResposta}
-                  disabled={
-                    (cartaAtual.tipo === "Ordem" &&
-                      ordemSelecoes.length !== cartaAtual.opcoes.length) ||
-                    (cartaAtual.tipo !== "Ordem" &&
-                      selecionado === null &&
-                      selecoesMultiplas.length === 0)
-                  }
-                  className="flex-1"
-                >
-                  Verificar
-                </Button>
-                <Button
-                  onClick={() => {
-                    const randomNum = Math.floor(Math.random() * 6) + 1;
-                    setRolledNumber(randomNum);
-                  }}
-                  size="sm"
-                  variant="outline"
-                  className="relative"
-                >
-                  <Dice6 className="h-4 w-4" />
-                  {rolledNumber !== null && (
-                    <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
-                      {rolledNumber}
-                    </span>
-                  )}
-                </Button>
-              </div>
+              <Button
+                onClick={verificarResposta}
+                disabled={
+                  (cartaAtual.tipo === "Ordem" &&
+                    ordemSelecoes.length !== cartaAtual.opcoes.length) ||
+                  (cartaAtual.tipo !== "Ordem" &&
+                    selecionado === null &&
+                    selecoesMultiplas.length === 0)
+                }
+                className="w-full mt-2"
+                onMouseDown={handleLongPressStart}
+                onMouseUp={handleLongPressEnd}
+                onMouseLeave={handleLongPressEnd}
+              >
+                Verificar
+              </Button>
             ) : (
-              <div className="flex w-full mt-2 space-x-2">
-                <Button
-                  onClick={selecionarCartaAleatoria}
-                  className="flex-1"
-                >
-                  Próxima Carta
-                </Button>
-                <Button
-                  onClick={() => {
-                    const randomNum = Math.floor(Math.random() * 6) + 1;
-                    setRolledNumber(randomNum);
-                  }}
-                  size="sm"
-                  variant="outline"
-                  className="relative"
-                >
-                  <Dice6 className="h-4 w-4" />
-                  {rolledNumber !== null && (
-                    <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
-                      {rolledNumber}
-                    </span>
-                  )}
-                </Button>
-              </div>
+              <Button
+                onClick={selecionarCartaAleatoria}
+                className="w-full mt-2"
+                onMouseDown={handleLongPressStart}
+                onMouseUp={handleLongPressEnd}
+                onMouseLeave={handleLongPressEnd}
+              >
+                Próxima Carta
+              </Button>
             )}
           </div>
           {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
@@ -1436,6 +1426,19 @@ const EcoChallenge: React.FC = () => {
           </div>
         </CardFooter>
       </Card>
+
+      {/* Modal para mostrar o número do dado quando a carta está revelada */}
+      {isDieModalOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={() => setIsDieModalOpen(false)}
+        >
+          <div className="bg-white p-4 rounded shadow-lg text-center">
+            <p className="text-xl font-bold mb-2">Você rolou um {rolledNumber}</p>
+            <Button onClick={() => setIsDieModalOpen(false)}>Fechar</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
