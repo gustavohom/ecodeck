@@ -27,6 +27,7 @@ import {
   EyeOff,
   Eye,
   Dice6,
+  XCircle as XIcon,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -911,11 +912,12 @@ const EcoChallenge: React.FC = () => {
   const verificarRespostaProps = {
     onClick: verificarResposta,
     disabled:
-      (cartaAtual.tipo === "Ordem" &&
+      !cartaAtual ||
+      ((cartaAtual.tipo === "Ordem" &&
         ordemSelecoes.length !== cartaAtual.opcoes.length) ||
-      (cartaAtual.tipo !== "Ordem" &&
-        selecionado === null &&
-        selecoesMultiplas.length === 0),
+        (cartaAtual.tipo !== "Ordem" &&
+          selecionado === null &&
+          selecoesMultiplas.length === 0)),
     className: "w-full mt-2",
     onMouseDown: handleLongPressStart,
     onMouseUp: handleLongPressEnd,
@@ -1451,7 +1453,7 @@ const EcoChallenge: React.FC = () => {
               variant="ghost"
               onClick={() => setIsDieModalOpen(false)}
             >
-              <XCircle className="h-6 w-6 text-gray-500" />
+              <XIcon className="h-6 w-6 text-gray-500" />
             </Button>
             <p className="text-2xl font-bold mb-4">
               Você rolou um {rolledNumber}
