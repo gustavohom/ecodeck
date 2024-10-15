@@ -26,6 +26,7 @@ import {
   Trash,
   EyeOff,
   Eye,
+  Dice6,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -424,8 +425,8 @@ const EcoChallenge: React.FC = () => {
   const [ocultarCarta, setOcultarCarta] = useState<boolean>(true);
   const [cartaRevelada, setCartaRevelada] = useState<boolean>(false);
 
-  const [rolledNumber, setRolledNumber] = useState<number | null>(null); // State to store the rolled number
-  const [isDieModalOpen, setIsDieModalOpen] = useState<boolean>(false); // State for die modal
+  const [rolledNumber, setRolledNumber] = useState<number | null>(null); // Estado para o número sorteado
+  const [isDieModalOpen, setIsDieModalOpen] = useState<boolean>(false); // Estado para o modal do dado
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
@@ -517,8 +518,8 @@ const EcoChallenge: React.FC = () => {
     setMostrarFontes(false);
     setOpcoesEliminadas([]);
     setCartaRevelada(!ocultarCarta); // Se não estiver ocultando, já revela a carta
-    setRolledNumber(null); // Reset rolled number when selecting a new card
-    setIsDieModalOpen(false); // Close die modal when selecting a new card
+    setRolledNumber(null); // Resetar número sorteado
+    setIsDieModalOpen(false); // Fechar modal do dado
   }, [categoriasSelecionadas, mostrarSomentePerguntas, ocultarCarta]);
 
   useEffect(() => {
@@ -883,7 +884,7 @@ const EcoChallenge: React.FC = () => {
   const handleLongPressStart = () => {
     longPressTimeout.current = setTimeout(() => {
       rolarDado();
-    }, 2000); // 2 segundos
+    }, 1000); // 1 segundo
   };
 
   const handleLongPressEnd = () => {
@@ -905,6 +906,26 @@ const EcoChallenge: React.FC = () => {
       setIsDieModalOpen(true);
     }
   };
+
+  // Permitir rolar o dado mesmo quando o botão está desabilitado
+  const verificarRespostaProps = {
+    onClick: verificarResposta,
+    disabled:
+      (cartaAtual.tipo === "Ordem" &&
+        ordemSelecoes.length !== cartaAtual.opcoes.length) ||
+      (cartaAtual.tipo !== "Ordem" &&
+        selecionado === null &&
+        selecoesMultiplas.length === 0),
+    className: "w-full mt-2",
+    onMouseDown: handleLongPressStart,
+    onMouseUp: handleLongPressEnd,
+    onMouseLeave: handleLongPressEnd,
+  };
+
+  // Se o botão está desabilitado, remover o atributo "disabled" do HTML para permitir o onMouseDown
+  if (verificarRespostaProps.disabled) {
+    delete verificarRespostaProps.disabled;
+  }
 
   if (!jogoIniciado) {
     return (
@@ -1096,6 +1117,14 @@ const EcoChallenge: React.FC = () => {
                   Você rolou um {rolledNumber}
                 </p>
               )}
+              <Button
+                onClick={rolarDado}
+                variant="outline"
+                className="mt-2"
+              >
+                <Dice6 className="h-6 w-6" />
+                Rolar Dado
+              </Button>
             </div>
           )}
         </CardHeader>
@@ -1204,16 +1233,16 @@ const EcoChallenge: React.FC = () => {
                               opcao.id
                             ) +
                               1 && (
-                            <span className="ml-1 text-blue-500">
+                          <span className="ml-1 text-blue-500">
+                            (
+                            {
                               (
-                              {
-                                (
-                                  cartaAtual.respostaCorreta as number[]
-                                ).indexOf(opcao.id) + 1
-                              }
-                              )
-                            </span>
-                          )}
+                                cartaAtual.respostaCorreta as number[]
+                              ).indexOf(opcao.id) + 1
+                            }
+                            )
+                          </span>
+                        )}
                       </span>
                     )}
                   {respondido &&
@@ -1349,27 +1378,11 @@ const EcoChallenge: React.FC = () => {
               <Button
                 onClick={() => setCartaRevelada(true)}
                 className="w-full mt-2"
-                onMouseDown={handleLongPressStart}
-                onMouseUp={handleLongPressEnd}
-                onMouseLeave={handleLongPressEnd}
               >
                 Revelar
               </Button>
             ) : !respondido ? (
-              <Button
-                onClick={verificarResposta}
-                disabled={
-                  (cartaAtual.tipo === "Ordem" &&
-                    ordemSelecoes.length !== cartaAtual.opcoes.length) ||
-                  (cartaAtual.tipo !== "Ordem" &&
-                    selecionado === null &&
-                    selecoesMultiplas.length === 0)
-                }
-                className="w-full mt-2"
-                onMouseDown={handleLongPressStart}
-                onMouseUp={handleLongPressEnd}
-                onMouseLeave={handleLongPressEnd}
-              >
+              <Button {...verificarRespostaProps}>
                 Verificar
               </Button>
             ) : (
@@ -1431,10 +1444,24 @@ const EcoChallenge: React.FC = () => {
       {isDieModalOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={() => setIsDieModalOpen(false)}
         >
-          <div className="bg-white p-4 rounded shadow-lg text-center">
-            <p className="text-xl font-bold mb-2">Você rolou um {rolledNumber}</p>
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center relative">
+            <Button
+              className="absolute top-2 right-2"
+              variant="ghost"
+              onClick={() => setIsDieModalOpen(false)}
+            >
+              <XCircle className="h-6 w-6 text-gray-500" />
+            </Button>
+            <p className="text-2xl font-bold mb-4">
+              Você rolou um {rolledNumber}
+            </p>
+            <Button
+              onClick={rolarDado}
+              className="mb-2"
+            >
+              Rolar Novamente
+            </Button>
             <Button onClick={() => setIsDieModalOpen(false)}>Fechar</Button>
           </div>
         </div>
