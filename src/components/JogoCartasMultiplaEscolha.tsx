@@ -908,26 +908,24 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
-  // Permitir rolar o dado mesmo quando o botão está desabilitado
+  // Calcular se o botão deve estar desabilitado
+  const isDisabled =
+    !cartaAtual ||
+    ((cartaAtual.tipo === "Ordem" &&
+      ordemSelecoes.length !== cartaAtual.opcoes.length) ||
+      (cartaAtual.tipo !== "Ordem" &&
+        selecionado === null &&
+        selecoesMultiplas.length === 0));
+
+  // Construir as propriedades do botão
   const verificarRespostaProps = {
     onClick: verificarResposta,
-    disabled:
-      !cartaAtual ||
-      ((cartaAtual.tipo === "Ordem" &&
-        ordemSelecoes.length !== cartaAtual.opcoes.length) ||
-        (cartaAtual.tipo !== "Ordem" &&
-          selecionado === null &&
-          selecoesMultiplas.length === 0)),
-    className: "w-full mt-2",
+    className: `w-full mt-2 ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`,
     onMouseDown: handleLongPressStart,
     onMouseUp: handleLongPressEnd,
     onMouseLeave: handleLongPressEnd,
+    ...(isDisabled ? {} : {}),
   };
-
-  // Se o botão está desabilitado, remover o atributo "disabled" do HTML para permitir o onMouseDown
-  if (verificarRespostaProps.disabled) {
-    delete verificarRespostaProps.disabled;
-  }
 
   if (!jogoIniciado) {
     return (
@@ -1115,15 +1113,9 @@ const EcoChallenge: React.FC = () => {
             <div className="h-56 flex flex-col items-center justify-center space-y-2">
               <p className="text-sm">Conteúdo da carta oculto</p>
               {rolledNumber !== null && (
-                <p className="text-xl font-bold">
-                  Você rolou um {rolledNumber}
-                </p>
+                <p className="text-xl font-bold">Você rolou um {rolledNumber}</p>
               )}
-              <Button
-                onClick={rolarDado}
-                variant="outline"
-                className="mt-2"
-              >
+              <Button onClick={rolarDado} variant="outline" className="mt-2">
                 <Dice6 className="h-6 w-6" />
                 Rolar Dado
               </Button>
@@ -1235,16 +1227,16 @@ const EcoChallenge: React.FC = () => {
                               opcao.id
                             ) +
                               1 && (
-                          <span className="ml-1 text-blue-500">
-                            (
-                            {
+                            <span className="ml-1 text-blue-500">
                               (
-                                cartaAtual.respostaCorreta as number[]
-                              ).indexOf(opcao.id) + 1
-                            }
-                            )
-                          </span>
-                        )}
+                              {
+                                (
+                                  cartaAtual.respostaCorreta as number[]
+                                ).indexOf(opcao.id) + 1
+                              }
+                              )
+                            </span>
+                          )}
                       </span>
                     )}
                   {respondido &&
@@ -1384,9 +1376,7 @@ const EcoChallenge: React.FC = () => {
                 Revelar
               </Button>
             ) : !respondido ? (
-              <Button {...verificarRespostaProps}>
-                Verificar
-              </Button>
+              <Button {...verificarRespostaProps}>Verificar</Button>
             ) : (
               <Button
                 onClick={selecionarCartaAleatoria}
@@ -1444,9 +1434,7 @@ const EcoChallenge: React.FC = () => {
 
       {/* Modal para mostrar o número do dado quando a carta está revelada */}
       {isDieModalOpen && (
-        <div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-        >
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center relative">
             <Button
               className="absolute top-2 right-2"
@@ -1458,10 +1446,7 @@ const EcoChallenge: React.FC = () => {
             <p className="text-2xl font-bold mb-4">
               Você rolou um {rolledNumber}
             </p>
-            <Button
-              onClick={rolarDado}
-              className="mb-2"
-            >
+            <Button onClick={rolarDado} className="mb-2">
               Rolar Novamente
             </Button>
             <Button onClick={() => setIsDieModalOpen(false)}>Fechar</Button>
