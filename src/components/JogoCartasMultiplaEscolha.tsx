@@ -24,6 +24,8 @@ import {
   Zap,
   Filter,
   Trash,
+  EyeOff,
+  Eye,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -39,7 +41,13 @@ import estrelasAliens from "./cards_estrelas_aliens";
 import testCards from "./test_card";
 
 // Combine as cartas simples e complexas em um único array
-const cartas = [...manejoPlantadas, ...manejoNativas, ...ecologiaFlorestal, ...estrelasAliens, ...testCards];
+const cartas = [
+  ...manejoPlantadas,
+  ...manejoNativas,
+  ...ecologiaFlorestal,
+  ...estrelasAliens,
+  ...testCards,
+];
 
 // Definição de Tipos
 interface Opcao {
@@ -348,14 +356,23 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
           )}
         </div>
         <div className="mt-4">
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={ocultarCarta}
-              onChange={(e) => setOcultarCarta(e.target.checked)}
-            />
-            <span>Ocultar Carta</span>
-          </label>
+          <Button
+            onClick={() => setOcultarCarta(!ocultarCarta)}
+            variant={ocultarCarta ? "default" : "outline"}
+            className="w-full"
+          >
+            {ocultarCarta ? (
+              <>
+                <EyeOff className="h-4 w-4 mr-2" />
+                Ocultar Carta Ativado
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4 mr-2" />
+                Ocultar Carta Desativado
+              </>
+            )}
+          </Button>
         </div>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
@@ -434,7 +451,9 @@ const EcoChallenge: React.FC = () => {
         setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
         setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
         setJogoIniciado(estado.jogoIniciado || false);
-        setOcultarCarta(estado.ocultarCarta !== undefined ? estado.ocultarCarta : true);
+        setOcultarCarta(
+          estado.ocultarCarta !== undefined ? estado.ocultarCarta : true
+        );
       }
     }
   }, []);
@@ -494,8 +513,8 @@ const EcoChallenge: React.FC = () => {
     setMostrarDica(false);
     setMostrarFontes(false);
     setOpcoesEliminadas([]);
-    setCartaRevelada(false);
-  }, [categoriasSelecionadas, mostrarSomentePerguntas]);
+    setCartaRevelada(!ocultarCarta); // Se não estiver ocultando, já revela a carta
+  }, [categoriasSelecionadas, mostrarSomentePerguntas, ocultarCarta]);
 
   useEffect(() => {
     if (jogoIniciado) {
@@ -939,6 +958,9 @@ const EcoChallenge: React.FC = () => {
   }
 
   const obterEstiloCarta = () => {
+    if (ocultarCarta && !cartaRevelada) {
+      return "border-gray-200 bg-white"; // Cor única para a carta genérica
+    }
     switch (cartaAtual.tipo) {
       case "Outras":
         return "border-blue-200 bg-blue-50";
@@ -981,7 +1003,7 @@ const EcoChallenge: React.FC = () => {
       <Card
         className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}
         style={
-          players.length > 1 && currentPlayer
+          players.length > 1 && currentPlayer && !(ocultarCarta && !cartaRevelada)
             ? {
                 boxShadow: `0 0 10px 5px ${currentPlayer.color}`,
               }
@@ -1086,9 +1108,7 @@ const EcoChallenge: React.FC = () => {
                     cartaAtual.tipo === "Ordem" &&
                     ordemSelecoes.includes(opcao.id) &&
                     ordemSelecoes.indexOf(opcao.id) + 1 !==
-                      (cartaAtual.respostaCorreta as number[]).indexOf(
-                        opcao.id
-                      ) +
+                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
                         1
                       ? "bg-red-100"
                       : ""
@@ -1097,9 +1117,7 @@ const EcoChallenge: React.FC = () => {
                     cartaAtual.tipo === "Ordem" &&
                     ordemSelecoes.includes(opcao.id) &&
                     ordemSelecoes.indexOf(opcao.id) + 1 ===
-                      (cartaAtual.respostaCorreta as number[]).indexOf(
-                        opcao.id
-                      ) +
+                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
                         1
                       ? "bg-green-100"
                       : ""
@@ -1141,9 +1159,9 @@ const EcoChallenge: React.FC = () => {
                             <span className="ml-1 text-blue-500">
                               (
                               {
-                                (cartaAtual.respostaCorreta as number[]).indexOf(
-                                  opcao.id
-                                ) + 1
+                                (
+                                  cartaAtual.respostaCorreta as number[]
+                                ).indexOf(opcao.id) + 1
                               }
                               )
                             </span>
@@ -1186,7 +1204,12 @@ const EcoChallenge: React.FC = () => {
         ) : null}
         <CardFooter className="flex flex-col items-center">
           <div className="flex flex-wrap justify-between w-full mb-1 space-x-2">
-            <Button onClick={toggleFontes} size="sm" variant="outline">
+            <Button
+              onClick={toggleFontes}
+              size="sm"
+              variant="outline"
+              disabled={ocultarCarta && !cartaRevelada}
+            >
               <BookOpen className="h-4 w-4" />
             </Button>
             <Button
@@ -1196,10 +1219,11 @@ const EcoChallenge: React.FC = () => {
                 currentPlayer.pulosDisponiveis === 0 ? "outline" : "secondary"
               }
               disabled={
-                currentPlayer.pulosDisponiveis === 0 ||
-                !["Pergunta", "MultiplaEscolha", "Ordem"].includes(
-                  cartaAtual.tipo
-                )
+                (currentPlayer.pulosDisponiveis === 0 ||
+                  !["Pergunta", "MultiplaEscolha", "Ordem"].includes(
+                    cartaAtual.tipo
+                  )) ||
+                (ocultarCarta && !cartaRevelada)
               }
             >
               <SkipForward className="h-4 w-4" />
@@ -1212,7 +1236,11 @@ const EcoChallenge: React.FC = () => {
                   ? "outline"
                   : "secondary"
               }
-              disabled={currentPlayer.respostasSeguidas < 3 || !cartaAtual.dica}
+              disabled={
+                currentPlayer.respostasSeguidas < 3 ||
+                !cartaAtual.dica ||
+                (ocultarCarta && !cartaRevelada)
+              }
             >
               <HelpCircle className="h-4 w-4" />
             </Button>
@@ -1222,7 +1250,10 @@ const EcoChallenge: React.FC = () => {
               variant={
                 currentPlayer.respostasSeguidas < 4 ? "outline" : "secondary"
               }
-              disabled={currentPlayer.respostasSeguidas < 4}
+              disabled={
+                currentPlayer.respostasSeguidas < 4 ||
+                (ocultarCarta && !cartaRevelada)
+              }
             >
               <MinusCircle className="h-4 w-4" />
             </Button>
@@ -1257,7 +1288,11 @@ const EcoChallenge: React.FC = () => {
             <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
               <ChevronUp className="h-4 w-4 text-purple-500 transform rotate-180" />
             </Button>
-            <Button onClick={incrementarRodadasPreso} size="sm" variant="outline">
+            <Button
+              onClick={incrementarRodadasPreso}
+              size="sm"
+              variant="outline"
+            >
               <ChevronUp className="h-4 w-4 text-purple-500" />
             </Button>
           </div>
