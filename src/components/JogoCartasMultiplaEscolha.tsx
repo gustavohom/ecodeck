@@ -717,7 +717,7 @@ const EcoChallenge: React.FC = () => {
     if (currentPlayer.respostasSeguidas >= 2 && cartaAtual.dica) {
       setMostrarDica(!mostrarDica);
       updateCurrentPlayer({
-        respostasSeguidas: currentPlayer.respostasSeguidas - 2,
+        respostasSeguidas: currentPlayer.respostasSeguidas -2,
       });
     } else if (!cartaAtual.dica) {
       setMensagem("Esta carta não possui dica.");
@@ -765,7 +765,7 @@ const EcoChallenge: React.FC = () => {
 
         setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
         updateCurrentPlayer({
-          respostasSeguidas: currentPlayer.respostasSeguidas - 2,
+          respostasSeguidas: currentPlayer.respostasSeguidas -2,
         });
         setMensagem("Uma resposta errada foi eliminada!");
       }
@@ -1248,10 +1248,10 @@ const EcoChallenge: React.FC = () => {
               onClick={eliminarRespostaErrada}
               size="sm"
               variant={
-                currentPlayer.respostasSeguidas < 4 ? "outline" : "secondary"
+                currentPlayer.respostasSeguidas < 3 ? "outline" : "secondary"
               }
               disabled={
-                currentPlayer.respostasSeguidas < 4 ||
+                currentPlayer.respostasSeguidas < 3 ||
                 (ocultarCarta && !cartaRevelada)
               }
             >
