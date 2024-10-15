@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
@@ -95,6 +93,8 @@ interface TelaInicialProps {
   onPlayersSetup: (players: Player[]) => void;
   players: Player[];
   setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
+  ocultarCarta: boolean;
+  setOcultarCarta: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const predefinedColors = [
@@ -142,6 +142,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   onPlayersSetup,
   players,
   setPlayers,
+  ocultarCarta,
+  setOcultarCarta,
 }) => {
   const [termoBusca, setTermoBusca] = useState<string>("");
 
@@ -345,6 +347,16 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             </Button>
           )}
         </div>
+        <div className="mt-4">
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={ocultarCarta}
+              onChange={(e) => setOcultarCarta(e.target.checked)}
+            />
+            <span>Ocultar Carta</span>
+          </label>
+        </div>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
         {hasSavedGame && (
@@ -392,6 +404,9 @@ const EcoChallenge: React.FC = () => {
 
   const [noCardsAvailable, setNoCardsAvailable] = useState<boolean>(false);
 
+  const [ocultarCarta, setOcultarCarta] = useState<boolean>(true);
+  const [cartaRevelada, setCartaRevelada] = useState<boolean>(false);
+
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
   ).sort();
@@ -419,6 +434,7 @@ const EcoChallenge: React.FC = () => {
         setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
         setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
         setJogoIniciado(estado.jogoIniciado || false);
+        setOcultarCarta(estado.ocultarCarta !== undefined ? estado.ocultarCarta : true);
       }
     }
   }, []);
@@ -437,6 +453,7 @@ const EcoChallenge: React.FC = () => {
         categoriasSelecionadas,
         mostrarSomentePerguntas,
         jogoIniciado,
+        ocultarCarta,
       };
       localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
     }
@@ -446,6 +463,7 @@ const EcoChallenge: React.FC = () => {
     categoriasSelecionadas,
     mostrarSomentePerguntas,
     jogoIniciado,
+    ocultarCarta,
   ]);
 
   const selecionarCartaAleatoria = useCallback(() => {
@@ -476,6 +494,7 @@ const EcoChallenge: React.FC = () => {
     setMostrarDica(false);
     setMostrarFontes(false);
     setOpcoesEliminadas([]);
+    setCartaRevelada(false);
   }, [categoriasSelecionadas, mostrarSomentePerguntas]);
 
   useEffect(() => {
@@ -853,6 +872,8 @@ const EcoChallenge: React.FC = () => {
         onPlayersSetup={handlePlayersSetup}
         players={players}
         setPlayers={setPlayers}
+        ocultarCarta={ocultarCarta}
+        setOcultarCarta={setOcultarCarta}
       />
     );
   }
@@ -906,7 +927,6 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
-  // Modificação para mostrar o botão de voltar à tela inicial
   if (!cartaAtual || !currentPlayer) {
     return (
       <div className="flex flex-col items-center">
@@ -980,170 +1000,190 @@ const EcoChallenge: React.FC = () => {
                 <Filter className="h-4 w-4" />
               </Button>
               <CardTitle className="text-xl font-bold">
-                {cartaAtual.titulo}
+                {ocultarCarta && !cartaRevelada
+                  ? "Carta Oculta"
+                  : cartaAtual.titulo}
               </CardTitle>
             </div>
-            <Badge
-              variant={
-                cartaAtual.dificuldade === "facil"
-                  ? "secondary"
-                  : cartaAtual.dificuldade === "normal"
-                  ? "default"
-                  : "destructive"
-              }
-            >
-              {cartaAtual.dificuldade}
-            </Badge>
-          </div>
-          <ScrollArea className="h-56 rounded-md border p-4">
-            <div className="text-sm">{renderizarConteudoPergunta()}</div>
-          </ScrollArea>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {cartaAtual.opcoes.map((opcao: Opcao) => (
-              <Button
-                key={opcao.id}
-                onClick={() =>
-                  cartaAtual.tipo === "MultiplaEscolha"
-                    ? handleSelecaoMultipla(opcao.id)
-                    : cartaAtual.tipo === "Ordem"
-                    ? handleSelecaoOrdem(opcao.id)
-                    : handleSelecao(opcao.id)
-                }
+            {!ocultarCarta || cartaRevelada ? (
+              <Badge
                 variant={
-                  selecionado === opcao.id ||
-                  selecoesMultiplas.includes(opcao.id)
+                  cartaAtual.dificuldade === "facil"
                     ? "secondary"
-                    : "outline"
+                    : cartaAtual.dificuldade === "normal"
+                    ? "default"
+                    : "destructive"
                 }
-                className={`w-full justify-start text-sm ${
-                  respondido &&
-                  (Array.isArray(cartaAtual.respostaCorreta)
-                    ? cartaAtual.respostaCorreta.includes(opcao.id)
-                    : cartaAtual.respostaCorreta === opcao.id)
-                    ? "bg-green-100"
-                    : ""
-                } ${
-                  respondido &&
-                  selecionado === opcao.id &&
-                  !(
-                    Array.isArray(cartaAtual.respostaCorreta)
-                      ? cartaAtual.respostaCorreta.includes(opcao.id)
-                      : cartaAtual.respostaCorreta === opcao.id
-                  )
-                    ? "bg-red-100"
-                    : ""
-                } ${
-                  respondido &&
-                  cartaAtual.tipo === "MultiplaEscolha" &&
-                  Array.isArray(cartaAtual.respostaCorreta) &&
-                  !cartaAtual.respostaCorreta.includes(opcao.id) &&
-                  selecoesMultiplas.includes(opcao.id)
-                    ? "bg-red-100"
-                    : ""
-                } ${
-                  respondido &&
-                  cartaAtual.tipo === "MultiplaEscolha" &&
-                  Array.isArray(cartaAtual.respostaCorreta) &&
-                  cartaAtual.respostaCorreta.includes(opcao.id) &&
-                  !selecoesMultiplas.includes(opcao.id)
-                    ? "bg-blue-100"
-                    : ""
-                } ${
-                  respondido &&
-                  cartaAtual.tipo === "Ordem" &&
-                  ordemSelecoes.includes(opcao.id) &&
-                  ordemSelecoes.indexOf(opcao.id) + 1 !==
-                    (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
-                    ? "bg-red-100"
-                    : ""
-                } ${
-                  respondido &&
-                  cartaAtual.tipo === "Ordem" &&
-                  ordemSelecoes.includes(opcao.id) &&
-                  ordemSelecoes.indexOf(opcao.id) + 1 ===
-                    (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
-                    ? "bg-green-100"
-                    : ""
-                } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
-                disabled={opcoesEliminadas.includes(opcao.id)}
-                style={{
-                  maxHeight: "80px",
-                  height: "auto",
-                  overflowY: "auto",
-                  whiteSpace: "normal",
-                  alignItems: "flex-start",
-                  display: "flex",
-                  textAlign: "left",
-                  padding: "8px",
-                }}
               >
-                {opcao.texto}
-                {cartaAtual.tipo === "MultiplaEscolha" && (
-                  <span className="ml-2">
-                    {selecoesMultiplas.includes(opcao.id) ? (
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                    ) : (
-                      <span className="h-4 w-4 border rounded" />
-                    )}
-                  </span>
-                )}
-                {cartaAtual.tipo === "Ordem" &&
-                  ordemSelecoes.includes(opcao.id) && (
+                {cartaAtual.dificuldade}
+              </Badge>
+            ) : null}
+          </div>
+          {!ocultarCarta || cartaRevelada ? (
+            <ScrollArea className="h-56 rounded-md border p-4">
+              <div className="text-sm">{renderizarConteudoPergunta()}</div>
+            </ScrollArea>
+          ) : (
+            <div className="h-56 flex items-center justify-center">
+              <p className="text-sm">Conteúdo da carta oculto</p>
+            </div>
+          )}
+        </CardHeader>
+        {!ocultarCarta || cartaRevelada ? (
+          <CardContent>
+            <div className="space-y-2">
+              {cartaAtual.opcoes.map((opcao: Opcao) => (
+                <Button
+                  key={opcao.id}
+                  onClick={() =>
+                    cartaAtual.tipo === "MultiplaEscolha"
+                      ? handleSelecaoMultipla(opcao.id)
+                      : cartaAtual.tipo === "Ordem"
+                      ? handleSelecaoOrdem(opcao.id)
+                      : handleSelecao(opcao.id)
+                  }
+                  variant={
+                    selecionado === opcao.id ||
+                    selecoesMultiplas.includes(opcao.id)
+                      ? "secondary"
+                      : "outline"
+                  }
+                  className={`w-full justify-start text-sm ${
+                    respondido &&
+                    (Array.isArray(cartaAtual.respostaCorreta)
+                      ? cartaAtual.respostaCorreta.includes(opcao.id)
+                      : cartaAtual.respostaCorreta === opcao.id)
+                      ? "bg-green-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    selecionado === opcao.id &&
+                    !(
+                      Array.isArray(cartaAtual.respostaCorreta)
+                        ? cartaAtual.respostaCorreta.includes(opcao.id)
+                        : cartaAtual.respostaCorreta === opcao.id
+                    )
+                      ? "bg-red-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    cartaAtual.tipo === "MultiplaEscolha" &&
+                    Array.isArray(cartaAtual.respostaCorreta) &&
+                    !cartaAtual.respostaCorreta.includes(opcao.id) &&
+                    selecoesMultiplas.includes(opcao.id)
+                      ? "bg-red-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    cartaAtual.tipo === "MultiplaEscolha" &&
+                    Array.isArray(cartaAtual.respostaCorreta) &&
+                    cartaAtual.respostaCorreta.includes(opcao.id) &&
+                    !selecoesMultiplas.includes(opcao.id)
+                      ? "bg-blue-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    cartaAtual.tipo === "Ordem" &&
+                    ordemSelecoes.includes(opcao.id) &&
+                    ordemSelecoes.indexOf(opcao.id) + 1 !==
+                      (cartaAtual.respostaCorreta as number[]).indexOf(
+                        opcao.id
+                      ) +
+                        1
+                      ? "bg-red-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    cartaAtual.tipo === "Ordem" &&
+                    ordemSelecoes.includes(opcao.id) &&
+                    ordemSelecoes.indexOf(opcao.id) + 1 ===
+                      (cartaAtual.respostaCorreta as number[]).indexOf(
+                        opcao.id
+                      ) +
+                        1
+                      ? "bg-green-100"
+                      : ""
+                  } ${
+                    opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""
+                  }`}
+                  disabled={opcoesEliminadas.includes(opcao.id)}
+                  style={{
+                    maxHeight: "80px",
+                    height: "auto",
+                    overflowY: "auto",
+                    whiteSpace: "normal",
+                    alignItems: "flex-start",
+                    display: "flex",
+                    textAlign: "left",
+                    padding: "8px",
+                  }}
+                >
+                  {opcao.texto}
+                  {cartaAtual.tipo === "MultiplaEscolha" && (
                     <span className="ml-2">
-                      {ordemSelecoes.indexOf(opcao.id) + 1}
-                      {respondido &&
-                        ordemSelecoes.indexOf(opcao.id) + 1 !==
-                          (cartaAtual.respostaCorreta as number[]).indexOf(
-                            opcao.id
-                          ) +
-                            1 && (
-                          <span className="ml-1 text-blue-500">
-                            (
-                            {
-                              (cartaAtual.respostaCorreta as number[]).indexOf(
-                                opcao.id
-                              ) + 1
-                            }
-                            )
-                          </span>
-                        )}
+                      {selecoesMultiplas.includes(opcao.id) ? (
+                        <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                      ) : (
+                        <span className="h-4 w-4 border rounded" />
+                      )}
                     </span>
                   )}
-                {respondido &&
-                  (Array.isArray(cartaAtual.respostaCorreta)
-                    ? cartaAtual.respostaCorreta.includes(opcao.id)
-                    : cartaAtual.respostaCorreta === opcao.id) && (
-                    <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
-                  )}
-                {respondido &&
-                  selecionado === opcao.id &&
-                  !(
-                    Array.isArray(cartaAtual.respostaCorreta)
+                  {cartaAtual.tipo === "Ordem" &&
+                    ordemSelecoes.includes(opcao.id) && (
+                      <span className="ml-2">
+                        {ordemSelecoes.indexOf(opcao.id) + 1}
+                        {respondido &&
+                          ordemSelecoes.indexOf(opcao.id) + 1 !==
+                            (cartaAtual.respostaCorreta as number[]).indexOf(
+                              opcao.id
+                            ) +
+                              1 && (
+                            <span className="ml-1 text-blue-500">
+                              (
+                              {
+                                (cartaAtual.respostaCorreta as number[]).indexOf(
+                                  opcao.id
+                                ) + 1
+                              }
+                              )
+                            </span>
+                          )}
+                      </span>
+                    )}
+                  {respondido &&
+                    (Array.isArray(cartaAtual.respostaCorreta)
                       ? cartaAtual.respostaCorreta.includes(opcao.id)
-                      : cartaAtual.respostaCorreta === opcao.id
-                  ) && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
-              </Button>
-            ))}
-          </div>
-          {mostrarDica && (
-            <Alert className="mt-4">
-              <AlertDescription>{cartaAtual.dica}</AlertDescription>
-            </Alert>
-          )}
-          {mostrarFontes && (
-            <Alert className="mt-4">
-              <AlertDescription>
-                <ul className="list-disc list-inside">
-                  {cartaAtual.fontes.map((fonte: string, index: number) => (
-                    <li key={index}>{fonte}</li>
-                  ))}
-                </ul>
-              </AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
+                      : cartaAtual.respostaCorreta === opcao.id) && (
+                      <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
+                    )}
+                  {respondido &&
+                    selecionado === opcao.id &&
+                    !(
+                      Array.isArray(cartaAtual.respostaCorreta)
+                        ? cartaAtual.respostaCorreta.includes(opcao.id)
+                        : cartaAtual.respostaCorreta === opcao.id
+                    ) && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
+                </Button>
+              ))}
+            </div>
+            {mostrarDica && (
+              <Alert className="mt-4">
+                <AlertDescription>{cartaAtual.dica}</AlertDescription>
+              </Alert>
+            )}
+            {mostrarFontes && (
+              <Alert className="mt-4">
+                <AlertDescription>
+                  <ul className="list-disc list-inside">
+                    {cartaAtual.fontes.map((fonte: string, index: number) => (
+                      <li key={index}>{fonte}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        ) : null}
         <CardFooter className="flex flex-col items-center">
           <div className="flex flex-wrap justify-between w-full mb-1 space-x-2">
             <Button onClick={toggleFontes} size="sm" variant="outline">
@@ -1222,7 +1262,14 @@ const EcoChallenge: React.FC = () => {
             </Button>
           </div>
           <div className="flex justify-between w-full mb-4">
-            {!respondido ? (
+            {ocultarCarta && !cartaRevelada ? (
+              <Button
+                onClick={() => setCartaRevelada(true)}
+                className="w-full mt-2"
+              >
+                Revelar
+              </Button>
+            ) : !respondido ? (
               <Button
                 onClick={verificarResposta}
                 disabled={
