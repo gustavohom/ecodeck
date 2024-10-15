@@ -714,16 +714,16 @@ const EcoChallenge: React.FC = () => {
 
   const toggleDica = () => {
     if (!currentPlayer || !cartaAtual) return;
-    if (currentPlayer.respostasSeguidas >= 3 && cartaAtual.dica) {
+    if (currentPlayer.respostasSeguidas >= 2 && cartaAtual.dica) {
       setMostrarDica(!mostrarDica);
       updateCurrentPlayer({
-        respostasSeguidas: currentPlayer.respostasSeguidas - 3,
+        respostasSeguidas: currentPlayer.respostasSeguidas - 2,
       });
     } else if (!cartaAtual.dica) {
       setMensagem("Esta carta não possui dica.");
     } else {
       setMensagem(
-        "Você precisa de pelo menos 3 respostas corretas seguidas para usar a dica!"
+        "Você precisa de pelo menos 2 respostas corretas seguidas para usar a dica!"
       );
     }
   };
@@ -744,7 +744,7 @@ const EcoChallenge: React.FC = () => {
 
   const eliminarRespostaErrada = () => {
     if (!currentPlayer || !cartaAtual) return;
-    if (currentPlayer.respostasSeguidas >= 4 && cartaAtual) {
+    if (currentPlayer.respostasSeguidas >= 2 && cartaAtual) {
       const opcoesErradas = cartaAtual.opcoes.filter((opcao: Opcao) => {
         if (Array.isArray(cartaAtual.respostaCorreta)) {
           return !cartaAtual.respostaCorreta.includes(opcao.id);
@@ -765,12 +765,12 @@ const EcoChallenge: React.FC = () => {
 
         setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
         updateCurrentPlayer({
-          respostasSeguidas: currentPlayer.respostasSeguidas - 4,
+          respostasSeguidas: currentPlayer.respostasSeguidas - 2,
         });
         setMensagem("Uma resposta errada foi eliminada!");
       }
     } else {
-      setMensagem("Você precisa de pelo menos 4 respostas corretas seguidas!");
+      setMensagem("Você precisa de pelo menos 2 respostas corretas seguidas!");
     }
   };
 
