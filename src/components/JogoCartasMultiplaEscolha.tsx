@@ -1016,7 +1016,7 @@ const EcoChallenge: React.FC = () => {
               <Button
                 onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
                 size="sm"
-                variant="outline"
+                variant={mostrarSomentePerguntas ? "default" : "outline"}
                 disabled={!hasQuestionCards}
               >
                 <Filter className="h-4 w-4" />
