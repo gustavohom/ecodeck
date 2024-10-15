@@ -1040,44 +1040,19 @@ const EcoChallenge: React.FC = () => {
                 ) : null}
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              {!ocultarCarta || cartaRevelada ? (
-                <>
-                  <Badge
-                    variant={
-                      cartaAtual.dificuldade === "facil"
-                        ? "secondary"
-                        : cartaAtual.dificuldade === "normal"
-                        ? "default"
-                        : "destructive"
-                    }
-                  >
-                    {cartaAtual.dificuldade}
-                  </Badge>
-                  <Button
-                    onClick={() => {
-                      const randomNum = Math.floor(Math.random() * 6) + 1;
-                      setRolledNumber(randomNum);
-                    }}
-                    size="sm"
-                    variant="outline"
-                  >
-                    <Dice6 className="h-4 w-4" />
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  onClick={() => {
-                    const randomNum = Math.floor(Math.random() * 6) + 1;
-                    setRolledNumber(randomNum);
-                  }}
-                  size="sm"
-                  variant="outline"
-                >
-                  <Dice6 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+            {!ocultarCarta || cartaRevelada ? (
+              <Badge
+                variant={
+                  cartaAtual.dificuldade === "facil"
+                    ? "secondary"
+                    : cartaAtual.dificuldade === "normal"
+                    ? "default"
+                    : "destructive"
+                }
+              >
+                {cartaAtual.dificuldade}
+              </Badge>
+            ) : null}
           </div>
           {!ocultarCarta || cartaRevelada ? (
             <ScrollArea className="h-56 rounded-md border p-4">
@@ -1086,9 +1061,6 @@ const EcoChallenge: React.FC = () => {
           ) : (
             <div className="h-56 flex flex-col items-center justify-center space-y-2">
               <p className="text-sm">Conteúdo da carta oculto</p>
-              {rolledNumber !== null && (
-                <p className="text-xl font-bold">Você rolou um {rolledNumber}</p>
-              )}
             </div>
           )}
         </CardHeader>
@@ -1197,16 +1169,16 @@ const EcoChallenge: React.FC = () => {
                               opcao.id
                             ) +
                               1 && (
-                              <span className="ml-1 text-blue-500">
+                            <span className="ml-1 text-blue-500">
+                              (
+                              {
                                 (
-                                {
-                                  (
-                                    cartaAtual.respostaCorreta as number[]
-                                  ).indexOf(opcao.id) + 1
-                                }
-                                )
-                              </span>
-                            )}
+                                  cartaAtual.respostaCorreta as number[]
+                                ).indexOf(opcao.id) + 1
+                              }
+                              )
+                            </span>
+                          )}
                       </span>
                     )}
                   {respondido &&
@@ -1339,30 +1311,87 @@ const EcoChallenge: React.FC = () => {
           </div>
           <div className="flex justify-between w-full mb-4">
             {ocultarCarta && !cartaRevelada ? (
-              <Button
-                onClick={() => setCartaRevelada(true)}
-                className="w-full mt-2"
-              >
-                Revelar
-              </Button>
+              <div className="flex w-full mt-2 space-x-2">
+                <Button
+                  onClick={() => setCartaRevelada(true)}
+                  className="flex-1"
+                >
+                  Revelar
+                </Button>
+                <Button
+                  onClick={() => {
+                    const randomNum = Math.floor(Math.random() * 6) + 1;
+                    setRolledNumber(randomNum);
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="relative"
+                >
+                  <Dice6 className="h-4 w-4" />
+                  {rolledNumber !== null && (
+                    <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
+                      {rolledNumber}
+                    </span>
+                  )}
+                </Button>
+              </div>
             ) : !respondido ? (
-              <Button
-                onClick={verificarResposta}
-                disabled={
-                  (cartaAtual.tipo === "Ordem" &&
-                    ordemSelecoes.length !== cartaAtual.opcoes.length) ||
-                  (cartaAtual.tipo !== "Ordem" &&
-                    selecionado === null &&
-                    selecoesMultiplas.length === 0)
-                }
-                className="w-full mt-2"
-              >
-                Verificar
-              </Button>
+              <div className="flex w-full mt-2 space-x-2">
+                <Button
+                  onClick={verificarResposta}
+                  disabled={
+                    (cartaAtual.tipo === "Ordem" &&
+                      ordemSelecoes.length !== cartaAtual.opcoes.length) ||
+                    (cartaAtual.tipo !== "Ordem" &&
+                      selecionado === null &&
+                      selecoesMultiplas.length === 0)
+                  }
+                  className="flex-1"
+                >
+                  Verificar
+                </Button>
+                <Button
+                  onClick={() => {
+                    const randomNum = Math.floor(Math.random() * 6) + 1;
+                    setRolledNumber(randomNum);
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="relative"
+                >
+                  <Dice6 className="h-4 w-4" />
+                  {rolledNumber !== null && (
+                    <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
+                      {rolledNumber}
+                    </span>
+                  )}
+                </Button>
+              </div>
             ) : (
-              <Button onClick={selecionarCartaAleatoria} className="w-full mt-2">
-                Próxima Carta
-              </Button>
+              <div className="flex w-full mt-2 space-x-2">
+                <Button
+                  onClick={selecionarCartaAleatoria}
+                  className="flex-1"
+                >
+                  Próxima Carta
+                </Button>
+                <Button
+                  onClick={() => {
+                    const randomNum = Math.floor(Math.random() * 6) + 1;
+                    setRolledNumber(randomNum);
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="relative"
+                >
+                  <Dice6 className="h-4 w-4" />
+                  {rolledNumber !== null && (
+                    <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
+                      {rolledNumber}
+                    </span>
+                  )}
+                </Button>
+              </div>
             )}
           </div>
           {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
