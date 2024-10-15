@@ -1232,12 +1232,12 @@ const EcoChallenge: React.FC = () => {
               onClick={toggleDica}
               size="sm"
               variant={
-                currentPlayer.respostasSeguidas < 3 || !cartaAtual.dica
+                currentPlayer.respostasSeguidas < 2 || !cartaAtual.dica
                   ? "outline"
                   : "secondary"
               }
               disabled={
-                currentPlayer.respostasSeguidas < 3 ||
+                currentPlayer.respostasSeguidas < 2 ||
                 !cartaAtual.dica ||
                 (ocultarCarta && !cartaRevelada)
               }
@@ -1248,10 +1248,10 @@ const EcoChallenge: React.FC = () => {
               onClick={eliminarRespostaErrada}
               size="sm"
               variant={
-                currentPlayer.respostasSeguidas < 3 ? "outline" : "secondary"
+                currentPlayer.respostasSeguidas < 2 ? "outline" : "secondary"
               }
               disabled={
-                currentPlayer.respostasSeguidas < 3 ||
+                currentPlayer.respostasSeguidas < 2 ||
                 (ocultarCarta && !cartaRevelada)
               }
             >
