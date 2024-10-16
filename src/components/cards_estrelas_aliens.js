@@ -91,7 +91,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outro",
+    tipo: "Outras",
     titulo: "Impacto do Buraco Negro",
     pergunta: `<img src="/img/espancao_estrelas/buraco-negro.png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     O Buraco Negro é uma força implacável, capaz de devorar tudo em seu caminho. Mas para aqueles corajosos o suficiente, ele também é uma oportunidade de começar de novo,
@@ -109,7 +109,7 @@ const estrelas_aliens = [
     dica: "",
   },
   {
-    tipo: "Outro",
+    tipo: "Outras",
     titulo: "Morphos, o Alien Metamorfo",
     pergunta: `<img src="/img/aliens/legal.png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
     O caos está prestes a engolir tudo o que você conhece. As leis do universo estão prestes a ser desfeitas, e nada será como antes. Eu sou o agente do caos, e meu poder
