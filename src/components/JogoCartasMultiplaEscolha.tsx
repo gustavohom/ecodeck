@@ -4,7 +4,7 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  // Removemos a importação de CardTitle
+  CardTitle, // Reimportamos o CardTitle aqui
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -388,7 +388,9 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             startGame();
           }}
           className="w-full"
-          disabled={categoriasSelecionadas.length === 0 || playerInputs.length === 0}
+          disabled={
+            categoriasSelecionadas.length === 0 || playerInputs.length === 0
+          }
         >
           Iniciar Novo Jogo
         </Button>
@@ -404,7 +406,7 @@ const EcoChallenge: React.FC = () => {
   const [respondido, setRespondido] = useState<boolean>(false);
   const [mensagem, setMensagem] = useState<string>("");
   const [mostrarDica, setMostrarDica] = useState<boolean>(false);
-  const [dicaUsada, setDicaUsada] = useState<boolean>(false); // Novo estado
+  const [dicaUsada, setDicaUsada] = useState<boolean>(false);
   const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
@@ -425,10 +427,10 @@ const EcoChallenge: React.FC = () => {
   const [ocultarCarta, setOcultarCarta] = useState<boolean>(true);
   const [cartaRevelada, setCartaRevelada] = useState<boolean>(false);
 
-  const [rolledNumber, setRolledNumber] = useState<number | null>(null); // Estado para o número sorteado
-  const [rollingNumber, setRollingNumber] = useState<number | null>(null); // Número durante a animação
-  const [isDieModalOpen, setIsDieModalOpen] = useState<boolean>(false); // Estado para o modal do dado
-  const [isRolling, setIsRolling] = useState<boolean>(false); // Estado para verificar se o dado está rolando
+  const [rolledNumber, setRolledNumber] = useState<number | null>(null);
+  const [rollingNumber, setRollingNumber] = useState<number | null>(null);
+  const [isDieModalOpen, setIsDieModalOpen] = useState<boolean>(false);
+  const [isRolling, setIsRolling] = useState<boolean>(false);
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
@@ -517,12 +519,12 @@ const EcoChallenge: React.FC = () => {
     setRespondido(false);
     setMensagem("");
     setMostrarDica(false);
-    setDicaUsada(false); // Resetar dicaUsada aqui
+    setDicaUsada(false);
     setMostrarFontes(false);
     setOpcoesEliminadas([]);
-    setCartaRevelada(!ocultarCarta); // Se não estiver ocultando, já revela a carta
-    setRolledNumber(null); // Resetar número sorteado
-    setIsDieModalOpen(false); // Fechar modal do dado
+    setCartaRevelada(!ocultarCarta);
+    setRolledNumber(null);
+    setIsDieModalOpen(false);
   }, [categoriasSelecionadas, mostrarSomentePerguntas, ocultarCarta]);
 
   useEffect(() => {
@@ -823,9 +825,7 @@ const EcoChallenge: React.FC = () => {
     if (!currentPlayer) return;
     updateCurrentPlayer({
       respostasErradas:
-        currentPlayer.respostasErradas > 0
-          ? currentPlayer.respostasErradas - 1
-          : 0,
+        currentPlayer.respostasErradas > 0 ? currentPlayer.respostasErradas - 1 : 0,
     });
     setMensagem("Erro removido!");
   };
@@ -902,7 +902,6 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
-  // Adicionar manipulador para cancelamento do toque
   const handleLongPressCancel = () => {
     if (longPressTimeout.current) {
       clearTimeout(longPressTimeout.current);
@@ -911,13 +910,13 @@ const EcoChallenge: React.FC = () => {
   };
 
   const rolarDado = () => {
-    if (isRolling) return; // Evita múltiplas rolagens simultâneas
+    if (isRolling) return;
 
     setIsRolling(true);
     setIsDieModalOpen(true);
 
     let rollCount = 0;
-    const maxRolls = 10; // Número de vezes que o número muda durante a animação
+    const maxRolls = 10;
 
     const rollInterval = setInterval(() => {
       const randomNum = Math.floor(Math.random() * 6) + 1;
@@ -931,10 +930,9 @@ const EcoChallenge: React.FC = () => {
         setRollingNumber(null);
         setIsRolling(false);
       }
-    }, 100); // Intervalo de 100ms para a animação
+    }, 100);
   };
 
-  // Calcular se o botão deve estar desabilitado
   const isDisabled =
     !cartaAtual ||
     ((cartaAtual.tipo === "Ordem" &&
@@ -943,7 +941,6 @@ const EcoChallenge: React.FC = () => {
         selecionado === null &&
         selecoesMultiplas.length === 0));
 
-  // Construir as propriedades do botão
   const verificarRespostaProps = {
     className: `w-full mt-2 ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`,
     onMouseDown: handleLongPressStart,
@@ -965,7 +962,7 @@ const EcoChallenge: React.FC = () => {
           setJogoIniciado(true);
         }}
         onReset={() => {
-          resetarTudo(); // Reseta tudo, inclusive fixedStars
+          resetarTudo();
         }}
         categoriasDisponiveis={categoriasDisponiveis}
         categoriasSelecionadas={categoriasSelecionadas}
@@ -1002,7 +999,6 @@ const EcoChallenge: React.FC = () => {
         >
           Remover Filtro
         </Button>
-        {/* Botões de seleção de jogador movidos para baixo */}
         <div
           className={`grid gap-1 mt-4 ${
             players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
@@ -1037,7 +1033,6 @@ const EcoChallenge: React.FC = () => {
         <Button onClick={voltarTelaInicial} className="mt-4">
           Voltar para a Tela Inicial
         </Button>
-        {/* Botões de seleção de jogador movidos para baixo */}
         <div
           className={`grid gap-1 mt-4 ${
             players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
@@ -1067,7 +1062,7 @@ const EcoChallenge: React.FC = () => {
 
   const obterEstiloCarta = () => {
     if (ocultarCarta && !cartaRevelada) {
-      return "border-gray-200 bg-white"; // Cor única para a carta genérica
+      return "border-gray-200 bg-white";
     }
     switch (cartaAtual.tipo) {
       case "Outras":
@@ -1109,7 +1104,7 @@ const EcoChallenge: React.FC = () => {
                 <Filter className="h-4 w-4" />
               </Button>
               <div className="flex flex-col">
-                {/* Removemos o CardTitle */}
+                {/* Título removido */}
                 {!ocultarCarta || cartaRevelada ? (
                   <p className="text-xs text-gray-500">
                     {cartaAtual.categorias.join(", ")}
@@ -1172,7 +1167,8 @@ const EcoChallenge: React.FC = () => {
                       : handleSelecao(opcao.id)
                   }
                   variant={
-                    selecionado === opcao.id || selecoesMultiplas.includes(opcao.id)
+                    selecionado === opcao.id ||
+                    selecoesMultiplas.includes(opcao.id)
                       ? "secondary"
                       : "outline"
                   }
@@ -1250,24 +1246,28 @@ const EcoChallenge: React.FC = () => {
                       )}
                     </span>
                   )}
-                  {cartaAtual.tipo === "Ordem" && ordemSelecoes.includes(opcao.id) && (
-                    <span className="ml-2">
-                      {ordemSelecoes.indexOf(opcao.id) + 1}
-                      {respondido &&
-                        ordemSelecoes.indexOf(opcao.id) + 1 !==
-                          (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1 && (
-                          <span className="ml-1 text-blue-500">
-                            (
-                            {
+                  {cartaAtual.tipo === "Ordem" &&
+                    ordemSelecoes.includes(opcao.id) && (
+                      <span className="ml-2">
+                        {ordemSelecoes.indexOf(opcao.id) + 1}
+                        {respondido &&
+                          ordemSelecoes.indexOf(opcao.id) + 1 !==
+                            (cartaAtual.respostaCorreta as number[]).indexOf(
+                              opcao.id
+                            ) +
+                              1 && (
+                            <span className="ml-1 text-blue-500">
                               (
-                                cartaAtual.respostaCorreta as number[]
-                              ).indexOf(opcao.id) + 1
-                            }
-                            )
-                          </span>
-                        )}
-                    </span>
-                  )}
+                              {
+                                (
+                                  cartaAtual.respostaCorreta as number[]
+                                ).indexOf(opcao.id) + 1
+                              }
+                              )
+                            </span>
+                          )}
+                      </span>
+                    )}
                   {respondido &&
                     (Array.isArray(cartaAtual.respostaCorreta)
                       ? cartaAtual.respostaCorreta.includes(opcao.id)
@@ -1280,7 +1280,9 @@ const EcoChallenge: React.FC = () => {
                       Array.isArray(cartaAtual.respostaCorreta)
                         ? cartaAtual.respostaCorreta.includes(opcao.id)
                         : cartaAtual.respostaCorreta === opcao.id
-                    ) && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
+                    ) && (
+                      <XCircle className="ml-auto h-4 w-4 text-red-500" />
+                    )}
                 </Button>
               ))}
             </div>
@@ -1467,7 +1469,6 @@ const EcoChallenge: React.FC = () => {
         </CardFooter>
       </Card>
 
-      {/* Botões de seleção de jogador movidos para baixo */}
       <div
         className={`grid gap-1 mt-4 ${
           players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
@@ -1492,7 +1493,6 @@ const EcoChallenge: React.FC = () => {
         ))}
       </div>
 
-      {/* Modal para mostrar o número do dado quando a carta está revelada */}
       {isDieModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-lg shadow-lg text-center relative w-96 h-96 flex flex-col justify-center">
