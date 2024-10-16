@@ -28,6 +28,7 @@ import {
   Eye,
   Dice6,
   XCircle as XIcon,
+  RefreshCcw, // Icon for the probability button
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -388,7 +389,9 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             startGame();
           }}
           className="w-full"
-          disabled={categoriasSelecionadas.length === 0 || playerInputs.length === 0}
+          disabled={
+            categoriasSelecionadas.length === 0 || playerInputs.length === 0
+          }
         >
           Iniciar Novo Jogo
         </Button>
@@ -404,13 +407,13 @@ const EcoChallenge: React.FC = () => {
   const [respondido, setRespondido] = useState<boolean>(false);
   const [mensagem, setMensagem] = useState<string>("");
   const [mostrarDica, setMostrarDica] = useState<boolean>(false);
-  const [dicaUsada, setDicaUsada] = useState<boolean>(false); // Novo estado
+  const [dicaUsada, setDicaUsada] = useState<boolean>(false);
   const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>(
-    []
-  );
+  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
+    string[]
+  >([]);
   const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
     useState<boolean>(false);
 
@@ -425,14 +428,23 @@ const EcoChallenge: React.FC = () => {
   const [ocultarCarta, setOcultarCarta] = useState<boolean>(true);
   const [cartaRevelada, setCartaRevelada] = useState<boolean>(false);
 
-  const [rolledNumber, setRolledNumber] = useState<number | null>(null); // Estado para o número sorteado
-  const [rollingNumber, setRollingNumber] = useState<number | null>(null); // Número durante a animação
-  const [isDieModalOpen, setIsDieModalOpen] = useState<boolean>(false); // Estado para o modal do dado
-  const [isRolling, setIsRolling] = useState<boolean>(false); // Estado para verificar se o dado está rolando
+  const [rolledNumber, setRolledNumber] = useState<number | null>(null);
+  const [rollingNumber, setRollingNumber] = useState<number | null>(null);
+  const [isDieModalOpen, setIsDieModalOpen] = useState<boolean>(false);
+  const [isRolling, setIsRolling] = useState<boolean>(false);
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
   ).sort();
+
+  // Probability settings for re-rolling "Vantagem", "Desvantagem", or "Outras" cards
+  const probabilitySettings = [
+    { value: 0, color: "white", label: "0%" },
+    { value: 0.4, color: "green", label: "40%" },
+    { value: 0.6, color: "orange", label: "60%" },
+    { value: 0.8, color: "red", label: "80%" },
+  ];
+  const [probabilityIndex, setProbabilityIndex] = useState<number>(0);
 
   // Verifica se há um jogo salvo no localStorage e se o jogo foi iniciado
   const hasSavedGame =
@@ -460,6 +472,7 @@ const EcoChallenge: React.FC = () => {
         setOcultarCarta(
           estado.ocultarCarta !== undefined ? estado.ocultarCarta : true
         );
+        setProbabilityIndex(estado.probabilityIndex || 0);
       }
     }
   }, []);
@@ -479,6 +492,7 @@ const EcoChallenge: React.FC = () => {
         mostrarSomentePerguntas,
         jogoIniciado,
         ocultarCarta,
+        probabilityIndex,
       };
       localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
     }
@@ -489,6 +503,7 @@ const EcoChallenge: React.FC = () => {
     mostrarSomentePerguntas,
     jogoIniciado,
     ocultarCarta,
+    probabilityIndex,
   ]);
 
   const selecionarCartaAleatoria = useCallback(() => {
@@ -509,21 +524,58 @@ const EcoChallenge: React.FC = () => {
       setNoCardsAvailable(false);
     }
 
-    const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
-    setCartaAtual(cartasFiltradas[indiceAleatorio]);
+    let novaCarta: Carta | null = null;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    do {
+      const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
+      novaCarta = cartasFiltradas[indiceAleatorio];
+
+      const isSpecialType = ["Vantagem", "Desvantagem", "Outras"].includes(
+        novaCarta.tipo
+      );
+
+      if (isSpecialType) {
+        const probability =
+          probabilitySettings[probabilityIndex].value || 0;
+
+        if (probability > 0) {
+          const randomValue = Math.random();
+          if (randomValue < probability) {
+            novaCarta = null; // Re-roll
+          }
+        }
+      }
+      attempts++;
+    } while (novaCarta === null && attempts < maxAttempts);
+
+    if (novaCarta === null) {
+      // If we couldn't find a suitable card after maxAttempts
+      setMensagem("Não foi possível selecionar uma carta adequada.");
+      return;
+    }
+
+    setCartaAtual(novaCarta);
     setSelecionado(null);
     setSelecoesMultiplas([]);
     setOrdemSelecoes([]);
     setRespondido(false);
     setMensagem("");
     setMostrarDica(false);
-    setDicaUsada(false); // Resetar dicaUsada aqui
+    setDicaUsada(false);
     setMostrarFontes(false);
     setOpcoesEliminadas([]);
-    setCartaRevelada(!ocultarCarta); // Se não estiver ocultando, já revela a carta
-    setRolledNumber(null); // Resetar número sorteado
-    setIsDieModalOpen(false); // Fechar modal do dado
-  }, [categoriasSelecionadas, mostrarSomentePerguntas, ocultarCarta]);
+    setCartaRevelada(!ocultarCarta);
+    setRolledNumber(null);
+    setIsDieModalOpen(false);
+  }, [
+    categoriasSelecionadas,
+    mostrarSomentePerguntas,
+    ocultarCarta,
+    probabilityIndex,
+    probabilitySettings,
+  ]);
 
   useEffect(() => {
     if (jogoIniciado) {
@@ -934,6 +986,11 @@ const EcoChallenge: React.FC = () => {
     }, 100); // Intervalo de 100ms para a animação
   };
 
+  // Função para alternar a configuração de probabilidade
+  const cycleProbability = () => {
+    setProbabilityIndex((prevIndex) => (prevIndex + 1) % probabilitySettings.length);
+  };
+
   // Calcular se o botão deve estar desabilitado
   const isDisabled =
     !cartaAtual ||
@@ -1059,6 +1116,21 @@ const EcoChallenge: React.FC = () => {
                 disabled={!hasQuestionCards}
               >
                 <Filter className="h-4 w-4" />
+              </Button>
+              <Button
+                onClick={cycleProbability}
+                size="sm"
+                style={{
+                  backgroundColor:
+                    probabilitySettings[probabilityIndex].color || "white",
+                  color:
+                    probabilitySettings[probabilityIndex].color === "white"
+                      ? "black"
+                      : "white",
+                }}
+              >
+                <RefreshCcw className="h-4 w-4" />
+                {probabilitySettings[probabilityIndex].label}
               </Button>
               <div className="flex flex-col">
                 <CardTitle className="text-xl font-bold">
@@ -1211,7 +1283,8 @@ const EcoChallenge: React.FC = () => {
                       {ordemSelecoes.indexOf(opcao.id) + 1}
                       {respondido &&
                         ordemSelecoes.indexOf(opcao.id) + 1 !==
-                          (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1 && (
+                          (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
+                            1 && (
                           <span className="ml-1 text-blue-500">
                             (
                             {
