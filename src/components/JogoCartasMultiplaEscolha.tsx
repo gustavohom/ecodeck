@@ -28,7 +28,6 @@ import {
   Eye,
   Dice6,
   XCircle as XIcon,
-  RefreshCcw, // Icon for the probability button
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -106,6 +105,8 @@ interface TelaInicialProps {
   setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
   ocultarCarta: boolean;
   setOcultarCarta: React.Dispatch<React.SetStateAction<boolean>>;
+  probabilityIndex: number;
+  setProbabilityIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const predefinedColors = [
@@ -141,6 +142,14 @@ const predefinedColors = [
   "#ff4444", // Light Red
 ];
 
+// Configurações de probabilidade para filtrar as cartas especiais
+const probabilitySettings = [
+  { value: 0, color: "white", label: "0%" },
+  { value: 0.4, color: "green", label: "40%" },
+  { value: 0.6, color: "orange", label: "60%" },
+  { value: 0.8, color: "red", label: "80%" },
+];
+
 // Componente Tela Inicial
 const TelaInicial: React.FC<TelaInicialProps> = ({
   onStartGame,
@@ -155,6 +164,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   setPlayers,
   ocultarCarta,
   setOcultarCarta,
+  probabilityIndex,
+  setProbabilityIndex,
 }) => {
   const [termoBusca, setTermoBusca] = useState<string>("");
 
@@ -229,6 +240,11 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     )
     .sort();
 
+  // Função para alternar a configuração de probabilidade
+  const cycleProbability = () => {
+    setProbabilityIndex((prevIndex) => (prevIndex + 1) % probabilitySettings.length);
+  };
+
   return (
     <Card className="w-full max-w-sm mx-auto mt-8">
       <CardHeader>
@@ -261,10 +277,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                       categoriasSelecionadas.filter((c) => c !== categoria)
                     );
                   } else {
-                    setCategoriasSelecionadas([
-                      ...categoriasSelecionadas,
-                      categoria,
-                    ]);
+                    setCategoriasSelecionadas([...categoriasSelecionadas, categoria]);
                   }
                 }}
                 className="mr-2"
@@ -294,9 +307,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                   placeholder={`Nome do Jogador ${index + 1}`}
                   value={player.name}
                   maxLength={10}
-                  onChange={(e) =>
-                    handlePlayerChange(index, "name", e.target.value)
-                  }
+                  onChange={(e) => handlePlayerChange(index, "name", e.target.value)}
                   className="p-2 border rounded w-full"
                 />
                 <div className="relative">
@@ -377,6 +388,22 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             )}
           </Button>
         </div>
+        {/* Botão de configuração de probabilidade */}
+        <div className="mt-4">
+          <Button
+            onClick={cycleProbability}
+            className="w-full"
+            style={{
+              backgroundColor: probabilitySettings[probabilityIndex].color,
+              color:
+                probabilitySettings[probabilityIndex].color === "white"
+                  ? "black"
+                  : "white",
+            }}
+          >
+            Ajuste de Cartas Especiais: {probabilitySettings[probabilityIndex].label}
+          </Button>
+        </div>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
         {hasSavedGame && (
@@ -389,9 +416,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             startGame();
           }}
           className="w-full"
-          disabled={
-            categoriasSelecionadas.length === 0 || playerInputs.length === 0
-          }
+          disabled={categoriasSelecionadas.length === 0 || playerInputs.length === 0}
         >
           Iniciar Novo Jogo
         </Button>
@@ -411,9 +436,9 @@ const EcoChallenge: React.FC = () => {
   const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<
-    string[]
-  >([]);
+  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>(
+    []
+  );
   const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
     useState<boolean>(false);
 
@@ -437,13 +462,7 @@ const EcoChallenge: React.FC = () => {
     new Set(cartas.flatMap((carta) => carta.categorias))
   ).sort();
 
-  // Probability settings for re-rolling "Vantagem", "Desvantagem", or "Outras" cards
-  const probabilitySettings = [
-    { value: 0, color: "white", label: "0%" },
-    { value: 0.4, color: "green", label: "40%" },
-    { value: 0.6, color: "orange", label: "60%" },
-    { value: 0.8, color: "red", label: "80%" },
-  ];
+  // Configurações de probabilidade para filtrar as cartas especiais
   const [probabilityIndex, setProbabilityIndex] = useState<number>(0);
 
   // Verifica se há um jogo salvo no localStorage e se o jogo foi iniciado
@@ -469,9 +488,7 @@ const EcoChallenge: React.FC = () => {
         setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
         setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
         setJogoIniciado(estado.jogoIniciado || false);
-        setOcultarCarta(
-          estado.ocultarCarta !== undefined ? estado.ocultarCarta : true
-        );
+        setOcultarCarta(estado.ocultarCarta !== undefined ? estado.ocultarCarta : true);
         setProbabilityIndex(estado.probabilityIndex || 0);
       }
     }
@@ -507,14 +524,40 @@ const EcoChallenge: React.FC = () => {
   ]);
 
   const selecionarCartaAleatoria = useCallback(() => {
-    const cartasFiltradas = cartas.filter(
-      (carta) =>
-        carta.categorias.some((categoria) =>
-          categoriasSelecionadas.includes(categoria)
-        ) &&
-        (!mostrarSomentePerguntas ||
-          ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo))
-    );
+    // Obter a configuração de probabilidade atual
+    const probabilitySettings = [
+      { value: 0, color: "white", label: "0%" },
+      { value: 0.4, color: "green", label: "40%" },
+      { value: 0.6, color: "orange", label: "60%" },
+      { value: 0.8, color: "red", label: "80%" },
+    ];
+    const currentProbability = probabilitySettings[probabilityIndex].value;
+
+    // Decidir se vamos incluir as cartas especiais ou não
+    let incluirCartasEspeciais = true;
+    if (currentProbability > 0) {
+      const randomValue = Math.random();
+      if (randomValue < currentProbability) {
+        incluirCartasEspeciais = false;
+      }
+    }
+
+    const cartasFiltradas = cartas.filter((carta) => {
+      const categoriaValida = carta.categorias.some((categoria) =>
+        categoriasSelecionadas.includes(categoria)
+      );
+      const tipoValido =
+        !mostrarSomentePerguntas ||
+        ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo);
+      const isEspecial = ["Vantagem", "Desvantagem", "Outras"].includes(carta.tipo);
+
+      // Se não vamos incluir cartas especiais, filtramos elas
+      if (!incluirCartasEspeciais && isEspecial) {
+        return false;
+      }
+
+      return categoriaValida && tipoValido;
+    });
 
     if (cartasFiltradas.length === 0) {
       setNoCardsAvailable(true);
@@ -524,37 +567,8 @@ const EcoChallenge: React.FC = () => {
       setNoCardsAvailable(false);
     }
 
-    let novaCarta: Carta | null = null;
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    do {
-      const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
-      novaCarta = cartasFiltradas[indiceAleatorio];
-
-      const isSpecialType = ["Vantagem", "Desvantagem", "Outras"].includes(
-        novaCarta.tipo
-      );
-
-      if (isSpecialType) {
-        const probability =
-          probabilitySettings[probabilityIndex].value || 0;
-
-        if (probability > 0) {
-          const randomValue = Math.random();
-          if (randomValue < probability) {
-            novaCarta = null; // Re-roll
-          }
-        }
-      }
-      attempts++;
-    } while (novaCarta === null && attempts < maxAttempts);
-
-    if (novaCarta === null) {
-      // If we couldn't find a suitable card after maxAttempts
-      setMensagem("Não foi possível selecionar uma carta adequada.");
-      return;
-    }
+    const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
+    const novaCarta = cartasFiltradas[indiceAleatorio];
 
     setCartaAtual(novaCarta);
     setSelecionado(null);
@@ -574,7 +588,6 @@ const EcoChallenge: React.FC = () => {
     mostrarSomentePerguntas,
     ocultarCarta,
     probabilityIndex,
-    probabilitySettings,
   ]);
 
   useEffect(() => {
@@ -826,9 +839,7 @@ const EcoChallenge: React.FC = () => {
       );
 
       if (opcoesRestantes.length > 0) {
-        const indiceAleatorio = Math.floor(
-          Math.random() * opcoesRestantes.length
-        );
+        const indiceAleatorio = Math.floor(Math.random() * opcoesRestantes.length);
         const opcaoEliminada = opcoesRestantes[indiceAleatorio].id;
 
         setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
@@ -875,9 +886,7 @@ const EcoChallenge: React.FC = () => {
     if (!currentPlayer) return;
     updateCurrentPlayer({
       respostasErradas:
-        currentPlayer.respostasErradas > 0
-          ? currentPlayer.respostasErradas - 1
-          : 0,
+        currentPlayer.respostasErradas > 0 ? currentPlayer.respostasErradas - 1 : 0,
     });
     setMensagem("Erro removido!");
   };
@@ -986,11 +995,6 @@ const EcoChallenge: React.FC = () => {
     }, 100); // Intervalo de 100ms para a animação
   };
 
-  // Função para alternar a configuração de probabilidade
-  const cycleProbability = () => {
-    setProbabilityIndex((prevIndex) => (prevIndex + 1) % probabilitySettings.length);
-  };
-
   // Calcular se o botão deve estar desabilitado
   const isDisabled =
     !cartaAtual ||
@@ -1033,6 +1037,8 @@ const EcoChallenge: React.FC = () => {
         setPlayers={setPlayers}
         ocultarCarta={ocultarCarta}
         setOcultarCarta={setOcultarCarta}
+        probabilityIndex={probabilityIndex}
+        setProbabilityIndex={setProbabilityIndex}
       />
     );
   }
@@ -1117,26 +1123,9 @@ const EcoChallenge: React.FC = () => {
               >
                 <Filter className="h-4 w-4" />
               </Button>
-              <Button
-                onClick={cycleProbability}
-                size="sm"
-                style={{
-                  backgroundColor:
-                    probabilitySettings[probabilityIndex].color || "white",
-                  color:
-                    probabilitySettings[probabilityIndex].color === "white"
-                      ? "black"
-                      : "white",
-                }}
-              >
-                <RefreshCcw className="h-4 w-4" />
-                {probabilitySettings[probabilityIndex].label}
-              </Button>
               <div className="flex flex-col">
                 <CardTitle className="text-xl font-bold">
-                  {ocultarCarta && !cartaRevelada
-                    ? "Carta Oculta"
-                    : cartaAtual.titulo}
+                  {ocultarCarta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo}
                 </CardTitle>
                 {!ocultarCarta || cartaRevelada ? (
                   <p className="text-xs text-gray-500">
@@ -1287,11 +1276,8 @@ const EcoChallenge: React.FC = () => {
                             1 && (
                           <span className="ml-1 text-blue-500">
                             (
-                            {
-                              (
-                                cartaAtual.respostaCorreta as number[]
-                              ).indexOf(opcao.id) + 1
-                            }
+                            {(cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
+                              1}
                             )
                           </span>
                         )}
@@ -1349,9 +1335,7 @@ const EcoChallenge: React.FC = () => {
               }
               disabled={
                 (currentPlayer.pulosDisponiveis === 0 ||
-                  !["Pergunta", "MultiplaEscolha", "Ordem"].includes(
-                    cartaAtual.tipo
-                  )) ||
+                  !["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)) ||
                 (ocultarCarta && !cartaRevelada)
               }
             >
@@ -1361,9 +1345,7 @@ const EcoChallenge: React.FC = () => {
               onClick={toggleDica}
               size="sm"
               variant={
-                currentPlayer.respostasSeguidas < 2 ||
-                !cartaAtual.dica ||
-                dicaUsada
+                currentPlayer.respostasSeguidas < 2 || !cartaAtual.dica || dicaUsada
                   ? "outline"
                   : "secondary"
               }
@@ -1379,12 +1361,9 @@ const EcoChallenge: React.FC = () => {
             <Button
               onClick={eliminarRespostaErrada}
               size="sm"
-              variant={
-                currentPlayer.respostasSeguidas < 2 ? "outline" : "secondary"
-              }
+              variant={currentPlayer.respostasSeguidas < 2 ? "outline" : "secondary"}
               disabled={
-                currentPlayer.respostasSeguidas < 2 ||
-                (ocultarCarta && !cartaRevelada)
+                currentPlayer.respostasSeguidas < 2 || (ocultarCarta && !cartaRevelada)
               }
             >
               <MinusCircle className="h-4 w-4" />
@@ -1420,20 +1399,13 @@ const EcoChallenge: React.FC = () => {
             <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
               <ChevronUp className="h-4 w-4 text-purple-500 transform rotate-180" />
             </Button>
-            <Button
-              onClick={incrementarRodadasPreso}
-              size="sm"
-              variant="outline"
-            >
+            <Button onClick={incrementarRodadasPreso} size="sm" variant="outline">
               <ChevronUp className="h-4 w-4 text-purple-500" />
             </Button>
           </div>
           <div className="flex justify-between w-full mb-4">
             {ocultarCarta && !cartaRevelada ? (
-              <Button
-                onClick={() => setCartaRevelada(true)}
-                className="w-full mt-2"
-              >
+              <Button onClick={() => setCartaRevelada(true)} className="w-full mt-2">
                 Revelar
               </Button>
             ) : !respondido ? (
