@@ -4,7 +4,7 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  CardTitle,
+  // Removemos a importação de CardTitle
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -990,8 +990,21 @@ const EcoChallenge: React.FC = () => {
   if (noCardsAvailable) {
     return (
       <div className="flex flex-col items-center">
+        <p className="mt-4 text-center">
+          Nenhuma carta disponível com os filtros atuais.
+        </p>
+        <Button
+          onClick={() => {
+            setMostrarSomentePerguntas(false);
+            selecionarCartaAleatoria();
+          }}
+          className="mt-4"
+        >
+          Remover Filtro
+        </Button>
+        {/* Botões de seleção de jogador movidos para baixo */}
         <div
-          className={`grid gap-1 mb-1 ${
+          className={`grid gap-1 mt-4 ${
             players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
           }`}
           style={{ width: "100%", maxWidth: "400px" }}
@@ -1013,18 +1026,6 @@ const EcoChallenge: React.FC = () => {
             </Button>
           ))}
         </div>
-        <p className="mt-4 text-center">
-          Nenhuma carta disponível com os filtros atuais.
-        </p>
-        <Button
-          onClick={() => {
-            setMostrarSomentePerguntas(false);
-            selecionarCartaAleatoria();
-          }}
-          className="mt-4"
-        >
-          Remover Filtro
-        </Button>
       </div>
     );
   }
@@ -1036,6 +1037,30 @@ const EcoChallenge: React.FC = () => {
         <Button onClick={voltarTelaInicial} className="mt-4">
           Voltar para a Tela Inicial
         </Button>
+        {/* Botões de seleção de jogador movidos para baixo */}
+        <div
+          className={`grid gap-1 mt-4 ${
+            players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
+          }`}
+          style={{ width: "100%", maxWidth: "400px" }}
+        >
+          {players.map((player) => (
+            <Button
+              key={player.id}
+              onClick={() => setCurrentPlayerId(player.id)}
+              size="sm"
+              variant={currentPlayerId === player.id ? "default" : "outline"}
+              style={{
+                backgroundColor:
+                  currentPlayerId === player.id ? player.color : undefined,
+                color: currentPlayerId === player.id ? "#fff" : undefined,
+                width: "100%",
+              }}
+            >
+              {player.name}
+            </Button>
+          ))}
+        </div>
       </div>
     );
   }
@@ -1060,31 +1085,8 @@ const EcoChallenge: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <div
-        className={`grid gap-1 mb-1 ${
-          players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
-        }`}
-        style={{ width: "100%", maxWidth: "400px" }}
-      >
-        {players.map((player) => (
-          <Button
-            key={player.id}
-            onClick={() => setCurrentPlayerId(player.id)}
-            size="sm"
-            variant={currentPlayerId === player.id ? "default" : "outline"}
-            style={{
-              backgroundColor:
-                currentPlayerId === player.id ? player.color : undefined,
-              color: currentPlayerId === player.id ? "#fff" : undefined,
-              width: "100%",
-            }}
-          >
-            {player.name}
-          </Button>
-        ))}
-      </div>
       <Card
-        className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}
+        className={`w-full max-w-sm mx-auto ${obterEstiloCarta()}`}
         style={
           players.length > 1 &&
           currentPlayer &&
@@ -1107,11 +1109,7 @@ const EcoChallenge: React.FC = () => {
                 <Filter className="h-4 w-4" />
               </Button>
               <div className="flex flex-col">
-                <CardTitle className="text-xl font-bold">
-                  {ocultarCarta && !cartaRevelada
-                    ? "Carta Oculta"
-                    : cartaAtual.titulo}
-                </CardTitle>
+                {/* Removemos o CardTitle */}
                 {!ocultarCarta || cartaRevelada ? (
                   <p className="text-xs text-gray-500">
                     {cartaAtual.categorias.join(", ")}
@@ -1468,6 +1466,31 @@ const EcoChallenge: React.FC = () => {
           </div>
         </CardFooter>
       </Card>
+
+      {/* Botões de seleção de jogador movidos para baixo */}
+      <div
+        className={`grid gap-1 mt-4 ${
+          players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
+        }`}
+        style={{ width: "100%", maxWidth: "400px" }}
+      >
+        {players.map((player) => (
+          <Button
+            key={player.id}
+            onClick={() => setCurrentPlayerId(player.id)}
+            size="sm"
+            variant={currentPlayerId === player.id ? "default" : "outline"}
+            style={{
+              backgroundColor:
+                currentPlayerId === player.id ? player.color : undefined,
+              color: currentPlayerId === player.id ? "#fff" : undefined,
+              width: "100%",
+            }}
+          >
+            {player.name}
+          </Button>
+        ))}
+      </div>
 
       {/* Modal para mostrar o número do dado quando a carta está revelada */}
       {isDieModalOpen && (
