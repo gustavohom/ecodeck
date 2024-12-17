@@ -52,12 +52,17 @@ const CriadorDeCarta: React.FC<CriadorDeCartaProps> = ({
   };
 
   const handleRespostaCorreta = (id: number) => {
-    if (cartaAtual.tipo === "MultiplaEscolha") {
+    if (cartaAtual.tipo === "MultiplaEscolha" || cartaAtual.tipo === "Outras") {
       const resposta = cartaAtual.respostaCorreta as number[] || [];
       const novaResposta = resposta.includes(id)
         ? resposta.filter((res) => res !== id)
         : [...resposta, id];
       setCartaAtual({ ...cartaAtual, respostaCorreta: novaResposta });
+    } else if (cartaAtual.tipo === "Ordem") {
+      const resposta = cartaAtual.respostaCorreta as number[] || [];
+      if (!resposta.includes(id)) {
+        setCartaAtual({ ...cartaAtual, respostaCorreta: [...resposta, id] });
+      }
     } else {
       setCartaAtual({ ...cartaAtual, respostaCorreta: id });
     }
@@ -75,15 +80,15 @@ const CriadorDeCarta: React.FC<CriadorDeCartaProps> = ({
   };
 
   return (
-    <div className="p-8 bg-gray-100 rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">Criador de Cartas</h2>
+    <div className="p-6 bg-white shadow-md rounded-md">
+      <h2 className="text-2xl font-bold mb-4 text-center">Criador de Cartas</h2>
 
       {/* Tipo de Carta */}
-      <label>Tipo da Carta</label>
+      <label className="block font-semibold mb-1">Tipo de Carta</label>
       <select
         value={cartaAtual.tipo}
         onChange={(e) => setCartaAtual({ ...cartaAtual, tipo: e.target.value })}
-        className="w-full p-2 mb-2 border rounded"
+        className="w-full p-2 mb-4 border rounded"
       >
         <option value="Pergunta">Pergunta</option>
         <option value="MultiplaEscolha">Multipla Escolha</option>
@@ -100,7 +105,6 @@ const CriadorDeCarta: React.FC<CriadorDeCartaProps> = ({
         onChange={(e) => setCartaAtual({ ...cartaAtual, titulo: e.target.value })}
         className="w-full p-2 mb-2 border rounded"
       />
-
       <textarea
         placeholder="Pergunta / Descrição"
         value={cartaAtual.pergunta}
@@ -109,7 +113,9 @@ const CriadorDeCarta: React.FC<CriadorDeCartaProps> = ({
       />
 
       {/* Opções */}
-      {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) && (
+      {["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras"].includes(
+        cartaAtual.tipo
+      ) && (
         <>
           <button onClick={adicionarOpcao} className="bg-blue-500 text-white p-2 rounded mb-2">
             Adicionar Opção
@@ -128,10 +134,16 @@ const CriadorDeCarta: React.FC<CriadorDeCartaProps> = ({
                 className="p-2 border rounded w-full"
               />
               <input
-                type={cartaAtual.tipo === "MultiplaEscolha" ? "checkbox" : "radio"}
+                type={
+                  cartaAtual.tipo === "MultiplaEscolha" ||
+                  cartaAtual.tipo === "Outras" ||
+                  cartaAtual.tipo === "Ordem"
+                    ? "checkbox"
+                    : "radio"
+                }
                 name="respostaCorreta"
                 checked={
-                  cartaAtual.tipo === "MultiplaEscolha"
+                  cartaAtual.tipo === "MultiplaEscolha" || cartaAtual.tipo === "Outras"
                     ? (cartaAtual.respostaCorreta as number[])?.includes(opcao.id)
                     : cartaAtual.respostaCorreta === opcao.id
                 }
@@ -143,33 +155,22 @@ const CriadorDeCarta: React.FC<CriadorDeCartaProps> = ({
         </>
       )}
 
-      {/* Categorias e Outros */}
+      {/* Campos Vantagem e Desvantagem */}
       <input
-        placeholder="Categorias (separadas por vírgula)"
-        value={cartaAtual.categorias?.join(", ")}
-        onChange={(e) =>
-          setCartaAtual({ ...cartaAtual, categorias: e.target.value.split(",").map((c) => c.trim()) })
-        }
+        placeholder="Vantagem"
+        value={cartaAtual.vantagem}
+        onChange={(e) => setCartaAtual({ ...cartaAtual, vantagem: e.target.value })}
         className="w-full p-2 mb-2 border rounded"
       />
-
-      <button
-        onClick={() => setCategoriaFixa(cartaAtual.categorias || [])}
-        className="bg-gray-500 text-white p-2 rounded mb-2"
-      >
-        Manter Categoria
-      </button>
-
       <input
-        placeholder="Fontes (separadas por linha)"
-        onChange={(e) =>
-          setCartaAtual({ ...cartaAtual, fontes: e.target.value.split("\n").map((f) => f.trim()) })
-        }
+        placeholder="Desvantagem"
+        value={cartaAtual.desvantagem}
+        onChange={(e) => setCartaAtual({ ...cartaAtual, desvantagem: e.target.value })}
         className="w-full p-2 mb-2 border rounded"
       />
 
       {/* Botão Salvar */}
-      <button onClick={salvarCarta} className="bg-green-500 text-white p-2 rounded">
+      <button onClick={salvarCarta} className="bg-green-500 text-white p-2 rounded mt-4 w-full">
         Salvar Carta
       </button>
     </div>
