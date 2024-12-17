@@ -8,6 +8,7 @@ export default function Home() {
       <p className="mb-4">
         Bem-vindo ao nosso jogo de cartas educativo! Aqui estão as regras:
       </p>
+      
       <ul className="list-disc pl-5 mb-4">
         <li>Cada carta contém uma pergunta de múltipla escolha sobre diversos temas.</li>
         <li>Escolha a resposta que você acredita ser correta.</li>
@@ -16,13 +17,23 @@ export default function Home() {
         <li>Use o botão de dica se precisar de ajuda.</li>
         <li>As fontes das informações estão indicadas no final de cada carta.</li>
       </ul>
-      <div className="flex space-x-4">
+
+      <div className="grid grid-cols-2 gap-4 mt-6">
         <Link href="/jogo">
-          <Button>Começar o Jogo</Button>
+          <Button className="w-full">Começar o Jogo</Button>
         </Link>
+
         <a href="/regras/regras.pdf" target="_blank" rel="noopener noreferrer">
-          <Button>Ver Regras</Button>
+          <Button className="w-full">Ver Regras</Button>
         </a>
+
+        <Link href="/criador">
+          <Button className="w-full">Criador de Cartas</Button>
+        </Link>
+
+        <Link href="/gerenciador">
+          <Button className="w-full">Gerenciar Baralhos</Button>
+        </Link>
       </div>
     </div>
   );
