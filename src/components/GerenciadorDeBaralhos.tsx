@@ -4,6 +4,7 @@ import CriadorDeCarta from "./CriadorDeCarta";
 const GerenciadorDeBaralhos: React.FC = () => {
   const [cartas, setCartas] = useState<any[]>([]);
   const [nomeBaralho, setNomeBaralho] = useState<string>("MeuBaralho");
+  const [categoriaFixa, setCategoriaFixa] = useState<string[]>([]); // Adiciona categoria fixa
 
   const adicionarCarta = (carta: any) => {
     setCartas([...cartas, carta]);
@@ -29,7 +30,14 @@ const GerenciadorDeBaralhos: React.FC = () => {
         onChange={(e) => setNomeBaralho(e.target.value)}
         className="p-2 border rounded w-full mb-4"
       />
-      <CriadorDeCarta onAddCarta={adicionarCarta} />
+
+      {/* Passando a propriedade setCategoriaFixa */}
+      <CriadorDeCarta
+        onAddCarta={adicionarCarta}
+        categoriaFixa={categoriaFixa}
+        setCategoriaFixa={setCategoriaFixa}
+      />
+
       <h2 className="text-xl font-bold mt-8">Cartas Criadas</h2>
       <pre className="bg-gray-200 p-4 rounded">{JSON.stringify(cartas, null, 2)}</pre>
       <button
