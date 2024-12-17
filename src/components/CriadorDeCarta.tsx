@@ -35,7 +35,7 @@ const CriadorDeCarta: React.FC<CriadorDeCartaProps> = ({
     titulo: "",
     pergunta: "",
     opcoes: [],
-    respostaCorreta: undefined,
+    respostaCorreta: [],
     dificuldade: "facil",
     categorias: categoriaFixa || [],
     fontes: [],
@@ -75,13 +75,13 @@ const CriadorDeCarta: React.FC<CriadorDeCartaProps> = ({
       titulo: "",
       pergunta: "",
       opcoes: [],
-      respostaCorreta: undefined,
+      respostaCorreta: [],
     });
   };
 
   return (
     <div className="p-6 bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-bold mb-4 text-center">Criador de Cartas</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center text-blue-600">Criador de Cartas</h2>
 
       {/* Tipo de Carta */}
       <label className="block font-semibold mb-1">Tipo de Carta</label>
@@ -134,19 +134,8 @@ const CriadorDeCarta: React.FC<CriadorDeCartaProps> = ({
                 className="p-2 border rounded w-full"
               />
               <input
-                type={
-                  cartaAtual.tipo === "MultiplaEscolha" ||
-                  cartaAtual.tipo === "Outras" ||
-                  cartaAtual.tipo === "Ordem"
-                    ? "checkbox"
-                    : "radio"
-                }
-                name="respostaCorreta"
-                checked={
-                  cartaAtual.tipo === "MultiplaEscolha" || cartaAtual.tipo === "Outras"
-                    ? (cartaAtual.respostaCorreta as number[])?.includes(opcao.id)
-                    : cartaAtual.respostaCorreta === opcao.id
-                }
+                type="checkbox"
+                checked={(cartaAtual.respostaCorreta as number[])?.includes(opcao.id)}
                 onChange={() => handleRespostaCorreta(opcao.id)}
                 className="ml-2"
               />
@@ -155,7 +144,23 @@ const CriadorDeCarta: React.FC<CriadorDeCartaProps> = ({
         </>
       )}
 
-      {/* Campos Vantagem e Desvantagem */}
+      {/* Categorias */}
+      <input
+        placeholder="Categorias (separadas por vírgula)"
+        value={cartaAtual.categorias?.join(", ")}
+        onChange={(e) =>
+          setCartaAtual({ ...cartaAtual, categorias: e.target.value.split(",").map((c) => c.trim()) })
+        }
+        className="w-full p-2 mb-2 border rounded"
+      />
+      <button
+        onClick={() => setCategoriaFixa(cartaAtual.categorias || [])}
+        className="bg-gray-600 text-white p-2 rounded mb-2"
+      >
+        Manter Categoria
+      </button>
+
+      {/* Vantagem e Desvantagem */}
       <input
         placeholder="Vantagem"
         value={cartaAtual.vantagem}
@@ -169,7 +174,7 @@ const CriadorDeCarta: React.FC<CriadorDeCartaProps> = ({
         className="w-full p-2 mb-2 border rounded"
       />
 
-      {/* Botão Salvar */}
+      {/* Salvar */}
       <button onClick={salvarCarta} className="bg-green-500 text-white p-2 rounded mt-4 w-full">
         Salvar Carta
       </button>
