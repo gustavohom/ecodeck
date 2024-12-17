@@ -10,51 +10,34 @@ const GerenciadorDeBaralhos: React.FC = () => {
   };
 
   const salvarBaralho = () => {
-    if (cartas.length === 0) {
-      alert("Nenhuma carta foi criada!");
-      return;
-    }
-
-    const baralhoData = JSON.stringify(cartas, null, 2);
-    const blob = new Blob([baralhoData], { type: "application/json" });
+    const json = JSON.stringify(cartas, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${nomeBaralho || "baralho_personalizado"}.json`;
-    link.click();
-
-    URL.revokeObjectURL(url);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${nomeBaralho}.json`;
+    a.click();
   };
 
   return (
-    <div>
-      <h1>Gerenciar Baralhos</h1>
-
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-4">Gerenciar Baralhos</h1>
       <input
         type="text"
         placeholder="Nome do Baralho"
         value={nomeBaralho}
         onChange={(e) => setNomeBaralho(e.target.value)}
+        className="p-2 border rounded w-full mb-4"
       />
-
       <CriadorDeCarta onAddCarta={adicionarCarta} />
-
-      <h2>Cartas Criadas</h2>
-      {cartas.length > 0 ? (
-        <ul>
-          {cartas.map((carta, index) => (
-            <li key={index}>
-              <strong>{carta.titulo}</strong> - {carta.tipo} (
-              {carta.dificuldade})
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>Nenhuma carta adicionada ainda.</p>
-      )}
-
-      <button onClick={salvarBaralho}>Salvar Baralho</button>
+      <h2 className="text-xl font-bold mt-8">Cartas Criadas</h2>
+      <pre className="bg-gray-200 p-4 rounded">{JSON.stringify(cartas, null, 2)}</pre>
+      <button
+        onClick={salvarBaralho}
+        className="bg-purple-500 text-white py-2 px-4 rounded mt-4"
+      >
+        Salvar Baralho
+      </button>
     </div>
   );
 };
