@@ -49,7 +49,7 @@ const teste_gustavo = [
     ],
     "respostaCorreta": [
       2,
-      2
+      3
     ],
     "dificuldade": "facil",
     "categorias": [
