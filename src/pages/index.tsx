@@ -30,10 +30,7 @@ export default function Home() {
         <Link href="/criador">
           <Button className="w-full">Criador de Cartas</Button>
         </Link>
-
-        <Link href="/gerenciador">
-          <Button className="w-full">Gerenciar Baralhos</Button>
-        </Link>
+        
       </div>
     </div>
   );
