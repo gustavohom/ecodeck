@@ -40,7 +40,7 @@ import manejoPlantadas from "./cards_manejo_plantada";
 import manejoNativas from "./cards_manejo_nativa";
 import ecologiaFlorestal from "./cards_ecologia_florestal";
 import estrelasAliens from "./cards_estrelas_aliens";
-import testCards from "./test_card";
+import testCards from "./teste_gustavo";
 
 // Combine as cartas simples e complexas em um único array
 const cartas = [
