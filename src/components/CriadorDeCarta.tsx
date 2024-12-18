@@ -49,12 +49,26 @@ const CriadorDeCarta: React.FC = () => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [categoriasBloqueadas, setCategoriasBloqueadas] = useState<boolean>(false);
 
-  // Estados para upload de baralhos
+  // Estados para upload de baralhos (js)
   const [baralhoParaMerge1, setBaralhoParaMerge1] = useState<Carta[]>([]);
   const [baralhoParaMerge2, setBaralhoParaMerge2] = useState<Carta[]>([]);
   const [baralhoParaEdicao, setBaralhoParaEdicao] = useState<Carta[]>([]);
 
-  const handleFileUpload = (
+  // Função para tentar extrair o array de um arquivo .js
+  const parseJSDeckFile = (content: string): Carta[] => {
+    // Procurar a linha que contem `const nome = [`
+    // Uma regex simples para capturar a parte entre '=' e ';'
+    const match = content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);/);
+    if (!match) {
+      throw new Error("Não foi possível encontrar um array exportado no arquivo JS.");
+    }
+    const arrayStr = match[1]; // Conteúdo entre = e ;
+    // Agora fazer JSON.parse
+    const json = JSON.parse(arrayStr) as Carta[];
+    return json;
+  };
+
+  const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     setBaralho: React.Dispatch<React.SetStateAction<Carta[]>>
   ) => {
@@ -65,10 +79,19 @@ const CriadorDeCarta: React.FC = () => {
       const result = event.target?.result;
       if (typeof result === "string") {
         try {
-          const json = JSON.parse(result) as Carta[];
-          setBaralho(json);
-        } catch (error) {
-          alert("Erro ao ler o arquivo JSON do baralho.");
+          if (file.name.endsWith(".js")) {
+            // É um arquivo JS, tentar extrair o array
+            const json = parseJSDeckFile(result);
+            setBaralho(json);
+          } else if (file.name.endsWith(".json")) {
+            // JSON direto
+            const json = JSON.parse(result) as Carta[];
+            setBaralho(json);
+          } else {
+            alert("Formato não suportado. Use arquivos .js ou .json");
+          }
+        } catch (error: any) {
+          alert("Erro ao ler o arquivo: " + error.message);
         }
       }
     };
@@ -100,7 +123,6 @@ const CriadorDeCarta: React.FC = () => {
     } else if (tipo === "Pergunta") {
       setRespostaCorreta([id]);
     }
-    // "Desvantagem" não deve ter respostas corretas, mas não impedimos o usuário.
   };
 
   const handleSetOrder = (opcaoId: number, position: number) => {
@@ -143,7 +165,6 @@ const CriadorDeCarta: React.FC = () => {
     setVantagem("");
     setDesvantagem("");
     setFontes([]);
-    // Mantenha as categorias do baralho
     setRespostaCorreta([]);
     setOrdemMap({});
     setDificuldade("facil");
@@ -194,7 +215,7 @@ const CriadorDeCarta: React.FC = () => {
     setEditIndex(index);
     setTipo(carta.tipo as TipoCarta);
     setTitulo(carta.titulo);
-    // Extrair imagem
+
     let p = carta.pergunta;
     let imgSrc = "";
     if (p.startsWith("<img")) {
@@ -269,7 +290,7 @@ const CriadorDeCarta: React.FC = () => {
     document.body.removeChild(element);
   };
 
-  // Unir dois baralhos carregados com o baralho atual
+  // Unir dois baralhos
   const mergeBaralhos = () => {
     setCards([...cards, ...baralhoParaMerge1, ...baralhoParaMerge2]);
   };
@@ -297,8 +318,10 @@ const CriadorDeCarta: React.FC = () => {
 
       <div className="bg-white shadow p-4 rounded mb-6 space-y-4">
         <h2 className="text-xl font-semibold">Carregar Baralho para Edição</h2>
-        <p className="text-sm text-gray-500">Selecione um arquivo .json contendo um array de cartas:</p>
-        <input type="file" accept=".json" onChange={(e) => handleFileUpload(e, setBaralhoParaEdicao)} />
+        <p className="text-sm text-gray-500">
+          Selecione um arquivo .js ou .json contendo um array de cartas:
+        </p>
+        <input type="file" accept=".js,.json" onChange={(e) => handleFileUpload(e, setBaralhoParaEdicao)} />
         {baralhoParaEdicao.length > 0 && (
           <button onClick={loadBaralhoForEdit} className="bg-blue-500 text-white px-4 py-2 rounded mt-2">
             Carregar baralho para edição
@@ -308,15 +331,15 @@ const CriadorDeCarta: React.FC = () => {
 
       <div className="bg-white shadow p-4 rounded mb-6 space-y-4">
         <h2 className="text-xl font-semibold">Unir Dois Baralhos</h2>
-        <p className="text-sm text-gray-500">Carregue primeiro um baralho, depois o segundo.</p>
+        <p className="text-sm text-gray-500">Carregue primeiro um baralho (.js ou .json), depois o segundo.</p>
         <div>
           <label className="block text-sm font-medium mb-1">Baralho 1:</label>
-          <input type="file" accept=".json" onChange={(e) => handleFileUpload(e, setBaralhoParaMerge1)} />
+          <input type="file" accept=".js,.json" onChange={(e) => handleFileUpload(e, setBaralhoParaMerge1)} />
           <p className="text-xs text-gray-500 mt-1">{baralhoParaMerge1.length} cartas carregadas</p>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Baralho 2:</label>
-          <input type="file" accept=".json" onChange={(e) => handleFileUpload(e, setBaralhoParaMerge2)} />
+          <input type="file" accept=".js,.json" onChange={(e) => handleFileUpload(e, setBaralhoParaMerge2)} />
           <p className="text-xs text-gray-500 mt-1">{baralhoParaMerge2.length} cartas carregadas</p>
         </div>
         {baralhoParaMerge1.length > 0 && baralhoParaMerge2.length > 0 && (
