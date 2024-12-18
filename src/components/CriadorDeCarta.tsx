@@ -359,7 +359,7 @@ const CriadorDeCarta: React.FC = () => {
             )}
             {tipo === "Outras" && (
               <p className="text-xs text-gray-500">
-                Em 'Outras', você pode ter um mix de certas e erradas.
+                Em cartas Outras, você pode ter um mix de certas e erradas.
               </p>
             )}
           </div>
