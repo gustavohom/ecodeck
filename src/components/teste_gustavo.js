@@ -17,7 +17,7 @@ const teste_gustavo = [
         "texto": "opção errada"
       }
     ],
-    "respostaCorreta": 0,
+    "respostaCorreta": 2,
     "dificuldade": "facil",
     "categorias": [
       "test_gu"],
@@ -48,7 +48,7 @@ const teste_gustavo = [
       }
     ],
     "respostaCorreta": [
-      1,
+      2,
       2
     ],
     "dificuldade": "facil",
@@ -85,7 +85,7 @@ const teste_gustavo = [
     ],
     "dificuldade": "dificil",
     "categorias": [
-      "test_gu"
+      "test_gustavo"
     ],
     "fontes": [],
     "vantagem": "vat",
