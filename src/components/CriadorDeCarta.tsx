@@ -29,13 +29,13 @@ const CriadorDeCarta: React.FC = () => {
   const [deckName, setDeckName] = useState<string>("meu_baralho");
   const [cards, setCards] = useState<Carta[]>([]);
 
-  // Estados da carta atual (para criação/edição)
+  // Estados da carta atual
   const [tipo, setTipo] = useState<TipoCarta>("Pergunta");
   const [titulo, setTitulo] = useState<string>("");
   const [pergunta, setPergunta] = useState<string>("");
   const [opcoes, setOpcoes] = useState<Opcao[]>([]);
   const [novaOpcao, setNovaOpcao] = useState<string>("");
-  const [imagem, setImagem] = useState<string>(""); // nome do arquivo da imagem
+  const [imagem, setImagem] = useState<string>("");
   const [respostaCorreta, setRespostaCorreta] = useState<number[]>([]);
   const [dificuldade, setDificuldade] = useState<Dificuldade>("facil");
   const [categorias, setCategorias] = useState<string[]>([]);
@@ -45,15 +45,35 @@ const CriadorDeCarta: React.FC = () => {
   const [vantagem, setVantagem] = useState<string>("");
   const [desvantagem, setDesvantagem] = useState<string>("");
   const [dica, setDica] = useState<string>("");
-
-  // Controle da ordem
   const [ordemMap, setOrdemMap] = useState<Record<number, number>>({});
-
-  // Controle de edição
   const [editIndex, setEditIndex] = useState<number | null>(null);
-
-  // Bloquear categorias?
   const [categoriasBloqueadas, setCategoriasBloqueadas] = useState<boolean>(false);
+
+  // Estados para upload de baralhos
+  const [baralhoParaMerge1, setBaralhoParaMerge1] = useState<Carta[]>([]);
+  const [baralhoParaMerge2, setBaralhoParaMerge2] = useState<Carta[]>([]);
+  const [baralhoParaEdicao, setBaralhoParaEdicao] = useState<Carta[]>([]);
+
+  const handleFileUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setBaralho: React.Dispatch<React.SetStateAction<Carta[]>>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result;
+      if (typeof result === "string") {
+        try {
+          const json = JSON.parse(result) as Carta[];
+          setBaralho(json);
+        } catch (error) {
+          alert("Erro ao ler o arquivo JSON do baralho.");
+        }
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const handleAddOpcao = () => {
     if (novaOpcao.trim() !== "") {
@@ -80,11 +100,10 @@ const CriadorDeCarta: React.FC = () => {
     } else if (tipo === "Pergunta") {
       setRespostaCorreta([id]);
     }
-    // Em "Desvantagem", não deveria ter respostas corretas. Não impedimos, mas não aconselhamos.
+    // "Desvantagem" não deve ter respostas corretas, mas não impedimos o usuário.
   };
 
   const handleSetOrder = (opcaoId: number, position: number) => {
-    // Impedir números negativos ou zero
     if (position < 1) return; 
     setOrdemMap({ ...ordemMap, [opcaoId]: position });
   };
@@ -124,7 +143,7 @@ const CriadorDeCarta: React.FC = () => {
     setVantagem("");
     setDesvantagem("");
     setFontes([]);
-    setCategorias([...categorias]); // mantém as categorias do baralho
+    // Mantenha as categorias do baralho
     setRespostaCorreta([]);
     setOrdemMap({});
     setDificuldade("facil");
@@ -160,12 +179,10 @@ const CriadorDeCarta: React.FC = () => {
     };
 
     if (editIndex !== null) {
-      // Atualizar carta existente
       const newCards = [...cards];
       newCards[editIndex] = novaCarta;
       setCards(newCards);
     } else {
-      // Adicionar nova carta
       setCards([...cards, novaCarta]);
     }
 
@@ -177,14 +194,13 @@ const CriadorDeCarta: React.FC = () => {
     setEditIndex(index);
     setTipo(carta.tipo as TipoCarta);
     setTitulo(carta.titulo);
-    // Extrair imagem do campo pergunta se existir
+    // Extrair imagem
     let p = carta.pergunta;
     let imgSrc = "";
     if (p.startsWith("<img")) {
       const imgTagMatch = p.match(/<img[^>]+src="([^"]+)"[^>]*alt="([^"]+)"[^>]*class="([^"]+)"[^>]*>\n?/);
       if (imgTagMatch) {
         imgSrc = imgTagMatch[1];
-        // Remover a tag da pergunta
         p = p.replace(imgTagMatch[0], "");
       }
     }
@@ -192,9 +208,8 @@ const CriadorDeCarta: React.FC = () => {
     setPergunta(p);
 
     setOpcoes(carta.opcoes);
-    // Restaurar respostaCorreta e ordem
+
     if (carta.tipo === "Ordem") {
-      // Precisamos recriar o ordemMap com base em respostaCorreta
       const ordemArray = carta.respostaCorreta as number[];
       const newOrdemMap: Record<number, number> = {};
       carta.opcoes.forEach((op) => {
@@ -206,13 +221,10 @@ const CriadorDeCarta: React.FC = () => {
       setOrdemMap(newOrdemMap);
       setRespostaCorreta([]);
     } else if (carta.tipo === "Pergunta") {
-      // Única correta
       const correct = typeof carta.respostaCorreta === "number" ? [carta.respostaCorreta] : [];
       setRespostaCorreta(correct);
       setOrdemMap({});
     } else {
-      // MultiplaEscolha, Vantagem, Desvantagem, Outras
-      // respostaCorreta pode ser número ou array
       const correctArr = Array.isArray(carta.respostaCorreta)
         ? carta.respostaCorreta
         : [carta.respostaCorreta];
@@ -232,7 +244,6 @@ const CriadorDeCarta: React.FC = () => {
     const newCards = [...cards];
     newCards.splice(index, 1);
     setCards(newCards);
-    // Se estava editando essa carta, resetar o formulário
     if (editIndex === index) {
       resetCarta();
     }
@@ -258,6 +269,17 @@ const CriadorDeCarta: React.FC = () => {
     document.body.removeChild(element);
   };
 
+  // Unir dois baralhos carregados com o baralho atual
+  const mergeBaralhos = () => {
+    setCards([...cards, ...baralhoParaMerge1, ...baralhoParaMerge2]);
+  };
+
+  // Carregar baralho para edição
+  const loadBaralhoForEdit = () => {
+    setCards(baralhoParaEdicao);
+    resetCarta();
+  };
+
   return (
     <div className="p-4 max-w-5xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Criador de Baralho</h1>
@@ -273,9 +295,39 @@ const CriadorDeCarta: React.FC = () => {
         />
       </div>
 
+      <div className="bg-white shadow p-4 rounded mb-6 space-y-4">
+        <h2 className="text-xl font-semibold">Carregar Baralho para Edição</h2>
+        <p className="text-sm text-gray-500">Selecione um arquivo .json contendo um array de cartas:</p>
+        <input type="file" accept=".json" onChange={(e) => handleFileUpload(e, setBaralhoParaEdicao)} />
+        {baralhoParaEdicao.length > 0 && (
+          <button onClick={loadBaralhoForEdit} className="bg-blue-500 text-white px-4 py-2 rounded mt-2">
+            Carregar baralho para edição
+          </button>
+        )}
+      </div>
+
+      <div className="bg-white shadow p-4 rounded mb-6 space-y-4">
+        <h2 className="text-xl font-semibold">Unir Dois Baralhos</h2>
+        <p className="text-sm text-gray-500">Carregue primeiro um baralho, depois o segundo.</p>
+        <div>
+          <label className="block text-sm font-medium mb-1">Baralho 1:</label>
+          <input type="file" accept=".json" onChange={(e) => handleFileUpload(e, setBaralhoParaMerge1)} />
+          <p className="text-xs text-gray-500 mt-1">{baralhoParaMerge1.length} cartas carregadas</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Baralho 2:</label>
+          <input type="file" accept=".json" onChange={(e) => handleFileUpload(e, setBaralhoParaMerge2)} />
+          <p className="text-xs text-gray-500 mt-1">{baralhoParaMerge2.length} cartas carregadas</p>
+        </div>
+        {baralhoParaMerge1.length > 0 && baralhoParaMerge2.length > 0 && (
+          <button onClick={mergeBaralhos} className="bg-green-500 text-white px-4 py-2 rounded mt-2">
+            Unir Baralhos ao Atual
+          </button>
+        )}
+      </div>
+
       <h2 className="text-2xl font-bold mb-4">{editIndex !== null ? "Editar Carta" : "Adicionar Carta"}</h2>
       <div className="bg-white shadow p-4 rounded mb-6 space-y-4">
-        {/* Tipo de Carta */}
         <div>
           <label className="block text-sm font-medium mb-1">Tipo da Carta</label>
           <select
@@ -295,7 +347,6 @@ const CriadorDeCarta: React.FC = () => {
           </p>
         </div>
 
-        {/* Título */}
         <div>
           <label className="block text-sm font-medium mb-1">Título da Carta</label>
           <input
@@ -306,7 +357,6 @@ const CriadorDeCarta: React.FC = () => {
           />
         </div>
 
-        {/* Imagem */}
         <div>
           <label className="block text-sm font-medium mb-1">Imagem (nome do arquivo, opcional)</label>
           <input
@@ -319,7 +369,6 @@ const CriadorDeCarta: React.FC = () => {
           <p className="text-xs text-gray-500 mt-1">Se tiver imagem, ela aparecerá no início da pergunta.</p>
         </div>
 
-        {/* Pergunta/Descrição */}
         <div>
           <label className="block text-sm font-medium mb-1">Pergunta/Descrição</label>
           <textarea
@@ -329,7 +378,6 @@ const CriadorDeCarta: React.FC = () => {
           />
         </div>
 
-        {/* Opções para Pergunta/MultiplaEscolha/Ordem */}
         {["Pergunta", "MultiplaEscolha", "Ordem"].includes(tipo) && (
           <div className="bg-gray-50 p-4 rounded space-y-4">
             <h3 className="text-lg font-semibold">Opções</h3>
@@ -398,7 +446,6 @@ const CriadorDeCarta: React.FC = () => {
           </div>
         )}
 
-        {/* Opções para Vantagem/Desvantagem/Outras */}
         {(tipo === "Vantagem" || tipo === "Desvantagem" || tipo === "Outras") && (
           <div className="bg-gray-50 p-4 rounded space-y-4">
             <h3 className="text-lg font-semibold">Opções</h3>
@@ -455,7 +502,6 @@ const CriadorDeCarta: React.FC = () => {
           </div>
         )}
 
-        {/* Categorias */}
         <div className="bg-gray-50 p-4 rounded space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Categorias</h3>
@@ -506,7 +552,6 @@ const CriadorDeCarta: React.FC = () => {
           </p>
         </div>
 
-        {/* Fontes */}
         <div className="bg-gray-50 p-4 rounded space-y-4">
           <h3 className="text-lg font-semibold">Fontes</h3>
           <div className="flex space-x-2">
@@ -536,7 +581,6 @@ const CriadorDeCarta: React.FC = () => {
           </ul>
         </div>
 
-        {/* Vantagem / Desvantagem / Dica */}
         <div className="bg-gray-50 p-4 rounded space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">Vantagem:</label>
