@@ -1,6 +1,4 @@
 const test_card = [
-
-  // Pergunta Fácil com Verdadeiro ou Falso
   {
     tipo: "Pergunta",
     titulo: "Impacto das Energias Renováveis",
