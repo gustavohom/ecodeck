@@ -1,13 +1,13 @@
 import React from "react";
-import GerenciadorDeBaralhos from "../components/GerenciadorDeBaralhos";
+import CriadorDeCarta from "@/components/CriadorDeCarta";
 
-const Criador: React.FC = () => {
+const CriadorPage: React.FC = () => {
   return (
-    <main className="p-8">
+    <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">Criador de Cartas</h1>
-      <GerenciadorDeBaralhos />
-    </main>
+      <CriadorDeCarta />
+    </div>
   );
 };
 
-export default Criador;
+export default CriadorPage;
