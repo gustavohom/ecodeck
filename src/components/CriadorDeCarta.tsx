@@ -129,7 +129,7 @@ const CriadorDeCarta: React.FC = () => {
       tipo,
       titulo,
       pergunta: imagem
-        ? `<img src="${imagem}" alt="${titulo}" class="img-media" />\n` + pergunta
+        ? `<img src="${imagem}" alt="${titulo}" class="${imagemClass}" />\n` + pergunta
         : pergunta,
       opcoes,
       respostaCorreta: finalRespostaCorreta,
@@ -469,7 +469,7 @@ const CriadorDeCarta: React.FC = () => {
               tipo,
               titulo,
               pergunta: imagem
-                ? `<img src="${imagem}" alt="${titulo}" class="img-media" />\n` + pergunta
+                ? `<img src="${imagem}" alt="${titulo}" class="${imagemClass}" />\n` + pergunta
                 : pergunta,
               opcoes,
               respostaCorreta:
