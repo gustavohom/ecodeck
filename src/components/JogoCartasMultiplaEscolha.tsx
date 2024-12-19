@@ -238,7 +238,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     }
     const allCats = recalcularCategorias(cartasOriginais, customDecks);
     setTodasCategorias(allCats);
-    setCategoriasSelecionadas((prev) => prev.filter((c) => allCats.includes(c)));
+    setCategoriasSelecionadas(categoriasSelecionadas.filter((c) => allCats.includes(c)));
   }, [customDecks]);
 
   const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -517,7 +517,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
         {hasSavedGame && (
-          <Button onClick={onContinueGame} className="w-full">
+          <Button onClick={() => onContinueGame()} className="w-full">
             Continuar Jogo
           </Button>
         )}
@@ -530,7 +530,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         >
           Iniciar Novo Jogo
         </Button>
-        <Button onClick={onReset} className="w-full">
+        <Button onClick={() => onReset()} className="w-full">
           Resetar Tudo
         </Button>
       </CardFooter>
@@ -1026,11 +1026,6 @@ const EcoChallenge: React.FC = () => {
         return <p key={index} dangerouslySetInnerHTML={{ __html: linha }} />;
       });
     return conteudo;
-  };
-
-  const handlePlayersSetup = (initializedPlayers: Player[]) => {
-    setPlayers(initializedPlayers);
-    setCurrentPlayerId(initializedPlayers[0].id);
   };
 
   const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -1597,7 +1592,7 @@ const EcoChallenge: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
