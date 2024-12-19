@@ -40,7 +40,7 @@ import manejoPlantadas from "./cards_manejo_plantada";
 import manejoNativas from "./cards_manejo_nativa";
 import ecologiaFlorestal from "./cards_ecologia_florestal";
 import estrelasAliens from "./cards_estrelas_aliens";
-import testCards from "./test_card";
+import testCards from "./teste_gustavo";
 
 interface Opcao {
   id: number;
@@ -638,7 +638,6 @@ const EcoChallenge: React.FC = () => {
       { value: 0.8, color: "red", label: "80%" },
     ];
     const currentProbability = probabilitySettings[probabilityIndex].value;
-
     let incluirCartasEspeciais = true;
     if (currentProbability > 0) {
       const randomValue = Math.random();
