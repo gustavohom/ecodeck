@@ -667,7 +667,23 @@ const EcoChallenge: React.FC = () => {
       }
     }
 
-    const cartasFiltradas = cartas.filter((carta) => {
+    // Partir das cartas originais
+    let finalCartas = [...cartasOriginais];
+
+    // Adicionar cartas dos baralhos personalizados usados
+    if (typeof window !== "undefined") {
+      const usedDecksData = localStorage.getItem("customUsedDecks");
+      if (usedDecksData) {
+        const usedDecks = JSON.parse(usedDecksData) as {id:number;name:string;cards:Carta[];used:boolean}[];
+        for (const d of usedDecks) {
+          if (d.used) {
+            finalCartas = [...finalCartas, ...d.cards];
+          }
+        }
+      }
+    }
+
+    const cartasFiltradas = finalCartas.filter((carta) => {
       const categoriaValida = carta.categorias.some((categoria) =>
         categoriasSelecionadas.includes(categoria)
       );
