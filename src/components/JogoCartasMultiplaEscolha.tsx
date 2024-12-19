@@ -638,6 +638,7 @@ const EcoChallenge: React.FC = () => {
       { value: 0.8, color: "red", label: "80%" },
     ];
     const currentProbability = probabilitySettings[probabilityIndex].value;
+
     let incluirCartasEspeciais = true;
     if (currentProbability > 0) {
       const randomValue = Math.random();
