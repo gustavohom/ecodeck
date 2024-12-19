@@ -85,7 +85,7 @@ const teste_gustavo = [
     ],
     "dificuldade": "dificil",
     "categorias": [
-      "test_gustavo"
+      "meu zovo"
     ],
     "fontes": [],
     "vantagem": "vat",
