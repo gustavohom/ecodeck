@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -25,6 +24,10 @@ import {
   Zap,
   Filter,
   Trash,
+  EyeOff,
+  Eye,
+  Dice6,
+  XCircle as XIcon,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -37,10 +40,16 @@ import manejoPlantadas from "./cards_manejo_plantada";
 import manejoNativas from "./cards_manejo_nativa";
 import ecologiaFlorestal from "./cards_ecologia_florestal";
 import estrelasAliens from "./cards_estrelas_aliens";
-import testCards from "./test_card";
+import testCards from "./teste_gustavo";
 
 // Combine as cartas simples e complexas em um único array
-const cartas = [...manejoPlantadas, ...manejoNativas, ...ecologiaFlorestal, ...estrelasAliens, ...testCards];
+const cartas = [
+  ...manejoPlantadas,
+  ...manejoNativas,
+  ...ecologiaFlorestal,
+  ...estrelasAliens,
+  ...testCards,
+];
 
 // Definição de Tipos
 interface Opcao {
@@ -94,6 +103,10 @@ interface TelaInicialProps {
   onPlayersSetup: (players: Player[]) => void;
   players: Player[];
   setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
+  ocultarCarta: boolean;
+  setOcultarCarta: React.Dispatch<React.SetStateAction<boolean>>;
+  probabilityIndex: number;
+  setProbabilityIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const predefinedColors = [
@@ -129,6 +142,14 @@ const predefinedColors = [
   "#ff4444", // Light Red
 ];
 
+// Configurações de probabilidade para filtrar as cartas especiais
+const probabilitySettings = [
+  { value: 0, color: "white", label: "0%" },
+  { value: 0.4, color: "green", label: "40%" },
+  { value: 0.6, color: "orange", label: "60%" },
+  { value: 0.8, color: "red", label: "80%" },
+];
+
 // Componente Tela Inicial
 const TelaInicial: React.FC<TelaInicialProps> = ({
   onStartGame,
@@ -141,6 +162,10 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   onPlayersSetup,
   players,
   setPlayers,
+  ocultarCarta,
+  setOcultarCarta,
+  probabilityIndex,
+  setProbabilityIndex,
 }) => {
   const [termoBusca, setTermoBusca] = useState<string>("");
 
@@ -215,6 +240,11 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     )
     .sort();
 
+  // Função para alternar a configuração de probabilidade
+  const cycleProbability = () => {
+    setProbabilityIndex((prevIndex) => (prevIndex + 1) % probabilitySettings.length);
+  };
+
   return (
     <Card className="w-full max-w-sm mx-auto mt-8">
       <CardHeader>
@@ -247,10 +277,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                       categoriasSelecionadas.filter((c) => c !== categoria)
                     );
                   } else {
-                    setCategoriasSelecionadas([
-                      ...categoriasSelecionadas,
-                      categoria,
-                    ]);
+                    setCategoriasSelecionadas([...categoriasSelecionadas, categoria]);
                   }
                 }}
                 className="mr-2"
@@ -280,9 +307,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                   placeholder={`Nome do Jogador ${index + 1}`}
                   value={player.name}
                   maxLength={10}
-                  onChange={(e) =>
-                    handlePlayerChange(index, "name", e.target.value)
-                  }
+                  onChange={(e) => handlePlayerChange(index, "name", e.target.value)}
                   className="p-2 border rounded w-full"
                 />
                 <div className="relative">
@@ -344,6 +369,41 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             </Button>
           )}
         </div>
+        <div className="mt-4">
+          <Button
+            onClick={() => setOcultarCarta(!ocultarCarta)}
+            variant={ocultarCarta ? "default" : "outline"}
+            className="w-full"
+          >
+            {ocultarCarta ? (
+              <>
+                <EyeOff className="h-4 w-4 mr-2" />
+                Ocultar Carta Ativado
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4 mr-2" />
+                Ocultar Carta Desativado
+              </>
+            )}
+          </Button>
+        </div>
+        {/* Botão de configuração de probabilidade */}
+        <div className="mt-4">
+          <Button
+            onClick={cycleProbability}
+            className="w-full"
+            style={{
+              backgroundColor: probabilitySettings[probabilityIndex].color,
+              color:
+                probabilitySettings[probabilityIndex].color === "white"
+                  ? "black"
+                  : "white",
+            }}
+          >
+            Ajuste de Cartas Especiais: {probabilitySettings[probabilityIndex].label}
+          </Button>
+        </div>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
         {hasSavedGame && (
@@ -356,9 +416,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             startGame();
           }}
           className="w-full"
-          disabled={
-            categoriasSelecionadas.length === 0 || playerInputs.length === 0
-          }
+          disabled={categoriasSelecionadas.length === 0 || playerInputs.length === 0}
         >
           Iniciar Novo Jogo
         </Button>
@@ -374,6 +432,7 @@ const EcoChallenge: React.FC = () => {
   const [respondido, setRespondido] = useState<boolean>(false);
   const [mensagem, setMensagem] = useState<string>("");
   const [mostrarDica, setMostrarDica] = useState<boolean>(false);
+  const [dicaUsada, setDicaUsada] = useState<boolean>(false);
   const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
@@ -391,9 +450,20 @@ const EcoChallenge: React.FC = () => {
 
   const [noCardsAvailable, setNoCardsAvailable] = useState<boolean>(false);
 
+  const [ocultarCarta, setOcultarCarta] = useState<boolean>(true);
+  const [cartaRevelada, setCartaRevelada] = useState<boolean>(false);
+
+  const [rolledNumber, setRolledNumber] = useState<number | null>(null);
+  const [rollingNumber, setRollingNumber] = useState<number | null>(null);
+  const [isDieModalOpen, setIsDieModalOpen] = useState<boolean>(false);
+  const [isRolling, setIsRolling] = useState<boolean>(false);
+
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
   ).sort();
+
+  // Configurações de probabilidade para filtrar as cartas especiais
+  const [probabilityIndex, setProbabilityIndex] = useState<number>(0);
 
   // Verifica se há um jogo salvo no localStorage e se o jogo foi iniciado
   const hasSavedGame =
@@ -418,6 +488,8 @@ const EcoChallenge: React.FC = () => {
         setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
         setMostrarSomentePerguntas(estado.mostrarSomentePerguntas || false);
         setJogoIniciado(estado.jogoIniciado || false);
+        setOcultarCarta(estado.ocultarCarta !== undefined ? estado.ocultarCarta : true);
+        setProbabilityIndex(estado.probabilityIndex || 0);
       }
     }
   }, []);
@@ -436,6 +508,8 @@ const EcoChallenge: React.FC = () => {
         categoriasSelecionadas,
         mostrarSomentePerguntas,
         jogoIniciado,
+        ocultarCarta,
+        probabilityIndex,
       };
       localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
     }
@@ -445,17 +519,45 @@ const EcoChallenge: React.FC = () => {
     categoriasSelecionadas,
     mostrarSomentePerguntas,
     jogoIniciado,
+    ocultarCarta,
+    probabilityIndex,
   ]);
 
   const selecionarCartaAleatoria = useCallback(() => {
-    const cartasFiltradas = cartas.filter(
-      (carta) =>
-        carta.categorias.some((categoria) =>
-          categoriasSelecionadas.includes(categoria)
-        ) &&
-        (!mostrarSomentePerguntas ||
-          ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo))
-    );
+    // Obter a configuração de probabilidade atual
+    const probabilitySettings = [
+      { value: 0, color: "white", label: "0%" },
+      { value: 0.4, color: "green", label: "40%" },
+      { value: 0.6, color: "orange", label: "60%" },
+      { value: 0.8, color: "red", label: "80%" },
+    ];
+    const currentProbability = probabilitySettings[probabilityIndex].value;
+
+    // Decidir se vamos incluir as cartas especiais ou não
+    let incluirCartasEspeciais = true;
+    if (currentProbability > 0) {
+      const randomValue = Math.random();
+      if (randomValue < currentProbability) {
+        incluirCartasEspeciais = false;
+      }
+    }
+
+    const cartasFiltradas = cartas.filter((carta) => {
+      const categoriaValida = carta.categorias.some((categoria) =>
+        categoriasSelecionadas.includes(categoria)
+      );
+      const tipoValido =
+        !mostrarSomentePerguntas ||
+        ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo);
+      const isEspecial = ["Vantagem", "Desvantagem", "Outras"].includes(carta.tipo);
+
+      // Se não vamos incluir cartas especiais, filtramos elas
+      if (!incluirCartasEspeciais && isEspecial) {
+        return false;
+      }
+
+      return categoriaValida && tipoValido;
+    });
 
     if (cartasFiltradas.length === 0) {
       setNoCardsAvailable(true);
@@ -466,16 +568,27 @@ const EcoChallenge: React.FC = () => {
     }
 
     const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
-    setCartaAtual(cartasFiltradas[indiceAleatorio]);
+    const novaCarta = cartasFiltradas[indiceAleatorio];
+
+    setCartaAtual(novaCarta);
     setSelecionado(null);
     setSelecoesMultiplas([]);
     setOrdemSelecoes([]);
     setRespondido(false);
     setMensagem("");
     setMostrarDica(false);
+    setDicaUsada(false);
     setMostrarFontes(false);
     setOpcoesEliminadas([]);
-  }, [categoriasSelecionadas, mostrarSomentePerguntas]);
+    setCartaRevelada(!ocultarCarta);
+    setRolledNumber(null);
+    setIsDieModalOpen(false);
+  }, [
+    categoriasSelecionadas,
+    mostrarSomentePerguntas,
+    ocultarCarta,
+    probabilityIndex,
+  ]);
 
   useEffect(() => {
     if (jogoIniciado) {
@@ -675,16 +788,23 @@ const EcoChallenge: React.FC = () => {
 
   const toggleDica = () => {
     if (!currentPlayer || !cartaAtual) return;
-    if (currentPlayer.respostasSeguidas >= 3 && cartaAtual.dica) {
-      setMostrarDica(!mostrarDica);
+
+    if (dicaUsada) {
+      setMensagem("Você já usou a dica para esta pergunta.");
+      return;
+    }
+
+    if (currentPlayer.respostasSeguidas >= 2 && cartaAtual.dica) {
+      setMostrarDica(true);
+      setDicaUsada(true);
       updateCurrentPlayer({
-        respostasSeguidas: currentPlayer.respostasSeguidas - 3,
+        respostasSeguidas: currentPlayer.respostasSeguidas - 2,
       });
     } else if (!cartaAtual.dica) {
       setMensagem("Esta carta não possui dica.");
     } else {
       setMensagem(
-        "Você precisa de pelo menos 3 respostas corretas seguidas para usar a dica!"
+        "Você precisa de pelo menos 2 respostas corretas seguidas para usar a dica!"
       );
     }
   };
@@ -705,7 +825,7 @@ const EcoChallenge: React.FC = () => {
 
   const eliminarRespostaErrada = () => {
     if (!currentPlayer || !cartaAtual) return;
-    if (currentPlayer.respostasSeguidas >= 4 && cartaAtual) {
+    if (currentPlayer.respostasSeguidas >= 2 && cartaAtual) {
       const opcoesErradas = cartaAtual.opcoes.filter((opcao: Opcao) => {
         if (Array.isArray(cartaAtual.respostaCorreta)) {
           return !cartaAtual.respostaCorreta.includes(opcao.id);
@@ -719,19 +839,17 @@ const EcoChallenge: React.FC = () => {
       );
 
       if (opcoesRestantes.length > 0) {
-        const indiceAleatorio = Math.floor(
-          Math.random() * opcoesRestantes.length
-        );
+        const indiceAleatorio = Math.floor(Math.random() * opcoesRestantes.length);
         const opcaoEliminada = opcoesRestantes[indiceAleatorio].id;
 
         setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
         updateCurrentPlayer({
-          respostasSeguidas: currentPlayer.respostasSeguidas - 4,
+          respostasSeguidas: currentPlayer.respostasSeguidas - 2,
         });
         setMensagem("Uma resposta errada foi eliminada!");
       }
     } else {
-      setMensagem("Você precisa de pelo menos 4 respostas corretas seguidas!");
+      setMensagem("Você precisa de pelo menos 2 respostas corretas seguidas!");
     }
   };
 
@@ -759,9 +877,7 @@ const EcoChallenge: React.FC = () => {
     if (!currentPlayer) return;
     updateCurrentPlayer({
       respostasCertas:
-        currentPlayer.respostasCertas > 0
-          ? currentPlayer.respostasCertas - 1
-          : 0,
+        currentPlayer.respostasCertas > 0 ? currentPlayer.respostasCertas - 1 : 0,
     });
     setMensagem("Acerto removido!");
   };
@@ -770,9 +886,7 @@ const EcoChallenge: React.FC = () => {
     if (!currentPlayer) return;
     updateCurrentPlayer({
       respostasErradas:
-        currentPlayer.respostasErradas > 0
-          ? currentPlayer.respostasErradas - 1
-          : 0,
+        currentPlayer.respostasErradas > 0 ? currentPlayer.respostasErradas - 1 : 0,
     });
     setMensagem("Erro removido!");
   };
@@ -833,6 +947,75 @@ const EcoChallenge: React.FC = () => {
     setCurrentPlayerId(initializedPlayers[0].id);
   };
 
+  // Implementação do long-press para rolar o dado
+  const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const handleLongPressStart = () => {
+    longPressTimeout.current = setTimeout(() => {
+      rolarDado();
+    }, 1000); // 1 segundo
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimeout.current) {
+      clearTimeout(longPressTimeout.current);
+      longPressTimeout.current = null;
+    }
+  };
+
+  // Adicionar manipulador para cancelamento do toque
+  const handleLongPressCancel = () => {
+    if (longPressTimeout.current) {
+      clearTimeout(longPressTimeout.current);
+      longPressTimeout.current = null;
+    }
+  };
+
+  const rolarDado = () => {
+    if (isRolling) return; // Evita múltiplas rolagens simultâneas
+
+    setIsRolling(true);
+    setIsDieModalOpen(true);
+
+    let rollCount = 0;
+    const maxRolls = 10; // Número de vezes que o número muda durante a animação
+
+    const rollInterval = setInterval(() => {
+      const randomNum = Math.floor(Math.random() * 6) + 1;
+      setRollingNumber(randomNum);
+      rollCount++;
+
+      if (rollCount >= maxRolls) {
+        clearInterval(rollInterval);
+        const finalNumber = Math.floor(Math.random() * 6) + 1;
+        setRolledNumber(finalNumber);
+        setRollingNumber(null);
+        setIsRolling(false);
+      }
+    }, 100); // Intervalo de 100ms para a animação
+  };
+
+  // Calcular se o botão deve estar desabilitado
+  const isDisabled =
+    !cartaAtual ||
+    ((cartaAtual.tipo === "Ordem" &&
+      ordemSelecoes.length !== cartaAtual.opcoes.length) ||
+      (cartaAtual.tipo !== "Ordem" &&
+        selecionado === null &&
+        selecoesMultiplas.length === 0));
+
+  // Construir as propriedades do botão
+  const verificarRespostaProps = {
+    className: `w-full mt-2 ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`,
+    onMouseDown: handleLongPressStart,
+    onMouseUp: handleLongPressEnd,
+    onMouseLeave: handleLongPressEnd,
+    onTouchStart: handleLongPressStart,
+    onTouchEnd: handleLongPressEnd,
+    onTouchCancel: handleLongPressCancel,
+    ...(isDisabled ? {} : { onClick: verificarResposta }),
+  };
+
   if (!jogoIniciado) {
     return (
       <TelaInicial
@@ -852,6 +1035,10 @@ const EcoChallenge: React.FC = () => {
         onPlayersSetup={handlePlayersSetup}
         players={players}
         setPlayers={setPlayers}
+        ocultarCarta={ocultarCarta}
+        setOcultarCarta={setOcultarCarta}
+        probabilityIndex={probabilityIndex}
+        setProbabilityIndex={setProbabilityIndex}
       />
     );
   }
@@ -866,29 +1053,6 @@ const EcoChallenge: React.FC = () => {
   if (noCardsAvailable) {
     return (
       <div className="flex flex-col items-center">
-        <div
-          className={`grid gap-1 mb-1 ${
-            players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
-          }`}
-          style={{ width: "100%", maxWidth: "400px" }}
-        >
-          {players.map((player) => (
-            <Button
-              key={player.id}
-              onClick={() => setCurrentPlayerId(player.id)}
-              size="sm"
-              variant={currentPlayerId === player.id ? "default" : "outline"}
-              style={{
-                backgroundColor:
-                  currentPlayerId === player.id ? player.color : undefined,
-                color: currentPlayerId === player.id ? "#fff" : undefined,
-                width: "100%",
-              }}
-            >
-              {player.name}
-            </Button>
-          ))}
-        </div>
         <p className="mt-4 text-center">
           Nenhuma carta disponível com os filtros atuais.
         </p>
@@ -905,7 +1069,6 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
-  // Modificação para mostrar o botão de voltar à tela inicial
   if (!cartaAtual || !currentPlayer) {
     return (
       <div className="flex flex-col items-center">
@@ -918,6 +1081,9 @@ const EcoChallenge: React.FC = () => {
   }
 
   const obterEstiloCarta = () => {
+    if (ocultarCarta && !cartaRevelada) {
+      return "border-gray-200 bg-white"; // Cor única para a carta genérica
+    }
     switch (cartaAtual.tipo) {
       case "Outras":
         return "border-blue-200 bg-blue-50";
@@ -934,33 +1100,12 @@ const EcoChallenge: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <div
-        className={`grid gap-1 mb-1 ${
-          players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
-        }`}
-        style={{ width: "100%", maxWidth: "400px" }}
-      >
-        {players.map((player) => (
-          <Button
-            key={player.id}
-            onClick={() => setCurrentPlayerId(player.id)}
-            size="sm"
-            variant={currentPlayerId === player.id ? "default" : "outline"}
-            style={{
-              backgroundColor:
-                currentPlayerId === player.id ? player.color : undefined,
-              color: currentPlayerId === player.id ? "#fff" : undefined,
-              width: "100%",
-            }}
-          >
-            {player.name}
-          </Button>
-        ))}
-      </div>
       <Card
         className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}
         style={
-          players.length > 1 && currentPlayer
+          players.length > 1 &&
+          currentPlayer &&
+          !(ocultarCarta && !cartaRevelada)
             ? {
                 boxShadow: `0 0 10px 5px ${currentPlayer.color}`,
               }
@@ -973,179 +1118,213 @@ const EcoChallenge: React.FC = () => {
               <Button
                 onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
                 size="sm"
-                variant="outline"
+                variant={mostrarSomentePerguntas ? "default" : "outline"}
                 disabled={!hasQuestionCards}
               >
                 <Filter className="h-4 w-4" />
               </Button>
-              <CardTitle className="text-xl font-bold">
-                {cartaAtual.titulo}
-              </CardTitle>
+              <div className="flex flex-col">
+                <CardTitle className="text-xl font-bold">
+                  {ocultarCarta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo}
+                </CardTitle>
+                {!ocultarCarta || cartaRevelada ? (
+                  <p className="text-xs text-gray-500">
+                    {cartaAtual.categorias.join(", ")}
+                  </p>
+                ) : null}
+              </div>
             </div>
-            <Badge
-              variant={
-                cartaAtual.dificuldade === "facil"
-                  ? "secondary"
-                  : cartaAtual.dificuldade === "normal"
-                  ? "default"
-                  : "destructive"
-              }
-            >
-              {cartaAtual.dificuldade}
-            </Badge>
-          </div>
-          <ScrollArea className="h-56 rounded-md border p-4">
-            <div className="text-sm">{renderizarConteudoPergunta()}</div>
-          </ScrollArea>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {cartaAtual.opcoes.map((opcao: Opcao) => (
-              <Button
-                key={opcao.id}
-                onClick={() =>
-                  cartaAtual.tipo === "MultiplaEscolha"
-                    ? handleSelecaoMultipla(opcao.id)
-                    : cartaAtual.tipo === "Ordem"
-                    ? handleSelecaoOrdem(opcao.id)
-                    : handleSelecao(opcao.id)
-                }
+            {!ocultarCarta || cartaRevelada ? (
+              <Badge
                 variant={
-                  selecionado === opcao.id ||
-                  selecoesMultiplas.includes(opcao.id)
+                  cartaAtual.dificuldade === "facil"
                     ? "secondary"
-                    : "outline"
+                    : cartaAtual.dificuldade === "normal"
+                    ? "default"
+                    : "destructive"
                 }
-                className={`w-full justify-start text-sm ${
-                  respondido &&
-                  (Array.isArray(cartaAtual.respostaCorreta)
-                    ? cartaAtual.respostaCorreta.includes(opcao.id)
-                    : cartaAtual.respostaCorreta === opcao.id)
-                    ? "bg-green-100"
-                    : ""
-                } ${
-                  respondido &&
-                  selecionado === opcao.id &&
-                  !(
-                    Array.isArray(cartaAtual.respostaCorreta)
-                      ? cartaAtual.respostaCorreta.includes(opcao.id)
-                      : cartaAtual.respostaCorreta === opcao.id
-                  )
-                    ? "bg-red-100"
-                    : ""
-                } ${
-                  respondido &&
-                  cartaAtual.tipo === "MultiplaEscolha" &&
-                  Array.isArray(cartaAtual.respostaCorreta) &&
-                  !cartaAtual.respostaCorreta.includes(opcao.id) &&
-                  selecoesMultiplas.includes(opcao.id)
-                    ? "bg-red-100"
-                    : ""
-                } ${
-                  respondido &&
-                  cartaAtual.tipo === "MultiplaEscolha" &&
-                  Array.isArray(cartaAtual.respostaCorreta) &&
-                  cartaAtual.respostaCorreta.includes(opcao.id) &&
-                  !selecoesMultiplas.includes(opcao.id)
-                    ? "bg-blue-100"
-                    : ""
-                } ${
-                  respondido &&
-                  cartaAtual.tipo === "Ordem" &&
-                  ordemSelecoes.includes(opcao.id) &&
-                  ordemSelecoes.indexOf(opcao.id) + 1 !==
-                    (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
-                    ? "bg-red-100"
-                    : ""
-                } ${
-                  respondido &&
-                  cartaAtual.tipo === "Ordem" &&
-                  ordemSelecoes.includes(opcao.id) &&
-                  ordemSelecoes.indexOf(opcao.id) + 1 ===
-                    (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
-                    ? "bg-green-100"
-                    : ""
-                } ${opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""}`}
-                disabled={opcoesEliminadas.includes(opcao.id)}
-                style={{
-                  maxHeight: "80px",
-                  height: "auto",
-                  overflowY: "auto",
-                  whiteSpace: "normal",
-                  alignItems: "flex-start",
-                  display: "flex",
-                  textAlign: "left",
-                  padding: "8px",
-                }}
               >
-                {opcao.texto}
-                {cartaAtual.tipo === "MultiplaEscolha" && (
-                  <span className="ml-2">
-                    {selecoesMultiplas.includes(opcao.id) ? (
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                    ) : (
-                      <span className="h-4 w-4 border rounded" />
-                    )}
-                  </span>
-                )}
-                {cartaAtual.tipo === "Ordem" &&
-                  ordemSelecoes.includes(opcao.id) && (
+                {cartaAtual.dificuldade}
+              </Badge>
+            ) : null}
+          </div>
+          {!ocultarCarta || cartaRevelada ? (
+            <ScrollArea className="h-56 rounded-md border p-4">
+              <div className="text-sm">{renderizarConteudoPergunta()}</div>
+            </ScrollArea>
+          ) : (
+            <div className="h-56 flex flex-col items-center justify-center space-y-2">
+              <p className="text-sm">Conteúdo da carta oculto</p>
+              {rolledNumber !== null && (
+                <p className="text-xl font-bold">Você rolou um {rolledNumber}</p>
+              )}
+              <Button
+                onClick={rolarDado}
+                variant="outline"
+                className="mt-2"
+                onTouchStart={handleLongPressStart}
+                onTouchEnd={handleLongPressEnd}
+                onTouchCancel={handleLongPressCancel}
+                onMouseDown={handleLongPressStart}
+                onMouseUp={handleLongPressEnd}
+                onMouseLeave={handleLongPressEnd}
+              >
+                <Dice6 className="h-6 w-6" />
+                Rolar Dado
+              </Button>
+            </div>
+          )}
+        </CardHeader>
+        {!ocultarCarta || cartaRevelada ? (
+          <CardContent>
+            <div className="space-y-2">
+              {cartaAtual.opcoes.map((opcao: Opcao) => (
+                <Button
+                  key={opcao.id}
+                  onClick={() =>
+                    cartaAtual.tipo === "MultiplaEscolha"
+                      ? handleSelecaoMultipla(opcao.id)
+                      : cartaAtual.tipo === "Ordem"
+                      ? handleSelecaoOrdem(opcao.id)
+                      : handleSelecao(opcao.id)
+                  }
+                  variant={
+                    selecionado === opcao.id || selecoesMultiplas.includes(opcao.id)
+                      ? "secondary"
+                      : "outline"
+                  }
+                  className={`w-full justify-start text-sm ${
+                    respondido &&
+                    (Array.isArray(cartaAtual.respostaCorreta)
+                      ? cartaAtual.respostaCorreta.includes(opcao.id)
+                      : cartaAtual.respostaCorreta === opcao.id)
+                      ? "bg-green-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    selecionado === opcao.id &&
+                    !(
+                      Array.isArray(cartaAtual.respostaCorreta)
+                        ? cartaAtual.respostaCorreta.includes(opcao.id)
+                        : cartaAtual.respostaCorreta === opcao.id
+                    )
+                      ? "bg-red-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    cartaAtual.tipo === "MultiplaEscolha" &&
+                    Array.isArray(cartaAtual.respostaCorreta) &&
+                    !cartaAtual.respostaCorreta.includes(opcao.id) &&
+                    selecoesMultiplas.includes(opcao.id)
+                      ? "bg-red-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    cartaAtual.tipo === "MultiplaEscolha" &&
+                    Array.isArray(cartaAtual.respostaCorreta) &&
+                    cartaAtual.respostaCorreta.includes(opcao.id) &&
+                    !selecoesMultiplas.includes(opcao.id)
+                      ? "bg-blue-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    cartaAtual.tipo === "Ordem" &&
+                    ordemSelecoes.includes(opcao.id) &&
+                    ordemSelecoes.indexOf(opcao.id) + 1 !==
+                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
+                      ? "bg-red-100"
+                      : ""
+                  } ${
+                    respondido &&
+                    cartaAtual.tipo === "Ordem" &&
+                    ordemSelecoes.includes(opcao.id) &&
+                    ordemSelecoes.indexOf(opcao.id) + 1 ===
+                      (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1
+                      ? "bg-green-100"
+                      : ""
+                  } ${
+                    opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""
+                  }`}
+                  disabled={opcoesEliminadas.includes(opcao.id)}
+                  style={{
+                    maxHeight: "80px",
+                    height: "auto",
+                    overflowY: "auto",
+                    whiteSpace: "normal",
+                    alignItems: "flex-start",
+                    display: "flex",
+                    textAlign: "left",
+                    padding: "8px",
+                  }}
+                >
+                  {opcao.texto}
+                  {cartaAtual.tipo === "MultiplaEscolha" && (
+                    <span className="ml-2">
+                      {selecoesMultiplas.includes(opcao.id) ? (
+                        <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                      ) : (
+                        <span className="h-4 w-4 border rounded" />
+                      )}
+                    </span>
+                  )}
+                  {cartaAtual.tipo === "Ordem" && ordemSelecoes.includes(opcao.id) && (
                     <span className="ml-2">
                       {ordemSelecoes.indexOf(opcao.id) + 1}
                       {respondido &&
                         ordemSelecoes.indexOf(opcao.id) + 1 !==
-                          (cartaAtual.respostaCorreta as number[]).indexOf(
-                            opcao.id
-                          ) +
+                          (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
                             1 && (
                           <span className="ml-1 text-blue-500">
                             (
-                            {
-                              (cartaAtual.respostaCorreta as number[]).indexOf(
-                                opcao.id
-                              ) + 1
-                            }
+                            {(cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
+                              1}
                             )
                           </span>
                         )}
                     </span>
                   )}
-                {respondido &&
-                  (Array.isArray(cartaAtual.respostaCorreta)
-                    ? cartaAtual.respostaCorreta.includes(opcao.id)
-                    : cartaAtual.respostaCorreta === opcao.id) && (
-                    <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
-                  )}
-                {respondido &&
-                  selecionado === opcao.id &&
-                  !(
-                    Array.isArray(cartaAtual.respostaCorreta)
+                  {respondido &&
+                    (Array.isArray(cartaAtual.respostaCorreta)
                       ? cartaAtual.respostaCorreta.includes(opcao.id)
-                      : cartaAtual.respostaCorreta === opcao.id
-                  ) && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
-              </Button>
-            ))}
-          </div>
-          {mostrarDica && (
-            <Alert className="mt-4">
-              <AlertDescription>{cartaAtual.dica}</AlertDescription>
-            </Alert>
-          )}
-          {mostrarFontes && (
-            <Alert className="mt-4">
-              <AlertDescription>
-                <ul className="list-disc list-inside">
-                  {cartaAtual.fontes.map((fonte: string, index: number) => (
-                    <li key={index}>{fonte}</li>
-                  ))}
-                </ul>
-              </AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
+                      : cartaAtual.respostaCorreta === opcao.id) && (
+                      <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
+                    )}
+                  {respondido &&
+                    selecionado === opcao.id &&
+                    !(
+                      Array.isArray(cartaAtual.respostaCorreta)
+                        ? cartaAtual.respostaCorreta.includes(opcao.id)
+                        : cartaAtual.respostaCorreta === opcao.id
+                    ) && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
+                </Button>
+              ))}
+            </div>
+            {mostrarDica && (
+              <Alert className="mt-4">
+                <AlertDescription>{cartaAtual.dica}</AlertDescription>
+              </Alert>
+            )}
+            {mostrarFontes && (
+              <Alert className="mt-4">
+                <AlertDescription>
+                  <ul className="list-disc list-inside">
+                    {cartaAtual.fontes.map((fonte: string, index: number) => (
+                      <li key={index}>{fonte}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        ) : null}
         <CardFooter className="flex flex-col items-center">
           <div className="flex flex-wrap justify-between w-full mb-1 space-x-2">
-            <Button onClick={toggleFontes} size="sm" variant="outline">
+            <Button
+              onClick={toggleFontes}
+              size="sm"
+              variant="outline"
+              disabled={ocultarCarta && !cartaRevelada}
+            >
               <BookOpen className="h-4 w-4" />
             </Button>
             <Button
@@ -1155,10 +1334,9 @@ const EcoChallenge: React.FC = () => {
                 currentPlayer.pulosDisponiveis === 0 ? "outline" : "secondary"
               }
               disabled={
-                currentPlayer.pulosDisponiveis === 0 ||
-                !["Pergunta", "MultiplaEscolha", "Ordem"].includes(
-                  cartaAtual.tipo
-                )
+                (currentPlayer.pulosDisponiveis === 0 ||
+                  !["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)) ||
+                (ocultarCarta && !cartaRevelada)
               }
             >
               <SkipForward className="h-4 w-4" />
@@ -1167,21 +1345,26 @@ const EcoChallenge: React.FC = () => {
               onClick={toggleDica}
               size="sm"
               variant={
-                currentPlayer.respostasSeguidas < 3 || !cartaAtual.dica
+                currentPlayer.respostasSeguidas < 2 || !cartaAtual.dica || dicaUsada
                   ? "outline"
                   : "secondary"
               }
-              disabled={currentPlayer.respostasSeguidas < 3 || !cartaAtual.dica}
+              disabled={
+                currentPlayer.respostasSeguidas < 2 ||
+                !cartaAtual.dica ||
+                (ocultarCarta && !cartaRevelada) ||
+                dicaUsada
+              }
             >
               <HelpCircle className="h-4 w-4" />
             </Button>
             <Button
               onClick={eliminarRespostaErrada}
               size="sm"
-              variant={
-                currentPlayer.respostasSeguidas < 4 ? "outline" : "secondary"
+              variant={currentPlayer.respostasSeguidas < 2 ? "outline" : "secondary"}
+              disabled={
+                currentPlayer.respostasSeguidas < 2 || (ocultarCarta && !cartaRevelada)
               }
-              disabled={currentPlayer.respostasSeguidas < 4}
             >
               <MinusCircle className="h-4 w-4" />
             </Button>
@@ -1221,22 +1404,23 @@ const EcoChallenge: React.FC = () => {
             </Button>
           </div>
           <div className="flex justify-between w-full mb-4">
-            {!respondido ? (
-              <Button
-                onClick={verificarResposta}
-                disabled={
-                  (cartaAtual.tipo === "Ordem" &&
-                    ordemSelecoes.length !== cartaAtual.opcoes.length) ||
-                  (cartaAtual.tipo !== "Ordem" &&
-                    selecionado === null &&
-                    selecoesMultiplas.length === 0)
-                }
-                className="w-full mt-2"
-              >
-                Verificar
+            {ocultarCarta && !cartaRevelada ? (
+              <Button onClick={() => setCartaRevelada(true)} className="w-full mt-2">
+                Revelar
               </Button>
+            ) : !respondido ? (
+              <Button {...verificarRespostaProps}>Verificar</Button>
             ) : (
-              <Button onClick={selecionarCartaAleatoria} className="w-full mt-2">
+              <Button
+                onClick={selecionarCartaAleatoria}
+                className="w-full mt-2"
+                onMouseDown={handleLongPressStart}
+                onMouseUp={handleLongPressEnd}
+                onMouseLeave={handleLongPressEnd}
+                onTouchStart={handleLongPressStart}
+                onTouchEnd={handleLongPressEnd}
+                onTouchCancel={handleLongPressCancel}
+              >
                 Próxima Carta
               </Button>
             )}
@@ -1283,6 +1467,63 @@ const EcoChallenge: React.FC = () => {
           </div>
         </CardFooter>
       </Card>
+
+      {/* Botões de Seleção de Jogador movidos para baixo */}
+      <div
+        className={`grid gap-1 mt-4 ${
+          players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
+        }`}
+        style={{ width: "100%", maxWidth: "400px" }}
+      >
+        {players.map((player) => (
+          <Button
+            key={player.id}
+            onClick={() => setCurrentPlayerId(player.id)}
+            size="sm"
+            variant={currentPlayerId === player.id ? "default" : "outline"}
+            style={{
+              backgroundColor:
+                currentPlayerId === player.id ? player.color : undefined,
+              color: currentPlayerId === player.id ? "#fff" : undefined,
+              width: "100%",
+            }}
+          >
+            {player.name}
+          </Button>
+        ))}
+      </div>
+
+      {/* Modal para mostrar o número do dado quando a carta está revelada */}
+      {isDieModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg text-center relative w-96 h-96 flex flex-col justify-center">
+            <Button
+              className="absolute top-4 right-4"
+              variant="ghost"
+              onClick={() => setIsDieModalOpen(false)}
+              disabled={isRolling}
+            >
+              <XIcon className="h-8 w-8 text-gray-500" />
+            </Button>
+            {isRolling ? (
+              <>
+                <p className="text-lg mb-2">Rolando o dado...</p>
+                <p className="text-6xl font-bold mb-6 animate-bounce">
+                  {rollingNumber}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-lg mb-2">Você sorteou um</p>
+                <p className="text-6xl font-bold mb-6">{rolledNumber}</p>
+                <Button onClick={rolarDado}>
+                  <Dice6 className="h-6 w-6" />
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
