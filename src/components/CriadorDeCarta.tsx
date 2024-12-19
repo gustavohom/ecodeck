@@ -5,6 +5,7 @@ interface Opcao {
   texto: string;
 }
 
+// Adicionamos campos opcionais: origBaralhoId e edited
 interface Carta {
   tipo: string;
   titulo: string;
@@ -17,6 +18,8 @@ interface Carta {
   vantagem: string;
   desvantagem: string;
   dica: string;
+  origBaralhoId?: number; // Id do baralho de onde veio
+  edited?: boolean; // Se a carta foi editada
 }
 
 const CARD_TYPES = ["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras"] as const;
@@ -24,6 +27,13 @@ type TipoCarta = typeof CARD_TYPES[number];
 
 const DIFFICULTIES = ["facil", "normal", "dificil"] as const;
 type Dificuldade = typeof DIFFICULTIES[number];
+
+interface BaralhoCarregado {
+  id: number;
+  nome: string;
+  cartas: Carta[];
+  adicionado: boolean; // se já foram adicionadas as cartas ao baralho principal
+}
 
 const CriadorDeCarta: React.FC = () => {
   const [deckName, setDeckName] = useState<string>("meu_baralho");
@@ -49,6 +59,14 @@ const CriadorDeCarta: React.FC = () => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [categoriasBloqueadas, setCategoriasBloqueadas] = useState<boolean>(false);
 
+  // Lista de baralhos carregados
+  const [baralhosCarregados, setBaralhosCarregados] = useState<BaralhoCarregado[]>([]);
+  
+  // Manter cartas editadas ao remover baralho
+  const [manterCartasEditadas, setManterCartasEditadas] = useState<boolean>(false);
+
+  let baralhoIdCounter = 0; // contador para atribuir ids aos baralhos carregados
+
   // Função para tentar extrair o array de um arquivo .js
   const parseJSDeckFile = (content: string): Carta[] => {
     const match = content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);/);
@@ -61,31 +79,91 @@ const CriadorDeCarta: React.FC = () => {
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result;
-      if (typeof result === "string") {
-        try {
-          let newCards: Carta[] = [];
-          if (file.name.endsWith(".js")) {
-            newCards = parseJSDeckFile(result);
-          } else if (file.name.endsWith(".json")) {
-            newCards = JSON.parse(result) as Carta[];
-          } else {
-            alert("Formato não suportado. Use arquivos .js ou .json");
-            return;
-          }
+    const files = e.target.files;
+    if (!files) return;
+    const newBaralhos: BaralhoCarregado[] = [];
 
-          // Adicionar as novas cartas ao baralho atual
-          setCards((prev) => [...prev, ...newCards]);
-        } catch (error: any) {
-          alert("Erro ao ler o arquivo: " + error.message);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const content = await file.text();
+      try {
+        let newCards: Carta[] = [];
+        if (file.name.endsWith(".js")) {
+          newCards = parseJSDeckFile(content);
+        } else if (file.name.endsWith(".json")) {
+          newCards = JSON.parse(content) as Carta[];
+        } else {
+          alert("Formato não suportado. Use arquivos .js ou .json");
+          continue;
         }
+        const nome = file.name.replace(/\.(js|json)$/, "");
+        // Cria um novo baralho carregado, inicialmente não adicionado
+        newBaralhos.push({
+          id: Date.now() + Math.random(),
+          nome,
+          cartas: newCards,
+          adicionado: false
+        });
+      } catch (error: any) {
+        alert("Erro ao ler o arquivo " + file.name + ": " + error.message);
       }
-    };
-    reader.readAsText(file);
+    }
+
+    if (newBaralhos.length > 0) {
+      setBaralhosCarregados((prev) => [...prev, ...newBaralhos]);
+    }
+  };
+
+  const adicionarBaralho = (baralhoId: number) => {
+    setBaralhosCarregados((prev) =>
+      prev.map((b) => {
+        if (b.id === baralhoId) {
+          // Marca como adicionado e insere as cartas no baralho principal
+          const newCards = b.cartas.map((carta) => ({
+            ...carta,
+            origBaralhoId: baralhoId,
+            edited: false
+          }));
+          setCards((oldCards) => [...oldCards, ...newCards]);
+          return { ...b, adicionado: true };
+        }
+        return b;
+      })
+    );
+  };
+
+  const removerBaralho = (baralhoId: number) => {
+    // Ao remover o baralho, removemos as cartas não editadas desse baralho
+    setBaralhosCarregados((prev) =>
+      prev.map((b) => {
+        if (b.id === baralhoId) {
+          // Ajustar o array de cards
+          setCards((oldCards) =>
+            oldCards.filter((c) => {
+              if (c.origBaralhoId === baralhoId) {
+                // Se a carta pertence a esse baralho
+                if (c.edited && manterCartasEditadas) {
+                  // Se carta editada e manterCartasEditadas = true, mantem
+                  return true;
+                } else if (c.edited && !manterCartasEditadas) {
+                  // carta editada e nao manter? Remove também? 
+                  // Pela descrição, manter cartas editadas significa que se desmarcarmos, remove tudo.
+                  // Ajustando a interpretação: "Se clicasse em remover baralho e manter editadas estivesse ON,
+                  // as editadas ficam. Se não, apaga todas, inclusive as editadas."
+                  return false;
+                } else if (!c.edited) {
+                  // carta não editada remove
+                  return false;
+                }
+              }
+              return true;
+            })
+          );
+          return { ...b, adicionado: false };
+        }
+        return b;
+      })
+    );
   };
 
   const handleAddOpcao = () => {
@@ -113,7 +191,6 @@ const CriadorDeCarta: React.FC = () => {
     } else if (tipo === "Pergunta") {
       setRespostaCorreta([id]);
     }
-    // "Desvantagem" não tem resposta correta idealmente, mas não bloqueamos.
   };
 
   const handleSetOrder = (opcaoId: number, position: number) => {
@@ -191,11 +268,18 @@ const CriadorDeCarta: React.FC = () => {
     };
 
     if (editIndex !== null) {
-      const newCards = [...cards];
-      newCards[editIndex] = novaCarta;
-      setCards(newCards);
+      setCards((oldCards) =>
+        oldCards.map((c, i) => {
+          if (i === editIndex) {
+            // marcar como editado
+            return { ...novaCarta, origBaralhoId: c.origBaralhoId, edited: true };
+          }
+          return c;
+        })
+      );
     } else {
-      setCards([...cards, novaCarta]);
+      // Carta nova adicionada manualmente não pertence a nenhum baralho (origBaralhoId undefined)
+      setCards((oldCards) => [...oldCards, { ...novaCarta, edited: true }]);
     }
 
     resetCarta();
@@ -253,9 +337,7 @@ const CriadorDeCarta: React.FC = () => {
   };
 
   const deleteCard = (index: number) => {
-    const newCards = [...cards];
-    newCards.splice(index, 1);
-    setCards(newCards);
+    setCards((oldCards) => oldCards.filter((_, i) => i !== index));
     if (editIndex === index) {
       resetCarta();
     }
@@ -265,8 +347,14 @@ const CriadorDeCarta: React.FC = () => {
     resetCarta();
   };
 
+  // Antes de baixar, remover campos origBaralhoId e edited das cartas
+  const prepareForDownload = (): Carta[] => {
+    return cards.map(({ origBaralhoId, edited, ...rest }) => rest);
+  };
+
   const generateCode = () => {
-    const deck = JSON.stringify(cards, null, 2);
+    const deckFinal = prepareForDownload();
+    const deck = JSON.stringify(deckFinal, null, 2);
     const code = `const ${deckName} = ${deck};\n\nexport default ${deckName};`;
     return code;
   };
@@ -297,12 +385,53 @@ const CriadorDeCarta: React.FC = () => {
       </div>
 
       <div className="bg-white shadow p-4 rounded mb-6 space-y-4">
-        <h2 className="text-xl font-semibold">Carregar Baralho</h2>
+        <h2 className="text-xl font-semibold">Carregar Baralhos</h2>
         <p className="text-sm text-gray-500">
-          Selecione um arquivo .js ou .json contendo um array de cartas. As cartas serão adicionadas ao baralho atual.
+          Selecione um ou mais arquivos .js ou .json contendo arrays de cartas. Eles serão listados abaixo.
         </p>
-        <input type="file" accept=".js,.json" onChange={handleFileUpload} />
+        <input type="file" accept=".js,.json" onChange={handleFileUpload} multiple />
       </div>
+
+      {baralhosCarregados.length > 0 && (
+        <div className="bg-white shadow p-4 rounded mb-6 space-y-4">
+          <h2 className="text-xl font-semibold">Baralhos Carregados</h2>
+          <div className="flex items-center space-x-2 mb-4">
+            <input
+              type="checkbox"
+              checked={manterCartasEditadas}
+              onChange={(e) => setManterCartasEditadas(e.target.checked)}
+            />
+            <label className="text-sm">Manter cartas editadas ao remover baralho</label>
+          </div>
+          <ul className="space-y-2">
+            {baralhosCarregados.map((b) => (
+              <li key={b.id} className="flex items-center space-x-4">
+                <span className="font-medium">{b.nome}</span>
+                <span className="text-sm text-gray-500">{b.cartas.length} cartas</span>
+                {!b.adicionado ? (
+                  <button
+                    onClick={() => adicionarBaralho(b.id)}
+                    className="bg-green-500 text-white px-4 py-1 rounded"
+                  >
+                    Adicionar
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => removerBaralho(b.id)}
+                    className="bg-red-500 text-white px-4 py-1 rounded"
+                  >
+                    Remover
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-gray-500">
+            Ao remover um baralho, cartas não editadas desse baralho serão removidas do baralho principal.
+            Se "Manter cartas editadas" estiver marcado, cartas editadas permanecem.
+          </p>
+        </div>
+      )}
 
       <h2 className="text-2xl font-bold mb-4">{editIndex !== null ? "Editar Carta" : "Adicionar Carta"}</h2>
       <div className="bg-white shadow p-4 rounded mb-6 space-y-4">
