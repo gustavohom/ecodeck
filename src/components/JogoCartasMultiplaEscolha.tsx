@@ -217,7 +217,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     return json;
   };
 
-  // Ao adicionar baralhos personalizados, recalculamos as categorias disponíveis.
   const recalcularCategorias = (baseCards: Carta[], decks: CustomDeck[]) => {
     let allCards = [...baseCards];
     for (const d of decks) {
@@ -259,42 +258,23 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     if (newDecks.length > 0) {
       const updatedDecks = [...customDecks, ...newDecks];
       setCustomDecks(updatedDecks);
-      // Recalcular categorias disponíveis com os baralhos recém adicionados (ainda não usados, mas categorias devem aparecer)
       const novasCategorias = recalcularCategorias(cartasOriginais, updatedDecks.filter(d => d.used));
-      // Se quisermos que as categorias reflitam inclusive as de baralhos não usados, bastaria tirar o filtro.  
-      // Caso queira mostrar categorias de todos os baralhos adicionados, independente de "used":
-      // const novasCategorias = recalcularCategorias(cartasOriginais, updatedDecks);
-      // Vamos assumir que mesmo não usados as categorias aparecem (pedido não muito claro, mas vamos incluir todos)
       const novasCategoriasTodos = recalcularCategorias(cartasOriginais, updatedDecks);
-      // Atualiza as categorias selecionáveis
-      setCategoriasSelecionadas((prevSelected) =>
+      setCategoriasSelecionadas((prevSelected: string[]) =>
         prevSelected.filter((cat) => novasCategoriasTodos.includes(cat))
-      );
-      // Aqui poderíamos armazenar as novas categorias no localStorage se necessário, 
-      // mas não foi pedido. As categoriasDisponiveis vêm do componente pai. Como não temos 
-      // mais controle externo, precisamos de uma forma: O usuário pediu para atualizar as categorias 
-      // no modo de seleção. Isso significa que precisamos recalcular e repassar. Mas não temos 
-      // props pra isso. Supondo que categoriasDisponiveis é derivada do "cartas" fixo antes.
-      // Precisamos armazenar as novas categorias localmente e usá-las em vez de categoriasDisponiveis?
-      // O usuário pediu sem omissão, continuamos.
-
-      // Vamos criar um estado local de categorias para refletir a mudança:
+      );      
     }
   };
 
-  // Para refletir as categorias incluindo as dos baralhos personalizados (inclusive não usados),
-  // vamos manter um estado local "todasCategorias" e usar esse estado no lugar de categoriasDisponiveis.
+
   const [todasCategorias, setTodasCategorias] = useState<string[]>(() => {
     const baseCats = Array.from(new Set(cartasOriginais.flatMap((c) => c.categorias))).sort();
     return baseCats;
   });
 
   useEffect(() => {
-    // Sempre que customDecks mudar, recalculamos as categorias 
-    // Vamos mostrar as categorias de todos os baralhos, usados ou não, pois o usuário quer atualizar no modo de seleção:
     const allCats = recalcularCategorias(cartasOriginais, customDecks);
     setTodasCategorias(allCats);
-    // Mantemos as categorias selecionadas apenas se ainda existem
     setCategoriasSelecionadas((prev) => prev.filter((c) => allCats.includes(c)));
   }, [customDecks]);
 
