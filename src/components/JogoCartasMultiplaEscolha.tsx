@@ -199,7 +199,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   setProbabilityIndex,
 }) => {
   const [termoBusca, setTermoBusca] = useState<string>("");
-
   const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>(
     players.length > 0
       ? players.map((p) => ({
@@ -263,7 +262,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
           id: Date.now() + Math.random(),
           name: file.name.replace(/\.(js|json)$/, ""),
           cards: newCards,
-          used: true,
+          used: false,
         });
       } catch (error: any) {
         alert("Erro ao ler o arquivo " + file.name + ": " + error.message);
@@ -309,7 +308,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   const startGame = () => {
     const initializedPlayers: Player[] = playerInputs.map((input, index) => ({
       id: index,
-      name: input.name || `Jogador ${index + 1}`,
+      name: input.name || Jogador ${index + 1},
       color: input.color || predefinedColors[index % predefinedColors.length],
       fixedStars: 0,
       respostasCertas: 0,
@@ -321,7 +320,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
       rodadasPreso: 0,
     }));
     onPlayersSetup(initializedPlayers);
-    localStorage.setItem("customUsedDecks", JSON.stringify(customDecks));
+    const usedDecks = customDecks.filter((d) => d.used);
+    localStorage.setItem("customUsedDecks", JSON.stringify(usedDecks));
     onStartGame();
   };
 
@@ -377,7 +377,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
           ))}
         </ScrollArea>
         <Button
-          onClick={() => setCategoriasSelecionadas(categoriasDisponiveis)}
+          onClick={() => setCategoriasSelecionadas(todasCategorias)}
           className="mr-2 mt-2"
         >
           Selecionar Todas
@@ -393,7 +393,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
               <div className="flex items-center space-x-2 mb-1">
                 <input
                   type="text"
-                  placeholder={`Nome do Jogador ${index + 1}`}
+                  placeholder={Nome do Jogador ${index + 1}}
                   value={player.name}
                   maxLength={10}
                   onChange={(e) => handlePlayerChange(index, "name", e.target.value)}
@@ -544,9 +544,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         >
           Iniciar Novo Jogo
         </Button>
-        <Button onClick={onReset} className="w-full">
-          Resetar Tudo
-        </Button>
       </CardFooter>
     </Card>
   );
@@ -641,6 +638,7 @@ const EcoChallenge: React.FC = () => {
       { value: 0.8, color: "red", label: "80%" },
     ];
     const currentProbability = probabilitySettings[probabilityIndex].value;
+
     let incluirCartasEspeciais = true;
     if (currentProbability > 0) {
       const randomValue = Math.random();
@@ -718,9 +716,172 @@ const EcoChallenge: React.FC = () => {
     }
   }, [jogoIniciado, selecionarCartaAleatoria]);
 
-  const handlePlayersSetup = (initializedPlayers: Player[]) => {
-    setPlayers(initializedPlayers);
-    setCurrentPlayerId(initializedPlayers[0].id);
+  const handleSelecao = (id: number) => {
+    if (!respondido) {
+      setSelecionado(id);
+    }
+  };
+
+  const handleSelecaoMultipla = (id: number) => {
+    if (!respondido) {
+      setSelecoesMultiplas((prevSelecoes) =>
+        prevSelecoes.includes(id)
+          ? prevSelecoes.filter((selecaoId) => selecaoId !== id)
+          : [...prevSelecoes, id]
+      );
+    }
+  };
+
+  const handleSelecaoOrdem = (id: number) => {
+    if (!respondido) {
+      setOrdemSelecoes((prevSelecoes) =>
+        prevSelecoes.includes(id)
+          ? prevSelecoes.filter((selecaoId) => selecaoId !== id)
+          : [...prevSelecoes, id]
+      );
+    }
+  };
+
+  const currentPlayer = players.find((p) => p.id === currentPlayerId);
+
+  const updateCurrentPlayer = (updatedData: Partial<Player>) => {
+    setPlayers((prevPlayers) =>
+      prevPlayers.map((player) =>
+        player.id === currentPlayerId ? { ...player, ...updatedData } : player
+      )
+    );
+  };
+
+  const verificarResposta = () => {
+    if (!currentPlayer || !cartaAtual) return;
+    if (cartaAtual.tipo === "MultiplaEscolha" && selecoesMultiplas.length > 0) {
+      const isCorrect =
+        Array.isArray(cartaAtual.respostaCorreta) &&
+        selecoesMultiplas.sort().toString() ===
+          (cartaAtual.respostaCorreta as number[]).sort().toString();
+      setRespondido(true);
+      if (isCorrect) {
+        updateCurrentPlayer({
+          respostasCertas: currentPlayer.respostasCertas + 1,
+          respostasSeguidas: currentPlayer.respostasSeguidas + 1,
+        });
+        const novoProgresso = currentPlayer.progresso + 20;
+        if (novoProgresso >= 100) {
+          updateCurrentPlayer({
+            progresso: 0,
+            pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
+            fixedStars: currentPlayer.fixedStars + 1,
+          });
+          setMensagem("Correto! Bônus extra! Barra completada!");
+        } else {
+          updateCurrentPlayer({ progresso: novoProgresso });
+        }
+        if (cartaAtual.dificuldade === "dificil") {
+          updateCurrentPlayer({
+            pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
+          });
+        }
+        setMensagem(Correto! ${cartaAtual.vantagem});
+      } else {
+        updateCurrentPlayer({
+          respostasErradas: currentPlayer.respostasErradas + 1,
+          respostasSeguidas: 0,
+          progresso: Math.max(currentPlayer.progresso - 10, 0),
+        });
+        setMensagem(Incorreto. ${cartaAtual.desvantagem});
+      }
+    } else if (cartaAtual.tipo === "Ordem" && ordemSelecoes.length > 0) {
+      const isCorrect =
+        ordemSelecoes.toString() ===
+        (cartaAtual.respostaCorreta as number[]).toString();
+      setRespondido(true);
+      if (isCorrect) {
+        updateCurrentPlayer({
+          respostasCertas: currentPlayer.respostasCertas + 1,
+          respostasSeguidas: currentPlayer.respostasSeguidas + 1,
+        });
+        const novoProgresso = currentPlayer.progresso + 20;
+        if (novoProgresso >= 100) {
+          updateCurrentPlayer({
+            progresso: 0,
+            pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
+            fixedStars: currentPlayer.fixedStars + 1,
+          });
+          setMensagem("Correto! Bônus extra! Barra completada!");
+        } else {
+          updateCurrentPlayer({ progresso: novoProgresso });
+        }
+        if (cartaAtual.dificuldade === "dificil") {
+          updateCurrentPlayer({
+            pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
+          });
+        }
+        setMensagem(Correto! ${cartaAtual.vantagem});
+      } else {
+        updateCurrentPlayer({
+          respostasErradas: currentPlayer.respostasErradas + 1,
+          respostasSeguidas: 0,
+          progresso: Math.max(currentPlayer.progresso - 10, 0),
+        });
+        setMensagem(Incorreto. ${cartaAtual.desvantagem});
+      }
+    } else if (cartaAtual && selecionado !== null) {
+      setRespondido(true);
+      const isCorrect = Array.isArray(cartaAtual.respostaCorreta)
+        ? cartaAtual.respostaCorreta.includes(selecionado)
+        : cartaAtual.respostaCorreta === selecionado;
+      if (isCorrect) {
+        if (["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)) {
+          updateCurrentPlayer({
+            respostasCertas: currentPlayer.respostasCertas + 1,
+            respostasSeguidas: currentPlayer.respostasSeguidas + 1,
+          });
+          const novoProgresso = currentPlayer.progresso + 20;
+          if (novoProgresso >= 100) {
+            updateCurrentPlayer({
+              progresso: 0,
+              pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
+              fixedStars: currentPlayer.fixedStars + 1,
+            });
+            setMensagem("Correto! Bônus extra! Barra completada!");
+          } else {
+            updateCurrentPlayer({ progresso: novoProgresso });
+          }
+          if (cartaAtual.dificuldade === "dificil") {
+            updateCurrentPlayer({
+              pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
+            });
+          }
+        }
+        setMensagem(Correto! ${cartaAtual.vantagem});
+      } else {
+        if (["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)) {
+          updateCurrentPlayer({
+            respostasErradas: currentPlayer.respostasErradas + 1,
+            respostasSeguidas: 0,
+            progresso: Math.max(currentPlayer.progresso - 10, 0),
+          });
+          setMensagem(Incorreto. ${cartaAtual.desvantagem});
+        }
+      }
+    }
+  };
+
+  const resetarContadores = () => {
+    if (window.confirm("Tem certeza que deseja resetar os contadores do jogador atual?")) {
+      if (!currentPlayer) return;
+      updateCurrentPlayer({
+        respostasCertas: 0,
+        respostasErradas: 0,
+        progresso: 0,
+        pulosDisponiveis: 0,
+        respostasSeguidas: 0,
+        rodadasPreso: 0,
+        contadorDeEstrelas: 0,
+      });
+      setMensagem("Contadores resetados!");
+      setTimeout(() => setMensagem(""), 2000);
+    }
   };
 
   const resetarTudo = () => {
@@ -733,8 +894,215 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
+  const toggleDica = () => {
+    if (!currentPlayer || !cartaAtual) return;
+    if (dicaUsada) {
+      setMensagem("Você já usou a dica para esta pergunta.");
+      return;
+    }
+    if (currentPlayer.respostasSeguidas >= 2 && cartaAtual.dica) {
+      setMostrarDica(true);
+      setDicaUsada(true);
+      updateCurrentPlayer({
+        respostasSeguidas: currentPlayer.respostasSeguidas - 2,
+      });
+    } else if (!cartaAtual.dica) {
+      setMensagem("Esta carta não possui dica.");
+    } else {
+      setMensagem("Você precisa de pelo menos 2 respostas corretas seguidas para usar a dica!");
+    }
+  };
+
+  const toggleFontes = () => {
+    setMostrarFontes(!mostrarFontes);
+  };
+
+  const pularPergunta = () => {
+    if (!currentPlayer || !cartaAtual) return;
+    if (currentPlayer.pulosDisponiveis > 0) {
+      updateCurrentPlayer({
+        pulosDisponiveis: currentPlayer.pulosDisponiveis - 1,
+      });
+      selecionarCartaAleatoria();
+    }
+  };
+
+  const eliminarRespostaErrada = () => {
+    if (!currentPlayer || !cartaAtual) return;
+    if (currentPlayer.respostasSeguidas >= 2 && cartaAtual) {
+      const opcoesErradas = cartaAtual.opcoes.filter((opcao: Opcao) => {
+        if (Array.isArray(cartaAtual.respostaCorreta)) {
+          return !cartaAtual.respostaCorreta.includes(opcao.id);
+        } else {
+          return opcao.id !== cartaAtual.respostaCorreta;
+        }
+      });
+      const opcoesRestantes = opcoesErradas.filter(
+        (opcao: Opcao) => !opcoesEliminadas.includes(opcao.id)
+      );
+      if (opcoesRestantes.length > 0) {
+        const indiceAleatorio = Math.floor(Math.random() * opcoesRestantes.length);
+        const opcaoEliminada = opcoesRestantes[indiceAleatorio].id;
+        setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
+        updateCurrentPlayer({
+          respostasSeguidas: currentPlayer.respostasSeguidas - 2,
+        });
+        setMensagem("Uma resposta errada foi eliminada!");
+      }
+    } else {
+      setMensagem("Você precisa de pelo menos 2 respostas corretas seguidas!");
+    }
+  };
+
   const voltarTelaInicial = () => {
     setJogoIniciado(false);
+  };
+
+  const incrementarRodadasPreso = () => {
+    if (!currentPlayer) return;
+    updateCurrentPlayer({
+      rodadasPreso: currentPlayer.rodadasPreso + 1,
+    });
+    setMensagem("Um contador adicionado!");
+  };
+
+  const diminuirRodadasPreso = () => {
+    if (!currentPlayer) return;
+    updateCurrentPlayer({
+      rodadasPreso: currentPlayer.rodadasPreso - 1,
+    });
+    setMensagem("Um contador removido!");
+  };
+
+  const diminuirAcertos = () => {
+    if (!currentPlayer) return;
+    updateCurrentPlayer({
+      respostasCertas:
+        currentPlayer.respostasCertas > 0 ? currentPlayer.respostasCertas - 1 : 0,
+    });
+    setMensagem("Acerto removido!");
+  };
+
+  const diminuirErros = () => {
+    if (!currentPlayer) return;
+    updateCurrentPlayer({
+      respostasErradas:
+        currentPlayer.respostasErradas > 0 ? currentPlayer.respostasErradas - 1 : 0,
+    });
+    setMensagem("Erro removido!");
+  };
+
+  const incrementarContadorDeEstrelas = () => {
+    if (!currentPlayer) return;
+    updateCurrentPlayer({
+      contadorDeEstrelas: currentPlayer.contadorDeEstrelas + 1,
+    });
+    setMensagem("Estrela adicionada!");
+  };
+
+  const diminuirContadorDeEstrelas = () => {
+    if (!currentPlayer) return;
+    if (currentPlayer.contadorDeEstrelas > 0) {
+      updateCurrentPlayer({
+        contadorDeEstrelas: currentPlayer.contadorDeEstrelas - 1,
+      });
+      setMensagem("Estrela removida!");
+    } else {
+      setMensagem("Nenhuma estrela para remover!");
+    }
+  };
+
+  const renderizarConteudoPergunta = () => {
+    if (!cartaAtual) return null;
+    const conteudo = cartaAtual.pergunta
+      .split("\n")
+      .map((linha: string, index: number) => {
+        if (linha.includes("<img")) {
+          const imgRegex = /<img src="([^"]+)" alt="([^"]+)" class="([^"]+)" \/>/;
+          const match = imgRegex.exec(linha);
+          if (match) {
+            const [_, src, alt, className] = match;
+            return (
+              <Zoom key={index}>
+                <Image
+                  src={src}
+                  alt={alt}
+                  width={500}
+                  height={300}
+                  className={${className} img-zoom}
+                />
+              </Zoom>
+            );
+          }
+        }
+        return <p key={index} dangerouslySetInnerHTML={{ __html: linha }} />;
+      });
+    return conteudo;
+  };
+
+  const handlePlayersSetup = (initializedPlayers: Player[]) => {
+    setPlayers(initializedPlayers);
+    setCurrentPlayerId(initializedPlayers[0].id);
+  };
+
+  const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const handleLongPressStart = () => {
+    longPressTimeout.current = setTimeout(() => {
+      rolarDado();
+    }, 1000);
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimeout.current) {
+      clearTimeout(longPressTimeout.current);
+      longPressTimeout.current = null;
+    }
+  };
+
+  const handleLongPressCancel = () => {
+    if (longPressTimeout.current) {
+      clearTimeout(longPressTimeout.current);
+      longPressTimeout.current = null;
+    }
+  };
+
+  const rolarDado = () => {
+    if (isRolling) return;
+    setIsRolling(true);
+    setIsDieModalOpen(true);
+    let rollCount = 0;
+    const maxRolls = 10;
+    const rollInterval = setInterval(() => {
+      const randomNum = Math.floor(Math.random() * 6) + 1;
+      setRollingNumber(randomNum);
+      rollCount++;
+      if (rollCount >= maxRolls) {
+        clearInterval(rollInterval);
+        const finalNumber = Math.floor(Math.random() * 6) + 1;
+        setRolledNumber(finalNumber);
+        setRollingNumber(null);
+        setIsRolling(false);
+      }
+    }, 100);
+  };
+
+  const isDisabled =
+    !cartaAtual ||
+    ((cartaAtual.tipo === "Ordem" && ordemSelecoes.length !== cartaAtual.opcoes.length) ||
+      (cartaAtual.tipo !== "Ordem" &&
+        selecionado === null &&
+        selecoesMultiplas.length === 0));
+
+  const verificarRespostaProps = {
+    className: w-full mt-2 ${isDisabled ? "opacity-50 cursor-not-allowed" : ""},
+    onMouseDown: handleLongPressStart,
+    onMouseUp: handleLongPressEnd,
+    onMouseLeave: handleLongPressEnd,
+    onTouchStart: handleLongPressStart,
+    onTouchEnd: handleLongPressEnd,
+    onTouchCancel: handleLongPressCancel,
+    ...(isDisabled ? {} : { onClick: verificarResposta }),
   };
 
   if (!jogoIniciado) {
@@ -763,6 +1131,7 @@ const EcoChallenge: React.FC = () => {
       />
     );
   }
+
   const hasQuestionCards = cartasOriginais.some(
     (carta) =>
       carta.categorias.some((categoria) =>
