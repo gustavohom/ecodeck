@@ -583,8 +583,9 @@ const EcoChallenge: React.FC = () => {
   const [isRolling, setIsRolling] = useState<boolean>(false);
 
   const categoriasDisponiveis = Array.from(
-    new Set(cartas.flatMap((carta) => carta.categorias))
+    new Set(cartasOriginais.flatMap((carta) => carta.categorias))
   ).sort();
+  
 
   // Configurações de probabilidade para filtrar as cartas especiais
   const [probabilityIndex, setProbabilityIndex] = useState<number>(0);
