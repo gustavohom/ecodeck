@@ -238,7 +238,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     }
     const allCats = recalcularCategorias(cartasOriginais, customDecks);
     setTodasCategorias(allCats);
-    setCategoriasSelecionadas(categoriasSelecionadas.filter((c) => allCats.includes(c)));
+    setCategoriasSelecionadas((prev) => prev.filter((c) => allCats.includes(c)));
   }, [customDecks]);
 
   const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -262,7 +262,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
           id: Date.now() + Math.random(),
           name: file.name.replace(/\.(js|json)$/, ""),
           cards: newCards,
-          used: false,
+          used: true,
         });
       } catch (error: any) {
         alert("Erro ao ler o arquivo " + file.name + ": " + error.message);
@@ -272,12 +272,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
       const updatedDecks = [...customDecks, ...newDecks];
       setCustomDecks(updatedDecks);
     }
-  };
-
-  const toggleDeckUsage = (deckId: number) => {
-    setCustomDecks((prev) =>
-      prev.map((d) => (d.id === deckId ? { ...d, used: !d.used } : d))
-    );
   };
 
   const addPlayerInput = () => {
@@ -320,8 +314,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
       rodadasPreso: 0,
     }));
     onPlayersSetup(initializedPlayers);
-    const usedDecks = customDecks.filter((d) => d.used);
-    localStorage.setItem("customUsedDecks", JSON.stringify(usedDecks));
+    localStorage.setItem("customUsedDecks", JSON.stringify(customDecks));
     onStartGame();
   };
 
@@ -469,16 +462,9 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                   <span className="flex-1 text-sm">{deck.name} ({deck.cards.length} cartas)</span>
                   <Button
                     size="sm"
-                    variant={deck.used ? "secondary" : "outline"}
-                    onClick={() => toggleDeckUsage(deck.id)}
-                  >
-                    {deck.used ? "Ativo" : "Ativar"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
+                    variant="outline"
                     onClick={() => {
-                      if (window.confirm("Tem certeza que deseja remover este baralho personalizado?")) {
+                      if (window.confirm("Remover este baralho? Isso pode alterar as categorias.")) {
                         setCustomDecks((prev) => prev.filter((d) => d.id !== deck.id));
                       }
                     }}
@@ -543,6 +529,9 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
           disabled={categoriasSelecionadas.length === 0 || playerInputs.length === 0}
         >
           Iniciar Novo Jogo
+        </Button>
+        <Button onClick={onReset} className="w-full">
+          Resetar Tudo
         </Button>
       </CardFooter>
     </Card>
