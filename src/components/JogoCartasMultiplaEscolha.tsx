@@ -275,7 +275,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   useEffect(() => {
     const allCats = recalcularCategorias(cartasOriginais, customDecks);
     setTodasCategorias(allCats);
-    setCategoriasSelecionadas((prev) => prev.filter((c) => allCats.includes(c)));
+    setCategoriasSelecionadas(categoriasSelecionadas.filter((c) => allCats.includes(c)));
   }, [customDecks]);
 
   const addPlayerInput = () => {
