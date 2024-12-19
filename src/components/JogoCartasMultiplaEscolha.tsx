@@ -199,6 +199,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   setProbabilityIndex,
 }) => {
   const [termoBusca, setTermoBusca] = useState<string>("");
+
   const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>(
     players.length > 0
       ? players.map((p) => ({
@@ -272,6 +273,12 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
       const updatedDecks = [...customDecks, ...newDecks];
       setCustomDecks(updatedDecks);
     }
+  };
+
+  const toggleDeckUsage = (deckId: number) => {
+    setCustomDecks((prev) =>
+      prev.map((d) => (d.id === deckId ? { ...d, used: !d.used } : d))
+    );
   };
 
   const addPlayerInput = () => {
@@ -370,7 +377,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
           ))}
         </ScrollArea>
         <Button
-          onClick={() => setCategoriasSelecionadas(todasCategorias)}
+          onClick={() => setCategoriasSelecionadas(categoriasDisponiveis)}
           className="mr-2 mt-2"
         >
           Selecionar Todas
@@ -462,9 +469,16 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                   <span className="flex-1 text-sm">{deck.name} ({deck.cards.length} cartas)</span>
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant={deck.used ? "secondary" : "outline"}
+                    onClick={() => toggleDeckUsage(deck.id)}
+                  >
+                    {deck.used ? "Ativo" : "Ativar"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
                     onClick={() => {
-                      if (window.confirm("Remover este baralho? Isso pode alterar as categorias.")) {
+                      if (window.confirm("Tem certeza que deseja remover este baralho personalizado?")) {
                         setCustomDecks((prev) => prev.filter((d) => d.id !== deck.id));
                       }
                     }}
@@ -517,7 +531,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
         {hasSavedGame && (
-          <Button onClick={() => onContinueGame()} className="w-full">
+          <Button onClick={onContinueGame} className="w-full">
             Continuar Jogo
           </Button>
         )}
@@ -530,7 +544,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         >
           Iniciar Novo Jogo
         </Button>
-        <Button onClick={() => onReset()} className="w-full">
+        <Button onClick={onReset} className="w-full">
           Resetar Tudo
         </Button>
       </CardFooter>
@@ -749,7 +763,6 @@ const EcoChallenge: React.FC = () => {
       />
     );
   }
-
   const hasQuestionCards = cartasOriginais.some(
     (carta) =>
       carta.categorias.some((categoria) =>
@@ -810,13 +823,13 @@ const EcoChallenge: React.FC = () => {
   return (
     <div className="flex flex-col items-center">
       <Card
-        className={`w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}`}
+        className={w-full max-w-sm mx-auto mt-4 ${obterEstiloCarta()}}
         style={
           players.length > 1 &&
           currentPlayer &&
           !(ocultarCarta && !cartaRevelada)
             ? {
-                boxShadow: `0 0 10px 5px ${currentPlayer.color}`,
+                boxShadow: 0 0 10px 5px ${currentPlayer.color},
               }
             : {}
         }
@@ -859,27 +872,7 @@ const EcoChallenge: React.FC = () => {
           </div>
           {!ocultarCarta || cartaRevelada ? (
             <ScrollArea className="h-56 rounded-md border p-4">
-              <div className="text-sm">{(cartaAtual as CartaBase).pergunta.split("\n").map((linha: string, index: number) => {
-                if (linha.includes("<img")) {
-                  const imgRegex = /<img src="([^"]+)" alt="([^"]+)" class="([^"]+)" \/>/;
-                  const match = imgRegex.exec(linha);
-                  if (match) {
-                    const [_, src, alt, className] = match;
-                    return (
-                      <Zoom key={index}>
-                        <Image
-                          src={src}
-                          alt={alt}
-                          width={500}
-                          height={300}
-                          className={`${className} img-zoom`}
-                        />
-                      </Zoom>
-                    );
-                  }
-                }
-                return <p key={index} dangerouslySetInnerHTML={{ __html: linha }} />;
-              })}</div>
+              <div className="text-sm">{renderizarConteudoPergunta()}</div>
             </ScrollArea>
           ) : (
             <div className="h-56 flex flex-col items-center justify-center space-y-2">
@@ -922,10 +915,10 @@ const EcoChallenge: React.FC = () => {
                       ? "secondary"
                       : "outline"
                   }
-                  className={`w-full justify-start text-sm ${
+                  className={w-full justify-start text-sm ${
                     respondido &&
                     (Array.isArray(cartaAtual.respostaCorreta)
-                      ? (cartaAtual.respostaCorreta as number[]).includes(opcao.id)
+                      ? cartaAtual.respostaCorreta.includes(opcao.id)
                       : cartaAtual.respostaCorreta === opcao.id)
                       ? "bg-green-100"
                       : ""
@@ -934,7 +927,7 @@ const EcoChallenge: React.FC = () => {
                     selecionado === opcao.id &&
                     !(
                       Array.isArray(cartaAtual.respostaCorreta)
-                        ? (cartaAtual.respostaCorreta as number[]).includes(opcao.id)
+                        ? cartaAtual.respostaCorreta.includes(opcao.id)
                         : cartaAtual.respostaCorreta === opcao.id
                     )
                       ? "bg-red-100"
@@ -943,7 +936,7 @@ const EcoChallenge: React.FC = () => {
                     respondido &&
                     cartaAtual.tipo === "MultiplaEscolha" &&
                     Array.isArray(cartaAtual.respostaCorreta) &&
-                    !(cartaAtual.respostaCorreta as number[]).includes(opcao.id) &&
+                    !cartaAtual.respostaCorreta.includes(opcao.id) &&
                     selecoesMultiplas.includes(opcao.id)
                       ? "bg-red-100"
                       : ""
@@ -951,7 +944,7 @@ const EcoChallenge: React.FC = () => {
                     respondido &&
                     cartaAtual.tipo === "MultiplaEscolha" &&
                     Array.isArray(cartaAtual.respostaCorreta) &&
-                    (cartaAtual.respostaCorreta as number[]).includes(opcao.id) &&
+                    cartaAtual.respostaCorreta.includes(opcao.id) &&
                     !selecoesMultiplas.includes(opcao.id)
                       ? "bg-blue-100"
                       : ""
@@ -973,7 +966,7 @@ const EcoChallenge: React.FC = () => {
                       : ""
                   } ${
                     opcoesEliminadas.includes(opcao.id) ? "opacity-50" : ""
-                  }`}
+                  }}
                   disabled={opcoesEliminadas.includes(opcao.id)}
                   style={{
                     maxHeight: "80px",
@@ -1014,7 +1007,7 @@ const EcoChallenge: React.FC = () => {
                   )}
                   {respondido &&
                     (Array.isArray(cartaAtual.respostaCorreta)
-                      ? (cartaAtual.respostaCorreta as number[]).includes(opcao.id)
+                      ? cartaAtual.respostaCorreta.includes(opcao.id)
                       : cartaAtual.respostaCorreta === opcao.id) && (
                       <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
                     )}
@@ -1022,7 +1015,7 @@ const EcoChallenge: React.FC = () => {
                     selecionado === opcao.id &&
                     !(
                       Array.isArray(cartaAtual.respostaCorreta)
-                        ? (cartaAtual.respostaCorreta as number[]).includes(opcao.id)
+                        ? cartaAtual.respostaCorreta.includes(opcao.id)
                         : cartaAtual.respostaCorreta === opcao.id
                     ) && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
                 </Button>
@@ -1160,9 +1153,9 @@ const EcoChallenge: React.FC = () => {
             )}
           <Progress
             value={currentPlayer.progresso}
-            className={`w-full ${
+            className={w-full ${
               currentPlayer.progresso === 100 ? "bg-green-500" : ""
-            }`}
+            }}
           />
           <div className="flex justify-between w-full mt-4 text-sm">
             <div className="flex items-center space-x-1">
@@ -1197,9 +1190,9 @@ const EcoChallenge: React.FC = () => {
         </CardFooter>
       </Card>
       <div
-        className={`grid gap-1 mt-4 ${
-          players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
-        }`}
+        className={grid gap-1 mt-4 ${
+          players.length > 4 ? "grid-cols-4" : grid-cols-${players.length}
+        }}
         style={{ width: "100%", maxWidth: "400px" }}
       >
         {players.map((player) => (
@@ -1247,7 +1240,7 @@ const EcoChallenge: React.FC = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
