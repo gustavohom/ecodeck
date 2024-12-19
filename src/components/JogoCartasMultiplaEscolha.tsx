@@ -244,7 +244,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-
     let newDecks: CustomDeck[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -269,7 +268,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         alert("Erro ao ler o arquivo " + file.name + ": " + error.message);
       }
     }
-
     if (newDecks.length > 0) {
       const updatedDecks = [...customDecks, ...newDecks];
       setCustomDecks(updatedDecks);
@@ -574,9 +572,9 @@ const EcoChallenge: React.FC = () => {
   const [rollingNumber, setRollingNumber] = useState<number | null>(null);
   const [isDieModalOpen, setIsDieModalOpen] = useState<boolean>(false);
   const [isRolling, setIsRolling] = useState<boolean>(false);
+  const [probabilityIndex, setProbabilityIndex] = useState<number>(0);
 
   const baseCategorias = Array.from(new Set(cartasOriginais.flatMap((c) => c.categorias))).sort();
-  const [probabilityIndex, setProbabilityIndex] = useState<number>(0);
 
   const hasSavedGame =
     typeof window !== "undefined" &&
@@ -676,11 +674,9 @@ const EcoChallenge: React.FC = () => {
         !mostrarSomentePerguntas ||
         ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo);
       const isEspecial = ["Vantagem", "Desvantagem", "Outras"].includes(carta.tipo);
-
       if (!incluirCartasEspeciais && isEspecial) {
         return false;
       }
-
       return categoriaValida && tipoValido;
     });
 
@@ -694,7 +690,6 @@ const EcoChallenge: React.FC = () => {
 
     const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
     const novaCarta = cartasFiltradas[indiceAleatorio];
-
     setCartaAtual(novaCarta);
     setSelecionado(null);
     setSelecoesMultiplas([]);
@@ -759,15 +754,12 @@ const EcoChallenge: React.FC = () => {
 
   const verificarResposta = () => {
     if (!currentPlayer || !cartaAtual) return;
-
-    if (cartaAtual?.tipo === "MultiplaEscolha" && selecoesMultiplas.length > 0) {
+    if (cartaAtual.tipo === "MultiplaEscolha" && selecoesMultiplas.length > 0) {
       const isCorrect =
         Array.isArray(cartaAtual.respostaCorreta) &&
         selecoesMultiplas.sort().toString() ===
           (cartaAtual.respostaCorreta as number[]).sort().toString();
-
       setRespondido(true);
-
       if (isCorrect) {
         updateCurrentPlayer({
           respostasCertas: currentPlayer.respostasCertas + 1,
@@ -798,13 +790,11 @@ const EcoChallenge: React.FC = () => {
         });
         setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
       }
-    } else if (cartaAtual?.tipo === "Ordem" && ordemSelecoes.length > 0) {
+    } else if (cartaAtual.tipo === "Ordem" && ordemSelecoes.length > 0) {
       const isCorrect =
         ordemSelecoes.toString() ===
         (cartaAtual.respostaCorreta as number[]).toString();
-
       setRespondido(true);
-
       if (isCorrect) {
         updateCurrentPlayer({
           respostasCertas: currentPlayer.respostasCertas + 1,
@@ -837,11 +827,9 @@ const EcoChallenge: React.FC = () => {
       }
     } else if (cartaAtual && selecionado !== null) {
       setRespondido(true);
-
       const isCorrect = Array.isArray(cartaAtual.respostaCorreta)
         ? cartaAtual.respostaCorreta.includes(selecionado)
         : cartaAtual.respostaCorreta === selecionado;
-
       if (isCorrect) {
         if (["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)) {
           updateCurrentPlayer({
@@ -880,11 +868,7 @@ const EcoChallenge: React.FC = () => {
   };
 
   const resetarContadores = () => {
-    if (
-      window.confirm(
-        "Tem certeza que deseja resetar os contadores do jogador atual?"
-      )
-    ) {
+    if (window.confirm("Tem certeza que deseja resetar os contadores do jogador atual?")) {
       if (!currentPlayer) return;
       updateCurrentPlayer({
         respostasCertas: 0,
@@ -953,15 +937,12 @@ const EcoChallenge: React.FC = () => {
           return opcao.id !== cartaAtual.respostaCorreta;
         }
       });
-
       const opcoesRestantes = opcoesErradas.filter(
         (opcao: Opcao) => !opcoesEliminadas.includes(opcao.id)
       );
-
       if (opcoesRestantes.length > 0) {
         const indiceAleatorio = Math.floor(Math.random() * opcoesRestantes.length);
         const opcaoEliminada = opcoesRestantes[indiceAleatorio].id;
-
         setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
         updateCurrentPlayer({
           respostasSeguidas: currentPlayer.respostasSeguidas - 2,
@@ -1108,8 +1089,7 @@ const EcoChallenge: React.FC = () => {
 
   const isDisabled =
     !cartaAtual ||
-    ((cartaAtual.tipo === "Ordem" &&
-      ordemSelecoes.length !== cartaAtual.opcoes.length) ||
+    ((cartaAtual.tipo === "Ordem" && ordemSelecoes.length !== cartaAtual.opcoes.length) ||
       (cartaAtual.tipo !== "Ordem" &&
         selecionado === null &&
         selecoesMultiplas.length === 0));
@@ -1168,7 +1148,9 @@ const EcoChallenge: React.FC = () => {
         <Button
           onClick={() => {
             setMostrarSomentePerguntas(false);
-            selecionarCartaAleatoria();
+            setJogoIniciado(false);
+            setNoCardsAvailable(false);
+            setCategoriasSelecionadas([]);
           }}
           className="mt-4"
         >
@@ -1613,9 +1595,7 @@ const EcoChallenge: React.FC = () => {
             {isRolling ? (
               <>
                 <p className="text-lg mb-2">Rolando o dado...</p>
-                <p className="text-6xl font-bold mb-6 animate-bounce">
-                  {rollingNumber}
-                </p>
+                <p className="text-6xl font-bold mb-6 animate-bounce">{rollingNumber}</p>
               </>
             ) : (
               <>
