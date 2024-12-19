@@ -42,16 +42,8 @@ import ecologiaFlorestal from "./cards_ecologia_florestal";
 import estrelasAliens from "./cards_estrelas_aliens";
 import testCards from "./teste_gustavo";
 
-// Cartas originais combinadas
-const cartasOriginais = [
-  ...manejoPlantadas,
-  ...manejoNativas,
-  ...ecologiaFlorestal,
-  ...estrelasAliens,
-  ...testCards,
-];
 
-// Tipagens
+// Tipos necessários
 interface Opcao {
   id: number;
   texto: string;
@@ -149,11 +141,39 @@ const probabilitySettings = [
   { value: 0.8, color: "red", label: "80%" },
 ];
 
+// Cartas Originais
+const cartasOriginais = [
+  ...manejoPlantadas,
+  ...manejoNativas,
+  ...ecologiaFlorestal,
+  ...estrelasAliens,
+  ...testCards,
+];
+
 interface CustomDeck {
   id: number;
   name: string;
   cards: Carta[];
   used: boolean;
+}
+
+function parseJSDeckFile(content: string): Carta[] {
+  const match = content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);/);
+  if (!match) {
+    throw new Error("Não foi possível encontrar um array exportado no arquivo JS.");
+  }
+  const arrayStr = match[1];
+  const json = JSON.parse(arrayStr) as Carta[];
+  return json;
+}
+
+function recalcularCategorias(baseCards: Carta[], decks: CustomDeck[]) {
+  let allCards = [...baseCards];
+  for (const d of decks) {
+    allCards = [...allCards, ...d.cards];
+  }
+  const novasCategorias = Array.from(new Set(allCards.flatMap((c) => c.categorias))).sort();
+  return novasCategorias;
 }
 
 const TelaInicial: React.FC<TelaInicialProps> = ({
@@ -201,30 +221,22 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     return [];
   });
 
+  const [todasCategorias, setTodasCategorias] = useState<string[]>(() => {
+    // Inicialmente apenas as categorias dos baralhos originais
+    const baseCats = Array.from(new Set(cartasOriginais.flatMap((c) => c.categorias))).sort();
+    return baseCats;
+  });
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("customDecks", JSON.stringify(customDecks));
     }
+    // Recalcular categorias disponíveis com todos os baralhos (originais + personalizados)
+    const allCats = recalcularCategorias(cartasOriginais, customDecks);
+    setTodasCategorias(allCats);
+    // Manter somente as categorias selecionadas que ainda existem
+    setCategoriasSelecionadas(categoriasSelecionadas.filter((c) => allCats.includes(c)));
   }, [customDecks]);
-
-  const parseJSDeckFile = (content: string): Carta[] => {
-    const match = content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);/);
-    if (!match) {
-      throw new Error("Não foi possível encontrar um array exportado no arquivo JS.");
-    }
-    const arrayStr = match[1];
-    const json = JSON.parse(arrayStr) as Carta[];
-    return json;
-  };
-
-  const recalcularCategorias = (baseCards: Carta[], decks: CustomDeck[]) => {
-    let allCards = [...baseCards];
-    for (const d of decks) {
-      allCards = [...allCards, ...d.cards];
-    }
-    const novasCategorias = Array.from(new Set(allCards.flatMap((c) => c.categorias))).sort();
-    return novasCategorias;
-  };
 
   const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -258,25 +270,15 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     if (newDecks.length > 0) {
       const updatedDecks = [...customDecks, ...newDecks];
       setCustomDecks(updatedDecks);
-      const novasCategorias = recalcularCategorias(cartasOriginais, updatedDecks.filter(d => d.used));
-      const novasCategoriasTodos = recalcularCategorias(cartasOriginais, updatedDecks);     
-      setCategoriasSelecionadas(
-        categoriasSelecionadas.filter((cat) => novasCategoriasTodos.includes(cat))
-      );
+      // Não precisa de mensagem, conforme solicitado.
     }
   };
 
-
-  const [todasCategorias, setTodasCategorias] = useState<string[]>(() => {
-    const baseCats = Array.from(new Set(cartasOriginais.flatMap((c) => c.categorias))).sort();
-    return baseCats;
-  });
-
-  useEffect(() => {
-    const allCats = recalcularCategorias(cartasOriginais, customDecks);
-    setTodasCategorias(allCats);
-    setCategoriasSelecionadas(categoriasSelecionadas.filter((c) => allCats.includes(c)));
-  }, [customDecks]);
+  const toggleDeckUsage = (deckId: number) => {
+    setCustomDecks((prev) =>
+      prev.map((d) => (d.id === deckId ? { ...d, used: !d.used } : d))
+    );
+  };
 
   const addPlayerInput = () => {
     if (playerInputs.length < 8) {
@@ -475,7 +477,11 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => removeDeck(deck.id)}
+                    onClick={() => {
+                      if (window.confirm("Tem certeza que deseja remover este baralho personalizado?")) {
+                        setCustomDecks((prev) => prev.filter((d) => d.id !== deck.id));
+                      }
+                    }}
                   >
                     <Trash className="h-4 w-4 text-red-500" />
                   </Button>
