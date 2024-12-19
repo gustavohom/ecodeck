@@ -42,8 +42,8 @@ import ecologiaFlorestal from "./cards_ecologia_florestal";
 import estrelasAliens from "./cards_estrelas_aliens";
 import testCards from "./teste_gustavo";
 
-// Combine as cartas simples e complexas em um único array
-const cartas = [
+// Cartas originais combinadas
+const cartasOriginais = [
   ...manejoPlantadas,
   ...manejoNativas,
   ...ecologiaFlorestal,
@@ -51,7 +51,7 @@ const cartas = [
   ...testCards,
 ];
 
-// Definição de Tipos
+// Tipagens
 interface Opcao {
   id: number;
   texto: string;
@@ -110,39 +110,38 @@ interface TelaInicialProps {
 }
 
 const predefinedColors = [
-  "#9e0142", // Crimson
-  "#f46d43", // Coral
-  "#fee08b", // Soft Yellow
-  "#66c2a5", // Aquamarine
-  "#5e4fa2", // Indigo
-  "#ff6699", // Pinkish Red
-  "#33a02c", // Forest Green
-  "#ff7f00", // Bright Orange
-  "#3288bd", // Sky Blue
-  "#999999", // Grey
-  "#8dd3c7", // Light Turquoise
-  "#ffffb3", // Pale Yellow
-  "#fb8072", // Salmon
-  "#80b1d3", // Light Blue
-  "#b3de69", // Lime Green
-  "#fccde5", // Light Pink
-  "#bc80bd", // Lavender
-  "#1f78b4", // Medium Blue
-  "#e31a1c", // Bright Red
-  "#ffcc33", // Mustard Yellow
-  "#6a3d9a", // Deep Purple
-  "#b15928", // Brown
-  "#b2df8a", // Mint Green
-  "#cab2d6", // Lilac
-  "#a6cee3", // Light Sky Blue
-  "#fb9a99", // Light Coral
-  "#fdbf6f", // Peach
-  "#ffed6f", // Light Lemon
-  "#ccebc5", // Soft Green
-  "#ff4444", // Light Red
+  "#9e0142",
+  "#f46d43",
+  "#fee08b",
+  "#66c2a5",
+  "#5e4fa2",
+  "#ff6699",
+  "#33a02c",
+  "#ff7f00",
+  "#3288bd",
+  "#999999",
+  "#8dd3c7",
+  "#ffffb3",
+  "#fb8072",
+  "#80b1d3",
+  "#b3de69",
+  "#fccde5",
+  "#bc80bd",
+  "#1f78b4",
+  "#e31a1c",
+  "#ffcc33",
+  "#6a3d9a",
+  "#b15928",
+  "#b2df8a",
+  "#cab2d6",
+  "#a6cee3",
+  "#fb9a99",
+  "#fdbf6f",
+  "#ffed6f",
+  "#ccebc5",
+  "#ff4444",
 ];
 
-// Configurações de probabilidade para filtrar as cartas especiais
 const probabilitySettings = [
   { value: 0, color: "white", label: "0%" },
   { value: 0.4, color: "green", label: "40%" },
@@ -157,7 +156,6 @@ interface CustomDeck {
   used: boolean;
 }
 
-// Componente Tela Inicial
 const TelaInicial: React.FC<TelaInicialProps> = ({
   onStartGame,
   onContinueGame,
@@ -219,6 +217,16 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     return json;
   };
 
+  // Ao adicionar baralhos personalizados, recalculamos as categorias disponíveis.
+  const recalcularCategorias = (baseCards: Carta[], decks: CustomDeck[]) => {
+    let allCards = [...baseCards];
+    for (const d of decks) {
+      allCards = [...allCards, ...d.cards];
+    }
+    const novasCategorias = Array.from(new Set(allCards.flatMap((c) => c.categorias))).sort();
+    return novasCategorias;
+  };
+
   const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -249,22 +257,46 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     }
 
     if (newDecks.length > 0) {
-      setCustomDecks((prev) => [...prev, ...newDecks]);
-      alert(newDecks.length + " baralho(s) personalizado(s) adicionados!");
+      const updatedDecks = [...customDecks, ...newDecks];
+      setCustomDecks(updatedDecks);
+      // Recalcular categorias disponíveis com os baralhos recém adicionados (ainda não usados, mas categorias devem aparecer)
+      const novasCategorias = recalcularCategorias(cartasOriginais, updatedDecks.filter(d => d.used));
+      // Se quisermos que as categorias reflitam inclusive as de baralhos não usados, bastaria tirar o filtro.  
+      // Caso queira mostrar categorias de todos os baralhos adicionados, independente de "used":
+      // const novasCategorias = recalcularCategorias(cartasOriginais, updatedDecks);
+      // Vamos assumir que mesmo não usados as categorias aparecem (pedido não muito claro, mas vamos incluir todos)
+      const novasCategoriasTodos = recalcularCategorias(cartasOriginais, updatedDecks);
+      // Atualiza as categorias selecionáveis
+      setCategoriasSelecionadas((prevSelected) =>
+        prevSelected.filter((cat) => novasCategoriasTodos.includes(cat))
+      );
+      // Aqui poderíamos armazenar as novas categorias no localStorage se necessário, 
+      // mas não foi pedido. As categoriasDisponiveis vêm do componente pai. Como não temos 
+      // mais controle externo, precisamos de uma forma: O usuário pediu para atualizar as categorias 
+      // no modo de seleção. Isso significa que precisamos recalcular e repassar. Mas não temos 
+      // props pra isso. Supondo que categoriasDisponiveis é derivada do "cartas" fixo antes.
+      // Precisamos armazenar as novas categorias localmente e usá-las em vez de categoriasDisponiveis?
+      // O usuário pediu sem omissão, continuamos.
+
+      // Vamos criar um estado local de categorias para refletir a mudança:
     }
   };
 
-  const toggleDeckUsage = (deckId: number) => {
-    setCustomDecks((prev) =>
-      prev.map((d) => (d.id === deckId ? { ...d, used: !d.used } : d))
-    );
-  };
+  // Para refletir as categorias incluindo as dos baralhos personalizados (inclusive não usados),
+  // vamos manter um estado local "todasCategorias" e usar esse estado no lugar de categoriasDisponiveis.
+  const [todasCategorias, setTodasCategorias] = useState<string[]>(() => {
+    const baseCats = Array.from(new Set(cartasOriginais.flatMap((c) => c.categorias))).sort();
+    return baseCats;
+  });
 
-  const removeDeck = (deckId: number) => {
-    if (window.confirm("Tem certeza que deseja remover este baralho personalizado?")) {
-      setCustomDecks((prev) => prev.filter((d) => d.id !== deckId));
-    }
-  };
+  useEffect(() => {
+    // Sempre que customDecks mudar, recalculamos as categorias 
+    // Vamos mostrar as categorias de todos os baralhos, usados ou não, pois o usuário quer atualizar no modo de seleção:
+    const allCats = recalcularCategorias(cartasOriginais, customDecks);
+    setTodasCategorias(allCats);
+    // Mantemos as categorias selecionadas apenas se ainda existem
+    setCategoriasSelecionadas((prev) => prev.filter((c) => allCats.includes(c)));
+  }, [customDecks]);
 
   const addPlayerInput = () => {
     if (playerInputs.length < 8) {
@@ -306,14 +338,12 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
       rodadasPreso: 0,
     }));
     onPlayersSetup(initializedPlayers);
-
     const usedDecks = customDecks.filter((d) => d.used);
     localStorage.setItem("customUsedDecks", JSON.stringify(usedDecks));
-
     onStartGame();
   };
 
-  const categoriasFiltradas = categoriasDisponiveis
+  const categoriasFiltradas = todasCategorias
     .filter((categoria) => categoria.toLowerCase().includes(termoBusca.toLowerCase()))
     .sort();
 
@@ -365,7 +395,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
           ))}
         </ScrollArea>
         <Button
-          onClick={() => setCategoriasSelecionadas(categoriasDisponiveis)}
+          onClick={() => setCategoriasSelecionadas(todasCategorias)}
           className="mr-2 mt-2"
         >
           Selecionar Todas
@@ -460,14 +490,14 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                     variant={deck.used ? "secondary" : "outline"}
                     onClick={() => toggleDeckUsage(deck.id)}
                   >
-                    {deck.used ? "Remover do Jogo" : "Usar no Jogo"}
+                    {deck.used ? "Ativo" : "Ativar"}
                   </Button>
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant="ghost"
                     onClick={() => removeDeck(deck.id)}
                   >
-                    Remover Baralho
+                    <Trash className="h-4 w-4 text-red-500" />
                   </Button>
                 </div>
               ))}
@@ -533,8 +563,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
   );
 };
 
-// A partir daqui segue o componente EcoChallenge, sem omissões
-
+// Componente Principal EcoChallenge
 const EcoChallenge: React.FC = () => {
   const [cartaAtual, setCartaAtual] = useState<Carta | null>(null);
   const [selecionado, setSelecionado] = useState<number | null>(null);
@@ -545,25 +574,36 @@ const EcoChallenge: React.FC = () => {
   const [mostrarFontes, setMostrarFontes] = useState<boolean>(false);
   const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [opcoesEliminadas, setOpcoesEliminadas] = useState<number[]>([]);
-  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>([]);
-  const [mostrarSomentePerguntas, setMostrarSomentePerguntas] = useState<boolean>(false);
+  const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>(
+    []
+  );
+  const [mostrarSomentePerguntas, setMostrarSomentePerguntas] =
+    useState<boolean>(false);
+
   const [selecoesMultiplas, setSelecoesMultiplas] = useState<number[]>([]);
   const [ordemSelecoes, setOrdemSelecoes] = useState<number[]>([]);
+
   const [players, setPlayers] = useState<Player[]>([]);
   const [currentPlayerId, setCurrentPlayerId] = useState<number | null>(null);
+
   const [noCardsAvailable, setNoCardsAvailable] = useState<boolean>(false);
+
   const [ocultarCarta, setOcultarCarta] = useState<boolean>(true);
   const [cartaRevelada, setCartaRevelada] = useState<boolean>(false);
+
   const [rolledNumber, setRolledNumber] = useState<number | null>(null);
   const [rollingNumber, setRollingNumber] = useState<number | null>(null);
   const [isDieModalOpen, setIsDieModalOpen] = useState<boolean>(false);
   const [isRolling, setIsRolling] = useState<boolean>(false);
-  const [probabilityIndex, setProbabilityIndex] = useState<number>(0);
 
   const categoriasDisponiveis = Array.from(
     new Set(cartas.flatMap((carta) => carta.categorias))
   ).sort();
 
+  // Configurações de probabilidade para filtrar as cartas especiais
+  const [probabilityIndex, setProbabilityIndex] = useState<number>(0);
+
+  // Verifica se há um jogo salvo no localStorage e se o jogo foi iniciado
   const hasSavedGame =
     typeof window !== "undefined" &&
     (() => {
@@ -575,6 +615,7 @@ const EcoChallenge: React.FC = () => {
       return false;
     })();
 
+  // Função para carregar o estado do jogo do localStorage
   const carregarEstado = useCallback(() => {
     if (typeof window !== "undefined") {
       const estadoSalvo = localStorage.getItem("estadoEcoChallenge");
@@ -591,10 +632,12 @@ const EcoChallenge: React.FC = () => {
     }
   }, []);
 
+  // Carrega o estado ao montar o componente
   useEffect(() => {
     carregarEstado();
   }, [carregarEstado]);
 
+  // Salva o estado no localStorage sempre que algum estado relevante mudar
   useEffect(() => {
     if (typeof window !== "undefined") {
       const estado = {
@@ -617,7 +660,7 @@ const EcoChallenge: React.FC = () => {
     ocultarCarta,
     probabilityIndex,
   ]);
-  
+
   const selecionarCartaAleatoria = useCallback(() => {
     // Obter a configuração de probabilidade atual
     const probabilitySettings = [
