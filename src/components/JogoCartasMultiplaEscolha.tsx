@@ -260,10 +260,9 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
       setCustomDecks(updatedDecks);
       const novasCategorias = recalcularCategorias(cartasOriginais, updatedDecks.filter(d => d.used));
       const novasCategoriasTodos = recalcularCategorias(cartasOriginais, updatedDecks);     
-      setCategoriasSelecionadas((prevSelected: string[]) =>
-        prevSelected.filter((cat) => novasCategoriasTodos.includes(cat))
+      setCategoriasSelecionadas(
+        categoriasSelecionadas.filter((cat) => novasCategoriasTodos.includes(cat))
       );
-      
     }
   };
 
