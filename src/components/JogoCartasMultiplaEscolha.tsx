@@ -156,6 +156,24 @@ const cartasOriginais = [
   ...testCards,
 ];
 
+const salvarEstado = (players, currentPlayerId, categoriasSelecionadas, jogoIniciado) => {
+  const estado = {
+    players,
+    currentPlayerId,
+    categoriasSelecionadas,
+    jogoIniciado,
+  };
+  localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
+};
+
+const carregarEstado = () => {
+  const estadoSalvo = localStorage.getItem("estadoEcoChallenge");
+  if (estadoSalvo) {
+    return JSON.parse(estadoSalvo);
+  }
+  return null;
+};
+
 interface CustomDeck {
   id: number;
   name: string;
@@ -531,7 +549,18 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
         {hasSavedGame && (
-          <Button onClick={onContinueGame} className="w-full">
+          <Button
+            onClick={() => {
+              const estado = carregarEstado();
+              if (estado) {
+                setPlayers(estado.players || []);
+                setCurrentPlayerId(estado.currentPlayerId || null);
+                setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
+                setJogoIniciado(true);
+              }
+            }}
+            className="w-full"
+          >
             Continuar Jogo
           </Button>
         )}
@@ -604,31 +633,20 @@ const EcoChallenge: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    carregarEstado();
+    const estado = carregarEstado();
+    if (estado) {
+      setPlayers(estado.players || []);
+      setCurrentPlayerId(estado.currentPlayerId || null);
+      setCategoriasSelecionadas(estado.categoriasSelecionadas || []);
+      setJogoIniciado(estado.jogoIniciado || false);
+    }
   }, [carregarEstado]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const estado = {
-        players,
-        currentPlayerId,
-        categoriasSelecionadas,
-        mostrarSomentePerguntas,
-        jogoIniciado,
-        ocultarCarta,
-        probabilityIndex,
-      };
-      localStorage.setItem("estadoEcoChallenge", JSON.stringify(estado));
+      salvarEstado(players, currentPlayerId, categoriasSelecionadas, jogoIniciado);
     }
-  }, [
-    players,
-    currentPlayerId,
-    categoriasSelecionadas,
-    mostrarSomentePerguntas,
-    jogoIniciado,
-    ocultarCarta,
-    probabilityIndex,
-  ]);
+  }, [players, currentPlayerId, categoriasSelecionadas, jogoIniciado]);
 
   const selecionarCartaAleatoria = useCallback(() => {
     const probabilitySettings = [
@@ -866,7 +884,6 @@ const EcoChallenge: React.FC = () => {
       }
     }
   };
-
   const resetarContadores = () => {
     if (window.confirm("Tem certeza que deseja resetar os contadores do jogador atual?")) {
       if (!currentPlayer) return;
@@ -883,7 +900,7 @@ const EcoChallenge: React.FC = () => {
       setTimeout(() => setMensagem(""), 2000);
     }
   };
-
+  
   const resetarTudo = () => {
     if (window.confirm("Tem certeza que deseja resetar todo o jogo?")) {
       setCategoriasSelecionadas([]);
