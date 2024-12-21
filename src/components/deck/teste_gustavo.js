@@ -85,7 +85,7 @@ const teste_gustavo = [
     ],
     "dificuldade": "dificil",
     "categorias": [
-      "zovo 3"
+      "_deck_teste"
     ],
     "fontes": [],
     "vantagem": "vat",
