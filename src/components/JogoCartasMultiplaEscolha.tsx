@@ -36,6 +36,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import Image from "next/image";
+
 import manejoPlantadas from "./deck/cards_manejo_plantada";
 import manejoNativas from "./deck/cards_manejo_nativa";
 import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
@@ -238,7 +239,9 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     }
     const allCats = recalcularCategorias(cartasOriginais, customDecks);
     setTodasCategorias(allCats);
-    setCategoriasSelecionadas(categoriasSelecionadas.filter((c) => allCats.includes(c)));
+    setCategoriasSelecionadas(
+      categoriasSelecionadas.filter((c) => allCats.includes(c))
+    );
   }, [customDecks]);
 
   const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -269,8 +272,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
       }
     }
     if (newDecks.length > 0) {
-      const updatedDecks = [...customDecks, ...newDecks];
-      setCustomDecks(updatedDecks);
+      setCustomDecks((prev) => [...prev, ...newDecks]);
     }
   };
 
@@ -296,13 +298,12 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 
   const handlePlayerChange = (index: number, field: "name" | "color", value: string) => {
     const updatedPlayers = [...playerInputs];
-    updatedPlayers[index][field] = value;
+    (updatedPlayers[index] as any)[field] = value;
     setPlayerInputs(updatedPlayers);
   };
 
   const deletePlayer = (index: number) => {
-    const updatedPlayers = playerInputs.filter((_, i) => i !== index);
-    setPlayerInputs(updatedPlayers);
+    setPlayerInputs((prev) => prev.filter((_, i) => i !== index));
   };
 
   const startGame = () => {
@@ -342,8 +343,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
       </CardHeader>
       <CardContent>
         <p className="text-sm mb-4">
-          Bem-vindo ao Eco Challenge! Teste seus conhecimentos sobre
-          sustentabilidade e faça escolhas que impactam o meio ambiente.
+          Bem-vindo ao Eco Challenge! Teste seus conhecimentos sobre sustentabilidade e faça
+          escolhas que impactam o meio ambiente.
         </p>
         <input
           type="text"
@@ -402,11 +403,9 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                 <div className="relative">
                   <button
                     onClick={() => {
-                      const updatedPlayers = [...playerInputs];
-                      updatedPlayers[index].showColorPicker = !(
-                        updatedPlayers[index].showColorPicker || false
-                      );
-                      setPlayerInputs(updatedPlayers);
+                      const copy = [...playerInputs];
+                      copy[index].showColorPicker = !copy[index].showColorPicker;
+                      setPlayerInputs(copy);
                     }}
                     style={{
                       backgroundColor: player.color,
@@ -426,27 +425,20 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                             width: "20px",
                             height: "20px",
                             borderRadius: "4px",
-                            border:
-                              player.color === color
-                                ? "2px solid black"
-                                : "1px solid #ccc",
+                            border: player.color === color ? "2px solid black" : "1px solid #ccc",
                           }}
                           onClick={() => {
                             handlePlayerChange(index, "color", color);
-                            const updatedPlayers = [...playerInputs];
-                            updatedPlayers[index].showColorPicker = false;
-                            setPlayerInputs(updatedPlayers);
+                            const upd = [...playerInputs];
+                            upd[index].showColorPicker = false;
+                            setPlayerInputs(upd);
                           }}
                         />
                       ))}
                     </div>
                   )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => deletePlayer(index)}
-                >
+                <Button variant="ghost" size="icon" onClick={() => deletePlayer(index)}>
                   <Trash className="h-4 w-4 text-red-500" />
                 </Button>
               </div>
@@ -461,12 +453,20 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 
         <div className="mt-4">
           <h2 className="text-lg font-bold mb-2">Baralhos Personalizados</h2>
-          <input type="file" multiple accept=".js,.json" onChange={handleCustomDeckUpload} className="mb-2" />
+          <input
+            type="file"
+            multiple
+            accept=".js,.json"
+            onChange={handleCustomDeckUpload}
+            className="mb-2"
+          />
           {customDecks.length > 0 && (
             <div className="mb-2 border p-2 rounded space-y-2">
               {customDecks.map((deck) => (
                 <div key={deck.id} className="flex items-center space-x-2">
-                  <span className="flex-1 text-sm">{deck.name} ({deck.cards.length} cartas)</span>
+                  <span className="flex-1 text-sm">
+                    {deck.name} ({deck.cards.length} cartas)
+                  </span>
                   <Button
                     size="sm"
                     variant={deck.used ? "secondary" : "outline"}
@@ -513,6 +513,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             )}
           </Button>
         </div>
+
         <div className="mt-4">
           <Button
             onClick={cycleProbability}
@@ -520,21 +521,21 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             style={{
               backgroundColor: probabilitySettings[probabilityIndex].color,
               color:
-                probabilitySettings[probabilityIndex].color === "white"
-                  ? "black"
-                  : "white",
+                probabilitySettings[probabilityIndex].color === "white" ? "black" : "white",
             }}
           >
             Ajuste de Cartas Especiais: {probabilitySettings[probabilityIndex].label}
           </Button>
         </div>
       </CardContent>
+
       <CardFooter className="flex flex-col space-y-2">
         {hasSavedGame && (
           <Button onClick={onContinueGame} className="w-full">
             Continuar Jogo
           </Button>
         )}
+
         <Button
           onClick={() => {
             startGame();
@@ -631,14 +632,7 @@ const EcoChallenge: React.FC = () => {
   ]);
 
   const selecionarCartaAleatoria = useCallback(() => {
-    const probabilitySettings = [
-      { value: 0, color: "white", label: "0%" },
-      { value: 0.4, color: "green", label: "40%" },
-      { value: 0.6, color: "orange", label: "60%" },
-      { value: 0.8, color: "red", label: "80%" },
-    ];
     const currentProbability = probabilitySettings[probabilityIndex].value;
-
     let incluirCartasEspeciais = true;
     if (currentProbability > 0) {
       const randomValue = Math.random();
@@ -646,9 +640,7 @@ const EcoChallenge: React.FC = () => {
         incluirCartasEspeciais = false;
       }
     }
-
     let finalCartas = [...cartasOriginais];
-
     if (typeof window !== "undefined") {
       const usedDecksData = localStorage.getItem("customUsedDecks");
       if (usedDecksData) {
@@ -665,21 +657,16 @@ const EcoChallenge: React.FC = () => {
         }
       }
     }
-
     const cartasFiltradas = finalCartas.filter((carta) => {
-      const categoriaValida = carta.categorias.some((categoria) =>
-        categoriasSelecionadas.includes(categoria)
-      );
+      const categoriaValida = carta.categorias.some((categoria) => categoriasSelecionadas.includes(categoria));
       const tipoValido =
-        !mostrarSomentePerguntas ||
-        ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo);
+        !mostrarSomentePerguntas || ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo);
       const isEspecial = ["Vantagem", "Desvantagem", "Outras"].includes(carta.tipo);
       if (!incluirCartasEspeciais && isEspecial) {
         return false;
       }
       return categoriaValida && tipoValido;
     });
-
     if (cartasFiltradas.length === 0) {
       setNoCardsAvailable(true);
       setCartaAtual(null);
@@ -687,7 +674,6 @@ const EcoChallenge: React.FC = () => {
     } else {
       setNoCardsAvailable(false);
     }
-
     const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
     const novaCarta = cartasFiltradas[indiceAleatorio];
     setCartaAtual(novaCarta);
@@ -1014,35 +1000,22 @@ const EcoChallenge: React.FC = () => {
 
   const renderizarConteudoPergunta = () => {
     if (!cartaAtual) return null;
-    const conteudo = cartaAtual.pergunta
-      .split("\n")
-      .map((linha: string, index: number) => {
-        if (linha.includes("<img")) {
-          const imgRegex = /<img src="([^"]+)" alt="([^"]+)" class="([^"]+)" \/>/;
-          const match = imgRegex.exec(linha);
-          if (match) {
-            const [_, src, alt, className] = match;
-            return (
-              <Zoom key={index}>
-                <Image
-                  src={src}
-                  alt={alt}
-                  width={500}
-                  height={300}
-                  className={`${className} img-zoom`}
-                />
-              </Zoom>
-            );
-          }
+    const conteudo = cartaAtual.pergunta.split("\n").map((linha: string, index: number) => {
+      if (linha.includes("<img")) {
+        const imgRegex = /<img src="([^"]+)" alt="([^"]+)" class="([^"]+)" \/>/;
+        const match = imgRegex.exec(linha);
+        if (match) {
+          const [_, src, alt, className] = match;
+          return (
+            <Zoom key={index}>
+              <Image src={src} alt={alt} width={500} height={300} className={`${className} img-zoom`} />
+            </Zoom>
+          );
         }
-        return <p key={index} dangerouslySetInnerHTML={{ __html: linha }} />;
-      });
+      }
+      return <p key={index} dangerouslySetInnerHTML={{ __html: linha }} />;
+    });
     return conteudo;
-  };
-
-  const handlePlayersSetup = (initializedPlayers: Player[]) => {
-    setPlayers(initializedPlayers);
-    setCurrentPlayerId(initializedPlayers[0].id);
   };
 
   const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -1112,6 +1085,7 @@ const EcoChallenge: React.FC = () => {
           setJogoIniciado(true);
         }}
         onContinueGame={() => {
+          carregarEstado();
           setJogoIniciado(true);
         }}
         onReset={() => {
@@ -1121,7 +1095,10 @@ const EcoChallenge: React.FC = () => {
         categoriasSelecionadas={categoriasSelecionadas}
         setCategoriasSelecionadas={setCategoriasSelecionadas}
         hasSavedGame={hasSavedGame}
-        onPlayersSetup={handlePlayersSetup}
+        onPlayersSetup={(initializedPlayers: Player[]) => {
+          setPlayers(initializedPlayers);
+          setCurrentPlayerId(initializedPlayers[0]?.id ?? null);
+        }}
         players={players}
         setPlayers={setPlayers}
         ocultarCarta={ocultarCarta}
@@ -1134,9 +1111,8 @@ const EcoChallenge: React.FC = () => {
 
   const hasQuestionCards = cartasOriginais.some(
     (carta) =>
-      carta.categorias.some((categoria) =>
-        categoriasSelecionadas.includes(categoria)
-      ) && ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo)
+      carta.categorias.some((categoria) => categoriasSelecionadas.includes(categoria)) &&
+      ["Pergunta", "MultiplaEscolha", "Ordem"].includes(carta.tipo)
   );
 
   if (noCardsAvailable) {
@@ -1363,12 +1339,10 @@ const EcoChallenge: React.FC = () => {
                       {ordemSelecoes.indexOf(opcao.id) + 1}
                       {respondido &&
                         ordemSelecoes.indexOf(opcao.id) + 1 !==
-                          (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
-                            1 && (
+                          (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1 && (
                           <span className="ml-1 text-blue-500">
                             (
-                            {(cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
-                              1}
+                            {(cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1}
                             )
                           </span>
                         )}
@@ -1421,11 +1395,9 @@ const EcoChallenge: React.FC = () => {
             <Button
               onClick={pularPergunta}
               size="sm"
-              variant={
-                currentPlayer.pulosDisponiveis === 0 ? "outline" : "secondary"
-              }
+              variant={currentPlayer?.pulosDisponiveis === 0 ? "outline" : "secondary"}
               disabled={
-                (currentPlayer.pulosDisponiveis === 0 ||
+                (currentPlayer?.pulosDisponiveis === 0 ||
                   !["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)) ||
                 (ocultarCarta && !cartaRevelada)
               }
@@ -1436,11 +1408,14 @@ const EcoChallenge: React.FC = () => {
               onClick={toggleDica}
               size="sm"
               variant={
-                currentPlayer.respostasSeguidas < 2 || !cartaAtual.dica || dicaUsada
+                currentPlayer && currentPlayer.respostasSeguidas < 2
+                  ? "outline"
+                  : !cartaAtual.dica || dicaUsada
                   ? "outline"
                   : "secondary"
               }
               disabled={
+                !currentPlayer ||
                 currentPlayer.respostasSeguidas < 2 ||
                 !cartaAtual.dica ||
                 (ocultarCarta && !cartaRevelada) ||
@@ -1452,9 +1427,11 @@ const EcoChallenge: React.FC = () => {
             <Button
               onClick={eliminarRespostaErrada}
               size="sm"
-              variant={currentPlayer.respostasSeguidas < 2 ? "outline" : "secondary"}
+              variant={currentPlayer && currentPlayer.respostasSeguidas < 2 ? "outline" : "secondary"}
               disabled={
-                currentPlayer.respostasSeguidas < 2 || (ocultarCarta && !cartaRevelada)
+                !currentPlayer ||
+                currentPlayer.respostasSeguidas < 2 ||
+                (ocultarCarta && !cartaRevelada)
               }
             >
               <MinusCircle className="h-4 w-4" />
@@ -1473,18 +1450,10 @@ const EcoChallenge: React.FC = () => {
             <Button onClick={diminuirErros} size="sm" variant="outline">
               <ThumbsUp className="h-4 w-4 text-red-500" />
             </Button>
-            <Button
-              onClick={diminuirContadorDeEstrelas}
-              size="sm"
-              variant="outline"
-            >
+            <Button onClick={diminuirContadorDeEstrelas} size="sm" variant="outline">
               <Star className="h-4 w-4 text-red-500" />
             </Button>
-            <Button
-              onClick={incrementarContadorDeEstrelas}
-              size="sm"
-              variant="outline"
-            >
+            <Button onClick={incrementarContadorDeEstrelas} size="sm" variant="outline">
               <Star className="h-4 w-4 text-yellow-500" />
             </Button>
             <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
@@ -1516,15 +1485,12 @@ const EcoChallenge: React.FC = () => {
               </Button>
             )}
           </div>
-          {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) &&
-            mensagem && (
-              <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
-            )}
+          {["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo) && mensagem && (
+            <p className="text-center font-bold text-sm mb-2">{mensagem}</p>
+          )}
           <Progress
             value={currentPlayer.progresso}
-            className={`w-full ${
-              currentPlayer.progresso === 100 ? "bg-green-500" : ""
-            }`}
+            className={`w-full ${currentPlayer.progresso === 100 ? "bg-green-500" : ""}`}
           />
           <div className="flex justify-between w-full mt-4 text-sm">
             <div className="flex items-center space-x-1">
@@ -1558,29 +1524,30 @@ const EcoChallenge: React.FC = () => {
           </div>
         </CardFooter>
       </Card>
+
       <div
         className={`grid gap-1 mt-4 ${
           players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`
         }`}
         style={{ width: "100%", maxWidth: "400px" }}
       >
-        {players.map((player) => (
+        {players.map((pl) => (
           <Button
-            key={player.id}
-            onClick={() => setCurrentPlayerId(player.id)}
+            key={pl.id}
+            onClick={() => setCurrentPlayerId(pl.id)}
             size="sm"
-            variant={currentPlayerId === player.id ? "default" : "outline"}
+            variant={currentPlayerId === pl.id ? "default" : "outline"}
             style={{
-              backgroundColor:
-                currentPlayerId === player.id ? player.color : undefined,
-              color: currentPlayerId === player.id ? "#fff" : undefined,
+              backgroundColor: currentPlayerId === pl.id ? pl.color : undefined,
+              color: currentPlayerId === pl.id ? "#fff" : undefined,
               width: "100%",
             }}
           >
-            {player.name}
+            {pl.name}
           </Button>
         ))}
       </div>
+
       {isDieModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-lg shadow-lg text-center relative w-96 h-96 flex flex-col justify-center">
