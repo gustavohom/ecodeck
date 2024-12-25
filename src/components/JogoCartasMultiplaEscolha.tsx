@@ -239,8 +239,14 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     }
     const allCats = recalcularCategorias(cartasOriginais, customDecks);
     setTodasCategorias(allCats);
-    setCategoriasSelecionadas((prev) => prev.filter((c) => allCats.includes(c)));
+    setCategoriasSelecionadas((prevCats: string[]) =>
+      prevCats.filter((c) => allCats.includes(c))
+    );
+    
   }, [customDecks]);
+
+
+ 
 
   const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
