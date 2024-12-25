@@ -39,7 +39,7 @@ import Image from "next/image";
 
 import manejoPlantadas from "./deck/cards_manejo_plantada";
 import manejoNativas from "./deck/cards_manejo_nativa";
-import ecologiaFlorestal from "./deck/'cards_ecologia_florestal";
+import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
 import estrelasAliens from "./dlc/cards_estrelas_aliens";
 import testCards from "./.test/test_card";
 
