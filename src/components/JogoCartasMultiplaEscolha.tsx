@@ -343,6 +343,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     setProbabilityIndex((prevIndex) => (prevIndex + 1) % probabilitySettings.length);
   };
 
+  const forcedHasSavedGame = true;
+
   return (
     <Card className="w-full max-w-sm mx-auto mt-8">
       <CardHeader>
@@ -518,9 +520,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             style={{
               backgroundColor: probabilitySettings[probabilityIndex].color,
               color:
-                probabilitySettings[probabilityIndex].color === "white"
-                  ? "black"
-                  : "white",
+                probabilitySettings[probabilityIndex].color === "white" ? "black" : "white",
             }}
           >
             Ajuste de Cartas Especiais: {probabilitySettings[probabilityIndex].label}
@@ -528,7 +528,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         </div>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
-        {hasSavedGame && (
+        {forcedHasSavedGame && (
           <Button onClick={onContinueGame} className="w-full">
             Continuar Jogo
           </Button>
@@ -574,12 +574,7 @@ const EcoChallenge: React.FC = () => {
 
   const baseCategorias = Array.from(new Set(cartasOriginais.flatMap((c) => c.categorias))).sort();
 
-  const hasSavedGame = typeof window !== "undefined" && (() => {
-    const st = localStorage.getItem("estadoEcoChallenge");
-    if (!st) return false;
-    const parsed = JSON.parse(st);
-    return parsed.isGameActive === true;
-  })();
+  const fakeHasSaved = true;
 
   const carregarEstado = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -734,9 +729,7 @@ const EcoChallenge: React.FC = () => {
           updateCurrentPlayer({ progresso: novoProgresso });
         }
         if (cartaAtual.dificuldade === "dificil") {
-          updateCurrentPlayer({
-            pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
-          });
+          updateCurrentPlayer({ pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2) });
         }
         setMensagem(`Correto! ${cartaAtual.vantagem}`);
       } else {
@@ -748,8 +741,7 @@ const EcoChallenge: React.FC = () => {
         setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
       }
     } else if (cartaAtual.tipo === "Ordem" && ordemSelecoes.length > 0) {
-      const isCorrect =
-        ordemSelecoes.toString() === (cartaAtual.respostaCorreta as number[]).toString();
+      const isCorrect = ordemSelecoes.toString() === (cartaAtual.respostaCorreta as number[]).toString();
       setRespondido(true);
       if (isCorrect) {
         updateCurrentPlayer({
@@ -790,8 +782,8 @@ const EcoChallenge: React.FC = () => {
             respostasCertas: currentPlayer.respostasCertas + 1,
             respostasSeguidas: currentPlayer.respostasSeguidas + 1,
           });
-          const novoProgresso = currentPlayer.progresso + 20;
-          if (novoProgresso >= 100) {
+          const prog = currentPlayer.progresso + 20;
+          if (prog >= 100) {
             updateCurrentPlayer({
               progresso: 0,
               pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
@@ -799,12 +791,10 @@ const EcoChallenge: React.FC = () => {
             });
             setMensagem("Correto! Bônus extra! Barra completada!");
           } else {
-            updateCurrentPlayer({ progresso: novoProgresso });
+            updateCurrentPlayer({ progresso: prog });
           }
           if (cartaAtual.dificuldade === "dificil") {
-            updateCurrentPlayer({
-              pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
-            });
+            updateCurrentPlayer({ pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2) });
           }
         }
         setMensagem(`Correto! ${cartaAtual.vantagem}`);
@@ -1026,9 +1016,7 @@ const EcoChallenge: React.FC = () => {
   if (!jogoIniciado) {
     return (
       <TelaInicial
-        onStartGame={() => {
-          setJogoIniciado(true);
-        }}
+        onStartGame={() => setJogoIniciado(true)}
         onContinueGame={() => {
           carregarEstado();
           setJogoIniciado(true);
@@ -1039,7 +1027,7 @@ const EcoChallenge: React.FC = () => {
         categoriasDisponiveis={baseCategorias}
         categoriasSelecionadas={categoriasSelecionadas}
         setCategoriasSelecionadas={setCategoriasSelecionadas}
-        hasSavedGame={hasSavedGame}
+        hasSavedGame={fakeHasSaved}
         onPlayersSetup={(initPlayers) => {
           setPlayers(initPlayers);
           setCurrentPlayerId(initPlayers[0]?.id ?? null);
@@ -1149,9 +1137,7 @@ const EcoChallenge: React.FC = () => {
           ) : (
             <div className="h-56 flex flex-col items-center justify-center space-y-2">
               <p className="text-sm">Conteúdo da carta oculto</p>
-              {rolledNumber !== null && (
-                <p className="text-xl font-bold">Você rolou um {rolledNumber}</p>
-              )}
+              {rolledNumber !== null && <p className="text-xl font-bold">Você rolou um {rolledNumber}</p>}
               <Button
                 onClick={rolarDado}
                 variant="outline"
@@ -1179,8 +1165,7 @@ const EcoChallenge: React.FC = () => {
                 const selected = selecionado === op.id || selecoesMultiplas.includes(op.id);
                 const wrongSelection =
                   respondido && selected && !isCorrect && (cartaAtual.tipo === "MultiplaEscolha"
-                    ? !(Array.isArray(cartaAtual.respostaCorreta) &&
-                        cartaAtual.respostaCorreta.includes(op.id))
+                    ? !(Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(op.id))
                     : cartaAtual.respostaCorreta !== op.id);
                 const missingSelection =
                   respondido &&
@@ -1218,7 +1203,9 @@ const EcoChallenge: React.FC = () => {
                       }
                     }}
                     variant={variant}
-                    className={`w-full justify-start text-sm ${extraClass} ${eliminated ? "opacity-50" : ""}`}
+                    className={`w-full justify-start text-sm ${extraClass} ${
+                      eliminated ? "opacity-50" : ""
+                    }`}
                     disabled={eliminated}
                     style={{
                       maxHeight: "80px",
