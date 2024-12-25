@@ -216,7 +216,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
           },
         ]
   );
-
   const [customDecks, setCustomDecks] = useState<CustomDeck[]>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("customDecks");
@@ -226,7 +225,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     }
     return [];
   });
-
   const [todasCategorias, setTodasCategorias] = useState<string[]>(() => {
     const baseCats = Array.from(new Set(cartasOriginais.flatMap((c) => c.categorias))).sort();
     return baseCats;
@@ -385,7 +383,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         <Button onClick={() => setCategoriasSelecionadas([])} className="mt-2">
           Limpar Todas
         </Button>
-
         <div className="mb-4 mt-4">
           <h2 className="text-lg font-bold mb-2">Adicionar Jogadores</h2>
           {playerInputs.map((player, index) => (
@@ -458,7 +455,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             </Button>
           )}
         </div>
-
         <div className="mt-4">
           <h2 className="text-lg font-bold mb-2">Baralhos Personalizados</h2>
           <input type="file" multiple accept=".js,.json" onChange={handleCustomDeckUpload} className="mb-2" />
@@ -493,7 +489,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             <p className="text-sm text-gray-500">Nenhum baralho personalizado adicionado.</p>
           )}
         </div>
-
         <div className="mt-4">
           <Button
             onClick={() => setOcultarCarta(!ocultarCarta)}
@@ -638,7 +633,6 @@ const EcoChallenge: React.FC = () => {
       { value: 0.8, color: "red", label: "80%" },
     ];
     const currentProbability = probabilitySettings[probabilityIndex].value;
-
     let incluirCartasEspeciais = true;
     if (currentProbability > 0) {
       const randomValue = Math.random();
@@ -646,9 +640,7 @@ const EcoChallenge: React.FC = () => {
         incluirCartasEspeciais = false;
       }
     }
-
     let finalCartas = [...cartasOriginais];
-
     if (typeof window !== "undefined") {
       const usedDecksData = localStorage.getItem("customUsedDecks");
       if (usedDecksData) {
@@ -665,7 +657,6 @@ const EcoChallenge: React.FC = () => {
         }
       }
     }
-
     const cartasFiltradas = finalCartas.filter((carta) => {
       const categoriaValida = carta.categorias.some((categoria) =>
         categoriasSelecionadas.includes(categoria)
@@ -679,7 +670,6 @@ const EcoChallenge: React.FC = () => {
       }
       return categoriaValida && tipoValido;
     });
-
     if (cartasFiltradas.length === 0) {
       setNoCardsAvailable(true);
       setCartaAtual(null);
@@ -687,7 +677,6 @@ const EcoChallenge: React.FC = () => {
     } else {
       setNoCardsAvailable(false);
     }
-
     const indiceAleatorio = Math.floor(Math.random() * cartasFiltradas.length);
     const novaCarta = cartasFiltradas[indiceAleatorio];
     setCartaAtual(novaCarta);
@@ -1112,6 +1101,7 @@ const EcoChallenge: React.FC = () => {
           setJogoIniciado(true);
         }}
         onContinueGame={() => {
+          carregarEstado();
           setJogoIniciado(true);
         }}
         onReset={() => {
@@ -1363,12 +1353,10 @@ const EcoChallenge: React.FC = () => {
                       {ordemSelecoes.indexOf(opcao.id) + 1}
                       {respondido &&
                         ordemSelecoes.indexOf(opcao.id) + 1 !==
-                          (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
-                            1 && (
+                          (cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1 && (
                           <span className="ml-1 text-blue-500">
                             (
-                            {(cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) +
-                              1}
+                            {(cartaAtual.respostaCorreta as number[]).indexOf(opcao.id) + 1}
                             )
                           </span>
                         )}
