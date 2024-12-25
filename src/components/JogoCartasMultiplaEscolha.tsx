@@ -98,7 +98,7 @@ interface TelaInicialProps {
   onReset: () => void;
   categoriasDisponiveis: string[];
   categoriasSelecionadas: string[];
-  setCategoriasSelecionadas: (categorias: string[]) => void;
+  setCategoriasSelecionadas: React.Dispatch<React.SetStateAction<string[]>>; // Updated to accept callback
   hasSavedGame: boolean;
   onPlayersSetup: (players: Player[]) => void;
   players: Player[];
@@ -239,14 +239,12 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     }
     const allCats = recalcularCategorias(cartasOriginais, customDecks);
     setTodasCategorias(allCats);
+
+    // The callback usage here ensures TypeScript recognizes it as (prevCats: string[]) => string[]
     setCategoriasSelecionadas((prevCats: string[]) =>
       prevCats.filter((c) => allCats.includes(c))
     );
-    
   }, [customDecks]);
-
-
- 
 
   const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -330,7 +328,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const usedDecks = customDecks.filter((d) => d.used);
     localStorage.setItem("customUsedDecks", JSON.stringify(usedDecks));
 
-    // Quando inicia o jogo, garante que o localStorage reconheça que já existe um jogo iniciado
     localStorage.setItem(
       "estadoEcoChallenge",
       JSON.stringify({
@@ -340,7 +337,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         categoriasSelecionadas,
         ocultarCarta,
         probabilityIndex,
-        // Outros campos que queira salvar para restaurar depois
       })
     );
 
@@ -425,7 +421,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                   <button
                     onClick={() => {
                       const copy = [...playerInputs];
-                      copy[index].showColorPicker = !(copy[index].showColorPicker);
+                      copy[index].showColorPicker = !copy[index].showColorPicker;
                       setPlayerInputs(copy);
                     }}
                     style={{
@@ -541,7 +537,10 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             className="w-full"
             style={{
               backgroundColor: probabilitySettings[probabilityIndex].color,
-              color: probabilitySettings[probabilityIndex].color === "white" ? "black" : "white",
+              color:
+                probabilitySettings[probabilityIndex].color === "white"
+                  ? "black"
+                  : "white",
             }}
           >
             Ajuste de Cartas Especiais: {probabilitySettings[probabilityIndex].label}
