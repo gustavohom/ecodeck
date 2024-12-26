@@ -345,10 +345,14 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 
   const forcedHasSavedGame = true;
 
+  const TelaInicial: React.FC<TelaInicialProps> = () => null; // (Just to ensure we keep the same structure; code is above)
+
   return (
     <Card className="w-full max-w-sm mx-auto mt-8">
       <CardHeader>
-        <CardTitle className="text-xl font-bold mb-4">Eco Challenge: O Jogo da Sustentabilidade</CardTitle>
+        <CardTitle className="text-xl font-bold mb-4">
+          Eco Challenge: O Jogo da Sustentabilidade
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-sm mb-4">
@@ -647,7 +651,9 @@ const EcoChallenge: React.FC = () => {
     }
     const filtradas = finalCartas.filter((c) => {
       const catOk = c.categorias.some((cat) => categoriasSelecionadas.includes(cat));
-      const tipoOk = !mostrarSomentePerguntas || ["Pergunta", "MultiplaEscolha", "Ordem"].includes(c.tipo);
+      const tipoOk =
+        !mostrarSomentePerguntas ||
+        ["Pergunta", "MultiplaEscolha", "Ordem"].includes(c.tipo);
       const isEspecial = ["Vantagem", "Desvantagem", "Outras"].includes(c.tipo);
       if (!incluirCartasEspeciais && isEspecial) return false;
       return catOk && tipoOk;
@@ -689,36 +695,45 @@ const EcoChallenge: React.FC = () => {
 
   const handleSelecaoMultipla = (id: number) => {
     if (!respondido) {
-      setSelecoesMultiplas((prev) => (prev.includes(id) ? prev.filter((z) => z !== id) : [...prev, id]));
+      setSelecoesMultiplas((prev) =>
+        prev.includes(id) ? prev.filter((z) => z !== id) : [...prev, id]
+      );
     }
   };
 
   const handleSelecaoOrdem = (id: number) => {
     if (!respondido) {
-      setOrdemSelecoes((prev) => (prev.includes(id) ? prev.filter((z) => z !== id) : [...prev, id]));
+      setOrdemSelecoes((prevSelecoes) =>
+        prevSelecoes.includes(id)
+          ? prevSelecoes.filter((selecaoId) => selecaoId !== id)
+          : [...prevSelecoes, id]
+      );
     }
   };
 
   const currentPlayer = players.find((p) => p.id === currentPlayerId);
 
   const updateCurrentPlayer = (partial: Partial<Player>) => {
-    setPlayers((prev) => prev.map((pl) => (pl.id === currentPlayerId ? { ...pl, ...partial } : pl)));
+    setPlayers((prev) =>
+      prev.map((pl) => (pl.id === currentPlayerId ? { ...pl, ...partial } : pl))
+    );
   };
 
   const verificarResposta = () => {
     if (!cartaAtual || !currentPlayer) return;
     if (cartaAtual.tipo === "MultiplaEscolha" && selecoesMultiplas.length > 0) {
-      const isCorrect =
+      const cor =
         Array.isArray(cartaAtual.respostaCorreta) &&
-        selecoesMultiplas.sort().toString() === (cartaAtual.respostaCorreta as number[]).sort().toString();
+        selecoesMultiplas.sort().toString() ===
+          (cartaAtual.respostaCorreta as number[]).sort().toString();
       setRespondido(true);
-      if (isCorrect) {
+      if (cor) {
         updateCurrentPlayer({
           respostasCertas: currentPlayer.respostasCertas + 1,
           respostasSeguidas: currentPlayer.respostasSeguidas + 1,
         });
-        const novoProgresso = currentPlayer.progresso + 20;
-        if (novoProgresso >= 100) {
+        const novoProg = currentPlayer.progresso + 20;
+        if (novoProg >= 100) {
           updateCurrentPlayer({
             progresso: 0,
             pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
@@ -726,10 +741,12 @@ const EcoChallenge: React.FC = () => {
           });
           setMensagem("Correto! Bônus extra! Barra completada!");
         } else {
-          updateCurrentPlayer({ progresso: novoProgresso });
+          updateCurrentPlayer({ progresso: novoProg });
         }
         if (cartaAtual.dificuldade === "dificil") {
-          updateCurrentPlayer({ pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2) });
+          updateCurrentPlayer({
+            pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
+          });
         }
         setMensagem(`Correto! ${cartaAtual.vantagem}`);
       } else {
@@ -741,9 +758,10 @@ const EcoChallenge: React.FC = () => {
         setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
       }
     } else if (cartaAtual.tipo === "Ordem" && ordemSelecoes.length > 0) {
-      const isCorrect = ordemSelecoes.toString() === (cartaAtual.respostaCorreta as number[]).toString();
+      const cor =
+        ordemSelecoes.toString() === (cartaAtual.respostaCorreta as number[]).toString();
       setRespondido(true);
-      if (isCorrect) {
+      if (cor) {
         updateCurrentPlayer({
           respostasCertas: currentPlayer.respostasCertas + 1,
           respostasSeguidas: currentPlayer.respostasSeguidas + 1,
@@ -760,7 +778,9 @@ const EcoChallenge: React.FC = () => {
           updateCurrentPlayer({ progresso: prog2 });
         }
         if (cartaAtual.dificuldade === "dificil") {
-          updateCurrentPlayer({ pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2) });
+          updateCurrentPlayer({
+            pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
+          });
         }
         setMensagem(`Correto! ${cartaAtual.vantagem}`);
       } else {
@@ -773,10 +793,10 @@ const EcoChallenge: React.FC = () => {
       }
     } else if (cartaAtual && selecionado !== null) {
       setRespondido(true);
-      const isCorrect = Array.isArray(cartaAtual.respostaCorreta)
+      const cor = Array.isArray(cartaAtual.respostaCorreta)
         ? cartaAtual.respostaCorreta.includes(selecionado)
         : cartaAtual.respostaCorreta === selecionado;
-      if (isCorrect) {
+      if (cor) {
         if (["Pergunta", "MultiplaEscolha", "Ordem"].includes(cartaAtual.tipo)) {
           updateCurrentPlayer({
             respostasCertas: currentPlayer.respostasCertas + 1,
@@ -794,7 +814,9 @@ const EcoChallenge: React.FC = () => {
             updateCurrentPlayer({ progresso: prog });
           }
           if (cartaAtual.dificuldade === "dificil") {
-            updateCurrentPlayer({ pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2) });
+            updateCurrentPlayer({
+              pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
+            });
           }
         }
         setMensagem(`Correto! ${cartaAtual.vantagem}`);
@@ -847,7 +869,9 @@ const EcoChallenge: React.FC = () => {
     if (currentPlayer.respostasSeguidas >= 2 && cartaAtual.dica) {
       setMostrarDica(true);
       setDicaUsada(true);
-      updateCurrentPlayer({ respostasSeguidas: currentPlayer.respostasSeguidas - 2 });
+      updateCurrentPlayer({
+        respostasSeguidas: currentPlayer.respostasSeguidas - 2,
+      });
     } else if (!cartaAtual.dica) {
       setMensagem("Esta carta não possui dica.");
     } else {
@@ -862,7 +886,9 @@ const EcoChallenge: React.FC = () => {
   const pularPergunta = () => {
     if (!currentPlayer || !cartaAtual) return;
     if (currentPlayer.pulosDisponiveis > 0) {
-      updateCurrentPlayer({ pulosDisponiveis: currentPlayer.pulosDisponiveis - 1 });
+      updateCurrentPlayer({
+        pulosDisponiveis: currentPlayer.pulosDisponiveis - 1,
+      });
       selecionarCartaAleatoria();
     }
   };
@@ -871,15 +897,20 @@ const EcoChallenge: React.FC = () => {
     if (!currentPlayer || !cartaAtual) return;
     if (currentPlayer.respostasSeguidas >= 2 && cartaAtual) {
       const opcoesErradas = cartaAtual.opcoes.filter((op) => {
-        if (Array.isArray(cartaAtual.respostaCorreta)) return !cartaAtual.respostaCorreta.includes(op.id);
-        return op.id !== cartaAtual.respostaCorreta;
+        if (Array.isArray(cartaAtual.respostaCorreta)) {
+          return !cartaAtual.respostaCorreta.includes(op.id);
+        } else {
+          return op.id !== cartaAtual.respostaCorreta;
+        }
       });
       const opcoesRestantes = opcoesErradas.filter((op) => !opcoesEliminadas.includes(op.id));
       if (opcoesRestantes.length > 0) {
         const idxAleat = Math.floor(Math.random() * opcoesRestantes.length);
         const opcaoEliminada = opcoesRestantes[idxAleat].id;
         setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
-        updateCurrentPlayer({ respostasSeguidas: currentPlayer.respostasSeguidas - 2 });
+        updateCurrentPlayer({
+          respostasSeguidas: currentPlayer.respostasSeguidas - 2,
+        });
         setMensagem("Uma resposta errada foi eliminada!");
       }
     } else {
@@ -893,13 +924,17 @@ const EcoChallenge: React.FC = () => {
 
   const incrementarRodadasPreso = () => {
     if (!currentPlayer) return;
-    updateCurrentPlayer({ rodadasPreso: currentPlayer.rodadasPreso + 1 });
+    updateCurrentPlayer({
+      rodadasPreso: currentPlayer.rodadasPreso + 1,
+    });
     setMensagem("Um contador adicionado!");
   };
 
   const diminuirRodadasPreso = () => {
     if (!currentPlayer) return;
-    updateCurrentPlayer({ rodadasPreso: currentPlayer.rodadasPreso - 1 });
+    updateCurrentPlayer({
+      rodadasPreso: currentPlayer.rodadasPreso - 1,
+    });
     setMensagem("Um contador removido!");
   };
 
@@ -921,14 +956,18 @@ const EcoChallenge: React.FC = () => {
 
   const incrementarContadorDeEstrelas = () => {
     if (!currentPlayer) return;
-    updateCurrentPlayer({ contadorDeEstrelas: currentPlayer.contadorDeEstrelas + 1 });
+    updateCurrentPlayer({
+      contadorDeEstrelas: currentPlayer.contadorDeEstrelas + 1,
+    });
     setMensagem("Estrela adicionada!");
   };
 
   const diminuirContadorDeEstrelas = () => {
     if (!currentPlayer) return;
     if (currentPlayer.contadorDeEstrelas > 0) {
-      updateCurrentPlayer({ contadorDeEstrelas: currentPlayer.contadorDeEstrelas - 1 });
+      updateCurrentPlayer({
+        contadorDeEstrelas: currentPlayer.contadorDeEstrelas - 1,
+      });
       setMensagem("Estrela removida!");
     } else {
       setMensagem("Nenhuma estrela para remover!");
@@ -999,8 +1038,8 @@ const EcoChallenge: React.FC = () => {
 
   const isDisabled =
     !cartaAtual ||
-    ((cartaAtual?.tipo === "Ordem" && ordemSelecoes.length !== cartaAtual.opcoes.length) ||
-      (cartaAtual?.tipo !== "Ordem" && selecionado === null && selecoesMultiplas.length === 0));
+    ((cartaAtual.tipo === "Ordem" && ordemSelecoes.length !== cartaAtual.opcoes.length) ||
+      (cartaAtual.tipo !== "Ordem" && selecionado === null && selecoesMultiplas.length === 0));
 
   const verificarRespostaProps = {
     className: `w-full mt-2 ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`,
@@ -1164,32 +1203,20 @@ const EcoChallenge: React.FC = () => {
                   : cartaAtual.respostaCorreta === op.id;
                 const selected = selecionado === op.id || selecoesMultiplas.includes(op.id);
                 const wrongSelection =
-                  respondido && selected && !isCorrect && (cartaAtual.tipo === "MultiplaEscolha"
-                    ? !(Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(op.id))
+                  respondido &&
+                  selected &&
+                  !isCorrect &&
+                  (cartaAtual.tipo === "MultiplaEscolha"
+                    ? !(Array.isArray(cartaAtual.respostaCorreta) &&
+                        cartaAtual.respostaCorreta.includes(op.id))
                     : cartaAtual.respostaCorreta !== op.id);
                 const missingSelection =
                   respondido &&
                   !selected &&
                   isCorrect &&
                   cartaAtual.tipo === "MultiplaEscolha";
-                const isOrderMismatch =
-                  respondido &&
-                  cartaAtual.tipo === "Ordem" &&
-                  selected &&
-                  ordemSelecoes.indexOf(op.id) + 1 !== (cartaAtual.respostaCorreta as number[]).indexOf(op.id) + 1;
-                const isOrderCorrect =
-                  respondido &&
-                  cartaAtual.tipo === "Ordem" &&
-                  selected &&
-                  ordemSelecoes.indexOf(op.id) + 1 === (cartaAtual.respostaCorreta as number[]).indexOf(op.id) + 1;
                 const eliminated = opcoesEliminadas.includes(op.id);
-                const variant = selected ? "secondary" : "outline";
-                let extraClass = "";
-                if (respondido && isCorrect) extraClass = "bg-green-100";
-                if (wrongSelection) extraClass = "bg-red-100";
-                if (missingSelection) extraClass = "bg-blue-100";
-                if (isOrderMismatch) extraClass = "bg-red-100";
-                if (isOrderCorrect) extraClass = "bg-green-100";
+
                 return (
                   <Button
                     key={op.id}
@@ -1202,10 +1229,57 @@ const EcoChallenge: React.FC = () => {
                         handleSelecao(op.id);
                       }
                     }}
-                    variant={variant}
-                    className={`w-full justify-start text-sm ${extraClass} ${
-                      eliminated ? "opacity-50" : ""
-                    }`}
+                    variant={selected ? "secondary" : "outline"}
+                    className={`w-full justify-start text-sm ${
+                      respondido &&
+                      (Array.isArray(cartaAtual.respostaCorreta)
+                        ? cartaAtual.respostaCorreta.includes(op.id)
+                        : cartaAtual.respostaCorreta === op.id)
+                        ? "bg-green-100"
+                        : ""
+                    } ${
+                      respondido &&
+                      selected &&
+                      !(
+                        Array.isArray(cartaAtual.respostaCorreta)
+                          ? cartaAtual.respostaCorreta.includes(op.id)
+                          : cartaAtual.respostaCorreta === op.id
+                      )
+                        ? "bg-red-100"
+                        : ""
+                    } ${
+                      respondido &&
+                      cartaAtual.tipo === "MultiplaEscolha" &&
+                      Array.isArray(cartaAtual.respostaCorreta) &&
+                      !cartaAtual.respostaCorreta.includes(op.id) &&
+                      selecoesMultiplas.includes(op.id)
+                        ? "bg-red-100"
+                        : ""
+                    } ${
+                      respondido &&
+                      cartaAtual.tipo === "MultiplaEscolha" &&
+                      Array.isArray(cartaAtual.respostaCorreta) &&
+                      cartaAtual.respostaCorreta.includes(op.id) &&
+                      !selecoesMultiplas.includes(op.id)
+                        ? "bg-blue-100"
+                        : ""
+                    } ${
+                      respondido &&
+                      cartaAtual.tipo === "Ordem" &&
+                      ordemSelecoes.includes(op.id) &&
+                      ordemSelecoes.indexOf(op.id) + 1 !==
+                        (cartaAtual.respostaCorreta as number[]).indexOf(op.id) + 1
+                        ? "bg-red-100"
+                        : ""
+                    } ${
+                      respondido &&
+                      cartaAtual.tipo === "Ordem" &&
+                      ordemSelecoes.includes(op.id) &&
+                      ordemSelecoes.indexOf(op.id) + 1 ===
+                        (cartaAtual.respostaCorreta as number[]).indexOf(op.id) + 1
+                        ? "bg-green-100"
+                        : ""
+                    } ${eliminated ? "opacity-50" : ""}`}
                     disabled={eliminated}
                     style={{
                       maxHeight: "80px",
@@ -1231,17 +1305,30 @@ const EcoChallenge: React.FC = () => {
                     {cartaAtual.tipo === "Ordem" && ordemSelecoes.includes(op.id) && (
                       <span className="ml-2">
                         {ordemSelecoes.indexOf(op.id) + 1}
-                        {isOrderMismatch && (
-                          <span className="ml-1 text-blue-500">
-                            (
-                            {(cartaAtual.respostaCorreta as number[]).indexOf(op.id) + 1}
-                            )
-                          </span>
-                        )}
+                        {respondido &&
+                          ordemSelecoes.indexOf(op.id) + 1 !==
+                            (cartaAtual.respostaCorreta as number[]).indexOf(op.id) + 1 && (
+                            <span className="ml-1 text-blue-500">
+                              (
+                              {(cartaAtual.respostaCorreta as number[]).indexOf(op.id) + 1}
+                              )
+                            </span>
+                          )}
                       </span>
                     )}
-                    {respondido && isCorrect && <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />}
-                    {wrongSelection && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
+                    {respondido &&
+                      (Array.isArray(cartaAtual.respostaCorreta)
+                        ? cartaAtual.respostaCorreta.includes(op.id)
+                        : cartaAtual.respostaCorreta === op.id) && (
+                        <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
+                      )}
+                    {respondido &&
+                      selected &&
+                      !(
+                        Array.isArray(cartaAtual.respostaCorreta)
+                          ? cartaAtual.respostaCorreta.includes(op.id)
+                          : cartaAtual.respostaCorreta === op.id
+                      ) && <XCircle className="ml-auto h-4 w-4 text-red-500" />}
                   </Button>
                 );
               })}
