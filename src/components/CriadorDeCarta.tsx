@@ -1,6 +1,17 @@
-import React, { useState } from "react";
+// src/components/CriadorDeCarta.tsx
 
-// Componente de visualização estática (sem clique)
+import React, { useState } from "react";
+// Import do react-beautiful-dnd para drag & drop
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from "react-beautiful-dnd";
+
+// ==================
+// Tipos e interfaces
+// ==================
 interface Opcao {
   id: number;
   texto: string;
@@ -24,7 +35,29 @@ interface Carta {
   edited?: boolean;
 }
 
-// Componente para exibir a carta de forma estática
+const CARD_TYPES = [
+  "Pergunta",
+  "MultiplaEscolha",
+  "Ordem",
+  "Vantagem",
+  "Desvantagem",
+  "Outras",
+] as const;
+type TipoCarta = typeof CARD_TYPES[number];
+
+const DIFFICULTIES = ["facil", "normal", "dificil"] as const;
+type Dificuldade = typeof DIFFICULTIES[number];
+
+interface BaralhoCarregado {
+  id: number;
+  nome: string;
+  cartas: Carta[];
+  adicionado: boolean;
+}
+
+// ===============================================
+// Componente que exibe uma carta de forma estática
+// ===============================================
 const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
   return (
     <div
@@ -33,7 +66,7 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
         borderRadius: "8px",
         padding: "16px",
         maxWidth: "400px",
-        margin: "1rem 0"
+        margin: "1rem 0",
       }}
     >
       <h2 style={{ fontSize: "1.25rem", fontWeight: "bold" }}>{card.titulo}</h2>
@@ -49,7 +82,13 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
 
       {/* Exibe as opcoes, sem clique */}
       {card.opcoes && card.opcoes.length > 0 && (
-        <ul style={{ marginTop: "8px", paddingLeft: "20px", fontSize: "0.875rem" }}>
+        <ul
+          style={{
+            marginTop: "8px",
+            paddingLeft: "20px",
+            fontSize: "0.875rem",
+          }}
+        >
           {card.opcoes.map((op) => (
             <li key={op.id}>{op.texto}</li>
           ))}
@@ -80,30 +119,66 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
   );
 };
 
-// -----------------------------
-// Criador de Carta principal
-// -----------------------------
-
-const CARD_TYPES = [
-  "Pergunta",
-  "MultiplaEscolha",
-  "Ordem",
-  "Vantagem",
-  "Desvantagem",
-  "Outras",
-] as const;
-type TipoCarta = typeof CARD_TYPES[number];
-
-const DIFFICULTIES = ["facil", "normal", "dificil"] as const;
-type Dificuldade = typeof DIFFICULTIES[number];
-
-interface BaralhoCarregado {
-  id: number;
-  nome: string;
-  cartas: Carta[];
-  adicionado: boolean;
+// =========================================
+// Componente Drag & Drop para "Ordem"
+// =========================================
+interface OrdemDragDropProps {
+  opcoes: Opcao[];
+  setOpcoes: React.Dispatch<React.SetStateAction<Opcao[]>>;
 }
 
+const OrdemDragDrop: React.FC<OrdemDragDropProps> = ({ opcoes, setOpcoes }) => {
+  // Ao finalizar o drag
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    const newList = Array.from(opcoes);
+    const [moved] = newList.splice(result.source.index, 1);
+    newList.splice(result.destination.index, 0, moved);
+    setOpcoes(newList);
+  };
+
+  return (
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Droppable droppableId="ordemList">
+        {(provided) => (
+          <ul
+            className="space-y-2"
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+          >
+            {opcoes.map((o, index) => (
+              <Draggable
+                key={o.id}
+                draggableId={String(o.id)}
+                index={index}
+              >
+                {(draggableProvided) => (
+                  <li
+                    ref={draggableProvided.innerRef}
+                    {...draggableProvided.draggableProps}
+                    {...draggableProvided.dragHandleProps}
+                    className="bg-white border rounded p-2 flex items-center justify-between"
+                  >
+                    {o.texto}
+                    {/* Se quiser exibir, por exemplo, #1, #2, etc: */}
+                    <span className="text-xs text-gray-500 ml-2">
+                      (Pos: {index + 1})
+                    </span>
+                  </li>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </ul>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
+};
+
+// ======================================
+// Componente principal: CriadorDeCarta
+// ======================================
 const CriadorDeCarta: React.FC = () => {
   const [deckName, setDeckName] = useState("meu_baralho");
   const [cards, setCards] = useState<Carta[]>([]);
@@ -115,7 +190,6 @@ const CriadorDeCarta: React.FC = () => {
   const [opcoes, setOpcoes] = useState<Opcao[]>([]);
   const [novaOpcao, setNovaOpcao] = useState("");
 
-  // imageType
   const [imageType, setImageType] = useState<"clickable" | "hero">("clickable");
   const [imagem, setImagem] = useState("");
 
@@ -135,19 +209,18 @@ const CriadorDeCarta: React.FC = () => {
   const [dica, setDica] = useState("");
 
   const [editIndex, setEditIndex] = useState<number | null>(null);
-
-  // Exibição do preview
   const [showPreview, setShowPreview] = useState(false);
 
-  // Lista de baralhos externos
   const [baralhosCarregados, setBaralhosCarregados] = useState<BaralhoCarregado[]>([]);
   const [manterCartasEditadas, setManterCartasEditadas] = useState(false);
 
-  // Parse de arquivo .js
+  // -----------------------
+  // Ler arquivo .js ou .json
+  // -----------------------
   const parseJSDeckFile = (content: string): Carta[] => {
     const match = content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);/);
     if (!match) {
-      throw new Error("Nao foi possivel encontrar um array exportado no arquivo JS.");
+      throw new Error("Não foi possível encontrar um array exportado no arquivo JS.");
     }
     const arrayStr = match[1];
     const json = JSON.parse(arrayStr) as Carta[];
@@ -169,7 +242,7 @@ const CriadorDeCarta: React.FC = () => {
         } else if (file.name.endsWith(".json")) {
           newCards = JSON.parse(content) as Carta[];
         } else {
-          alert("Formato nao suportado. Use arquivos .js ou .json");
+          alert("Formato não suportado. Use arquivos .js ou .json");
           continue;
         }
         const nome = file.name.replace(/\.(js|json)$/, "");
@@ -232,11 +305,11 @@ const CriadorDeCarta: React.FC = () => {
   };
 
   // -----------------------------
-  // Handlers de opcoes e ordem
+  // Handlers de opcoes
   // -----------------------------
   const handleAddOpcao = () => {
     if (novaOpcao.trim() !== "") {
-      setOpcoes([...opcoes, { id: opcoes.length + 1, texto: novaOpcao }]);
+      setOpcoes((prev) => [...prev, { id: prev.length + 1, texto: novaOpcao }]);
       setNovaOpcao("");
     }
   };
@@ -246,12 +319,15 @@ const CriadorDeCarta: React.FC = () => {
     setRespostaCorreta(respostaCorreta.filter((rc) => rc !== id));
   };
 
-  // Se for Pergunta, so 1 posicao
-  // Se for MultiplaEscolha e Outras, multiplas
+  // Mostrar "Marcar correta" se for Pergunta / MultiplaEscolha / Ordem / Outras
   const handleToggleRespostaCorreta = (id: number) => {
     if (tipo === "Pergunta") {
       setRespostaCorreta([id]);
-    } else if (tipo === "MultiplaEscolha" || tipo === "Outras") {
+    } else if (
+      tipo === "MultiplaEscolha" ||
+      tipo === "Ordem" ||
+      tipo === "Outras"
+    ) {
       if (respostaCorreta.includes(id)) {
         setRespostaCorreta(respostaCorreta.filter((x) => x !== id));
       } else {
@@ -260,36 +336,16 @@ const CriadorDeCarta: React.FC = () => {
     }
   };
 
-  // -- "Ordem" usando numeric input ao lado de cada opcao:
-  // Por exemplo: Resposta A [2]
-  //             Resposta B [3]
-  //             Resposta C [1]
-  const handleSetOrder = (id: number, position: number) => {
-    if (position < 1) return;
-    // substitui a posicao do item (id) no array de respostaCorreta
-    // ou cria caso nao exista
-    // porem, iremos salvar de fato no final (handleAddOrUpdateCard)
-    // De forma mais simples, cria um map, tipo { [opId]: pos }
-    // ou diretamente num state. Vamos usar setRespostaCorreta(...) para segurar?
-    // Mas lembre-se que e array ou single. Vamos criar um map local so
-    // ou reusaremos "respostaCorreta" como array do msm tam. Daria confusao.
-    // Vamos so armazenar inline no opcoes, estilo "opcoes" com "pos"?
-    // A solucao rapida: adiconar " (#2) " no texto. Nao e ideal. Vamos usar a approach:
-    const newOpcoes = opcoes.map((o) =>
-      o.id === id ? { ...o, ordemTemp: position } : o
-    ) as (Opcao & { ordemTemp?: number })[];
-    setOpcoes(newOpcoes);
-  };
-
   // -----------------------------
-  // Handlers de categorias e fontes
+  // Categorias / Fontes
   // -----------------------------
   const handleAddCategoria = () => {
     if (!categoriasBloqueadas && novaCategoria.trim() !== "") {
-      setCategorias([...categorias, novaCategoria]);
+      setCategorias((prev) => [...prev, novaCategoria]);
       setNovaCategoria("");
     }
   };
+
   const handleRemoveCategoria = (cat: string) => {
     if (!categoriasBloqueadas) {
       setCategorias(categorias.filter((c) => c !== cat));
@@ -298,10 +354,11 @@ const CriadorDeCarta: React.FC = () => {
 
   const handleAddFonte = () => {
     if (!fontesBloqueadas && novaFonte.trim() !== "") {
-      setFontes([...fontes, novaFonte]);
+      setFontes((prev) => [...prev, novaFonte]);
       setNovaFonte("");
     }
   };
+
   const handleRemoveFonte = (f: string) => {
     if (!fontesBloqueadas) {
       setFontes(fontes.filter((fon) => fon !== f));
@@ -333,26 +390,17 @@ const CriadorDeCarta: React.FC = () => {
     let finalRespostaCorreta: number | number[] = respostaCorreta;
 
     if (tipo === "Ordem") {
-      // Precisamos descobrir a ordem. Se armazenamos em opcoes[*].ordemTemp, podemos reordenar:
-      // 1) "ordemTemp" = pos do item
-      // 2) se nao setado, assume Infinity
-      const sorted = [...opcoes].sort((a, b) => {
-        const A = (a as any).ordemTemp || 9999;
-        const B = (b as any).ordemTemp || 9999;
-        return A - B;
-      });
-      finalRespostaCorreta = sorted.map((o) => o.id);
+      // "Ordem": a verdadeira ordem é a do array opcoes no momento (após DnD)
+      finalRespostaCorreta = opcoes.map((o) => o.id);
     } else if (tipo === "Vantagem") {
-      // todas corretas
       finalRespostaCorreta = opcoes.map((o) => o.id);
     } else if (tipo === "Desvantagem") {
-      // todas erradas
       finalRespostaCorreta = [];
     } else if (tipo === "Pergunta") {
-      // so pega a primeira
-      finalRespostaCorreta = respostaCorreta.length > 0 ? respostaCorreta[0] : 0;
+      finalRespostaCorreta =
+        respostaCorreta.length > 0 ? respostaCorreta[0] : 0;
     }
-    // caso MultiplaEscolha ou Outras, ja temos finalRespostaCorreta = array
+    // Se for MultiplaEscolha ou Outras, já temos finalRespostaCorreta como array
 
     const novaCarta: Carta = {
       tipo,
@@ -390,7 +438,6 @@ const CriadorDeCarta: React.FC = () => {
       // Nova carta
       setCards((oldCards) => [...oldCards, { ...novaCarta, edited: true }]);
     }
-
     resetCarta();
   };
 
@@ -406,7 +453,6 @@ const CriadorDeCarta: React.FC = () => {
     let extractedImage = "";
     let usedHeroStyle = false;
 
-    // hero (style=...) vs. clickable (class="img-media")
     const heroImgRegex = /<img[^>]+style="[^"]+"[^>]*src="([^"]+)"[^>]*>/;
     const clickableImgRegex = /<img[^>]+class="[^"]+"[^>]*src="([^"]+)"[^>]*>/;
 
@@ -430,19 +476,9 @@ const CriadorDeCarta: React.FC = () => {
 
     // Monta respostaCorreta
     if (carta.tipo === "Ordem") {
-      // Precisamos reordenar as opcoes para refletir a "respostaCorreta"
-      if (Array.isArray(carta.respostaCorreta)) {
-        const seq = carta.respostaCorreta as number[];
-        // reordena opcoes
-        const sorted = carta.opcoes.slice().sort(
-          (a, b) => seq.indexOf(a.id) - seq.indexOf(b.id)
-        );
-        // Guardar posicao em each?
-        const withPos = sorted.map((o, idx) => {
-          return { ...o, ordemTemp: idx + 1 };
-        });
-        setOpcoes(withPos);
-      }
+      // As "opcoes" ja estarao na ordem salva
+      // so limpamos (ou recarregamos) "respostaCorreta"
+      // pois so trabalhamos no array "opcoes"
       setRespostaCorreta([]);
     } else if (carta.tipo === "Vantagem") {
       setRespostaCorreta(carta.opcoes.map((o) => o.id));
@@ -450,9 +486,13 @@ const CriadorDeCarta: React.FC = () => {
       setRespostaCorreta([]);
     } else if (carta.tipo === "Pergunta") {
       const correctId =
-        typeof carta.respostaCorreta === "number" ? (carta.respostaCorreta as number) : 0;
+        typeof carta.respostaCorreta === "number" ? carta.respostaCorreta : 0;
       setRespostaCorreta(correctId ? [correctId] : []);
-    } else if (carta.tipo === "MultiplaEscolha" || carta.tipo === "Outras") {
+    } else if (
+      carta.tipo === "MultiplaEscolha" ||
+      carta.tipo === "Outras" ||
+      carta.tipo === "Ordem"
+    ) {
       const arr = Array.isArray(carta.respostaCorreta)
         ? (carta.respostaCorreta as number[])
         : [carta.respostaCorreta];
@@ -499,13 +539,18 @@ const CriadorDeCarta: React.FC = () => {
     document.body.removeChild(element);
   };
 
+  // ===================
+  // Render do componente
+  // ===================
   return (
     <div className="p-4 max-w-5xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Criador de Baralho</h1>
 
       {/* Nome do Baralho */}
       <div className="bg-white shadow p-4 rounded mb-6">
-        <label className="block text-sm font-medium mb-2">Nome do Baralho:</label>
+        <label className="block text-sm font-medium mb-2">
+          Nome do Baralho:
+        </label>
         <input
           type="text"
           value={deckName}
@@ -519,7 +564,7 @@ const CriadorDeCarta: React.FC = () => {
       <div className="bg-white shadow p-4 rounded mb-6 space-y-4">
         <h2 className="text-xl font-semibold">Carregar Baralhos</h2>
         <p className="text-sm text-gray-500">
-          Selecione um ou mais arquivos .js ou .json contendo arrays de cartas. Eles serao listados abaixo.
+          Selecione um ou mais arquivos .js ou .json contendo arrays de cartas. 
         </p>
         <input type="file" accept=".js,.json" onChange={handleFileUpload} multiple />
       </div>
@@ -542,7 +587,9 @@ const CriadorDeCarta: React.FC = () => {
             {baralhosCarregados.map((b) => (
               <li key={b.id} className="flex items-center space-x-4">
                 <span className="font-medium">{b.nome}</span>
-                <span className="text-sm text-gray-500">{b.cartas.length} cartas</span>
+                <span className="text-sm text-gray-500">
+                  {b.cartas.length} cartas
+                </span>
                 {!b.adicionado ? (
                   <button
                     onClick={() => adicionarBaralho(b.id)}
@@ -562,8 +609,8 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </ul>
           <p className="text-xs text-gray-500">
-            Ao remover um baralho, cartas nao editadas desse baralho serao removidas do baralho principal.
-            Se Manter cartas editadas estiver marcado, as editadas permanecem.
+            Ao remover um baralho, cartas não editadas desse baralho serão removidas do baralho principal.
+            Se &quot;Manter cartas editadas&quot; estiver marcado, as editadas permanecem.
           </p>
         </div>
       )}
@@ -575,7 +622,9 @@ const CriadorDeCarta: React.FC = () => {
       <div className="bg-white shadow p-4 rounded mb-6 space-y-4">
         {/* Tipo da Carta */}
         <div>
-          <label className="block text-sm font-medium mb-1">Tipo da Carta</label>
+          <label className="block text-sm font-medium mb-1">
+            Tipo da Carta
+          </label>
           <select
             value={tipo}
             onChange={(e) => setTipo(e.target.value as TipoCarta)}
@@ -588,15 +637,16 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Pergunta: uma correta; MultiplaEscolha: multiplas corretas;
-            Ordem: defina a sequencia com numero lateral; Vantagem: todas corretas;
-            Desvantagem: todas erradas; Outras: mistas.
+            "Pergunta": 1 correta; "MultiplaEscolha": várias corretas; "Ordem": arraste para ordenar; 
+            "Vantagem": todas corretas; "Desvantagem": todas erradas; "Outras": mistas.
           </p>
         </div>
 
         {/* Título */}
         <div>
-          <label className="block text-sm font-medium mb-1">Título da Carta</label>
+          <label className="block text-sm font-medium mb-1">
+            Título da Carta
+          </label>
           <input
             type="text"
             value={titulo}
@@ -608,34 +658,40 @@ const CriadorDeCarta: React.FC = () => {
         {/* Tipo de imagem e caminho */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div>
-            <label className="block text-sm font-medium mb-1">Tipo de Imagem</label>
+            <label className="block text-sm font-medium mb-1">
+              Tipo de Imagem
+            </label>
             <select
               value={imageType}
               onChange={(e) => setImageType(e.target.value as "clickable" | "hero")}
               className="border p-2 rounded w-full"
             >
-              <option value="clickable">Clicavel (Zoom)</option>
+              <option value="clickable">Clicável (Zoom)</option>
               <option value="hero">Personagem (Hero)</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Caminho da Imagem</label>
+            <label className="block text-sm font-medium mb-1">
+              Caminho da Imagem
+            </label>
             <input
               type="text"
               value={imagem}
               onChange={(e) => setImagem(e.target.value)}
               className="border p-2 w-full rounded"
-              placeholder="/minha_imagem.png"
+              placeholder="/imagem_exemplo.png"
             />
           </div>
         </div>
         <p className="text-xs text-gray-500">
-          &quot;Clicavel&quot; &rarr; usa Zoom, &quot;Hero&quot; &rarr; imagem centralizada, etc.
+          &quot;Clicável&quot; → usa Zoom, &quot;Hero&quot; → imagem centralizada etc.
         </p>
 
-        {/* Pergunta */}
+        {/* Pergunta/Descrição */}
         <div>
-          <label className="block text-sm font-medium mb-1">Pergunta/Descrição</label>
+          <label className="block text-sm font-medium mb-1">
+            Pergunta/Descrição
+          </label>
           <textarea
             value={pergunta}
             onChange={(e) => setPergunta(e.target.value)}
@@ -643,11 +699,8 @@ const CriadorDeCarta: React.FC = () => {
           />
         </div>
 
-        {/* Opcoes / Dificuldade, dependendo do tipo */}
-        {(tipo === "Pergunta" ||
-          tipo === "MultiplaEscolha" ||
-          tipo === "Ordem" ||
-          tipo === "Outras") && (
+        {/* Se for "Vantagem" ou "Desvantagem": exibe as opcoes sem "Marcar correta" */}
+        {tipo === "Vantagem" || tipo === "Desvantagem" ? (
           <div className="bg-gray-50 p-4 rounded space-y-4">
             <h3 className="text-lg font-semibold">Opções</h3>
             <div className="flex space-x-2">
@@ -658,81 +711,10 @@ const CriadorDeCarta: React.FC = () => {
                 placeholder="Texto da opção"
                 className="border p-2 rounded flex-1"
               />
-              <button onClick={handleAddOpcao} className="bg-blue-500 text-white px-4 py-2 rounded">
-                Adicionar Opção
-              </button>
-            </div>
-            <ul className="space-y-2">
-              {opcoes.map((o, idx) => (
-                <li key={o.id} className="flex flex-col md:flex-row md:items-center md:space-x-2">
-                  <div className="flex-1">{o.texto}</div>
-
-                  {/* Se for "Ordem": input numerico para a posição */}
-                  {tipo === "Ordem" && (
-                    <div className="flex items-center space-x-1 my-1">
-                      <label className="text-sm">Pos:</label>
-                      <input
-                        type="number"
-                        min={1}
-                        onChange={(e) => handleSetOrder(o.id, Number(e.target.value))}
-                        value={(o as any).ordemTemp || ""}
-                        className="border p-1 w-16 rounded text-sm"
-                      />
-                    </div>
-                  )}
-
-                  {/* Se NÃO for Vantagem/Desvantagem e for Pergunta/MultiplaEscolha/Outras, mostra "Marcar correta" */}
-                  {tipo !== "Vantagem" && tipo !== "Desvantagem" && (
-                    <button
-                      onClick={() => handleToggleRespostaCorreta(o.id)}
-                      className={`${
-                        respostaCorreta.includes(o.id)
-                          ? "bg-green-500 text-white"
-                          : "bg-gray-300"
-                      } px-2 py-1 rounded text-sm`}
-                    >
-                      {respostaCorreta.includes(o.id) ? "Correta" : "Marcar correta"}
-                    </button>
-                  )}
-
-                  <button
-                    onClick={() => handleRemoveOpcao(o.id)}
-                    className="bg-red-500 text-white px-2 py-1 rounded text-sm mt-1 md:mt-0"
-                  >
-                    Remover
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <div>
-              <label className="block text-sm font-medium mb-1">Dificuldade</label>
-              <select
-                value={dificuldade}
-                onChange={(e) => setDificuldade(e.target.value as Dificuldade)}
-                className="border p-2 rounded w-full"
+              <button
+                onClick={handleAddOpcao}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
               >
-                {DIFFICULTIES.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        )}
-
-        {(tipo === "Vantagem" || tipo === "Desvantagem") && (
-          <div className="bg-gray-50 p-4 rounded space-y-4">
-            <h3 className="text-lg font-semibold">Opções</h3>
-            <div className="flex space-x-2">
-              <input
-                type="text"
-                value={novaOpcao}
-                onChange={(e) => setNovaOpcao(e.target.value)}
-                placeholder="Texto da opção"
-                className="border p-2 rounded flex-1"
-              />
-              <button onClick={handleAddOpcao} className="bg-blue-500 text-white px-4 py-2 rounded">
                 Adicionar Opção
               </button>
             </div>
@@ -750,10 +732,14 @@ const CriadorDeCarta: React.FC = () => {
               ))}
             </ul>
             <div>
-              <label className="block text-sm font-medium mb-1">Dificuldade</label>
+              <label className="block text-sm font-medium mb-1">
+                Dificuldade
+              </label>
               <select
                 value={dificuldade}
-                onChange={(e) => setDificuldade(e.target.value as Dificuldade)}
+                onChange={(e) =>
+                  setDificuldade(e.target.value as Dificuldade)
+                }
                 className="border p-2 rounded w-full"
               >
                 {DIFFICULTIES.map((d) => (
@@ -773,6 +759,120 @@ const CriadorDeCarta: React.FC = () => {
                 Todas as opções serão corretas.
               </p>
             )}
+          </div>
+        ) : tipo === "Ordem" ? (
+          // Se for ORDEM, usamos o DnD
+          <div className="bg-gray-50 p-4 rounded space-y-4">
+            <h3 className="text-lg font-semibold">Opções (arraste para reordenar)</h3>
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                value={novaOpcao}
+                onChange={(e) => setNovaOpcao(e.target.value)}
+                placeholder="Texto da opção"
+                className="border p-2 rounded flex-1"
+              />
+              <button
+                onClick={handleAddOpcao}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                Adicionar Opção
+              </button>
+            </div>
+
+            {/* Componente Drag & Drop */}
+            <OrdemDragDrop opcoes={opcoes} setOpcoes={setOpcoes} />
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Dificuldade
+              </label>
+              <select
+                value={dificuldade}
+                onChange={(e) =>
+                  setDificuldade(e.target.value as Dificuldade)
+                }
+                className="border p-2 rounded w-full"
+              >
+                {DIFFICULTIES.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        ) : (
+          // Caso Pergunta, MultiplaEscolha ou Outras
+          <div className="bg-gray-50 p-4 rounded space-y-4">
+            <h3 className="text-lg font-semibold">Opções</h3>
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                value={novaOpcao}
+                onChange={(e) => setNovaOpcao(e.target.value)}
+                placeholder="Texto da opção"
+                className="border p-2 rounded flex-1"
+              />
+              <button
+                onClick={handleAddOpcao}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                Adicionar Opção
+              </button>
+            </div>
+            <ul className="space-y-2">
+              {opcoes.map((o) => (
+                <li
+                  key={o.id}
+                  className="flex flex-col md:flex-row md:items-center md:space-x-2"
+                >
+                  <div className="flex-1">{o.texto}</div>
+
+                  {/* Botão "Marcar correta" somente se Pergunta/MultiplaEscolha/Ordem/Outras */}
+                  {(tipo === "Pergunta" ||
+                    tipo === "MultiplaEscolha" ||
+                    tipo === "Ordem" ||
+                    tipo === "Outras") && (
+                    <button
+                      onClick={() => handleToggleRespostaCorreta(o.id)}
+                      className={`${
+                        respostaCorreta.includes(o.id)
+                          ? "bg-green-500 text-white"
+                          : "bg-gray-300"
+                      } px-2 py-1 rounded text-sm`}
+                    >
+                      {respostaCorreta.includes(o.id)
+                        ? "Correta"
+                        : "Marcar correta"}
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => handleRemoveOpcao(o.id)}
+                    className="bg-red-500 text-white px-2 py-1 rounded text-sm mt-1 md:mt-0"
+                  >
+                    Remover
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Dificuldade
+              </label>
+              <select
+                value={dificuldade}
+                onChange={(e) => setDificuldade(e.target.value as Dificuldade)}
+                className="border p-2 rounded w-full"
+              >
+                {DIFFICULTIES.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         )}
 
@@ -825,7 +925,7 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </ul>
           <p className="text-xs text-gray-500">
-            Ao travar as categorias, nao e possivel adicionar ou remover mais.
+            Ao travar as categorias, não é possível adicionar ou remover mais.
           </p>
         </div>
 
@@ -878,14 +978,16 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </ul>
           <p className="text-xs text-gray-500">
-            Ao travar as fontes, nao e possivel adicionar ou remover mais.
+            Ao travar as fontes, não é possível adicionar ou remover mais.
           </p>
         </div>
 
         {/* Vantagem, Desvantagem, Dica */}
         <div className="bg-gray-50 p-4 rounded space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Vantagem:</label>
+            <label className="block text-sm font-medium mb-1">
+              Vantagem:
+            </label>
             <input
               type="text"
               value={vantagem}
@@ -894,7 +996,9 @@ const CriadorDeCarta: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Desvantagem:</label>
+            <label className="block text-sm font-medium mb-1">
+              Desvantagem:
+            </label>
             <input
               type="text"
               value={desvantagem}
@@ -939,7 +1043,7 @@ const CriadorDeCarta: React.FC = () => {
         </div>
       </div>
 
-      {/* Se showPreview, renderizamos a carta estaticamente */}
+      {/* Se showPreview, renderizamos a carta estática */}
       {showPreview && (
         <div>
           <h2 className="text-2xl font-bold mb-2">Pré-visualização</h2>
@@ -956,10 +1060,7 @@ const CriadorDeCarta: React.FC = () => {
               opcoes,
               respostaCorreta:
                 tipo === "Ordem"
-                  ? opcoes
-                      .slice()
-                      .sort((a: any, b: any) => (a.ordemTemp || 9999) - (b.ordemTemp || 9999))
-                      .map((o) => o.id)
+                  ? opcoes.map((o) => o.id)
                   : tipo === "Vantagem"
                   ? opcoes.map((o) => o.id)
                   : tipo === "Desvantagem"
