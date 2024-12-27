@@ -504,7 +504,7 @@ const CriadorDeCarta: React.FC = () => {
           </ul>
           <p className="text-xs text-gray-500">
             Ao remover um baralho, cartas não editadas desse baralho serão
-            removidas do baralho principal. Se "Manter cartas editadas" estiver
+            removidas do baralho principal. Se Manter cartas editadas estiver
             marcado, cartas editadas permanecem.
           </p>
         </div>
@@ -580,7 +580,7 @@ const CriadorDeCarta: React.FC = () => {
           </div>
         </div>
         <p className="text-xs text-gray-500">
-          "Clicável" → usa Zoom, "Hero" → imagem centralizada menor, etc.
+          Clicável → usa Zoom, Hero → imagem centralizada menor, etc.
         </p>
 
         {/* Pergunta */}
