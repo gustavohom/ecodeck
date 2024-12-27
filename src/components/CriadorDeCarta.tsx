@@ -563,7 +563,7 @@ const CriadorDeCarta: React.FC = () => {
           </ul>
           <p className="text-xs text-gray-500">
             Ao remover um baralho, cartas nao editadas desse baralho serao removidas do baralho principal.
-            Se "Manter cartas editadas" estiver marcado, as editadas permanecem.
+            Se \"Manter cartas editadas\" estiver marcado, as editadas permanecem.
           </p>
         </div>
       )}
