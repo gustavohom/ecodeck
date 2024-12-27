@@ -14,7 +14,7 @@ interface Opcao {
 interface Carta {
   tipo: string;
   titulo: string;
-  pergunta: string; // pode conter <img>
+  pergunta: string; // pode conter <img> etc
   opcoes: Opcao[];
   respostaCorreta: number | number[];
   dificuldade: string;
@@ -51,6 +51,9 @@ interface BaralhoCarregado {
 
 // -------------------------------------------------------------------
 // 2) Componente de Preview Estático (CardStaticView)
+//    - Aceita Pergunta com respostaCorreta: number OU [number]
+//    - Exibe no tipo "Ordem" as opções na ordem original, mas indica
+//      a posição final entre parênteses.
 // -------------------------------------------------------------------
 const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
   const {
@@ -70,17 +73,13 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
   let renderedOptions: React.ReactNode = null;
 
   if (tipo === "Ordem") {
-    // Mostrar as opções NA ORDEM que aparecem no array `opcoes`.
-    // Ao lado de cada opção, exibir entre parênteses a posição final em `respostaCorreta`.
-    // Exemplo: "Alternativa A (2)"
-    // Se não estiver presente em respostaCorreta, exibir "?". 
-    // (Mas normalmente estará).
+    // Mostrar as opções na MESMA ordem do array `opcoes`.
+    // Ao lado, exibir (N) onde N é a posição no array `respostaCorreta`.
     const seq = Array.isArray(respostaCorreta) ? respostaCorreta : [];
 
     renderedOptions = (
       <ul style={{ marginTop: "8px", paddingLeft: "20px" }}>
         {opcoes.map((op) => {
-          // Descobre em que posição esse op.id está em seq
           const idx = seq.indexOf(op.id);
           const finalPos = idx >= 0 ? idx + 1 : "?";
           return (
@@ -102,16 +101,21 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
     } else if (tipo === "Desvantagem") {
       // nenhuma correta (set vazio)
     } else if (tipo === "Pergunta") {
-      // single number
+      // Permitir tanto number quanto array de 1 elemento
       if (typeof respostaCorreta === "number" && respostaCorreta !== 0) {
         correctSet.add(respostaCorreta);
+      } else if (
+        Array.isArray(respostaCorreta) &&
+        respostaCorreta.length === 1
+      ) {
+        correctSet.add(respostaCorreta[0]);
       }
     } else {
       // MultiplaEscolha ou Outras => array
       if (Array.isArray(respostaCorreta)) {
         respostaCorreta.forEach((x) => correctSet.add(x));
       } else if (respostaCorreta !== 0) {
-        // Se for "Outras" e veio como number
+        // Caso seja 1 número único num "Outras"
         correctSet.add(respostaCorreta as number);
       }
     }
@@ -391,7 +395,6 @@ const CriadorDeCarta: React.FC = () => {
   // Criar / Atualizar / Editar / Remover
   // -----------------------------
   const resetCarta = () => {
-    // se categoriasBloqueadas = false => limpamos
     if (!categoriasBloqueadas) setCategorias([]);
     if (!fontesBloqueadas) setFontes([]);
 
@@ -508,7 +511,6 @@ const CriadorDeCarta: React.FC = () => {
     if (carta.tipo === "Ordem") {
       if (Array.isArray(carta.respostaCorreta)) {
         const seq = carta.respostaCorreta;
-        // reorganizar opcoes de acordo com seq
         const sorted = carta.opcoes.slice().sort(
           (a, b) => seq.indexOf(a.id) - seq.indexOf(b.id)
         );
@@ -528,7 +530,16 @@ const CriadorDeCarta: React.FC = () => {
         typeof carta.respostaCorreta === "number"
           ? (carta.respostaCorreta as number)
           : 0;
-      setRespostaCorreta(correctId ? [correctId] : []);
+      if (correctId !== 0) {
+        setRespostaCorreta([correctId]);
+      } else if (
+        Array.isArray(carta.respostaCorreta) &&
+        carta.respostaCorreta.length === 1
+      ) {
+        setRespostaCorreta([carta.respostaCorreta[0]]);
+      } else {
+        setRespostaCorreta([]);
+      }
     } else if (carta.tipo === "MultiplaEscolha" || carta.tipo === "Outras") {
       const arr = Array.isArray(carta.respostaCorreta)
         ? (carta.respostaCorreta as number[])
@@ -668,8 +679,9 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Pergunta: 1 correta; MultiplaEscolha: multiplas corretas;  
-            Ordem: exibir posicao entre parenteses;  
+            Pergunta: 1 correta (pode ser um número ou [número]);
+            MultiplaEscolha: multiplas corretas;
+            Ordem: exibir posicao entre parenteses;
             Vantagem: todas corretas; Desvantagem: todas erradas; Outras: mistas.
           </p>
         </div>
