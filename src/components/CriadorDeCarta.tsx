@@ -1,19 +1,20 @@
 // src/components/CriadorDeCarta.tsx
+
 import React, { useState } from "react";
 
 // -------------------------------------------------------------------
-// 1) Interfaces e Tipos
+// 1) Tipos e Interfaces
 // -------------------------------------------------------------------
 interface Opcao {
   id: number;
   texto: string;
-  ordemTemp?: number; // Para armazenar a posição no tipo "Ordem"
+  ordemTemp?: number; // Usado em "Ordem" para armazenar posição
 }
 
 interface Carta {
   tipo: string;
   titulo: string;
-  pergunta: string; // pode conter <img> etc
+  pergunta: string; // pode conter <img>
   opcoes: Opcao[];
   respostaCorreta: number | number[];
   dificuldade: string;
@@ -50,7 +51,6 @@ interface BaralhoCarregado {
 
 // -------------------------------------------------------------------
 // 2) Componente de Preview Estático (CardStaticView)
-//    Mostra a carta de forma bonita e destaca as corretas / ordem.
 // -------------------------------------------------------------------
 const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
   const {
@@ -67,58 +67,57 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
     dica,
   } = card;
 
-  // Renderizar opções de acordo com o tipo
   let renderedOptions: React.ReactNode = null;
 
   if (tipo === "Ordem") {
-    // "respostaCorreta" deve ser array com IDs na sequência final
-    const correctSequence = Array.isArray(respostaCorreta)
-      ? respostaCorreta
-      : []; // segurança
-
-    // criar um dicionário id->texto
-    const mapOp: Record<number, string> = {};
-    opcoes.forEach((op) => {
-      mapOp[op.id] = op.texto;
-    });
+    // Mostrar as opções NA ORDEM que aparecem no array `opcoes`.
+    // Ao lado de cada opção, exibir entre parênteses a posição final em `respostaCorreta`.
+    // Exemplo: "Alternativa A (2)"
+    // Se não estiver presente em respostaCorreta, exibir "?". 
+    // (Mas normalmente estará).
+    const seq = Array.isArray(respostaCorreta) ? respostaCorreta : [];
 
     renderedOptions = (
-      <ul style={{ listStyleType: "none", paddingLeft: 0 }}>
-        {correctSequence.map((opId, idx) => (
-          <li key={opId} style={{ margin: "4px 0" }}>
-            <span style={{ fontWeight: "bold", color: "#333" }}>
-              {idx + 1}){" "}
-            </span>
-            {mapOp[opId]}
-          </li>
-        ))}
+      <ul style={{ marginTop: "8px", paddingLeft: "20px" }}>
+        {opcoes.map((op) => {
+          // Descobre em que posição esse op.id está em seq
+          const idx = seq.indexOf(op.id);
+          const finalPos = idx >= 0 ? idx + 1 : "?";
+          return (
+            <li key={op.id} style={{ marginBottom: "4px" }}>
+              {op.texto} ({finalPos})
+            </li>
+          );
+        })}
       </ul>
     );
   } else {
-    // Para Pergunta, MultiplaEscolha, Outras, Vantagem, Desvantagem
-    // Construir um "set" de IDs corretos
+    // Para Pergunta, MultiplaEscolha, Vantagem, Desvantagem, Outras:
+    // construímos um set com IDs corretos
     const correctSet = new Set<number>();
 
     if (tipo === "Vantagem") {
-      // Todas as opções são corretas
+      // todas corretas
       opcoes.forEach((o) => correctSet.add(o.id));
     } else if (tipo === "Desvantagem") {
-      // Nenhuma é correta
+      // nenhuma correta (set vazio)
     } else if (tipo === "Pergunta") {
-      // respostaCorreta é um número
-      const resp = typeof respostaCorreta === "number" ? respostaCorreta : 0;
-      if (resp) {
-        correctSet.add(resp);
+      // single number
+      if (typeof respostaCorreta === "number" && respostaCorreta !== 0) {
+        correctSet.add(respostaCorreta);
       }
     } else {
       // MultiplaEscolha ou Outras => array
       if (Array.isArray(respostaCorreta)) {
-        respostaCorreta.forEach((id) => correctSet.add(id));
+        respostaCorreta.forEach((x) => correctSet.add(x));
+      } else if (respostaCorreta !== 0) {
+        // Se for "Outras" e veio como number
+        correctSet.add(respostaCorreta as number);
       }
     }
 
     renderedOptions = (
-      <ul style={{ marginTop: "8px", paddingLeft: "20px", fontSize: "0.875rem" }}>
+      <ul style={{ marginTop: "8px", paddingLeft: "20px" }}>
         {opcoes.map((op) => {
           const isCorrect = correctSet.has(op.id);
           return (
@@ -161,7 +160,6 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
         dangerouslySetInnerHTML={{ __html: pergunta }}
       />
 
-      {/* Exibimos as opções / ordem */}
       {renderedOptions}
 
       <div style={{ marginTop: "8px", fontSize: "0.75rem", color: "#999" }}>
@@ -347,16 +345,12 @@ const CriadorDeCarta: React.FC = () => {
   };
 
   const handleToggleRespostaCorreta = (id: number) => {
-    // Pergunta => só 1
     if (tipo === "Pergunta") {
+      // apenas 1 ID
       setRespostaCorreta([id]);
-    }
-    // MultiplaEscolha ou Outras => várias
-    else if (tipo === "MultiplaEscolha" || tipo === "Outras") {
+    } else if (tipo === "MultiplaEscolha" || tipo === "Outras") {
       setRespostaCorreta((prev) =>
-        prev.includes(id)
-          ? prev.filter((x) => x !== id)
-          : [...prev, id]
+        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
       );
     }
   };
@@ -514,6 +508,7 @@ const CriadorDeCarta: React.FC = () => {
     if (carta.tipo === "Ordem") {
       if (Array.isArray(carta.respostaCorreta)) {
         const seq = carta.respostaCorreta;
+        // reorganizar opcoes de acordo com seq
         const sorted = carta.opcoes.slice().sort(
           (a, b) => seq.indexOf(a.id) - seq.indexOf(b.id)
         );
@@ -647,8 +642,8 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </ul>
           <p className="text-xs text-gray-500">
-            Ao remover um baralho, cartas nao editadas desse baralho serao removidas do baralho principal.  
-            Se &quot;Manter cartas editadas&quot; estiver marcado, as editadas permanecem.
+            Ao remover um baralho, cartas nao editadas desse baralho serao removidas do baralho principal.
+            Se &quot;Manter cartas editadas&quot; estiver marcado, cartas editadas permanecem.
           </p>
         </div>
       )}
@@ -674,7 +669,7 @@ const CriadorDeCarta: React.FC = () => {
           </select>
           <p className="text-xs text-gray-500 mt-1">
             Pergunta: 1 correta; MultiplaEscolha: multiplas corretas;  
-            Ordem: numeração das opções;  
+            Ordem: exibir posicao entre parenteses;  
             Vantagem: todas corretas; Desvantagem: todas erradas; Outras: mistas.
           </p>
         </div>
