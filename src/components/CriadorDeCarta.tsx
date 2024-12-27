@@ -637,8 +637,8 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            "Pergunta": 1 correta; "MultiplaEscolha": várias corretas; "Ordem": arraste para ordenar; 
-            "Vantagem": todas corretas; "Desvantagem": todas erradas; "Outras": mistas.
+            Pergunta: 1 correta; MultiplaEscolha: várias corretas; Ordem: arraste para ordenar; 
+            Vantagem: todas corretas; Desvantagem: todas erradas; Outras: mistas.
           </p>
         </div>
 
