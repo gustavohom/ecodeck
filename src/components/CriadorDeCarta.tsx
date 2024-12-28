@@ -52,8 +52,7 @@ interface BaralhoCarregado {
 // -------------------------------------------------------------------
 // 2) Componente de Preview Estático (CardStaticView)
 //    - Aceita Pergunta com respostaCorreta: number OU [number]
-//    - Exibe no tipo "Ordem" as opções na ordem original,
-//      mostrando (N) onde N é a posição em respostaCorreta
+//    - Exibe no tipo "Ordem" as opções na ordem correta definida por respostaCorreta
 // -------------------------------------------------------------------
 const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
   const {
@@ -73,15 +72,20 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
   let renderedOptions: React.ReactNode = null;
 
   if (tipo === "Ordem") {
-    // Mostra as opções na ordem original do array 'opcoes'
-    // e exibe (N) onde N é a posição em 'respostaCorreta'
+    // Garante que respostaCorreta é um array
     const seq = Array.isArray(respostaCorreta) ? respostaCorreta : [];
+
+    // Cria um mapa de ID para posição
+    const ordemMap = new Map<number, number>();
+    seq.forEach((id, index) => {
+      ordemMap.set(id, index + 1); // 1-based
+    });
 
     renderedOptions = (
       <ul style={{ marginTop: "8px", paddingLeft: "20px" }}>
         {opcoes.map((op) => {
-          const idx = seq.indexOf(op.id);
-          const finalPos = idx >= 0 ? idx + 1 : "?";
+          const pos = ordemMap.get(op.id);
+          const finalPos = pos !== undefined ? pos : "?";
           return (
             <li key={op.id} style={{ marginBottom: "4px" }}>
               {op.texto} ({finalPos})
@@ -91,7 +95,7 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
       </ul>
     );
   } else {
-    // Para outros tipos, construímos um set com IDs corretos
+    // Para outros tipos, construir um set com IDs corretos
     const correctSet = new Set<number>();
 
     if (tipo === "Vantagem") {
@@ -99,13 +103,10 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
     } else if (tipo === "Desvantagem") {
       // Nenhuma correta
     } else if (tipo === "Pergunta") {
-      // Se for number ou array[1]
+      // Se for number ou array com um elemento
       if (typeof respostaCorreta === "number" && respostaCorreta !== 0) {
         correctSet.add(respostaCorreta);
-      } else if (
-        Array.isArray(respostaCorreta) &&
-        respostaCorreta.length === 1
-      ) {
+      } else if (Array.isArray(respostaCorreta) && respostaCorreta.length === 1) {
         correctSet.add(respostaCorreta[0]);
       }
     } else {
@@ -241,7 +242,7 @@ const CriadorDeCarta: React.FC = () => {
   const parseJSDeckFile = (content: string): Carta[] => {
     const match = content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);/);
     if (!match) {
-      throw new Error("Nao foi possivel encontrar um array exportado no arquivo JS.");
+      throw new Error("Não foi possível encontrar um array exportado no arquivo JS.");
     }
     const arrayStr = match[1];
     const json = JSON.parse(arrayStr) as Carta[];
@@ -263,7 +264,7 @@ const CriadorDeCarta: React.FC = () => {
         } else if (file.name.endsWith(".json")) {
           newCards = JSON.parse(content) as Carta[];
         } else {
-          alert("Formato nao suportado. Use arquivos .js ou .json");
+          alert("Formato não suportado. Use arquivos .js ou .json");
           continue;
         }
         const nome = file.name.replace(/\.(js|json)$/, "");
@@ -510,7 +511,7 @@ const CriadorDeCarta: React.FC = () => {
         if (pos >= 0) {
           op.ordemTemp = String(pos + 1); // 1-based
         } else {
-          op.ordemTemp = "";
+          op.ordemTemp = ""; // Opcional: Definir como "9999" para colocar no final
         }
       });
       // Não alteramos 'respostaCorreta' aqui
@@ -642,8 +643,8 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </ul>
           <p className="text-xs text-gray-500">
-            Ao remover um baralho, cartas nao editadas desse baralho serao removidas do baralho principal.
-            Se &quot;Manter cartas editadas&quot; estiver marcado, cartas editadas permanecem.
+            Ao remover um baralho, cartas não editadas desse baralho serão removidas do baralho principal.
+            Se "Manter cartas editadas" estiver marcado, cartas editadas permanecem.
           </p>
         </div>
       )}
@@ -668,7 +669,7 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Pergunta: 1 correta; MultiplaEscolha: multiplas corretas;
+            Pergunta: 1 correta; MultiplaEscolha: múltiplas corretas;
             Ordem: exibimos input numérico + setinhas (pode ficar vazio);
             Vantagem: todas corretas; Desvantagem: todas erradas; Outras: mistas.
           </p>
@@ -694,7 +695,7 @@ const CriadorDeCarta: React.FC = () => {
               onChange={(e) => setImageType(e.target.value as "clickable" | "hero")}
               className="border p-2 rounded w-full"
             >
-              <option value="clickable">Clicavel (Zoom)</option>
+              <option value="clickable">Clicável (Zoom)</option>
               <option value="hero">Personagem (Hero)</option>
             </select>
           </div>
@@ -710,7 +711,7 @@ const CriadorDeCarta: React.FC = () => {
           </div>
         </div>
         <p className="text-xs text-gray-500">
-          &quot;Clicavel&quot; &rarr; usa Zoom, &quot;Hero&quot; &rarr; imagem centralizada.
+          "Clicável" &rarr; usa Zoom, "Hero" &rarr; imagem centralizada.
         </p>
 
         {/* Pergunta/Descrição */}
@@ -928,7 +929,7 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </ul>
           <p className="text-xs text-gray-500">
-            Se &quot;Travar&quot; estiver ativado, as categorias **não** serão limpas ao criar nova carta.
+            Se "Travar" estiver ativado, as categorias **não** serão limpas ao criar nova carta.
           </p>
         </div>
 
@@ -974,7 +975,7 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </ul>
           <p className="text-xs text-gray-500">
-            Se &quot;Travar&quot; estiver ativado, as fontes **não** serão limpas ao criar nova carta.
+            Se "Travar" estiver ativado, as fontes **não** serão limpas ao criar nova carta.
           </p>
         </div>
 
