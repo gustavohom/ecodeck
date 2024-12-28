@@ -8,13 +8,15 @@ import React, { useState } from "react";
 interface Opcao {
   id: number;
   texto: string;
-  ordemTemp?: number; // Usado em "Ordem" para armazenar posição
+  ordemTemp?: string; 
+  // Agora 'ordemTemp' é string. Se estiver vazio "", significa sem valor.
+// Se o usuário digitar "3", fica "3". Posteriormente transformamos em number.
 }
 
 interface Carta {
   tipo: string;
   titulo: string;
-  pergunta: string; // pode conter <img> etc
+  pergunta: string; 
   opcoes: Opcao[];
   respostaCorreta: number | number[];
   dificuldade: string;
@@ -52,8 +54,8 @@ interface BaralhoCarregado {
 // -------------------------------------------------------------------
 // 2) Componente de Preview Estático (CardStaticView)
 //    - Aceita Pergunta com respostaCorreta: number OU [number]
-//    - Exibe no tipo "Ordem" as opções na ordem original, mas indica
-//      a posição final entre parênteses.
+//    - Exibe no tipo "Ordem" as opções na ordem original, 
+//      mostrando (N) onde N é a posição em respostaCorreta
 // -------------------------------------------------------------------
 const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
   const {
@@ -73,8 +75,8 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
   let renderedOptions: React.ReactNode = null;
 
   if (tipo === "Ordem") {
-    // Mostrar as opções na MESMA ordem do array `opcoes`.
-    // Ao lado, exibir (N) onde N é a posição no array `respostaCorreta`.
+    // Mostramos cada opção na ORDEM em que elas aparecem no array opcoes
+    // e exibimos (N) onde N é a posição final (1-based) em respostaCorreta
     const seq = Array.isArray(respostaCorreta) ? respostaCorreta : [];
 
     renderedOptions = (
@@ -96,12 +98,11 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
     const correctSet = new Set<number>();
 
     if (tipo === "Vantagem") {
-      // todas corretas
       opcoes.forEach((o) => correctSet.add(o.id));
     } else if (tipo === "Desvantagem") {
-      // nenhuma correta (set vazio)
+      // nenhuma correta
     } else if (tipo === "Pergunta") {
-      // Permitir tanto number quanto array de 1 elemento
+      // Se for number ou array[1]
       if (typeof respostaCorreta === "number" && respostaCorreta !== 0) {
         correctSet.add(respostaCorreta);
       } else if (
@@ -111,11 +112,10 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
         correctSet.add(respostaCorreta[0]);
       }
     } else {
-      // MultiplaEscolha ou Outras => array
+      // MultiplaEscolha ou Outras
       if (Array.isArray(respostaCorreta)) {
         respostaCorreta.forEach((x) => correctSet.add(x));
       } else if (respostaCorreta !== 0) {
-        // Caso seja 1 número único num "Outras"
         correctSet.add(respostaCorreta as number);
       }
     }
@@ -194,9 +194,7 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
 // 3) Componente Principal: CriadorDeCarta
 // -------------------------------------------------------------------
 const CriadorDeCarta: React.FC = () => {
-  // Nome do baralho final
   const [deckName, setDeckName] = useState("meu_baralho");
-  // Lista de cartas
   const [cards, setCards] = useState<Carta[]>([]);
 
   // -----------------------------
@@ -237,6 +235,13 @@ const CriadorDeCarta: React.FC = () => {
   // -----------------------------
   // Baralhos externos
   // -----------------------------
+  interface BaralhoCarregado {
+    id: number;
+    nome: string;
+    cartas: Carta[];
+    adicionado: boolean;
+  }
+
   const [baralhosCarregados, setBaralhosCarregados] = useState<BaralhoCarregado[]>([]);
   const [manterCartasEditadas, setManterCartasEditadas] = useState(false);
 
@@ -294,7 +299,7 @@ const CriadorDeCarta: React.FC = () => {
         if (b.id === baralhoId) {
           const newCards = b.cartas.map((c) => ({
             ...c,
-            origBaralhoId: baralhoId,
+            origBaralhoId: b.id,
             edited: false,
           }));
           setCards((oldCards) => [...oldCards, ...newCards]);
@@ -336,7 +341,7 @@ const CriadorDeCarta: React.FC = () => {
         {
           id: old.length + 1,
           texto: novaOpcao,
-          ordemTemp: old.length + 1,
+          ordemTemp: "", // Começamos vazio, o usuário pode digitar manualmente
         },
       ]);
       setNovaOpcao("");
@@ -350,7 +355,6 @@ const CriadorDeCarta: React.FC = () => {
 
   const handleToggleRespostaCorreta = (id: number) => {
     if (tipo === "Pergunta") {
-      // apenas 1 ID
       setRespostaCorreta([id]);
     } else if (tipo === "MultiplaEscolha" || tipo === "Outras") {
       setRespostaCorreta((prev) =>
@@ -359,11 +363,13 @@ const CriadorDeCarta: React.FC = () => {
     }
   };
 
-  // "Ordem": define a posição via input number
-  const handleSetOrder = (optionId: number, position: number) => {
+  // "Ordem": define a posição via input. Permitimos string vazia.
+  const handleSetOrder = (optionId: number, newValue: number | null) => {
     setOpcoes((old) =>
       old.map((op) =>
-        op.id === optionId ? { ...op, ordemTemp: position } : op
+        op.id === optionId
+          ? { ...op, ordemTemp: newValue === null ? "" : String(newValue) }
+          : op
       )
     );
   };
@@ -415,27 +421,24 @@ const CriadorDeCarta: React.FC = () => {
   };
 
   const handleAddOrUpdateCard = () => {
-    let finalRespostaCorreta: number | number[] = respostaCorreta;
-
+    // Converter 'ordemTemp' (string) para number (ou 9999 se vazio)
+    let finalRC: number | number[] = respostaCorreta;
     if (tipo === "Ordem") {
-      // ordenar as opções pelo ordemTemp
+      // ordenar as opções
       const sorted = [...opcoes].sort((a, b) => {
-        const A = a.ordemTemp || 9999;
-        const B = b.ordemTemp || 9999;
-        return A - B;
+        const posA = a.ordemTemp?.trim() ? parseInt(a.ordemTemp, 10) : 9999;
+        const posB = b.ordemTemp?.trim() ? parseInt(b.ordemTemp, 10) : 9999;
+        return posA - posB;
       });
-      finalRespostaCorreta = sorted.map((o) => o.id);
+      finalRC = sorted.map((o) => o.id);
     } else if (tipo === "Vantagem") {
-      // todas corretas
-      finalRespostaCorreta = opcoes.map((o) => o.id);
+      finalRC = opcoes.map((o) => o.id);
     } else if (tipo === "Desvantagem") {
-      // nenhuma correta
-      finalRespostaCorreta = [];
+      finalRC = [];
     } else if (tipo === "Pergunta") {
-      finalRespostaCorreta =
-        respostaCorreta.length > 0 ? respostaCorreta[0] : 0;
+      finalRC = respostaCorreta.length > 0 ? respostaCorreta[0] : 0;
     }
-    // MultiplaEscolha/Outras => array normal
+    // Se MultiplaEscolha ou Outras => array normal
 
     const novaCarta: Carta = {
       tipo,
@@ -450,7 +453,7 @@ const CriadorDeCarta: React.FC = () => {
       imageType,
       imagem,
       opcoes,
-      respostaCorreta: finalRespostaCorreta,
+      respostaCorreta: finalRC,
       dificuldade,
       categorias,
       fontes,
@@ -505,38 +508,32 @@ const CriadorDeCarta: React.FC = () => {
     setImageType(usedHeroStyle ? "hero" : "clickable");
     setPergunta(p.trim());
 
-    setOpcoes(carta.opcoes);
+    // Copiamos as opcoes p/ não mutar
+    const copyOp = carta.opcoes.map((o) => ({ ...o }));
 
-    // Reconstruir respostaCorreta
-    if (carta.tipo === "Ordem") {
-      if (Array.isArray(carta.respostaCorreta)) {
-        const seq = carta.respostaCorreta;
-        const sorted = carta.opcoes.slice().sort(
-          (a, b) => seq.indexOf(a.id) - seq.indexOf(b.id)
-        );
-        const withPos = sorted.map((o, idx) => ({
-          ...o,
-          ordemTemp: idx + 1,
-        }));
-        setOpcoes(withPos);
-      }
-      setRespostaCorreta([]);
+    if (carta.tipo === "Ordem" && Array.isArray(carta.respostaCorreta)) {
+      const seq = carta.respostaCorreta as number[];
+      // Para cada opcao no array original, definimos a pos
+      copyOp.forEach((op) => {
+        const idxPos = seq.indexOf(op.id);
+        if (idxPos >= 0) {
+          // 1-based
+          op.ordemTemp = String(idxPos + 1);
+        } else {
+          op.ordemTemp = "";
+        }
+      });
+      setRespostaCorreta([]); 
     } else if (carta.tipo === "Vantagem") {
       setRespostaCorreta(carta.opcoes.map((o) => o.id));
     } else if (carta.tipo === "Desvantagem") {
       setRespostaCorreta([]);
     } else if (carta.tipo === "Pergunta") {
-      const correctId =
-        typeof carta.respostaCorreta === "number"
-          ? (carta.respostaCorreta as number)
-          : 0;
-      if (correctId !== 0) {
-        setRespostaCorreta([correctId]);
-      } else if (
-        Array.isArray(carta.respostaCorreta) &&
-        carta.respostaCorreta.length === 1
-      ) {
-        setRespostaCorreta([carta.respostaCorreta[0]]);
+      const rc = carta.respostaCorreta;
+      if (typeof rc === "number") {
+        setRespostaCorreta(rc ? [rc] : []);
+      } else if (Array.isArray(rc) && rc.length === 1) {
+        setRespostaCorreta([rc[0]]);
       } else {
         setRespostaCorreta([]);
       }
@@ -547,6 +544,8 @@ const CriadorDeCarta: React.FC = () => {
       setRespostaCorreta(arr.filter((x) => x !== 0));
     }
 
+    setOpcoes(copyOp);
+
     setDificuldade(carta.dificuldade as Dificuldade);
     setCategorias(carta.categorias);
     setFontes(carta.fontes);
@@ -556,7 +555,7 @@ const CriadorDeCarta: React.FC = () => {
   };
 
   const deleteCard = (index: number) => {
-    setCards((oldCards) => oldCards.filter((_, i) => i !== index));
+    setCards((old) => old.filter((_, i) => i !== index));
     if (editIndex === index) {
       resetCarta();
     }
@@ -679,9 +678,8 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Pergunta: 1 correta (pode ser um número ou [número]);
-            MultiplaEscolha: multiplas corretas;
-            Ordem: exibir posicao entre parenteses;
+            Pergunta: 1 correta; MultiplaEscolha: multiplas corretas;  
+            Ordem: exibimos input numérico + setinhas (pode ficar vazio);  
             Vantagem: todas corretas; Desvantagem: todas erradas; Outras: mistas.
           </p>
         </div>
@@ -735,7 +733,7 @@ const CriadorDeCarta: React.FC = () => {
           />
         </div>
 
-        {/* Opções (Pergunta/MultiplaEscolha/Ordem/Outras) */}
+        {/* Opções */}
         {(tipo === "Pergunta" ||
           tipo === "MultiplaEscolha" ||
           tipo === "Ordem" ||
@@ -771,17 +769,25 @@ const CriadorDeCarta: React.FC = () => {
                       <label className="text-sm">Pos:</label>
                       <input
                         type="number"
-                        min={1}
-                        max={opcoes.length}
-                        step={1}
-                        onChange={(e) => handleSetOrder(o.id, Number(e.target.value))}
-                        value={o.ordemTemp || idx + 1}
+                        style={{
+                          MozAppearance: "textfield",
+                          WebkitAppearance: "textfield",
+                          appearance: "auto",
+                        }}
+                        onChange={(e) => {
+                          // Permitir vazio
+                          if (e.target.value === "") {
+                            handleSetOrder(o.id, null);
+                          } else {
+                            handleSetOrder(o.id, Number(e.target.value));
+                          }
+                        }}
+                        value={o.ordemTemp ?? ""}
                         className="border p-1 w-16 rounded text-sm"
                       />
                     </div>
                   )}
 
-                  {/* Se Pergunta/MultiplaEscolha/Outras => Marcar correta */}
                   {(tipo === "Pergunta" ||
                     tipo === "MultiplaEscolha" ||
                     tipo === "Outras") && (
@@ -826,7 +832,6 @@ const CriadorDeCarta: React.FC = () => {
           </div>
         )}
 
-        {/* Opções (Vantagem/Desvantagem) */}
         {(tipo === "Vantagem" || tipo === "Desvantagem") && (
           <div className="bg-gray-50 p-4 rounded space-y-4">
             <h3 className="text-lg font-semibold">Opções</h3>
@@ -1053,9 +1058,19 @@ const CriadorDeCarta: React.FC = () => {
               opcoes,
               respostaCorreta:
                 tipo === "Ordem"
-                  ? [...opcoes]
-                      .sort((a, b) => (a.ordemTemp || 9999) - (b.ordemTemp || 9999))
-                      .map((o) => o.id)
+                  ? (() => {
+                      // Convertemos ordemTemp => number => sort => array
+                      const sorted = [...opcoes].sort((a, b) => {
+                        const posA = a.ordemTemp?.trim()
+                          ? parseInt(a.ordemTemp, 10)
+                          : 9999;
+                        const posB = b.ordemTemp?.trim()
+                          ? parseInt(b.ordemTemp, 10)
+                          : 9999;
+                        return posA - posB;
+                      });
+                      return sorted.map((o) => o.id);
+                    })()
                   : tipo === "Vantagem"
                   ? opcoes.map((o) => o.id)
                   : tipo === "Desvantagem"
@@ -1093,9 +1108,19 @@ const CriadorDeCarta: React.FC = () => {
               opcoes,
               respostaCorreta:
                 tipo === "Ordem"
-                  ? [...opcoes]
-                      .sort((a, b) => (a.ordemTemp || 9999) - (b.ordemTemp || 9999))
-                      .map((o) => o.id)
+                  ? (() => {
+                      // Converte e ordena
+                      const sorted = [...opcoes].sort((a, b) => {
+                        const posA = a.ordemTemp?.trim()
+                          ? parseInt(a.ordemTemp, 10)
+                          : 9999;
+                        const posB = b.ordemTemp?.trim()
+                          ? parseInt(b.ordemTemp, 10)
+                          : 9999;
+                        return posA - posB;
+                      });
+                      return sorted.map((o) => o.id);
+                    })()
                   : tipo === "Vantagem"
                   ? opcoes.map((o) => o.id)
                   : tipo === "Desvantagem"
