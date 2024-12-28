@@ -8,7 +8,7 @@ import React, { useState } from "react";
 interface Opcao {
   id: number;
   texto: string;
-  ordemTemp?: string; // Agora 'ordemTemp' é string. Se estiver vazio "", significa sem valor.
+  ordemTemp?: string; // 'ordemTemp' é string para permitir valores vazios
 }
 
 interface Carta {
@@ -513,7 +513,7 @@ const CriadorDeCarta: React.FC = () => {
           op.ordemTemp = "";
         }
       });
-      setRespostaCorreta([]); // Não necessário para "Ordem"
+      // Não alteramos 'respostaCorreta' aqui
     } else if (carta.tipo === "Vantagem") {
       setRespostaCorreta(carta.opcoes.map((o) => o.id));
     } else if (carta.tipo === "Desvantagem") {
