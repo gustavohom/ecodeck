@@ -644,7 +644,7 @@ const CriadorDeCarta: React.FC = () => {
           </ul>
           <p className="text-xs text-gray-500">
             Ao remover um baralho, cartas não editadas desse baralho serão removidas do baralho principal.
-            Se "Manter cartas editadas" estiver marcado, cartas editadas permanecem.
+            Se Manter cartas editadas estiver marcado, cartas editadas permanecem.
           </p>
         </div>
       )}
@@ -711,7 +711,7 @@ const CriadorDeCarta: React.FC = () => {
           </div>
         </div>
         <p className="text-xs text-gray-500">
-          "Clicável" &rarr; usa Zoom, "Hero" &rarr; imagem centralizada.
+          Clicável &rarr; usa Zoom, Hero &rarr; imagem centralizada.
         </p>
 
         {/* Pergunta/Descrição */}
@@ -929,7 +929,7 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </ul>
           <p className="text-xs text-gray-500">
-            Se "Travar" estiver ativado, as categorias **não** serão limpas ao criar nova carta.
+            Se Travar estiver ativado, as categorias **não** serão limpas ao criar nova carta.
           </p>
         </div>
 
@@ -975,7 +975,7 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </ul>
           <p className="text-xs text-gray-500">
-            Se "Travar" estiver ativado, as fontes **não** serão limpas ao criar nova carta.
+            Se Travar estiver ativado, as fontes **não** serão limpas ao criar nova carta.
           </p>
         </div>
 
