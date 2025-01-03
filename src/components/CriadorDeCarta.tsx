@@ -208,7 +208,7 @@ const CriadorDeCarta: React.FC = () => {
   const [baralhosCarregados, setBaralhosCarregados] = useState<BaralhoCarregado[]>([]);
   const [manterCartasEditadas, setManterCartasEditadas] = useState(false);
 
-  // Função para ler baralhos .js com crases
+  // Faz o parsing de um arquivo .js usando strings multiline com crases
   const parseJSDeckFile = (content: string): Carta[] => {
     const match = content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);/);
     if (!match) {
@@ -391,7 +391,7 @@ const CriadorDeCarta: React.FC = () => {
 
     let computedPergunta = "";
 
-    // Modal-based zoom para imagens clicáveis
+    // Usando crases para multiline
     if (imageType === "clickable" && imagem) {
       computedPergunta = `
 <style>
@@ -400,7 +400,6 @@ const CriadorDeCarta: React.FC = () => {
     display: inline-block;
     cursor: pointer;
   }
-
   .zoom-modal {
     position: fixed;
     top: 0;
@@ -499,7 +498,7 @@ ${pergunta}
     let extractedImage = "";
     let usedHeroStyle = false;
 
-    // Ajustando regex para imagens do modal
+    // Ajustando regex para imagens no modal
     const heroImgRegex = /<img[^>]+style="[^"]+"[^>]*src="([^"]+)"[^>]*>/;
     const modalImgRegex = /<div class="zoom-container"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"[^>]*>[\s\S]*?<\/div>/;
 
@@ -578,6 +577,7 @@ ${pergunta}
 
   const generateCode = () => {
     const deckFinal = prepareForDownload();
+    // Precisamos usar crases caso queira multiline
     const deck = JSON.stringify(deckFinal, null, 2);
     return `const ${deckName} = ${deck};\n\nexport default ${deckName};`;
   };
@@ -768,7 +768,7 @@ ${pergunta}
                           if (value === "") {
                             handleSetOrder(o.id, null);
                           } else {
-                            const num = parseInt(e.target.value, 10);
+                            const num = parseInt(value, 10);
                             if (!isNaN(num)) {
                               handleSetOrder(o.id, num);
                             }
@@ -1094,7 +1094,10 @@ ${pergunta}
 ${pergunta}
 `
                   : imageType === "hero" && imagem
-                  ? `<img src="${imagem}" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="${titulo}" /><br>\n${pergunta}`
+                  ? `
+<img src="${imagem}" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="${titulo}" /><br>
+${pergunta}
+`
                   : pergunta,
               imageType,
               imagem,
@@ -1194,7 +1197,10 @@ ${pergunta}
 ${pergunta}
 `
                   : imageType === "hero" && imagem
-                  ? `<img src="${imagem}" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="${titulo}" /><br>\n${pergunta}`
+                  ? `
+<img src="${imagem}" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="${titulo}" /><br>
+${pergunta}
+`
                   : pergunta,
               imageType,
               imagem,
