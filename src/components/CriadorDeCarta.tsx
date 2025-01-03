@@ -213,8 +213,9 @@ const CriadorDeCarta: React.FC = () => {
       throw new Error("Não foi possível encontrar um array exportado no arquivo JS.");
     }
     const arrayStr = match[1];
-    const json = JSON.parse(arrayStr) as Carta[];
-    return json;
+    // Usando Function para permitir multiline de crases no .js
+    const array = new Function(`return ${arrayStr};`)();
+    return array as Carta[];
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -295,7 +296,7 @@ const CriadorDeCarta: React.FC = () => {
       setOpcoes((old) => [
         ...old,
         {
-          id: old.length > 0 ? Math.max(...old.map(o => o.id)) + 1 : 1,
+          id: old.length > 0 ? Math.max(...old.map((o) => o.id)) + 1 : 1,
           texto: novaOpcao,
           ordemTemp: tipo === "Ordem" ? "" : undefined,
         },
@@ -387,15 +388,35 @@ const CriadorDeCarta: React.FC = () => {
       finalRespostaCorreta = respostaCorreta.length > 0 ? respostaCorreta[0] : 0;
     }
 
+    let computedPergunta = "";
+    if (imageType === "hero" && imagem) {
+      computedPergunta = `
+<img src="${imagem}" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="${titulo}" /><br>
+${pergunta}
+`;
+    } else if (imageType === "clickable" && imagem) {
+      // Inserindo CSS e HTML para zoom
+      computedPergunta = `
+<style>
+  .zoom-image {
+    transition: transform 0.2s;
+    cursor: pointer;
+  }
+  .zoom-image:hover {
+    transform: scale(1.5);
+  }
+</style>
+<img src="${imagem}" alt="${titulo}" class="zoom-image" />
+${pergunta}
+`;
+    } else {
+      computedPergunta = `${pergunta}`;
+    }
+
     const novaCarta: Carta = {
       tipo,
       titulo,
-      pergunta:
-        imageType === "hero" && imagem
-          ? `<img src=\"${imagem}\" style=\"display: block; margin: 0 auto; width: 120px; height: auto;\" alt=\"${titulo}\" /><br>\n${pergunta}`
-          : imagem
-          ? `<img src=\"${imagem}\" alt=\"${titulo}\" class=\"img-media my-4\" />\n` + pergunta
-          : pergunta,
+      pergunta: computedPergunta,
       imageType,
       imagem,
       opcoes,
@@ -436,7 +457,7 @@ const CriadorDeCarta: React.FC = () => {
     let usedHeroStyle = false;
 
     const heroImgRegex = /<img[^>]+style="[^"]+"[^>]*src="([^"]+)"[^>]*>/;
-    const clickableImgRegex = /<img[^>]+class="[^"]+"[^>]*src="([^"]+)"[^>]*>/;
+    const clickableImgRegex = /<img[^>]+class="zoom-image"[^>]*src="([^"]+)"[^>]*>/;
 
     const heroMatch = p.match(heroImgRegex);
     const clickableMatch = p.match(clickableImgRegex);
@@ -609,9 +630,9 @@ const CriadorDeCarta: React.FC = () => {
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Pergunta: 1 correta; MultiplaEscolha: múltiplas corretas;
-            Ordem: exibimos input numérico + setinhas (pode ficar vazio);
-            Vantagem: todas corretas; Desvantagem: todas erradas; Outras: mistas.
+            Pergunta: 1 correta; MultiplaEscolha: múltiplas corretas; Ordem: 
+            precisa de numeração; Vantagem: todas corretas; Desvantagem: todas 
+            erradas; Outras: mistas ou livres.
           </p>
         </div>
 
@@ -649,7 +670,7 @@ const CriadorDeCarta: React.FC = () => {
           </div>
         </div>
         <p className="text-xs text-gray-500">
-          Clicável &rarr; usa Zoom, Hero &rarr; imagem centralizada.
+          Clicável → adiciona CSS de zoom, Hero → imagem centralizada.
         </p>
 
         <div>
@@ -975,9 +996,19 @@ const CriadorDeCarta: React.FC = () => {
               titulo,
               pergunta:
                 imageType === "hero" && imagem
-                  ? `<img src=\"${imagem}\" style=\"display: block; margin: 0 auto; width: 120px; height: auto;\" alt=\"${titulo}\" /><br>\n${pergunta}`
-                  : imagem
-                  ? `<img src=\"${imagem}\" alt=\"${titulo}\" class=\"img-media my-4\" />\n${pergunta}`
+                  ? `<img src="${imagem}" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="${titulo}" /><br>\n${pergunta}`
+                  : imageType === "clickable" && imagem
+                  ? `<style>
+  .zoom-image {
+    transition: transform 0.2s;
+    cursor: pointer;
+  }
+  .zoom-image:hover {
+    transform: scale(1.5);
+  }
+</style>
+<img src="${imagem}" alt="${titulo}" class="zoom-image" />
+${pergunta}`
                   : pergunta,
               imageType,
               imagem,
@@ -1023,9 +1054,19 @@ const CriadorDeCarta: React.FC = () => {
               titulo,
               pergunta:
                 imageType === "hero" && imagem
-                  ? `<img src=\"${imagem}\" style=\"display: block; margin: 0 auto; width: 120px; height: auto;\" alt=\"${titulo}\" /><br>\n${pergunta}`
-                  : imagem
-                  ? `<img src=\"${imagem}\" alt=\"${titulo}\" class=\"img-media my-4\" />\n${pergunta}`
+                  ? `<img src="${imagem}" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="${titulo}" /><br>\n${pergunta}`
+                  : imageType === "clickable" && imagem
+                  ? `<style>
+  .zoom-image {
+    transition: transform 0.2s;
+    cursor: pointer;
+  }
+  .zoom-image:hover {
+    transform: scale(1.5);
+  }
+</style>
+<img src="${imagem}" alt="${titulo}" class="zoom-image" />
+${pergunta}`
                   : pergunta,
               imageType,
               imagem,
