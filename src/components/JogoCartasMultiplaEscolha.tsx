@@ -166,8 +166,8 @@ function parseJSDeckFile(content: string): Carta[] {
     throw new Error("Não foi possível encontrar um array exportado no arquivo JS.");
   }
   const arrayStr = match[1];
-  const json = JSON.parse(arrayStr) as Carta[];
-  return json;
+  const array = new Function(`return ${arrayStr};`)();
+  return array as Carta[];
 }
 
 function recalcularCategorias(baseCards: Carta[], decks: CustomDeck[]) {
