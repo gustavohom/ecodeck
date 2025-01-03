@@ -89,6 +89,7 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
     if (tipo === "Vantagem") {
       opcoes.forEach((o) => correctSet.add(o.id));
     } else if (tipo === "Desvantagem") {
+      // Todas as opções são incorretas
     } else if (tipo === "Pergunta") {
       if (typeof respostaCorreta === "number" && respostaCorreta !== 0) {
         correctSet.add(respostaCorreta);
@@ -207,13 +208,13 @@ const CriadorDeCarta: React.FC = () => {
   const [baralhosCarregados, setBaralhosCarregados] = useState<BaralhoCarregado[]>([]);
   const [manterCartasEditadas, setManterCartasEditadas] = useState(false);
 
+  // Função para ler baralhos .js com crases
   const parseJSDeckFile = (content: string): Carta[] => {
     const match = content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);/);
     if (!match) {
       throw new Error("Não foi possível encontrar um array exportado no arquivo JS.");
     }
     const arrayStr = match[1];
-    // Usando Function para permitir multiline de crases no .js
     const array = new Function(`return ${arrayStr};`)();
     return array as Carta[];
   };
@@ -389,24 +390,66 @@ const CriadorDeCarta: React.FC = () => {
     }
 
     let computedPergunta = "";
-    if (imageType === "hero" && imagem) {
-      computedPergunta = `
-<img src="${imagem}" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="${titulo}" /><br>
-${pergunta}
-`;
-    } else if (imageType === "clickable" && imagem) {
-      // Inserindo CSS e HTML para zoom
+
+    // Modal-based zoom para imagens clicáveis
+    if (imageType === "clickable" && imagem) {
       computedPergunta = `
 <style>
-  .zoom-image {
-    transition: transform 0.2s;
+  .zoom-container {
+    position: relative;
+    display: inline-block;
     cursor: pointer;
   }
-  .zoom-image:hover {
-    transform: scale(1.5);
+
+  .zoom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,0,0.8);
+    z-index: 9999;
+  }
+  .zoom-modal-content {
+    max-width: 90%;
+    max-height: 90%;
+    position: relative;
+  }
+  .zoom-modal-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+  .zoom-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: white;
+    font-size: 2rem;
+    text-decoration: none;
+    cursor: pointer;
   }
 </style>
-<img src="${imagem}" alt="${titulo}" class="zoom-image" />
+
+<div class="zoom-container" onclick="document.getElementById('zoomModal').style.display='flex'">
+  <img src="${imagem}" alt="${titulo}" style="width: 200px; height: auto;" />
+</div>
+
+<div id="zoomModal" class="zoom-modal" onclick="this.style.display='none'">
+  <div class="zoom-modal-content" onclick="event.stopPropagation()">
+    <a class="zoom-modal-close" onclick="document.getElementById('zoomModal').style.display='none'">&times;</a>
+    <img src="${imagem}" alt="${titulo}" />
+  </div>
+</div>
+
+${pergunta}
+`;
+    } else if (imageType === "hero" && imagem) {
+      computedPergunta = `
+<img src="${imagem}" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="${titulo}" /><br>
 ${pergunta}
 `;
     } else {
@@ -456,19 +499,20 @@ ${pergunta}
     let extractedImage = "";
     let usedHeroStyle = false;
 
+    // Ajustando regex para imagens do modal
     const heroImgRegex = /<img[^>]+style="[^"]+"[^>]*src="([^"]+)"[^>]*>/;
-    const clickableImgRegex = /<img[^>]+class="zoom-image"[^>]*src="([^"]+)"[^>]*>/;
+    const modalImgRegex = /<div class="zoom-container"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"[^>]*>[\s\S]*?<\/div>/;
 
     const heroMatch = p.match(heroImgRegex);
-    const clickableMatch = p.match(clickableImgRegex);
+    const modalMatch = p.match(modalImgRegex);
 
     if (heroMatch) {
       usedHeroStyle = true;
       extractedImage = heroMatch[1];
       p = p.replace(heroMatch[0], "");
-    } else if (clickableMatch) {
-      extractedImage = clickableMatch[1];
-      p = p.replace(clickableMatch[0], "");
+    } else if (modalMatch) {
+      extractedImage = modalMatch[1];
+      p = p.replace(modalMatch[0], "");
     }
 
     setImagem(extractedImage);
@@ -630,8 +674,8 @@ ${pergunta}
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Pergunta: 1 correta; MultiplaEscolha: múltiplas corretas; Ordem: 
-            precisa de numeração; Vantagem: todas corretas; Desvantagem: todas 
+            Pergunta: 1 correta; MultiplaEscolha: múltiplas corretas; Ordem:
+            precisa de numeração; Vantagem: todas corretas; Desvantagem: todas
             erradas; Outras: mistas ou livres.
           </p>
         </div>
@@ -654,7 +698,7 @@ ${pergunta}
               onChange={(e) => setImageType(e.target.value as "clickable" | "hero")}
               className="border p-2 rounded w-full"
             >
-              <option value="clickable">Clicável (Zoom)</option>
+              <option value="clickable">Clicável (Modal)</option>
               <option value="hero">Personagem (Hero)</option>
             </select>
           </div>
@@ -670,7 +714,7 @@ ${pergunta}
           </div>
         </div>
         <p className="text-xs text-gray-500">
-          Clicável → adiciona CSS de zoom, Hero → imagem centralizada.
+          Clicável → abre modal de zoom, Hero → imagem centralizada.
         </p>
 
         <div>
@@ -724,7 +768,7 @@ ${pergunta}
                           if (value === "") {
                             handleSetOrder(o.id, null);
                           } else {
-                            const num = parseInt(value, 10);
+                            const num = parseInt(e.target.value, 10);
                             if (!isNaN(num)) {
                               handleSetOrder(o.id, num);
                             }
@@ -995,20 +1039,62 @@ ${pergunta}
               tipo,
               titulo,
               pergunta:
-                imageType === "hero" && imagem
-                  ? `<img src="${imagem}" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="${titulo}" /><br>\n${pergunta}`
-                  : imageType === "clickable" && imagem
-                  ? `<style>
-  .zoom-image {
-    transition: transform 0.2s;
+                imageType === "clickable" && imagem
+                  ? `
+<style>
+  .zoom-container {
+    position: relative;
+    display: inline-block;
     cursor: pointer;
   }
-  .zoom-image:hover {
-    transform: scale(1.5);
+  .zoom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,0,0.8);
+    z-index: 9999;
+  }
+  .zoom-modal-content {
+    max-width: 90%;
+    max-height: 90%;
+    position: relative;
+  }
+  .zoom-modal-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+  .zoom-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: white;
+    font-size: 2rem;
+    text-decoration: none;
+    cursor: pointer;
   }
 </style>
-<img src="${imagem}" alt="${titulo}" class="zoom-image" />
-${pergunta}`
+
+<div class="zoom-container" onclick="document.getElementById('zoomModal').style.display='flex'">
+  <img src="${imagem}" alt="${titulo}" style="width: 200px; height: auto;" />
+</div>
+
+<div id="zoomModal" class="zoom-modal" onclick="this.style.display='none'">
+  <div class="zoom-modal-content" onclick="event.stopPropagation()">
+    <a class="zoom-modal-close" onclick="document.getElementById('zoomModal').style.display='none'">&times;</a>
+    <img src="${imagem}" alt="${titulo}" />
+  </div>
+</div>
+
+${pergunta}
+`
+                  : imageType === "hero" && imagem
+                  ? `<img src="${imagem}" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="${titulo}" /><br>\n${pergunta}`
                   : pergunta,
               imageType,
               imagem,
@@ -1053,20 +1139,62 @@ ${pergunta}`
               tipo,
               titulo,
               pergunta:
-                imageType === "hero" && imagem
-                  ? `<img src="${imagem}" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="${titulo}" /><br>\n${pergunta}`
-                  : imageType === "clickable" && imagem
-                  ? `<style>
-  .zoom-image {
-    transition: transform 0.2s;
+                imageType === "clickable" && imagem
+                  ? `
+<style>
+  .zoom-container {
+    position: relative;
+    display: inline-block;
     cursor: pointer;
   }
-  .zoom-image:hover {
-    transform: scale(1.5);
+  .zoom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,0,0.8);
+    z-index: 9999;
+  }
+  .zoom-modal-content {
+    max-width: 90%;
+    max-height: 90%;
+    position: relative;
+  }
+  .zoom-modal-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+  .zoom-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: white;
+    font-size: 2rem;
+    text-decoration: none;
+    cursor: pointer;
   }
 </style>
-<img src="${imagem}" alt="${titulo}" class="zoom-image" />
-${pergunta}`
+
+<div class="zoom-container" onclick="document.getElementById('zoomModal').style.display='flex'">
+  <img src="${imagem}" alt="${titulo}" style="width: 200px; height: auto;" />
+</div>
+
+<div id="zoomModal" class="zoom-modal" onclick="this.style.display='none'">
+  <div class="zoom-modal-content" onclick="event.stopPropagation()">
+    <a class="zoom-modal-close" onclick="document.getElementById('zoomModal').style.display='none'">&times;</a>
+    <img src="${imagem}" alt="${titulo}" />
+  </div>
+</div>
+
+${pergunta}
+`
+                  : imageType === "hero" && imagem
+                  ? `<img src="${imagem}" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="${titulo}" /><br>\n${pergunta}`
                   : pergunta,
               imageType,
               imagem,
