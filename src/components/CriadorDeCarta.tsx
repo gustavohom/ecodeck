@@ -208,7 +208,6 @@ const CriadorDeCarta: React.FC = () => {
   const [baralhosCarregados, setBaralhosCarregados] = useState<BaralhoCarregado[]>([]);
   const [manterCartasEditadas, setManterCartasEditadas] = useState(false);
 
-  // Faz o parsing de um arquivo .js usando strings multiline com crases
   const parseJSDeckFile = (content: string): Carta[] => {
     const match = content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);/);
     if (!match) {
@@ -391,7 +390,6 @@ const CriadorDeCarta: React.FC = () => {
 
     let computedPergunta = "";
 
-    // Usando crases para multiline
     if (imageType === "clickable" && imagem) {
       computedPergunta = `
 <style>
@@ -399,6 +397,8 @@ const CriadorDeCarta: React.FC = () => {
     position: relative;
     display: inline-block;
     cursor: pointer;
+    text-align: center; 
+    margin-bottom: 1em;
   }
   .zoom-modal {
     position: fixed;
@@ -411,20 +411,26 @@ const CriadorDeCarta: React.FC = () => {
     justify-content: center;
     background-color: rgba(0,0,0,0.8);
     z-index: 9999;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .zoom-modal-content {
+    margin: 1rem auto;
     max-width: 90%;
-    max-height: 90%;
+    max-height: 100%;
     position: relative;
   }
   .zoom-modal-content img {
-    width: 100%;
+    display: block;
+    margin: auto;
+    width: auto;
+    max-width: 100%;
     height: auto;
-    border-radius: 4px;
+    object-fit: contain;
   }
   .zoom-modal-close {
     position: absolute;
-    top: 1rem;
+    top: 0.5rem;
     right: 1rem;
     color: white;
     font-size: 2rem;
@@ -434,7 +440,7 @@ const CriadorDeCarta: React.FC = () => {
 </style>
 
 <div class="zoom-container" onclick="document.getElementById('zoomModal').style.display='flex'">
-  <img src="${imagem}" alt="${titulo}" style="width: 200px; height: auto;" />
+  <img src="${imagem}" alt="${titulo}" style="width: 300px; height: auto; display: block; margin: 0 auto;" />
 </div>
 
 <div id="zoomModal" class="zoom-modal" onclick="this.style.display='none'">
@@ -498,7 +504,6 @@ ${pergunta}
     let extractedImage = "";
     let usedHeroStyle = false;
 
-    // Ajustando regex para imagens no modal
     const heroImgRegex = /<img[^>]+style="[^"]+"[^>]*src="([^"]+)"[^>]*>/;
     const modalImgRegex = /<div class="zoom-container"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"[^>]*>[\s\S]*?<\/div>/;
 
@@ -577,7 +582,6 @@ ${pergunta}
 
   const generateCode = () => {
     const deckFinal = prepareForDownload();
-    // Precisamos usar crases caso queira multiline
     const deck = JSON.stringify(deckFinal, null, 2);
     return `const ${deckName} = ${deck};\n\nexport default ${deckName};`;
   };
@@ -1046,6 +1050,8 @@ ${pergunta}
     position: relative;
     display: inline-block;
     cursor: pointer;
+    text-align: center; 
+    margin-bottom: 1em;
   }
   .zoom-modal {
     position: fixed;
@@ -1058,20 +1064,26 @@ ${pergunta}
     justify-content: center;
     background-color: rgba(0,0,0,0.8);
     z-index: 9999;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .zoom-modal-content {
+    margin: 1rem auto;
     max-width: 90%;
-    max-height: 90%;
+    max-height: 100%;
     position: relative;
   }
   .zoom-modal-content img {
-    width: 100%;
+    display: block;
+    margin: auto;
+    width: auto;
+    max-width: 100%;
     height: auto;
-    border-radius: 4px;
+    object-fit: contain;
   }
   .zoom-modal-close {
     position: absolute;
-    top: 1rem;
+    top: 0.5rem;
     right: 1rem;
     color: white;
     font-size: 2rem;
@@ -1081,7 +1093,7 @@ ${pergunta}
 </style>
 
 <div class="zoom-container" onclick="document.getElementById('zoomModal').style.display='flex'">
-  <img src="${imagem}" alt="${titulo}" style="width: 200px; height: auto;" />
+  <img src="${imagem}" alt="${titulo}" style="width: 300px; height: auto; display: block; margin: 0 auto;" />
 </div>
 
 <div id="zoomModal" class="zoom-modal" onclick="this.style.display='none'">
@@ -1149,6 +1161,8 @@ ${pergunta}
     position: relative;
     display: inline-block;
     cursor: pointer;
+    text-align: center; 
+    margin-bottom: 1em;
   }
   .zoom-modal {
     position: fixed;
@@ -1161,20 +1175,26 @@ ${pergunta}
     justify-content: center;
     background-color: rgba(0,0,0,0.8);
     z-index: 9999;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .zoom-modal-content {
+    margin: 1rem auto;
     max-width: 90%;
-    max-height: 90%;
+    max-height: 100%;
     position: relative;
   }
   .zoom-modal-content img {
-    width: 100%;
+    display: block;
+    margin: auto;
+    width: auto;
+    max-width: 100%;
     height: auto;
-    border-radius: 4px;
+    object-fit: contain;
   }
   .zoom-modal-close {
     position: absolute;
-    top: 1rem;
+    top: 0.5rem;
     right: 1rem;
     color: white;
     font-size: 2rem;
@@ -1184,7 +1204,7 @@ ${pergunta}
 </style>
 
 <div class="zoom-container" onclick="document.getElementById('zoomModal').style.display='flex'">
-  <img src="${imagem}" alt="${titulo}" style="width: 200px; height: auto;" />
+  <img src="${imagem}" alt="${titulo}" style="width: 300px; height: auto; display: block; margin: 0 auto;" />
 </div>
 
 <div id="zoomModal" class="zoom-modal" onclick="this.style.display='none'">
