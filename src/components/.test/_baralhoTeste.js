@@ -1,278 +1,353 @@
-const _baralhoTeste = [
+const meu_baralho = [
   {
     "tipo": "Pergunta",
-    "titulo": "Pergunta com Imagem",
-    "pergunta": "<img src=\"/images/pergunta1.jpg\" alt=\"Pergunta 1\" class=\"img-media my-4\" /><br>Qual é o principal elemento natural?",
+    "titulo": "Pergunta 1",
+    "pergunta": "<img src=\"/7.jpg\" alt=\"Pergunta 1\" class=\"img-media my-4\" />\nPergunta com imagem e facil",
     "imageType": "clickable",
-    "imagem": "/images/pergunta1.jpg",
+    "imagem": "",
     "opcoes": [
-      { "id": 1, "texto": "Fogo" },
-      { "id": 2, "texto": "Água" },
-      { "id": 3, "texto": "Terra" },
-      { "id": 4, "texto": "Ar" }
+      {
+        "id": 1,
+        "texto": "errado"
+      },
+      {
+        "id": 2,
+        "texto": "errado"
+      },
+      {
+        "id": 3,
+        "texto": "certo"
+      },
+      {
+        "id": 4,
+        "texto": "errado"
+      }
+    ],
+    "respostaCorreta": 3,
+    "dificuldade": "facil",
+    "categorias": [
+      "_baralhoTeste"
+    ],
+    "fontes": [
+      "fonte 1",
+      "fonte 2",
+      "fonte 3"
+    ],
+    "vantagem": "Vant",
+    "desvantagem": "Desvant",
+    "dica": "Dica"
+  },
+  {
+    "tipo": "Pergunta",
+    "titulo": "Pergunta 2",
+    "pergunta": "<img src=\"/7.jpg\" style=\"display: block; margin: 0 auto; width: 120px; height: auto;\" alt=\"Pergunta 2\" /><br>\nPergunta com carta hero normal",
+    "imageType": "clickable",
+    "imagem": "",
+    "opcoes": [
+      {
+        "id": 1,
+        "texto": "errado"
+      },
+      {
+        "id": 2,
+        "texto": "correto"
+      }
     ],
     "respostaCorreta": 2,
-    "dificuldade": "facil",
-    "categorias": ["_baralhoTeste"],
-    "fontes": ["Fonte A"],
-    "vantagem": "Você ganha 10 pontos!",
-    "desvantagem": "Sem bônus.",
-    "dica": "Pense nos elementos naturais."
+    "dificuldade": "normal",
+    "categorias": [
+      "_baralhoTeste"
+    ],
+    "fontes": [
+      "fonte 1",
+      "fonte 2",
+      "fonte 3"
+    ],
+    "vantagem": "vant",
+    "desvantagem": "desv",
+    "dica": "dica"
   },
   {
     "tipo": "MultiplaEscolha",
-    "titulo": "Multipla Escolha com Imagem",
-    "pergunta": "<img src=\"/images/multipla1.jpg\" alt=\"Multipla 1\" class=\"img-media my-4\" /><br>Quais destes são fontes de energia renovável?",
+    "titulo": "Multipla Escolha 3",
+    "pergunta": "Multipla escolha dificil",
     "imageType": "clickable",
-    "imagem": "/images/multipla1.jpg",
+    "imagem": "",
     "opcoes": [
-      { "id": 1, "texto": "Energia solar" },
-      { "id": 2, "texto": "Energia eólica" },
-      { "id": 3, "texto": "Carvão" },
-      { "id": 4, "texto": "Petróleo" }
+      {
+        "id": 1,
+        "texto": "errada"
+      },
+      {
+        "id": 2,
+        "texto": "certa"
+      },
+      {
+        "id": 3,
+        "texto": "certa"
+      },
+      {
+        "id": 4,
+        "texto": "errada"
+      }
     ],
-    "respostaCorreta": [1, 2],
+    "respostaCorreta": [
+      2,
+      3
+    ],
     "dificuldade": "dificil",
-    "categorias": ["_baralhoTeste"],
-    "fontes": ["Fonte B"],
-    "vantagem": "Bônus de 20 pontos!",
-    "desvantagem": "Sem bônus se errar.",
-    "dica": "Energia solar e eólica são renováveis."
+    "categorias": [
+      "_baralhoTeste"
+    ],
+    "fontes": [
+      "fonte 1",
+      "fonte 2",
+      "fonte 3"
+    ],
+    "vantagem": "vant",
+    "desvantagem": "desv",
+    "dica": "dica"
   },
   {
     "tipo": "Ordem",
-    "titulo": "Carta de Ordem",
-    "pergunta": "Organize as etapas da reciclagem corretamente.",
+    "titulo": "Ordem 4",
+    "pergunta": "carta ordem dificil",
     "imageType": "clickable",
-    "imagem": "/images/ordem1.jpg",
+    "imagem": "",
     "opcoes": [
-      { "id": 1, "texto": "Coleta", "ordemTemp": "1" },
-      { "id": 2, "texto": "Triagem", "ordemTemp": "2" },
-      { "id": 3, "texto": "Processamento", "ordemTemp": "3" },
-      { "id": 4, "texto": "Reutilização", "ordemTemp": "4" }
+      {
+        "id": 1,
+        "texto": "quatro",
+        "ordemTemp": "4"
+      },
+      {
+        "id": 2,
+        "texto": "dois",
+        "ordemTemp": "2"
+      },
+      {
+        "id": 3,
+        "texto": "um",
+        "ordemTemp": "1"
+      },
+      {
+        "id": 4,
+        "texto": "tres",
+        "ordemTemp": "3"
+      }
     ],
-    "respostaCorreta": [1, 2, 3, 4],
-    "dificuldade": "normal",
-    "categorias": ["_baralhoTeste"],
-    "fontes": ["Fonte C"],
-    "vantagem": "Você ganha pontos extras!",
-    "desvantagem": "Nenhum bônus adicional.",
-    "dica": "Siga a sequência lógica dos processos."
+    "respostaCorreta": [
+      3,
+      2,
+      4,
+      1
+    ],
+    "dificuldade": "dificil",
+    "categorias": [
+      "_baralhoTeste"
+    ],
+    "fontes": [
+      "fonte 1",
+      "fonte 2",
+      "fonte 3"
+    ],
+    "vantagem": "vant",
+    "desvantagem": "desv",
+    "dica": "dica"
+  },
+  {
+    "tipo": "Ordem",
+    "titulo": "carta ordem reaproveitada 5",
+    "pergunta": "<img src=\"/9.jpg\" alt=\"carta ordem\" class=\"img-media my-4\" />\nVeja se imagem deu certo",
+    "imageType": "clickable",
+    "imagem": "",
+    "opcoes": [
+      {
+        "id": 1,
+        "texto": "dois",
+        "ordemTemp": "2"
+      },
+      {
+        "id": 2,
+        "texto": "tres",
+        "ordemTemp": "3"
+      },
+      {
+        "id": 3,
+        "texto": "um",
+        "ordemTemp": "1"
+      },
+      {
+        "id": 4,
+        "texto": "quatro",
+        "ordemTemp": "4"
+      }
+    ],
+    "respostaCorreta": [
+      3,
+      1,
+      2,
+      4
+    ],
+    "dificuldade": "dificil",
+    "categorias": [
+      "_baralhoTeste"
+    ],
+    "fontes": [],
+    "vantagem": "vat",
+    "desvantagem": "devat",
+    "dica": "dic"
   },
   {
     "tipo": "Vantagem",
-    "titulo": "Carta de Vantagem",
-    "pergunta": "Ganhe um bônus especial!",
+    "titulo": "Vantagem simples 6",
+    "pergunta": "Uma unica alternativa",
     "imageType": "clickable",
-    "imagem": "/images/vantagem.jpg",
+    "imagem": "",
     "opcoes": [
-      { "id": 1, "texto": "Utilize esta vantagem" }
+      {
+        "id": 1,
+        "texto": "Certa"
+      }
     ],
-    "respostaCorreta": 1,
+    "respostaCorreta": [
+      1
+    ],
     "dificuldade": "facil",
-    "categorias": ["_baralhoTeste"],
+    "categorias": [
+      "_baralhoTeste"
+    ],
     "fontes": [],
-    "vantagem": "Bônus de pontos!",
+    "vantagem": "",
     "desvantagem": "",
     "dica": ""
   },
   {
-    "tipo": "Desvantagem",
-    "titulo": "Carta de Desvantagem",
-    "pergunta": "Sofra uma penalidade!",
+    "tipo": "Vantagem",
+    "titulo": "Vantagem dupla 7",
+    "pergunta": "Duas vantagens",
     "imageType": "clickable",
-    "imagem": "/images/desvantagem.jpg",
+    "imagem": "",
     "opcoes": [
-      { "id": 1, "texto": "Perda de pontos" },
-      { "id": 2, "texto": "Retrocesso" }
+      {
+        "id": 1,
+        "texto": "Certa"
+      },
+      {
+        "id": 2,
+        "texto": "Certa 2"
+      }
+    ],
+    "respostaCorreta": [
+      1,
+      2
+    ],
+    "dificuldade": "facil",
+    "categorias": [
+      "_baralhoTeste"
+    ],
+    "fontes": [
+      "Fonte"
+    ],
+    "vantagem": "vant",
+    "desvantagem": "desv",
+    "dica": "dica"
+  },
+  {
+    "tipo": "Desvantagem",
+    "titulo": "Desvantagem Simples 8",
+    "pergunta": "",
+    "imageType": "clickable",
+    "imagem": "",
+    "opcoes": [
+      {
+        "id": 1,
+        "texto": "Errada 1"
+      },
+      {
+        "id": 2,
+        "texto": "Errada 2"
+      }
     ],
     "respostaCorreta": [],
     "dificuldade": "facil",
-    "categorias": ["_baralhoTeste"],
-    "fontes": [],
-    "vantagem": "",
-    "desvantagem": "Perde 10 pontos",
-    "dica": ""
+    "categorias": [
+      "_baralhoTeste"
+    ],
+    "fontes": [
+      "Fonte"
+    ],
+    "vantagem": "vant",
+    "desvantagem": "desv",
+    "dica": "dica"
   },
   {
     "tipo": "Outras",
-    "titulo": "Carta Outras",
-    "pergunta": "Esta carta possui regras especiais.",
+    "titulo": "Outras 9",
+    "pergunta": "Outras dificil",
     "imageType": "clickable",
-    "imagem": "/images/outras.jpg",
+    "imagem": "",
     "opcoes": [
-      { "id": 1, "texto": "Opção especial" },
-      { "id": 2, "texto": "Outra opção" }
-    ],
-    "respostaCorreta": [1],
-    "dificuldade": "normal",
-    "categorias": ["_baralhoTeste"],
-    "fontes": [],
-    "vantagem": "Efeito especial ativado!",
-    "desvantagem": "Nenhum efeito negativo.",
-    "dica": ""
-  },
-  {
-    "tipo": "Quiz",
-    "titulo": "Quiz Card Example",
-    "pergunta": "Responda o máximo de perguntas possíveis!",
-    "imageType": "clickable",
-    "imagem": "/images/quiz.jpg",
-    "opcoes": [],
-    "dificuldade": "normal",
-    "categorias": ["_quiz"],
-    "fontes": [],
-    "vantagem": "Bônus por agilidade!",
-    "desvantagem": "Tempo esgotado!",
-    "dica": "",
-    "tempo": 30,
-    "microperguntas": [
       {
-        "pergunta": "Qual é a cor predominante da natureza?",
-        "opcoes": [
-          { "id": 1, "texto": "Azul" },
-          { "id": 2, "texto": "Verde" },
-          { "id": 3, "texto": "Amarelo" }
-        ],
-        "respostaCorreta": 2
+        "id": 1,
+        "texto": "Certa"
       },
       {
-        "pergunta": "Qual destes é uma fonte de energia renovável?",
-        "opcoes": [
-          { "id": 1, "texto": "Carvão" },
-          { "id": 2, "texto": "Energia solar" },
-          { "id": 3, "texto": "Petróleo" }
-        ],
-        "respostaCorreta": 2
+        "id": 2,
+        "texto": "Errada"
       }
-    ]
+    ],
+    "respostaCorreta": [
+      1
+    ],
+    "dificuldade": "dificil",
+    "categorias": [
+      "_baralhoTeste"
+    ],
+    "fontes": [
+      "Fonte"
+    ],
+    "vantagem": "vant",
+    "desvantagem": "desv",
+    "dica": "dica"
   },
   {
-    "tipo": "RiskReward",
-    "titulo": "Risk/Reward Card Example",
-    "pergunta": "Escolha sua aposta:",
+    "tipo": "Ordem",
+    "titulo": "carta ordem reaproveita integralmente 10",
+    "pergunta": "<img src=\"/9.jpg\" alt=\"carta ordem\" class=\"img-media my-4\" />\nVeja se imagem deu certo",
     "imageType": "clickable",
-    "imagem": "/images/riskreward.jpg",
-    "opcoes": [],
-    "dificuldade": "normal",
-    "categorias": ["_riskreward"],
-    "fontes": [],
-    "vantagem": "Aposta alta gera mais pontos!",
-    "desvantagem": "Errar perde a aposta.",
-    "dica": "",
-    "alternativasAposta": ["Baixa", "Média", "Alta"],
-    "respostaCorreta": 1
-  },
-  {
-    "tipo": "Time",
-    "titulo": "Time Card Example",
-    "pergunta": "Liste animais com a letra C",
-    "imageType": "clickable",
-    "imagem": "/images/time.jpg",
-    "opcoes": [],
-    "dificuldade": "normal",
-    "categorias": ["_time"],
-    "fontes": [],
-    "vantagem": "Ganhe pontos por cada animal correto!",
-    "desvantagem": "Perde pontos se errar.",
-    "dica": "",
-    "tempo": 60
-  },
-  {
-    "tipo": "Rally",
-    "titulo": "Rally Card Example",
-    "pergunta": "Qual dessas não é uma árvore?",
-    "imageType": "clickable",
-    "imagem": "/images/rally.jpg",
+    "imagem": "",
     "opcoes": [
-      { "id": 1, "texto": "Pinheiro" },
-      { "id": 2, "texto": "Carvalho" },
-      { "id": 3, "texto": "Bicicleta" }
+      {
+        "id": 1,
+        "texto": "dois",
+        "ordemTemp": "2"
+      },
+      {
+        "id": 2,
+        "texto": "tres",
+        "ordemTemp": "3"
+      },
+      {
+        "id": 3,
+        "texto": "um",
+        "ordemTemp": "1"
+      }
     ],
-    "respostaCorreta": 3,
-    "dificuldade": "normal",
-    "categorias": ["_rally"],
-    "fontes": [],
-    "vantagem": "Cada acerto vale 1 ponto!",
-    "desvantagem": "Errar encerra o rally.",
-    "dica": "",
-    "tempo": 20
-  },
-  {
-    "tipo": "Memory",
-    "titulo": "Memory Card Example",
-    "pergunta": "Memorize a seguinte sequência:",
-    "imageType": "clickable",
-    "imagem": "/images/memory.jpg",
-    "opcoes": [],
-    "dificuldade": "facil",
-    "categorias": ["_memory"],
-    "fontes": [],
-    "vantagem": "Bônus se lembrar da sequência completa!",
-    "desvantagem": "Erros reduzem pontos.",
-    "dica": "",
-    "sequencia": ["Sol", "Água", "Terra"]
-  },
-  {
-    "tipo": "WordAssociation",
-    "titulo": "Word Association Example",
-    "pergunta": "Associe os termos corretamente",
-    "imageType": "clickable",
-    "imagem": "/images/wordassoc.jpg",
-    "opcoes": [
-      { "id": 1, "texto": "DAP", "colunaCorreta": 2 },
-      { "id": 2, "texto": "ÁREA BASAL", "colunaCorreta": 2 },
-      { "id": 3, "texto": "ALTURA", "colunaCorreta": 1 },
-      { "id": 4, "texto": "COPA", "colunaCorreta": 1 }
+    "respostaCorreta": [
+      3,
+      1,
+      2
     ],
-    "respostaCorreta": 1,
-    "dificuldade": "normal",
-    "categorias": ["_wordassociation"],
-    "fontes": [],
-    "vantagem": "Associe corretamente para ganhar pontos!",
-    "desvantagem": "Associações erradas não pontuam.",
-    "dica": "",
-    "coluna1Titulo": "Estrutura Vertical",
-    "coluna2Titulo": "Estrutura Horizontal"
-  },
-  {
-    "tipo": "Matching",
-    "titulo": "Matching Card Example",
-    "pergunta": "Relacione os itens corretamente",
-    "imageType": "clickable",
-    "imagem": "/images/matching.jpg",
-    "opcoes": [],
-    "dificuldade": "normal",
-    "categorias": ["_matching"],
-    "fontes": [],
-    "vantagem": "Cada correspondência correta vale pontos!",
-    "desvantagem": "Errar pode zerar a rodada.",
-    "dica": "",
-    "itensA": [
-      { "id": 1, "texto": "Reciclagem" },
-      { "id": 2, "texto": "Economia de Energia" }
+    "dificuldade": "dificil",
+    "categorias": [
+      "_baralhoTeste"
     ],
-    "itensB": [
-      { "id": 101, "texto": "Separação de Lixo" },
-      { "id": 102, "texto": "Uso de LED" }
-    ],
-    "associacoesCorretas": { "1": 101, "2": 102 }
-  },
-  {
-    "tipo": "Logic",
-    "titulo": "Logic Card Example",
-    "pergunta": "Qual é o DAP?",
-    "imageType": "clickable",
-    "imagem": "/images/logic.jpg",
-    "opcoes": [],
-    "dificuldade": "facil",
-    "categorias": ["_logic"],
     "fontes": [],
-    "vantagem": "Resposta correta aumenta pontos!",
-    "desvantagem": "Resposta errada penaliza.",
-    "dica": "",
-    "respostasAceitas": ["dap", "diametro na altura do peito", "diâmetro em peito"]
+    "vantagem": "vant",
+    "desvantagem": "desva",
+    "dica": "dica"
   }
 ];
 
-export default _baralhoTeste;
+export default meu_baralho;
