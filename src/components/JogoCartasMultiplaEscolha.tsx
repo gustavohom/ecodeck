@@ -36,7 +36,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 // import manejoPlantadas from "./deck/cards_manejo_plantada";
 // import manejoNativas from "./deck/cards_manejo_nativa";
 // import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
-// import estrelasAliens from "./dlc/cards_estrelas_aliens";
+import estrelasAliens from "./.test/baralhoTeste";
 import testCards from "./.test/test_card";
 
 interface Opcao {
@@ -162,7 +162,7 @@ const cartasOriginais = [
 //  ...manejoPlantadas,
 //  ...manejoNativas,
 //  ...ecologiaFlorestal,
-//  ...estrelasAliens,
+  ...estrelasAliens,
   ...testCards,
 ];
 
