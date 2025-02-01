@@ -33,10 +33,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-//import manejoPlantadas from "./deck/cards_manejo_plantada";
-//import manejoNativas from "./deck/cards_manejo_nativa";
-//import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
-//import estrelasAliens from "./dlc/cards_estrelas_aliens";
+import manejoPlantadas from "./deck/cards_manejo_plantada";
+import manejoNativas from "./deck/cards_manejo_nativa";
+import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
+import estrelasAliens from "./dlc/cards_estrelas_aliens";
 import testCards from "./.test/test_card";
 
 interface Opcao {
@@ -68,17 +68,10 @@ interface CartaBase {
   itensA?: { id: number; texto: string }[];
   itensB?: { id: number; texto: string }[];
   associacoesCorretas?: { [key: number]: number };
+  respostaCorreta?: number | number[];
 }
 
-interface CartaSingleAnswer extends CartaBase {
-  respostaCorreta: number;
-}
-
-interface CartaMultipleAnswers extends CartaBase {
-  respostaCorreta: number[];
-}
-
-type Carta = CartaSingleAnswer | CartaMultipleAnswers | CartaBase;
+type Carta = CartaBase;
 
 interface Player {
   id: number;
@@ -161,10 +154,10 @@ const probabilitySettings = [
 ];
 
 const cartasOriginais = [
-//  ...manejoPlantadas,
-//  ...manejoNativas,
-//  ...ecologiaFlorestal,
-//  ...estrelasAliens,
+  ...manejoPlantadas,
+  ...manejoNativas,
+  ...ecologiaFlorestal,
+  ...estrelasAliens,
   ...testCards,
 ];
 
