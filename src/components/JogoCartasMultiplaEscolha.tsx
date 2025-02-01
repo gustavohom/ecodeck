@@ -36,7 +36,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 //import manejoPlantadas from "./deck/cards_manejo_plantada";
 //import manejoNativas from "./deck/cards_manejo_nativa";
 //import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
-import estrelasAliens from "./.test/_baralhoTeste";
+//import estrelasAliens from "./dlc/cards_estrelas_aliens";
 import testCards from "./.test/test_card";
 
 interface Opcao {
@@ -157,7 +157,7 @@ const cartasOriginais: Carta[] = [
   //...manejoPlantadas,
   //...manejoNativas,
   //...ecologiaFlorestal,
-  ...estrelasAliens,
+  //...estrelasAliens,
   ...testCards,
 ];
 
@@ -183,11 +183,10 @@ function recalcularCategorias(baseCards: Carta[], decks: CustomDeck[]): string[]
   for (const d of decks) {
     allCards = [
       ...allCards,
-      ...d.cards.map(card => ({
-        imageType: card.imageType || "clickable",
-        imagem: card.imagem || "",
-        ...card
-      }))
+      ...d.cards.map(card => {
+        const { imageType, imagem, ...rest } = card;
+        return { ...rest, imageType: imageType || "clickable", imagem: imagem || "" };
+      })
     ];
   }
   return Array.from(new Set(allCards.flatMap((c) => c.categorias))).sort();
@@ -404,11 +403,10 @@ const EcoChallenge: React.FC = () => {
           if (d.used) {
             finalCartas = [
               ...finalCartas,
-              ...d.cards.map(card => ({
-                imageType: card.imageType || "clickable",
-                imagem: card.imagem || "",
-                ...card,
-              })),
+              ...d.cards.map(card => {
+                const { imageType, imagem, ...rest } = card;
+                return { ...rest, imageType: imageType || "clickable", imagem: imagem || "" };
+              })
             ];
           }
         }
