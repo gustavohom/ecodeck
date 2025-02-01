@@ -39,11 +39,11 @@ import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
 import estrelasAliens from "./dlc/cards_estrelas_aliens";
 import testCards from "./.test/test_card";
 
-// Interfaces e tipos – extensão para novas cartas
+// Interfaces e Tipos – Acrescentando campos para os novos tipos de carta
 interface Opcao {
   id: number;
   texto: string;
-  // Para WordAssociation, define a coluna correta (1 ou 2)
+  // Para WordAssociation, indica a coluna correta (1 ou 2)
   colunaCorreta?: number;
 }
 
@@ -58,11 +58,11 @@ interface CartaBase {
   vantagem: string;
   desvantagem: string;
   dica: string;
-  // Campos opcionais para as novas dinâmicas:
-  tempo?: number; // para Quiz, Time, Rally
+  // Campos extras para as novas dinâmicas
+  tempo?: number; // Para Quiz, Time, Rally
   microperguntas?: { pergunta: string; opcoes: Opcao[]; respostaCorreta: number }[];
-  alternativasAposta?: string[]; // para RiskReward
-  sequencia?: string[]; // para Memory
+  alternativasAposta?: string[]; // Para RiskReward
+  sequencia?: string[]; // Para Memory
   // Para WordAssociation
   coluna1Titulo?: string;
   coluna2Titulo?: string;
@@ -105,7 +105,7 @@ interface PlayerInput {
   showColorPicker?: boolean;
 }
 
-// (Exemplo de TelaInicial; ajuste conforme necessário)
+// Exemplo de TelaInicial – mantenha sua implementação original
 interface TelaInicialProps {
   onStartGame: () => void;
   onContinueGame: () => void;
@@ -123,41 +123,16 @@ interface TelaInicialProps {
   setProbabilityIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 const TelaInicial: React.FC<TelaInicialProps> = (props) => {
-  // Neste exemplo, apenas retorna null. Implemente sua tela inicial conforme desejar.
+  // Mantenha a implementação original ou substitua pela sua tela de configuração
   return null;
 };
 
 const predefinedColors = [
-  "#9e0142",
-  "#f46d43",
-  "#fee08b",
-  "#66c2a5",
-  "#5e4fa2",
-  "#ff6699",
-  "#33a02c",
-  "#ff7f00",
-  "#3288bd",
-  "#999999",
-  "#8dd3c7",
-  "#ffffb3",
-  "#fb8072",
-  "#80b1d3",
-  "#b3de69",
-  "#fccde5",
-  "#bc80bd",
-  "#1f78b4",
-  "#e31a1c",
-  "#ffcc33",
-  "#6a3d9a",
-  "#b15928",
-  "#b2df8a",
-  "#cab2d6",
-  "#a6cee3",
-  "#fb9a99",
-  "#fdbf6f",
-  "#ffed6f",
-  "#ccebc5",
-  "#ff4444",
+  "#9e0142", "#f46d43", "#fee08b", "#66c2a5", "#5e4fa2", "#ff6699",
+  "#33a02c", "#ff7f00", "#3288bd", "#999999", "#8dd3c7", "#ffffb3",
+  "#fb8072", "#80b1d3", "#b3de69", "#fccde5", "#bc80bd", "#1f78b4",
+  "#e31a1c", "#ffcc33", "#6a3d9a", "#b15928", "#b2df8a", "#cab2d6",
+  "#a6cee3", "#fb9a99", "#fdbf6f", "#ffed6f", "#ccebc5", "#ff4444",
 ];
 
 const probabilitySettings = [
@@ -202,17 +177,13 @@ function recalcularCategorias(baseCards: Carta[], decks: CustomDeck[]) {
 }
 
 const EcoChallenge: React.FC = () => {
-  // Estados para configuração do jogo
+  // Estados de configuração
   const [termoBusca, setTermoBusca] = useState("");
-  const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>(
-    [] // Inicialize conforme preferir
-  );
+  const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>([]);
   const [customDecks, setCustomDecks] = useState<CustomDeck[]>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("customDecks");
-      if (saved) {
-        return JSON.parse(saved) as CustomDeck[];
-      }
+      if (saved) return JSON.parse(saved) as CustomDeck[];
     }
     return [];
   });
@@ -245,7 +216,7 @@ const EcoChallenge: React.FC = () => {
   const [isDieModalOpen, setIsDieModalOpen] = useState(false);
   const [isRolling, setIsRolling] = useState(false);
 
-  // Estados para novas cartas
+  // Estados para os novos tipos de carta
   const [quizState, setQuizState] = useState({ currentIndex: 0, score: 0 });
   const [riskRewardAnswer, setRiskRewardAnswer] = useState<number | null>(null);
   const [timeCardCounter, setTimeCardCounter] = useState(0);
@@ -262,7 +233,7 @@ const EcoChallenge: React.FC = () => {
     }
     const allCats = recalcularCategorias(cartasOriginais, customDecks);
     setTodasCategorias(allCats);
-    setCategoriasSelecionadas((prevCats) => prevCats.filter((c) => allCats.includes(c)));
+    setCategoriasSelecionadas((prev) => prev.filter((c) => allCats.includes(c)));
   }, [customDecks]);
 
   const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -318,9 +289,9 @@ const EcoChallenge: React.FC = () => {
   };
 
   const handlePlayerChange = (index: number, field: "name" | "color", value: string) => {
-    const updatedPlayers = [...playerInputs];
-    (updatedPlayers[index] as any)[field] = value;
-    setPlayerInputs(updatedPlayers);
+    const updated = [...playerInputs];
+    (updated[index] as any)[field] = value;
+    setPlayerInputs(updated);
   };
 
   const deletePlayer = (index: number) => {
@@ -328,10 +299,10 @@ const EcoChallenge: React.FC = () => {
   };
 
   const startGame = () => {
-    const initializedPlayers: Player[] = playerInputs.map((input, index) => ({
-      id: index,
-      name: input.name || `Jogador ${index + 1}`,
-      color: input.color || predefinedColors[index % predefinedColors.length],
+    const initPlayers: Player[] = playerInputs.map((input, idx) => ({
+      id: idx,
+      name: input.name || `Jogador ${idx + 1}`,
+      color: input.color || predefinedColors[idx % predefinedColors.length],
       fixedStars: 0,
       respostasCertas: 0,
       respostasErradas: 0,
@@ -341,8 +312,8 @@ const EcoChallenge: React.FC = () => {
       contadorDeEstrelas: 0,
       rodadasPreso: 0,
     }));
-    setPlayers(initializedPlayers);
-    setCurrentPlayerId(initializedPlayers[0]?.id ?? null);
+    setPlayers(initPlayers);
+    setCurrentPlayerId(initPlayers[0]?.id ?? null);
     const usedDecks = customDecks.filter((d) => d.used);
     localStorage.setItem("customUsedDecks", JSON.stringify(usedDecks));
     localStorage.setItem(
@@ -350,7 +321,7 @@ const EcoChallenge: React.FC = () => {
       JSON.stringify({
         isGameActive: true,
         jogoIniciado: true,
-        players: initializedPlayers,
+        players: initPlayers,
         currentPlayerId: 0,
         categoriasSelecionadas,
         ocultarCarta,
@@ -361,10 +332,9 @@ const EcoChallenge: React.FC = () => {
   };
 
   const cycleProbability = () => {
-    setProbabilityIndex((prevIndex) => (prevIndex + 1) % probabilitySettings.length);
+    setProbabilityIndex((prev) => (prev + 1) % probabilitySettings.length);
   };
 
-  // Função para carregar estado do localStorage
   const carregarEstado = useCallback(() => {
     if (typeof window === "undefined") return;
     const st = localStorage.getItem("estadoEcoChallenge");
@@ -418,7 +388,8 @@ const EcoChallenge: React.FC = () => {
     }
     const filtradas = finalCartas.filter((c) => {
       const catOk = c.categorias.some((cat) => categoriasSelecionadas.includes(cat));
-      const tipoOk = !true || ["Pergunta", "MultiplaEscolha", "Ordem"].includes(c.tipo);
+      // Aqui, se quiser manter a lógica original para cartas de pergunta, altere se necessário
+      const tipoOk = !true || ["Pergunta", "MultiplaEscolha", "Ordem", "Quiz", "RiskReward", "Time", "Rally", "Memory", "WordAssociation", "Matching", "Logic"].includes(c.tipo);
       const isEspecial = ["Vantagem", "Desvantagem", "Outras"].includes(c.tipo);
       if (!incluirCartasEspeciais && isEspecial) return false;
       return catOk && tipoOk;
@@ -444,6 +415,14 @@ const EcoChallenge: React.FC = () => {
     setCartaRevelada(!ocultarCarta);
     setRolledNumber(null);
     setIsDieModalOpen(false);
+    // Reinicia estados dos tipos especiais se aplicável
+    setQuizState({ currentIndex: 0, score: 0 });
+    setRiskRewardAnswer(null);
+    setTimeCardCounter(0);
+    setRallyScore(0);
+    setRallyActive(true);
+    setMemoryInput([]);
+    setLogicAnswer("");
   }, [categoriasSelecionadas, ocultarCarta, probabilityIndex]);
 
   useEffect(() => {
@@ -500,8 +479,8 @@ const EcoChallenge: React.FC = () => {
 
   const isDisabled =
     !cartaAtual ||
-    ((cartaAtual?.tipo === "Ordem" && ordemSelecoes.length !== cartaAtual.opcoes.length) ||
-      (cartaAtual?.tipo !== "Ordem" && selecionado === null && selecoesMultiplas.length === 0));
+    ((cartaAtual.tipo === "Ordem" && ordemSelecoes.length !== cartaAtual.opcoes.length) ||
+      (cartaAtual.tipo !== "Ordem" && selecionado === null && selecoesMultiplas.length === 0));
 
   const verificarRespostaProps = {
     className: `w-full mt-2 ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`,
@@ -514,13 +493,13 @@ const EcoChallenge: React.FC = () => {
     ...(isDisabled ? {} : { onClick: verificarResposta }),
   };
 
-  // Lógica de verificação de resposta (exemplo para Logic; demais casos seguem a lógica original)
+  // Lógica de verificação de resposta para Logic (exemplo); para os demais, mantém a lógica original
   const verificarResposta = () => {
     if (!cartaAtual || !currentPlayer) return;
     if (cartaAtual.tipo === "Logic") {
       if (
         cartaAtual.respostasAceitas &&
-        cartaAtual.respostasAceitas.map(resp => resp.toLowerCase()).includes(logicAnswer.trim().toLowerCase())
+        cartaAtual.respostasAceitas.map((r) => r.toLowerCase()).includes(logicAnswer.trim().toLowerCase())
       ) {
         updateCurrentPlayer({
           respostasCertas: currentPlayer.respostasCertas + 1,
@@ -740,6 +719,177 @@ const EcoChallenge: React.FC = () => {
     );
   }
 
+  // Função que renderiza o conteúdo da carta conforme seu tipo
+  function renderizarConteudoPergunta() {
+    if (!cartaAtual) return null;
+    switch (cartaAtual.tipo) {
+      case "Quiz":
+        {
+          const micro = cartaAtual.microperguntas ? cartaAtual.microperguntas[quizState.currentIndex] : null;
+          if (!micro) return <div>Quiz finalizado! Pontuação: {quizState.score}</div>;
+          return (
+            <div>
+              <div dangerouslySetInnerHTML={{ __html: micro.pergunta }} />
+              {micro.opcoes.map((op) => (
+                <Button key={op.id} onClick={() => {
+                  if (micro.respostaCorreta === op.id) {
+                    setQuizState((prev) => ({ ...prev, score: prev.score + 1 }));
+                  }
+                  setQuizState((prev) => ({ ...prev, currentIndex: prev.currentIndex + 1 }));
+                }}>
+                  {op.texto}
+                </Button>
+              ))}
+              <div>Tempo: {cartaAtual.tempo} segundos</div>
+            </div>
+          );
+        }
+      case "RiskReward":
+        return (
+          <div>
+            <div dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta }} />
+            {cartaAtual.alternativasAposta?.map((alt, idx) => (
+              <Button key={idx} onClick={() => setRiskRewardAnswer(idx)}>
+                {alt}
+              </Button>
+            ))}
+            {riskRewardAnswer !== null && (
+              <div>
+                Você escolheu: {cartaAtual.alternativasAposta?.[riskRewardAnswer]}
+              </div>
+            )}
+          </div>
+        );
+      case "Time":
+        return (
+          <div>
+            <div dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta }} />
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Button onClick={() => setTimeCardCounter((prev) => prev + 1)}>+</Button>
+              <span>{timeCardCounter}</span>
+              <Button onClick={() => setTimeCardCounter((prev) => prev - 1)}>-</Button>
+            </div>
+            <div>Tempo: {cartaAtual.tempo} segundos</div>
+          </div>
+        );
+      case "Rally":
+        return (
+          <div>
+            <div dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta }} />
+            {cartaAtual.opcoes.map((op) => (
+              <Button key={op.id} onClick={() => {
+                if (Array.isArray(cartaAtual.respostaCorreta)) {
+                  if (cartaAtual.respostaCorreta.includes(op.id)) {
+                    setRallyScore((prev) => prev + 1);
+                  } else {
+                    setRallyActive(false);
+                  }
+                } else {
+                  if (cartaAtual.respostaCorreta === op.id) {
+                    setRallyScore((prev) => prev + 1);
+                  } else {
+                    setRallyActive(false);
+                  }
+                }
+              }}>
+                {op.texto}
+              </Button>
+            ))}
+            <div>Pontuação Rally: {rallyScore}</div>
+            {!rallyActive && <div>Rally encerrado!</div>}
+          </div>
+        );
+      case "Memory":
+        return (
+          <div>
+            <div>Memorize a sequência: {cartaAtual.sequencia?.join(", ")}</div>
+            <div style={{ marginTop: "8px" }}>
+              <input
+                type="text"
+                placeholder="Digite a sequência separada por vírgula"
+                value={memoryInput.join(", ")}
+                onChange={(e) => setMemoryInput(e.target.value.split(",").map(s => s.trim()))}
+              />
+            </div>
+          </div>
+        );
+      case "WordAssociation":
+        return (
+          <div>
+            <div>{cartaAtual.pergunta}</div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div style={{ width: "45%" }}>
+                <h4>{cartaAtual.coluna1Titulo}</h4>
+                {cartaAtual.opcoes
+                  .filter(op => op.colunaCorreta === 1)
+                  .map(op => (
+                    <div key={op.id} style={{ padding: "4px", border: "1px solid #ccc", marginBottom: "4px" }}>
+                      {op.texto}
+                    </div>
+                  ))}
+              </div>
+              <div style={{ width: "45%" }}>
+                <h4>{cartaAtual.coluna2Titulo}</h4>
+                {cartaAtual.opcoes
+                  .filter(op => op.colunaCorreta === 2)
+                  .map(op => (
+                    <div key={op.id} style={{ padding: "4px", border: "1px solid #ccc", marginBottom: "4px" }}>
+                      {op.texto}
+                    </div>
+                  ))}
+              </div>
+            </div>
+            <div style={{ marginTop: "8px" }}>
+              (Simulação de arrastar e soltar as alternativas para a coluna correta)
+            </div>
+          </div>
+        );
+      case "Matching":
+        return (
+          <div>
+            <div>{cartaAtual.pergunta}</div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div>
+                <h4>Coluna A</h4>
+                {cartaAtual.itensA?.map(item => (
+                  <div key={item.id} style={{ padding: "4px", border: "1px solid #ccc", marginBottom: "4px" }}>
+                    {item.texto}
+                  </div>
+                ))}
+              </div>
+              <div>
+                <h4>Coluna B</h4>
+                {cartaAtual.itensB?.map(item => (
+                  <div key={item.id} style={{ padding: "4px", border: "1px solid #ccc", marginBottom: "4px" }}>
+                    {item.texto}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{ marginTop: "8px" }}>
+              (Simulação de seleção das correspondências corretas)
+            </div>
+          </div>
+        );
+      case "Logic":
+        return (
+          <div>
+            <div dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta }} />
+            <div style={{ marginTop: "8px" }}>
+              <input
+                type="text"
+                value={logicAnswer}
+                onChange={(e) => setLogicAnswer(e.target.value)}
+                placeholder="Digite sua resposta"
+              />
+            </div>
+          </div>
+        );
+      default:
+        return <div dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta }} />;
+    }
+  }
+
   return (
     <div className="flex flex-col items-center">
       <Card
@@ -756,7 +906,7 @@ const EcoChallenge: React.FC = () => {
               <Button
                 onClick={() => {}}
                 size="sm"
-                variant={mostrarSomentePerguntas ? "default" : "outline"}
+                variant={"outline"}
                 disabled={false}
               >
                 <Filter className="h-4 w-4" />
@@ -786,7 +936,7 @@ const EcoChallenge: React.FC = () => {
           </div>
           {(!ocultarCarta || cartaRevelada) ? (
             <ScrollArea className="h-56 rounded-md border p-4">
-              <div className="text-sm">{/* Renderiza a carta conforme seu tipo */}{renderizarConteudoPergunta()}</div>
+              <div className="text-sm">{renderizarConteudoPergunta()}</div>
             </ScrollArea>
           ) : (
             <div className="h-56 flex flex-col items-center justify-center space-y-2">
@@ -817,10 +967,7 @@ const EcoChallenge: React.FC = () => {
                   ? cartaAtual.respostaCorreta.includes(op.id)
                   : cartaAtual.respostaCorreta === op.id;
                 const selected = selecionado === op.id || selecoesMultiplas.includes(op.id);
-                const wrongSelection =
-                  respondido &&
-                  selected &&
-                  !isCorrect;
+                const wrongSelection = respondido && selected && !isCorrect;
                 const eliminated = opcoesEliminadas.includes(op.id);
                 return (
                   <Button
@@ -1062,10 +1209,8 @@ const EcoChallenge: React.FC = () => {
           </div>
         </CardFooter>
       </Card>
-      <div
-        className={`grid gap-1 mt-4 ${players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`}`}
-        style={{ width: "100%", maxWidth: "400px" }}
-      >
+      <div className={`grid gap-1 mt-4 ${players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`}`}
+           style={{ width: "100%", maxWidth: "400px" }}>
         {players.map((pl) => (
           <Button
             key={pl.id}
