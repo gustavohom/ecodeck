@@ -33,10 +33,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-//import manejoPlantadas from "./deck/cards_manejo_plantada";
-//import manejoNativas from "./deck/cards_manejo_nativa";
-//import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
-import estrelasAliens from "./.test/_baralhoTeste";
+import manejoPlantadas from "./deck/cards_manejo_plantada";
+import manejoNativas from "./deck/cards_manejo_nativa";
+import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
+import estrelasAliens from "./dlc/cards_estrelas_aliens";
 import testCards from "./.test/test_card";
 
 interface Opcao {
@@ -153,10 +153,10 @@ const probabilitySettings = [
   { value: 0.8, color: "red", label: "80%" },
 ];
 
-const cartasOriginais = [
-//  ...manejoPlantadas,
-//  ...manejoNativas,
-//  ...ecologiaFlorestal,
+const cartasOriginais: Carta[] = [
+  ...manejoPlantadas,
+  ...manejoNativas,
+  ...ecologiaFlorestal,
   ...estrelasAliens,
   ...testCards,
 ];
@@ -178,13 +178,19 @@ function parseJSDeckFile(content: string): Carta[] {
   return array as Carta[];
 }
 
-function recalcularCategorias(baseCards: Carta[], decks: CustomDeck[]) {
+function recalcularCategorias(baseCards: Carta[], decks: CustomDeck[]): string[] {
   let allCards = [...baseCards];
   for (const d of decks) {
-    allCards = [...allCards, ...d.cards];
+    allCards = [
+      ...allCards,
+      ...d.cards.map(card => ({
+        imageType: card.imageType || "clickable",
+        imagem: card.imagem || "",
+        ...card
+      }))
+    ];
   }
-  const novasCategorias = Array.from(new Set(allCards.flatMap((c) => c.categorias))).sort();
-  return novasCategorias;
+  return Array.from(new Set(allCards.flatMap((c) => c.categorias))).sort();
 }
 
 const EcoChallenge: React.FC = () => {
@@ -389,14 +395,21 @@ const EcoChallenge: React.FC = () => {
     if (p > 0 && Math.random() < p) {
       incluirCartasEspeciais = false;
     }
-    let finalCartas = [...cartasOriginais];
+    let finalCartas: Carta[] = [...cartasOriginais];
     if (typeof window !== "undefined") {
       const usedDecksData = localStorage.getItem("customUsedDecks");
       if (usedDecksData) {
         const usedDecks = JSON.parse(usedDecksData) as CustomDeck[];
         for (const d of usedDecks) {
           if (d.used) {
-            finalCartas = [...finalCartas, ...d.cards];
+            finalCartas = [
+              ...finalCartas,
+              ...d.cards.map(card => ({
+                imageType: card.imageType || "clickable",
+                imagem: card.imagem || "",
+                ...card,
+              })),
+            ];
           }
         }
       }
