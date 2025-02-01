@@ -1,4 +1,5 @@
-const meu_baralho = [
+const _baralhoTeste = [
+  [
   {
     "tipo": "Pergunta",
     "titulo": "Pergunta com Imagem",
@@ -275,4 +276,4 @@ const meu_baralho = [
   }
 ];
 
-export default meu_baralho;
+export default _baralhoTeste;
