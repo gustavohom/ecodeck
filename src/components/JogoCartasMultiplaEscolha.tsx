@@ -33,10 +33,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-// import manejoPlantadas from "./deck/cards_manejo_plantada";
-// import manejoNativas from "./deck/cards_manejo_nativa";
-// import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
-import estrelasAliens from "./.test/_baralhoTeste";
+import manejoPlantadas from "./deck/cards_manejo_plantada";
+import manejoNativas from "./deck/cards_manejo_nativa";
+import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
+import estrelasAliens from "./dlc/cards_estrelas_aliens";
 import testCards from "./.test/test_card";
 
 interface Opcao {
@@ -49,6 +49,8 @@ interface CartaBase {
   tipo: string;
   titulo: string;
   pergunta: string;
+  imageType: string;
+  imagem: string;
   opcoes: Opcao[];
   dificuldade: string;
   categorias: string[];
@@ -159,9 +161,9 @@ const probabilitySettings = [
 ];
 
 const cartasOriginais = [
-//  ...manejoPlantadas,
-//  ...manejoNativas,
-//  ...ecologiaFlorestal,
+  ...manejoPlantadas,
+  ...manejoNativas,
+  ...ecologiaFlorestal,
   ...estrelasAliens,
   ...testCards,
 ];
@@ -408,7 +410,7 @@ const EcoChallenge: React.FC = () => {
     }
     const filtradas = finalCartas.filter((c) => {
       const catOk = c.categorias.some((cat) => categoriasSelecionadas.includes(cat));
-      const tipoOk = !false || ["Pergunta", "MultiplaEscolha", "Ordem", "Quiz", "RiskReward", "Time", "Rally", "Memory", "WordAssociation", "Matching", "Logic"].includes(c.tipo);
+      const tipoOk = ["Pergunta", "MultiplaEscolha", "Ordem", "Quiz", "RiskReward", "Time", "Rally", "Memory", "WordAssociation", "Matching", "Logic"].includes(c.tipo);
       const isEspecial = ["Vantagem", "Desvantagem", "Outras"].includes(c.tipo);
       if (!incluirCartasEspeciais && isEspecial) return false;
       return catOk && tipoOk;
@@ -778,27 +780,26 @@ const EcoChallenge: React.FC = () => {
   function renderizarConteudoPergunta() {
     if (!cartaAtual) return null;
     switch (cartaAtual.tipo) {
-      case "Quiz":
-        {
-          const micro = cartaAtual.microperguntas ? cartaAtual.microperguntas[quizState.currentIndex] : null;
-          if (!micro) return <div>Quiz finalizado! Pontuação: {quizState.score}</div>;
-          return (
-            <div>
-              <div dangerouslySetInnerHTML={{ __html: micro.pergunta }} />
-              {micro.opcoes.map((op) => (
-                <Button key={op.id} onClick={() => {
-                  if (micro.respostaCorreta === op.id) {
-                    setQuizState((prev) => ({ ...prev, score: prev.score + 1 }));
-                  }
-                  setQuizState((prev) => ({ ...prev, currentIndex: prev.currentIndex + 1 }));
-                }}>
-                  {op.texto}
-                </Button>
-              ))}
-              <div>Tempo: {cartaAtual.tempo} segundos</div>
-            </div>
-          );
-        }
+      case "Quiz": {
+        const micro = cartaAtual.microperguntas ? cartaAtual.microperguntas[quizState.currentIndex] : null;
+        if (!micro) return <div>Quiz finalizado! Pontuação: {quizState.score}</div>;
+        return (
+          <div>
+            <div dangerouslySetInnerHTML={{ __html: micro.pergunta }} />
+            {micro.opcoes.map((op) => (
+              <Button key={op.id} onClick={() => {
+                if (micro.respostaCorreta === op.id) {
+                  setQuizState((prev) => ({ ...prev, score: prev.score + 1 }));
+                }
+                setQuizState((prev) => ({ ...prev, currentIndex: prev.currentIndex + 1 }));
+              }}>
+                {op.texto}
+              </Button>
+            ))}
+            <div>Tempo: {cartaAtual.tempo} segundos</div>
+          </div>
+        );
+      }
       case "RiskReward":
         return (
           <div>
@@ -855,7 +856,7 @@ const EcoChallenge: React.FC = () => {
       case "Memory":
         return (
           <div>
-            <div>Memorize a sequência: {cartaAtual.sequencia?.join(", ")}</div>
+            <div>Memorize a seguinte sequência: {cartaAtual.sequencia?.join(", ")}</div>
             <div style={{ marginTop: "8px" }}>
               <input
                 type="text"
@@ -888,9 +889,7 @@ const EcoChallenge: React.FC = () => {
                 ))}
               </div>
             </div>
-            <div style={{ marginTop: "8px" }}>
-              (Simulação de arrastar e soltar)
-            </div>
+            <div style={{ marginTop: "8px" }}>(Simulação de arrastar e soltar)</div>
           </div>
         );
       case "Matching":
@@ -915,9 +914,7 @@ const EcoChallenge: React.FC = () => {
                 ))}
               </div>
             </div>
-            <div style={{ marginTop: "8px" }}>
-              (Simulação de seleção de correspondências)
-            </div>
+            <div style={{ marginTop: "8px" }}>(Simulação de seleção de correspondências)</div>
           </div>
         );
       case "Logic":
@@ -952,12 +949,7 @@ const EcoChallenge: React.FC = () => {
         <CardHeader>
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center space-x-2">
-              <Button
-                onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
-                size="sm"
-                variant="outline"
-                disabled={false}
-              >
+              <Button onClick={() => setMostrarSomentePerguntas((prev) => !prev)} size="sm" variant="outline" disabled={false}>
                 <Filter className="h-4 w-4" />
               </Button>
               <div className="flex flex-col">
@@ -970,15 +962,7 @@ const EcoChallenge: React.FC = () => {
               </div>
             </div>
             {(!ocultarCarta || cartaRevelada) && (
-              <Badge
-                variant={
-                  cartaAtual.dificuldade === "facil"
-                    ? "secondary"
-                    : cartaAtual.dificuldade === "normal"
-                    ? "default"
-                    : "destructive"
-                }
-              >
+              <Badge variant={cartaAtual.dificuldade === "facil" ? "secondary" : cartaAtual.dificuldade === "normal" ? "default" : "destructive"}>
                 {cartaAtual.dificuldade}
               </Badge>
             )}
