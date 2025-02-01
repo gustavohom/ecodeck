@@ -116,7 +116,7 @@ interface TelaInicialProps {
   setProbabilityIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const TelaInicial: React.FC<TelaInicialProps> = (props) => null;
+const TelaInicial: React.FC<TelaInicialProps> = () => null;
 
 const predefinedColors = [
   "#9e0142",
@@ -194,9 +194,7 @@ function recalcularCategorias(baseCards: Carta[], decks: CustomDeck[]) {
 
 const EcoChallenge: React.FC = () => {
   const [termoBusca, setTermoBusca] = useState("");
-  const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>(
-    []
-  );
+  const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>([]);
   const [customDecks, setCustomDecks] = useState<CustomDeck[]>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("customDecks");
@@ -327,7 +325,6 @@ const EcoChallenge: React.FC = () => {
       contadorDeEstrelas: 0,
       rodadasPreso: 0,
     }));
-    onPlayersSetup(initPlayers);
     setPlayers(initPlayers);
     setCurrentPlayerId(initPlayers[0]?.id ?? null);
     const usedDecks = customDecks.filter((d) => d.used);
@@ -344,7 +341,6 @@ const EcoChallenge: React.FC = () => {
         probabilityIndex,
       })
     );
-    onStartGame();
   };
 
   const categoriasFiltradas = todasCategorias
@@ -412,7 +408,7 @@ const EcoChallenge: React.FC = () => {
     }
     const filtradas = finalCartas.filter((c) => {
       const catOk = c.categorias.some((cat) => categoriasSelecionadas.includes(cat));
-      const tipoOk = !mostrarSomentePerguntas || ["Pergunta", "MultiplaEscolha", "Ordem", "Quiz", "RiskReward", "Time", "Rally", "Memory", "WordAssociation", "Matching", "Logic"].includes(c.tipo);
+      const tipoOk = !false || ["Pergunta", "MultiplaEscolha", "Ordem", "Quiz", "RiskReward", "Time", "Rally", "Memory", "WordAssociation", "Matching", "Logic"].includes(c.tipo);
       const isEspecial = ["Vantagem", "Desvantagem", "Outras"].includes(c.tipo);
       if (!incluirCartasEspeciais && isEspecial) return false;
       return catOk && tipoOk;
@@ -959,7 +955,7 @@ const EcoChallenge: React.FC = () => {
               <Button
                 onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
                 size="sm"
-                variant={"outline"}
+                variant="outline"
                 disabled={false}
               >
                 <Filter className="h-4 w-4" />
