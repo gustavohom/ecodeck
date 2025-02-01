@@ -1,5 +1,4 @@
 const test_card = [
- [
   {
     "tipo": "Pergunta",
     "titulo": "Pergunta com Imagem",
