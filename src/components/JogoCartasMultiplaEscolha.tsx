@@ -39,11 +39,9 @@ import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
 import estrelasAliens from "./dlc/cards_estrelas_aliens";
 import testCards from "./.test/test_card";
 
-// Interfaces e Tipos – Acrescentando campos para os novos tipos de carta
 interface Opcao {
   id: number;
   texto: string;
-  // Para WordAssociation, indica a coluna correta (1 ou 2)
   colunaCorreta?: number;
 }
 
@@ -58,17 +56,13 @@ interface CartaBase {
   vantagem: string;
   desvantagem: string;
   dica: string;
-  // Campos extras para as novas dinâmicas
-  tempo?: number; // Para Quiz, Time, Rally
+  tempo?: number;
   microperguntas?: { pergunta: string; opcoes: Opcao[]; respostaCorreta: number }[];
-  alternativasAposta?: string[]; // Para RiskReward
-  sequencia?: string[]; // Para Memory
-  // Para WordAssociation
+  alternativasAposta?: string[];
+  sequencia?: string[];
   coluna1Titulo?: string;
   coluna2Titulo?: string;
-  // Para Logic
   respostasAceitas?: string[];
-  // Para Matching
   itensA?: { id: number; texto: string }[];
   itensB?: { id: number; texto: string }[];
   associacoesCorretas?: { [key: number]: number };
@@ -105,7 +99,6 @@ interface PlayerInput {
   showColorPicker?: boolean;
 }
 
-// Exemplo de TelaInicial – mantenha sua implementação original
 interface TelaInicialProps {
   onStartGame: () => void;
   onContinueGame: () => void;
@@ -122,17 +115,40 @@ interface TelaInicialProps {
   probabilityIndex: number;
   setProbabilityIndex: React.Dispatch<React.SetStateAction<number>>;
 }
-const TelaInicial: React.FC<TelaInicialProps> = (props) => {
-  // Mantenha a implementação original ou substitua pela sua tela de configuração
-  return null;
-};
+
+const TelaInicial: React.FC<TelaInicialProps> = (props) => null;
 
 const predefinedColors = [
-  "#9e0142", "#f46d43", "#fee08b", "#66c2a5", "#5e4fa2", "#ff6699",
-  "#33a02c", "#ff7f00", "#3288bd", "#999999", "#8dd3c7", "#ffffb3",
-  "#fb8072", "#80b1d3", "#b3de69", "#fccde5", "#bc80bd", "#1f78b4",
-  "#e31a1c", "#ffcc33", "#6a3d9a", "#b15928", "#b2df8a", "#cab2d6",
-  "#a6cee3", "#fb9a99", "#fdbf6f", "#ffed6f", "#ccebc5", "#ff4444",
+  "#9e0142",
+  "#f46d43",
+  "#fee08b",
+  "#66c2a5",
+  "#5e4fa2",
+  "#ff6699",
+  "#33a02c",
+  "#ff7f00",
+  "#3288bd",
+  "#999999",
+  "#8dd3c7",
+  "#ffffb3",
+  "#fb8072",
+  "#80b1d3",
+  "#b3de69",
+  "#fccde5",
+  "#bc80bd",
+  "#1f78b4",
+  "#e31a1c",
+  "#ffcc33",
+  "#6a3d9a",
+  "#b15928",
+  "#b2df8a",
+  "#cab2d6",
+  "#a6cee3",
+  "#fb9a99",
+  "#fdbf6f",
+  "#ffed6f",
+  "#ccebc5",
+  "#ff4444",
 ];
 
 const probabilitySettings = [
@@ -177,9 +193,10 @@ function recalcularCategorias(baseCards: Carta[], decks: CustomDeck[]) {
 }
 
 const EcoChallenge: React.FC = () => {
-  // Estados de configuração
   const [termoBusca, setTermoBusca] = useState("");
-  const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>([]);
+  const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>(
+    []
+  );
   const [customDecks, setCustomDecks] = useState<CustomDeck[]>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("customDecks");
@@ -195,7 +212,6 @@ const EcoChallenge: React.FC = () => {
   const [ocultarCarta, setOcultarCarta] = useState(true);
   const [probabilityIndex, setProbabilityIndex] = useState(0);
 
-  // Estados do jogo
   const [players, setPlayers] = useState<Player[]>([]);
   const [currentPlayerId, setCurrentPlayerId] = useState<number | null>(null);
   const [cartaAtual, setCartaAtual] = useState<Carta | null>(null);
@@ -216,7 +232,6 @@ const EcoChallenge: React.FC = () => {
   const [isDieModalOpen, setIsDieModalOpen] = useState(false);
   const [isRolling, setIsRolling] = useState(false);
 
-  // Estados para os novos tipos de carta
   const [quizState, setQuizState] = useState({ currentIndex: 0, score: 0 });
   const [riskRewardAnswer, setRiskRewardAnswer] = useState<number | null>(null);
   const [timeCardCounter, setTimeCardCounter] = useState(0);
@@ -312,6 +327,7 @@ const EcoChallenge: React.FC = () => {
       contadorDeEstrelas: 0,
       rodadasPreso: 0,
     }));
+    onPlayersSetup(initPlayers);
     setPlayers(initPlayers);
     setCurrentPlayerId(initPlayers[0]?.id ?? null);
     const usedDecks = customDecks.filter((d) => d.used);
@@ -328,12 +344,20 @@ const EcoChallenge: React.FC = () => {
         probabilityIndex,
       })
     );
-    setJogoIniciado(true);
+    onStartGame();
   };
+
+  const categoriasFiltradas = todasCategorias
+    .filter((cat) => cat.toLowerCase().includes(termoBusca.toLowerCase()))
+    .sort();
 
   const cycleProbability = () => {
     setProbabilityIndex((prev) => (prev + 1) % probabilitySettings.length);
   };
+
+  const forcedHasSavedGame = true;
+
+  const TelaInicialDummy: React.FC<TelaInicialProps> = () => null;
 
   const carregarEstado = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -388,8 +412,7 @@ const EcoChallenge: React.FC = () => {
     }
     const filtradas = finalCartas.filter((c) => {
       const catOk = c.categorias.some((cat) => categoriasSelecionadas.includes(cat));
-      // Aqui, se quiser manter a lógica original para cartas de pergunta, altere se necessário
-      const tipoOk = !true || ["Pergunta", "MultiplaEscolha", "Ordem", "Quiz", "RiskReward", "Time", "Rally", "Memory", "WordAssociation", "Matching", "Logic"].includes(c.tipo);
+      const tipoOk = !mostrarSomentePerguntas || ["Pergunta", "MultiplaEscolha", "Ordem", "Quiz", "RiskReward", "Time", "Rally", "Memory", "WordAssociation", "Matching", "Logic"].includes(c.tipo);
       const isEspecial = ["Vantagem", "Desvantagem", "Outras"].includes(c.tipo);
       if (!incluirCartasEspeciais && isEspecial) return false;
       return catOk && tipoOk;
@@ -415,7 +438,6 @@ const EcoChallenge: React.FC = () => {
     setCartaRevelada(!ocultarCarta);
     setRolledNumber(null);
     setIsDieModalOpen(false);
-    // Reinicia estados dos tipos especiais se aplicável
     setQuizState({ currentIndex: 0, score: 0 });
     setRiskRewardAnswer(null);
     setTimeCardCounter(0);
@@ -493,13 +515,12 @@ const EcoChallenge: React.FC = () => {
     ...(isDisabled ? {} : { onClick: verificarResposta }),
   };
 
-  // Lógica de verificação de resposta para Logic (exemplo); para os demais, mantém a lógica original
   const verificarResposta = () => {
     if (!cartaAtual || !currentPlayer) return;
     if (cartaAtual.tipo === "Logic") {
       if (
         cartaAtual.respostasAceitas &&
-        cartaAtual.respostasAceitas.map((r) => r.toLowerCase()).includes(logicAnswer.trim().toLowerCase())
+        cartaAtual.respostasAceitas.map(r => r.toLowerCase()).includes(logicAnswer.trim().toLowerCase())
       ) {
         updateCurrentPlayer({
           respostasCertas: currentPlayer.respostasCertas + 1,
@@ -512,7 +533,7 @@ const EcoChallenge: React.FC = () => {
             pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
             fixedStars: currentPlayer.fixedStars + 1,
           });
-          setMensagem("Correto! Bônus extra! Barra completada!");
+          setMensagem(`Correto! Bônus extra! Barra completada!`);
         } else {
           updateCurrentPlayer({ progresso: novoProg });
         }
@@ -526,111 +547,108 @@ const EcoChallenge: React.FC = () => {
         setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
       }
       setRespondido(true);
-    } else {
-      // Lógica original para Pergunta, MultiplaEscolha, Ordem, etc.
-      if (cartaAtual.tipo === "MultiplaEscolha" && selecoesMultiplas.length > 0) {
-        const cor =
-          Array.isArray(cartaAtual.respostaCorreta) &&
-          selecoesMultiplas.sort().toString() === (cartaAtual.respostaCorreta as number[]).sort().toString();
-        setRespondido(true);
-        if (cor) {
+    } else if (cartaAtual.tipo === "MultiplaEscolha" && selecoesMultiplas.length > 0) {
+      const cor =
+        Array.isArray(cartaAtual.respostaCorreta) &&
+        selecoesMultiplas.sort().toString() === (cartaAtual.respostaCorreta as number[]).sort().toString();
+      setRespondido(true);
+      if (cor) {
+        updateCurrentPlayer({
+          respostasCertas: currentPlayer.respostasCertas + 1,
+          respostasSeguidas: currentPlayer.respostasSeguidas + 1,
+        });
+        const novoProg = currentPlayer.progresso + 20;
+        if (novoProg >= 100) {
           updateCurrentPlayer({
-            respostasCertas: currentPlayer.respostasCertas + 1,
-            respostasSeguidas: currentPlayer.respostasSeguidas + 1,
+            progresso: 0,
+            pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
+            fixedStars: currentPlayer.fixedStars + 1,
           });
-          const novoProg = currentPlayer.progresso + 20;
-          if (novoProg >= 100) {
-            updateCurrentPlayer({
-              progresso: 0,
-              pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
-              fixedStars: currentPlayer.fixedStars + 1,
-            });
-            setMensagem("Correto! Bônus extra! Barra completada!");
-          } else {
-            updateCurrentPlayer({ progresso: novoProg });
-          }
-          if (cartaAtual.dificuldade === "dificil") {
-            updateCurrentPlayer({
-              pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
-            });
-          }
-          setMensagem(`Correto! ${cartaAtual.vantagem}`);
+          setMensagem(`Correto! Bônus extra! Barra completada!`);
         } else {
-          updateCurrentPlayer({
-            respostasErradas: currentPlayer.respostasErradas + 1,
-            respostasSeguidas: 0,
-            progresso: Math.max(currentPlayer.progresso - 10, 0),
-          });
-          setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
+          updateCurrentPlayer({ progresso: novoProg });
         }
-      } else if (cartaAtual.tipo === "Ordem" && ordemSelecoes.length > 0) {
-        const cor = ordemSelecoes.toString() === (cartaAtual.respostaCorreta as number[]).toString();
-        setRespondido(true);
-        if (cor) {
+        if (cartaAtual.dificuldade === "dificil") {
           updateCurrentPlayer({
-            respostasCertas: currentPlayer.respostasCertas + 1,
-            respostasSeguidas: currentPlayer.respostasSeguidas + 1,
+            pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
           });
-          const prog2 = currentPlayer.progresso + 20;
-          if (prog2 >= 100) {
-            updateCurrentPlayer({
-              progresso: 0,
-              pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
-              fixedStars: currentPlayer.fixedStars + 1,
-            });
-            setMensagem("Correto! Bônus extra! Barra completada!");
-          } else {
-            updateCurrentPlayer({ progresso: prog2 });
-          }
-          if (cartaAtual.dificuldade === "dificil") {
-            updateCurrentPlayer({
-              pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
-            });
-          }
-          setMensagem(`Correto! ${cartaAtual.vantagem}`);
+        }
+        setMensagem(`Correto! ${cartaAtual.vantagem}`);
+      } else {
+        updateCurrentPlayer({
+          respostasErradas: currentPlayer.respostasErradas + 1,
+          respostasSeguidas: 0,
+          progresso: Math.max(currentPlayer.progresso - 10, 0),
+        });
+        setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
+      }
+    } else if (cartaAtual.tipo === "Ordem" && ordemSelecoes.length > 0) {
+      const cor = ordemSelecoes.toString() === (cartaAtual.respostaCorreta as number[]).toString();
+      setRespondido(true);
+      if (cor) {
+        updateCurrentPlayer({
+          respostasCertas: currentPlayer.respostasCertas + 1,
+          respostasSeguidas: currentPlayer.respostasSeguidas + 1,
+        });
+        const prog2 = currentPlayer.progresso + 20;
+        if (prog2 >= 100) {
+          updateCurrentPlayer({
+            progresso: 0,
+            pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
+            fixedStars: currentPlayer.fixedStars + 1,
+          });
+          setMensagem(`Correto! Bônus extra! Barra completada!`);
         } else {
-          updateCurrentPlayer({
-            respostasErradas: currentPlayer.respostasErradas + 1,
-            respostasSeguidas: 0,
-            progresso: Math.max(currentPlayer.progresso - 10, 0),
-          });
-          setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
+          updateCurrentPlayer({ progresso: prog2 });
         }
-      } else if (cartaAtual && selecionado !== null) {
-        setRespondido(true);
-        const cor = Array.isArray(cartaAtual.respostaCorreta)
-          ? cartaAtual.respostaCorreta.includes(selecionado)
-          : cartaAtual.respostaCorreta === selecionado;
-        if (cor) {
+        if (cartaAtual.dificuldade === "dificil") {
           updateCurrentPlayer({
-            respostasCertas: currentPlayer.respostasCertas + 1,
-            respostasSeguidas: currentPlayer.respostasSeguidas + 1,
+            pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
           });
-          const prog = currentPlayer.progresso + 20;
-          if (prog >= 100) {
-            updateCurrentPlayer({
-              progresso: 0,
-              pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
-              fixedStars: currentPlayer.fixedStars + 1,
-            });
-            setMensagem("Correto! Bônus extra! Barra completada!");
-          } else {
-            updateCurrentPlayer({ progresso: prog });
-          }
-          if (cartaAtual.dificuldade === "dificil") {
-            updateCurrentPlayer({
-              pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
-            });
-          }
-          setMensagem(`Correto! ${cartaAtual.vantagem}`);
+        }
+        setMensagem(`Correto! ${cartaAtual.vantagem}`);
+      } else {
+        updateCurrentPlayer({
+          respostasErradas: currentPlayer.respostasErradas + 1,
+          respostasSeguidas: 0,
+          progresso: Math.max(currentPlayer.progresso - 10, 0),
+        });
+        setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
+      }
+    } else if (cartaAtual && selecionado !== null) {
+      setRespondido(true);
+      const cor = Array.isArray(cartaAtual.respostaCorreta)
+        ? cartaAtual.respostaCorreta.includes(selecionado)
+        : cartaAtual.respostaCorreta === selecionado;
+      if (cor) {
+        updateCurrentPlayer({
+          respostasCertas: currentPlayer.respostasCertas + 1,
+          respostasSeguidas: currentPlayer.respostasSeguidas + 1,
+        });
+        const prog = currentPlayer.progresso + 20;
+        if (prog >= 100) {
+          updateCurrentPlayer({
+            progresso: 0,
+            pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
+            fixedStars: currentPlayer.fixedStars + 1,
+          });
+          setMensagem(`Correto! Bônus extra! Barra completada!`);
         } else {
-          updateCurrentPlayer({
-            respostasErradas: currentPlayer.respostasErradas + 1,
-            respostasSeguidas: 0,
-            progresso: Math.max(currentPlayer.progresso - 10, 0),
-          });
-          setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
+          updateCurrentPlayer({ progresso: prog });
         }
+        if (cartaAtual.dificuldade === "dificil") {
+          updateCurrentPlayer({
+            pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2),
+          });
+        }
+        setMensagem(`Correto! ${cartaAtual.vantagem}`);
+      } else {
+        updateCurrentPlayer({
+          respostasErradas: currentPlayer.respostasErradas + 1,
+          respostasSeguidas: 0,
+          progresso: Math.max(currentPlayer.progresso - 10, 0),
+        });
+        setMensagem(`Incorreto. ${cartaAtual.desvantagem}`);
       }
     }
   };
@@ -662,64 +680,105 @@ const EcoChallenge: React.FC = () => {
     }
   };
 
-  if (!jogoIniciado) {
-    return (
-      <TelaInicial
-        onStartGame={startGame}
-        onContinueGame={() => {
-          carregarEstado();
-          setJogoIniciado(true);
-        }}
-        onReset={resetarTudo}
-        categoriasDisponiveis={baseCategorias}
-        categoriasSelecionadas={categoriasSelecionadas}
-        setCategoriasSelecionadas={setCategoriasSelecionadas}
-        hasSavedGame={true}
-        onPlayersSetup={(initPlayers) => {
-          setPlayers(initPlayers);
-          setCurrentPlayerId(initPlayers[0]?.id ?? null);
-        }}
-        players={players}
-        setPlayers={setPlayers}
-        ocultarCarta={ocultarCarta}
-        setOcultarCarta={setOcultarCarta}
-        probabilityIndex={probabilityIndex}
-        setProbabilityIndex={setProbabilityIndex}
-      />
-    );
-  }
+  const toggleDica = () => {
+    if (!currentPlayer || !cartaAtual) return;
+    if (dicaUsada) {
+      setMensagem("Você já usou a dica para esta pergunta.");
+      return;
+    }
+    if (currentPlayer.respostasSeguidas >= 2 && cartaAtual.dica) {
+      setMostrarDica(true);
+      setDicaUsada(true);
+      updateCurrentPlayer({ respostasSeguidas: currentPlayer.respostasSeguidas - 2 });
+    } else if (!cartaAtual.dica) {
+      setMensagem("Esta carta não possui dica.");
+    } else {
+      setMensagem("Você precisa de pelo menos 2 respostas corretas seguidas para usar a dica!");
+    }
+  };
 
-  if (noCardsAvailable) {
-    return (
-      <div className="flex flex-col items-center">
-        <p className="mt-4 text-center">Nenhuma carta disponível com os filtros atuais.</p>
-        <Button
-          onClick={() => {
-            setMostrarDica(false);
-            setJogoIniciado(false);
-            setNoCardsAvailable(false);
-            setCategoriasSelecionadas([]);
-          }}
-          className="mt-4"
-        >
-          Remover Filtro
-        </Button>
-      </div>
-    );
-  }
+  const toggleFontes = () => {
+    setMostrarFontes(!mostrarFontes);
+  };
 
-  if (!cartaAtual || !currentPlayer) {
-    return (
-      <div className="flex flex-col items-center">
-        <p className="mt-4 text-center">O jogo não pôde ser carregado.</p>
-        <Button onClick={() => setJogoIniciado(false)} className="mt-4">
-          Voltar para a Tela Inicial
-        </Button>
-      </div>
-    );
-  }
+  const pularPergunta = () => {
+    if (!currentPlayer || !cartaAtual) return;
+    if (currentPlayer.pulosDisponiveis > 0) {
+      updateCurrentPlayer({ pulosDisponiveis: currentPlayer.pulosDisponiveis - 1 });
+      selecionarCartaAleatoria();
+    }
+  };
 
-  // Função que renderiza o conteúdo da carta conforme seu tipo
+  const eliminarRespostaErrada = () => {
+    if (!currentPlayer || !cartaAtual) return;
+    if (currentPlayer.respostasSeguidas >= 2) {
+      const opcoesErradas = cartaAtual.opcoes.filter((op) => {
+        if (Array.isArray(cartaAtual.respostaCorreta)) {
+          return !cartaAtual.respostaCorreta.includes(op.id);
+        }
+        return op.id !== cartaAtual.respostaCorreta;
+      });
+      const opcoesRestantes = opcoesErradas.filter((op) => !opcoesEliminadas.includes(op.id));
+      if (opcoesRestantes.length > 0) {
+        const idxAleat = Math.floor(Math.random() * opcoesRestantes.length);
+        const opcaoEliminada = opcoesRestantes[idxAleat].id;
+        setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
+        updateCurrentPlayer({ respostasSeguidas: currentPlayer.respostasSeguidas - 2 });
+        setMensagem("Uma resposta errada foi eliminada!");
+      }
+    } else {
+      setMensagem("Você precisa de pelo menos 2 respostas corretas seguidas!");
+    }
+  };
+
+  const voltarTelaInicial = () => {
+    setJogoIniciado(false);
+  };
+
+  const incrementarRodadasPreso = () => {
+    if (!currentPlayer) return;
+    updateCurrentPlayer({ rodadasPreso: currentPlayer.rodadasPreso + 1 });
+    setMensagem("Um contador adicionado!");
+  };
+
+  const diminuirRodadasPreso = () => {
+    if (!currentPlayer) return;
+    updateCurrentPlayer({ rodadasPreso: currentPlayer.rodadasPreso - 1 });
+    setMensagem("Um contador removido!");
+  };
+
+  const diminuirAcertos = () => {
+    if (!currentPlayer) return;
+    updateCurrentPlayer({
+      respostasCertas: currentPlayer.respostasCertas > 0 ? currentPlayer.respostasCertas - 1 : 0,
+    });
+    setMensagem("Acerto removido!");
+  };
+
+  const diminuirErros = () => {
+    if (!currentPlayer) return;
+    updateCurrentPlayer({
+      respostasErradas: currentPlayer.respostasErradas > 0 ? currentPlayer.respostasErradas - 1 : 0,
+    });
+    setMensagem("Erro removido!");
+  };
+
+  const incrementarContadorDeEstrelas = () => {
+    if (!currentPlayer) return;
+    updateCurrentPlayer({ contadorDeEstrelas: currentPlayer.contadorDeEstrelas + 1 });
+    setMensagem("Estrela adicionada!");
+  };
+
+  const diminuirContadorDeEstrelas = () => {
+    if (!currentPlayer) return;
+    if (currentPlayer.contadorDeEstrelas > 0) {
+      updateCurrentPlayer({ contadorDeEstrelas: currentPlayer.contadorDeEstrelas - 1 });
+      setMensagem("Estrela removida!");
+    } else {
+      setMensagem("Nenhuma estrela para remover!");
+    }
+  };
+
   function renderizarConteudoPergunta() {
     if (!cartaAtual) return null;
     switch (cartaAtual.tipo) {
@@ -754,9 +813,7 @@ const EcoChallenge: React.FC = () => {
               </Button>
             ))}
             {riskRewardAnswer !== null && (
-              <div>
-                Você escolheu: {cartaAtual.alternativasAposta?.[riskRewardAnswer]}
-              </div>
+              <div>Você escolheu: {cartaAtual.alternativasAposta?.[riskRewardAnswer]}</div>
             )}
           </div>
         );
@@ -820,27 +877,23 @@ const EcoChallenge: React.FC = () => {
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <div style={{ width: "45%" }}>
                 <h4>{cartaAtual.coluna1Titulo}</h4>
-                {cartaAtual.opcoes
-                  .filter(op => op.colunaCorreta === 1)
-                  .map(op => (
-                    <div key={op.id} style={{ padding: "4px", border: "1px solid #ccc", marginBottom: "4px" }}>
-                      {op.texto}
-                    </div>
-                  ))}
+                {cartaAtual.opcoes.filter(op => op.colunaCorreta === 1).map(op => (
+                  <div key={op.id} style={{ padding: "4px", border: "1px solid #ccc", marginBottom: "4px" }}>
+                    {op.texto}
+                  </div>
+                ))}
               </div>
               <div style={{ width: "45%" }}>
                 <h4>{cartaAtual.coluna2Titulo}</h4>
-                {cartaAtual.opcoes
-                  .filter(op => op.colunaCorreta === 2)
-                  .map(op => (
-                    <div key={op.id} style={{ padding: "4px", border: "1px solid #ccc", marginBottom: "4px" }}>
-                      {op.texto}
-                    </div>
-                  ))}
+                {cartaAtual.opcoes.filter(op => op.colunaCorreta === 2).map(op => (
+                  <div key={op.id} style={{ padding: "4px", border: "1px solid #ccc", marginBottom: "4px" }}>
+                    {op.texto}
+                  </div>
+                ))}
               </div>
             </div>
             <div style={{ marginTop: "8px" }}>
-              (Simulação de arrastar e soltar as alternativas para a coluna correta)
+              (Simulação de arrastar e soltar)
             </div>
           </div>
         );
@@ -867,7 +920,7 @@ const EcoChallenge: React.FC = () => {
               </div>
             </div>
             <div style={{ marginTop: "8px" }}>
-              (Simulação de seleção das correspondências corretas)
+              (Simulação de seleção de correspondências)
             </div>
           </div>
         );
@@ -893,7 +946,7 @@ const EcoChallenge: React.FC = () => {
   return (
     <div className="flex flex-col items-center">
       <Card
-        className={`w-full max-w-sm mx-auto mt-4 ${ocultarCarta && !cartaRevelada ? "border-gray-200 bg-white" : ""}`}
+        className={`w-full max-w-sm mx-auto mt-8 ${ocultarCarta && !cartaRevelada ? "border-gray-200 bg-white" : ""}`}
         style={
           players.length > 1 && currentPlayer && !(ocultarCarta && !cartaRevelada)
             ? { boxShadow: `0 0 10px 5px ${currentPlayer.color}` }
@@ -904,7 +957,7 @@ const EcoChallenge: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center space-x-2">
               <Button
-                onClick={() => {}}
+                onClick={() => setMostrarSomentePerguntas((prev) => !prev)}
                 size="sm"
                 variant={"outline"}
                 disabled={false}
@@ -1033,16 +1086,11 @@ const EcoChallenge: React.FC = () => {
         )}
         <CardFooter className="flex flex-col items-center">
           <div className="flex flex-wrap justify-between w-full mb-1 space-x-2">
-            <Button onClick={() => setMostrarFontes(!mostrarFontes)} size="sm" variant="outline" disabled={ocultarCarta && !cartaRevelada}>
+            <Button onClick={toggleFontes} size="sm" variant="outline" disabled={ocultarCarta && !cartaRevelada}>
               <BookOpen className="h-4 w-4" />
             </Button>
             <Button
-              onClick={() => {
-                if (currentPlayer?.pulosDisponiveis) {
-                  updateCurrentPlayer({ pulosDisponiveis: currentPlayer.pulosDisponiveis - 1 });
-                  selecionarCartaAleatoria();
-                }
-              }}
+              onClick={pularPergunta}
               size="sm"
               variant={currentPlayer?.pulosDisponiveis === 0 ? "outline" : "secondary"}
               disabled={
@@ -1054,22 +1102,7 @@ const EcoChallenge: React.FC = () => {
               <SkipForward className="h-4 w-4" />
             </Button>
             <Button
-              onClick={() => {
-                if (!currentPlayer || !cartaAtual) return;
-                if (dicaUsada) {
-                  setMensagem("Você já usou a dica para esta pergunta.");
-                  return;
-                }
-                if (currentPlayer.respostasSeguidas >= 2 && cartaAtual.dica) {
-                  setMostrarDica(true);
-                  setDicaUsada(true);
-                  updateCurrentPlayer({ respostasSeguidas: currentPlayer.respostasSeguidas - 2 });
-                } else if (!cartaAtual.dica) {
-                  setMensagem("Esta carta não possui dica.");
-                } else {
-                  setMensagem("Você precisa de pelo menos 2 respostas corretas seguidas para usar a dica!");
-                }
-              }}
+              onClick={toggleDica}
               size="sm"
               variant={
                 currentPlayer &&
@@ -1090,61 +1123,27 @@ const EcoChallenge: React.FC = () => {
             <Button onClick={resetarContadores} size="sm" variant="outline">
               <RotateCcw className="h-4 w-4" />
             </Button>
-            <Button onClick={() => setJogoIniciado(false)} size="sm" variant="outline">
+            <Button onClick={voltarTelaInicial} size="sm" variant="outline">
               <Home className="h-4 w-4" />
             </Button>
           </div>
           <div className="flex flex-wrap justify-between w-full space-x-2">
-            <Button onClick={() => {
-              if (currentPlayer) {
-                updateCurrentPlayer({
-                  respostasCertas: currentPlayer.respostasCertas > 0 ? currentPlayer.respostasCertas - 1 : 0,
-                });
-                setMensagem("Acerto removido!");
-              }
-            }} size="sm" variant="outline">
+            <Button onClick={diminuirAcertos} size="sm" variant="outline">
               <ThumbsDown className="h-4 w-4 text-green-500" />
             </Button>
-            <Button onClick={() => {
-              if (currentPlayer) {
-                updateCurrentPlayer({
-                  respostasErradas: currentPlayer.respostasErradas > 0 ? currentPlayer.respostasErradas - 1 : 0,
-                });
-                setMensagem("Erro removido!");
-              }
-            }} size="sm" variant="outline">
+            <Button onClick={diminuirErros} size="sm" variant="outline">
               <ThumbsUp className="h-4 w-4 text-red-500" />
             </Button>
-            <Button onClick={() => {
-              if (currentPlayer) {
-                updateCurrentPlayer({ contadorDeEstrelas: currentPlayer.contadorDeEstrelas - 1 });
-                setMensagem("Estrela removida!");
-              }
-            }} size="sm" variant="outline">
+            <Button onClick={diminuirContadorDeEstrelas} size="sm" variant="outline">
               <Star className="h-4 w-4 text-red-500" />
             </Button>
-            <Button onClick={() => {
-              if (currentPlayer) {
-                updateCurrentPlayer({ contadorDeEstrelas: currentPlayer.contadorDeEstrelas + 1 });
-                setMensagem("Estrela adicionada!");
-              }
-            }} size="sm" variant="outline">
+            <Button onClick={incrementarContadorDeEstrelas} size="sm" variant="outline">
               <Star className="h-4 w-4 text-yellow-500" />
             </Button>
-            <Button onClick={() => {
-              if (currentPlayer) {
-                updateCurrentPlayer({ rodadasPreso: currentPlayer.rodadasPreso - 1 });
-                setMensagem("Um contador removido!");
-              }
-            }} size="sm" variant="outline">
+            <Button onClick={diminuirRodadasPreso} size="sm" variant="outline">
               <ChevronUp className="h-4 w-4 text-purple-500 transform rotate-180" />
             </Button>
-            <Button onClick={() => {
-              if (currentPlayer) {
-                updateCurrentPlayer({ rodadasPreso: currentPlayer.rodadasPreso + 1 });
-                setMensagem("Um contador adicionado!");
-              }
-            }} size="sm" variant="outline">
+            <Button onClick={incrementarRodadasPreso} size="sm" variant="outline">
               <ChevronUp className="h-4 w-4 text-purple-500" />
             </Button>
           </div>
@@ -1209,8 +1208,7 @@ const EcoChallenge: React.FC = () => {
           </div>
         </CardFooter>
       </Card>
-      <div className={`grid gap-1 mt-4 ${players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`}`}
-           style={{ width: "100%", maxWidth: "400px" }}>
+      <div className={`grid gap-1 mt-4 ${players.length > 4 ? "grid-cols-4" : `grid-cols-${players.length}`}`} style={{ width: "100%", maxWidth: "400px" }}>
         {players.map((pl) => (
           <Button
             key={pl.id}
