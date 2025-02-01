@@ -1,4 +1,4 @@
-const test_card = [
+const meu_baralho = [
   {
     "tipo": "Pergunta",
     "titulo": "Pergunta com Imagem",
@@ -275,4 +275,4 @@ const test_card = [
   }
 ];
 
-export default test_card;
+export default meu_baralho;
