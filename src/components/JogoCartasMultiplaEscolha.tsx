@@ -159,10 +159,10 @@ const probabilitySettings = [
 ];
 
 const cartasOriginais = [
-  ...manejoPlantadas,
-  ...manejoNativas,
-  ...ecologiaFlorestal,
-  ...estrelasAliens,
+//  ...manejoPlantadas,
+//  ...manejoNativas,
+//  ...ecologiaFlorestal,
+//  ...estrelasAliens,
   ...testCards,
 ];
 
