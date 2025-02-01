@@ -154,7 +154,7 @@ const probabilitySettings = [
 ];
 
 const cartasOriginais: Carta[] = [
-  ...manejoPlantadas,
+  //...manejoPlantadas,
   //...manejoNativas,
   //...ecologiaFlorestal,
   ...estrelasAliens,
