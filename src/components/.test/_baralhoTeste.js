@@ -1,5 +1,4 @@
 const _baralhoTeste = [
-  [
   {
     "tipo": "Pergunta",
     "titulo": "Pergunta com Imagem",
