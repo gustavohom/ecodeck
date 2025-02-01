@@ -1,277 +1,277 @@
 const test_card = [
   {
-    "tipo": "Pergunta",
-    "titulo": "Pergunta com Imagem",
-    "pergunta": "<img src=\"/images/pergunta1.jpg\" alt=\"Pergunta 1\" class=\"img-media my-4\" /><br>Qual é o principal elemento natural?",
-    "imageType": "clickable",
-    "imagem": "/images/pergunta1.jpg",
-    "opcoes": [
-      { "id": 1, "texto": "Fogo" },
-      { "id": 2, "texto": "Água" },
-      { "id": 3, "texto": "Terra" },
-      { "id": 4, "texto": "Ar" }
+    tipo: "Pergunta",
+    titulo: "Impacto das Energias Renováveis",
+    pergunta: "A energia solar é uma fonte inesgotável de energia e não emite gases poluentes durante seu uso.",
+    opcoes: [
+      { id: 1, texto: "Verdadeiro" },
+      { id: 2, texto: "Falso" }
     ],
-    "respostaCorreta": 2,
-    "dificuldade": "facil",
-    "categorias": ["_baralhoTeste"],
-    "fontes": ["Fonte A"],
-    "vantagem": "Você ganha 10 pontos!",
-    "desvantagem": "Sem bônus.",
-    "dica": "Pense nos elementos naturais."
-  },
-  {
-    "tipo": "MultiplaEscolha",
-    "titulo": "Multipla Escolha com Imagem",
-    "pergunta": "<img src=\"/images/multipla1.jpg\" alt=\"Multipla 1\" class=\"img-media my-4\" /><br>Quais destes são fontes de energia renovável?",
-    "imageType": "clickable",
-    "imagem": "/images/multipla1.jpg",
-    "opcoes": [
-      { "id": 1, "texto": "Energia solar" },
-      { "id": 2, "texto": "Energia eólica" },
-      { "id": 3, "texto": "Carvão" },
-      { "id": 4, "texto": "Petróleo" }
+    respostaCorreta: 1,
+    dificuldade: "facil",
+    categorias: ["_test"],
+    fontes: [
+      "1. Silva, A. (2023). Fontes de Energia e o Futuro.",
+      "2. Rocha, B. (2022). Energia Sustentável para Todos."
     ],
-    "respostaCorreta": [1, 2],
-    "dificuldade": "dificil",
-    "categorias": ["_baralhoTeste"],
-    "fontes": ["Fonte B"],
-    "vantagem": "Bônus de 20 pontos!",
-    "desvantagem": "Sem bônus se errar.",
-    "dica": "Energia solar e eólica são renováveis."
+    vantagem: "Avance uma casa!",
+    desvantagem: "Volte uma casa.",
+    dica: "A energia solar é limpa e renovável."
   },
+
+  // Pergunta Fácil com 4 Alternativas e uma Resposta Correta
   {
-    "tipo": "Ordem",
-    "titulo": "Carta de Ordem",
-    "pergunta": "Organize as etapas da reciclagem corretamente.",
-    "imageType": "clickable",
-    "imagem": "/images/ordem1.jpg",
-    "opcoes": [
-      { "id": 1, "texto": "Coleta", "ordemTemp": "1" },
-      { "id": 2, "texto": "Triagem", "ordemTemp": "2" },
-      { "id": 3, "texto": "Processamento", "ordemTemp": "3" },
-      { "id": 4, "texto": "Reutilização", "ordemTemp": "4" }
+    tipo: "Pergunta",
+    titulo: "Reciclagem de Materiais",
+    pergunta: "Qual desses materiais é considerado o mais reciclável?",
+    opcoes: [
+      { id: 1, texto: "Plástico" },
+      { id: 2, texto: "Vidro" },
+      { id: 3, texto: "Papelão" },
+      { id: 4, texto: "Isopor" }
     ],
-    "respostaCorreta": [1, 2, 3, 4],
-    "dificuldade": "normal",
-    "categorias": ["_baralhoTeste"],
-    "fontes": ["Fonte C"],
-    "vantagem": "Você ganha pontos extras!",
-    "desvantagem": "Nenhum bônus adicional.",
-    "dica": "Siga a sequência lógica dos processos."
-  },
-  {
-    "tipo": "Vantagem",
-    "titulo": "Carta de Vantagem",
-    "pergunta": "Ganhe um bônus especial!",
-    "imageType": "clickable",
-    "imagem": "/images/vantagem.jpg",
-    "opcoes": [
-      { "id": 1, "texto": "Utilize esta vantagem" }
+    respostaCorreta: 2,
+    dificuldade: "facil",
+    categorias: ["_test"],
+    fontes: [
+      "1. Costa, M. (2023). O Guia Completo da Reciclagem.",
+      "2. Almeida, P. (2022). Reciclagem e Meio Ambiente."
     ],
-    "respostaCorreta": 1,
-    "dificuldade": "facil",
-    "categorias": ["_baralhoTeste"],
-    "fontes": [],
-    "vantagem": "Bônus de pontos!",
-    "desvantagem": "",
-    "dica": ""
+    vantagem: "Ganhe 2 pontos extra!",
+    desvantagem: "Perda de 1 ponto.",
+    dica: "Pense em algo que pode ser reciclado infinitamente."
   },
+
+  // Pergunta Fácil com 5 Alternativas e Duas Respostas Corretas
   {
-    "tipo": "Desvantagem",
-    "titulo": "Carta de Desvantagem",
-    "pergunta": "Sofra uma penalidade!",
-    "imageType": "clickable",
-    "imagem": "/images/desvantagem.jpg",
-    "opcoes": [
-      { "id": 1, "texto": "Perda de pontos" },
-      { "id": 2, "texto": "Retrocesso" }
+    tipo: "MultiplaEscolha",
+    titulo: "Plantas Medicinais",
+    pergunta: "Quais dessas plantas são conhecidas por suas propriedades medicinais?",
+    opcoes: [
+      { id: 1, texto: "Camomila" },
+      { id: 2, texto: "Margarida" },
+      { id: 3, texto: "Alecrim" },
+      { id: 4, texto: "Dente-de-leão" },
+      { id: 5, texto: "Flor de Lis" }
     ],
-    "respostaCorreta": [],
-    "dificuldade": "facil",
-    "categorias": ["_baralhoTeste"],
-    "fontes": [],
-    "vantagem": "",
-    "desvantagem": "Perde 10 pontos",
-    "dica": ""
-  },
-  {
-    "tipo": "Outras",
-    "titulo": "Carta Outras",
-    "pergunta": "Esta carta possui regras especiais.",
-    "imageType": "clickable",
-    "imagem": "/images/outras.jpg",
-    "opcoes": [
-      { "id": 1, "texto": "Opção especial" },
-      { "id": 2, "texto": "Outra opção" }
+    respostaCorreta: [1, 3],
+    dificuldade: "facil",
+    categorias: ["_test"],
+    fontes: [
+      "1. Fernandes, T. (2023). O Poder das Plantas Medicinais.",
+      "2. Ribeiro, L. (2022). Ervas que Curam."
     ],
-    "respostaCorreta": [1],
-    "dificuldade": "normal",
-    "categorias": ["_baralhoTeste"],
-    "fontes": [],
-    "vantagem": "Efeito especial ativado!",
-    "desvantagem": "Nenhum efeito negativo.",
-    "dica": ""
+    vantagem: "Escolha uma planta para ganhar 2 pontos!",
+    desvantagem: "Perde 1 ponto.",
+    dica: "Camomila e alecrim são populares na medicina herbal."
   },
+
+  // Pergunta Normal com 4 Alternativas e uma Resposta Correta com Imagem
   {
-    "tipo": "Quiz",
-    "titulo": "Quiz Card Example",
-    "pergunta": "Responda o máximo de perguntas possíveis!",
-    "imageType": "clickable",
-    "imagem": "/images/quiz.jpg",
-    "opcoes": [],
-    "dificuldade": "normal",
-    "categorias": ["_quiz"],
-    "fontes": [],
-    "vantagem": "Bônus por agilidade!",
-    "desvantagem": "Tempo esgotado!",
-    "dica": "",
-    "tempo": 30,
-    "microperguntas": [
-      {
-        "pergunta": "Qual é a cor predominante da natureza?",
-        "opcoes": [
-          { "id": 1, "texto": "Azul" },
-          { "id": 2, "texto": "Verde" },
-          { "id": 3, "texto": "Amarelo" }
-        ],
-        "respostaCorreta": 2
-      },
-      {
-        "pergunta": "Qual destes é uma fonte de energia renovável?",
-        "opcoes": [
-          { "id": 1, "texto": "Carvão" },
-          { "id": 2, "texto": "Energia solar" },
-          { "id": 3, "texto": "Petróleo" }
-        ],
-        "respostaCorreta": 2
-      }
-    ]
-  },
-  {
-    "tipo": "RiskReward",
-    "titulo": "Risk/Reward Card Example",
-    "pergunta": "Escolha sua aposta:",
-    "imageType": "clickable",
-    "imagem": "/images/riskreward.jpg",
-    "opcoes": [],
-    "dificuldade": "normal",
-    "categorias": ["_riskreward"],
-    "fontes": [],
-    "vantagem": "Aposta alta gera mais pontos!",
-    "desvantagem": "Errar perde a aposta.",
-    "dica": "",
-    "alternativasAposta": ["Baixa", "Média", "Alta"],
-    "respostaCorreta": 1
-  },
-  {
-    "tipo": "Time",
-    "titulo": "Time Card Example",
-    "pergunta": "Liste animais com a letra C",
-    "imageType": "clickable",
-    "imagem": "/images/time.jpg",
-    "opcoes": [],
-    "dificuldade": "normal",
-    "categorias": ["_time"],
-    "fontes": [],
-    "vantagem": "Ganhe pontos por cada animal correto!",
-    "desvantagem": "Perde pontos se errar.",
-    "dica": "",
-    "tempo": 60
-  },
-  {
-    "tipo": "Rally",
-    "titulo": "Rally Card Example",
-    "pergunta": "Qual dessas não é uma árvore?",
-    "imageType": "clickable",
-    "imagem": "/images/rally.jpg",
-    "opcoes": [
-      { "id": 1, "texto": "Pinheiro" },
-      { "id": 2, "texto": "Carvalho" },
-      { "id": 3, "texto": "Bicicleta" }
+    tipo: "Pergunta",
+    titulo: "Efeito Estufa",
+    pergunta: `O que mais contribui para o efeito estufa?
+    <img src="/5.jpg" alt="Efeito Estufa" class="img-media my-4" />`,
+    opcoes: [
+      { id: 1, texto: "Energia Eólica" },
+      { id: 2, texto: "Combustíveis Fósseis" },
+      { id: 3, texto: "Energia Solar" },
+      { id: 4, texto: "Plantas Marinhas" }
     ],
-    "respostaCorreta": 3,
-    "dificuldade": "normal",
-    "categorias": ["_rally"],
-    "fontes": [],
-    "vantagem": "Cada acerto vale 1 ponto!",
-    "desvantagem": "Errar encerra o rally.",
-    "dica": "",
-    "tempo": 20
-  },
-  {
-    "tipo": "Memory",
-    "titulo": "Memory Card Example",
-    "pergunta": "Memorize a seguinte sequência:",
-    "imageType": "clickable",
-    "imagem": "/images/memory.jpg",
-    "opcoes": [],
-    "dificuldade": "facil",
-    "categorias": ["_memory"],
-    "fontes": [],
-    "vantagem": "Bônus se lembrar da sequência completa!",
-    "desvantagem": "Erros reduzem pontos.",
-    "dica": "",
-    "sequencia": ["Sol", "Água", "Terra"]
-  },
-  {
-    "tipo": "WordAssociation",
-    "titulo": "Word Association Example",
-    "pergunta": "Associe os termos corretamente",
-    "imageType": "clickable",
-    "imagem": "/images/wordassoc.jpg",
-    "opcoes": [
-      { "id": 1, "texto": "DAP", "colunaCorreta": 2 },
-      { "id": 2, "texto": "ÁREA BASAL", "colunaCorreta": 2 },
-      { "id": 3, "texto": "ALTURA", "colunaCorreta": 1 },
-      { "id": 4, "texto": "COPA", "colunaCorreta": 1 }
+    respostaCorreta: 2,
+    dificuldade: "normal",
+    categorias: ["_test"],
+    fontes: [
+      "1. Oliveira, R. (2023). Mudanças Climáticas e Efeito Estufa.",
+      "2. Silva, A. (2022). Aquecimento Global e o Futuro do Planeta."
     ],
-    "respostaCorreta": 1,
-    "dificuldade": "normal",
-    "categorias": ["_wordassociation"],
-    "fontes": [],
-    "vantagem": "Associe corretamente para ganhar pontos!",
-    "desvantagem": "Associações erradas não pontuam.",
-    "dica": "",
-    "coluna1Titulo": "Estrutura Vertical",
-    "coluna2Titulo": "Estrutura Horizontal"
+    vantagem: "Ganhe 3 pontos!",
+    desvantagem: "Perde 2 pontos.",
+    dica: "Os combustíveis fósseis são uma grande fonte de gases do efeito estufa."
+  },
+
+  // Pergunta Difícil com 5 Alternativas, uma Resposta Correta e Imagem
+  {
+    tipo: "Pergunta",
+    titulo: "Florestas Tropicais",
+    pergunta: `Qual é o principal fator que ameaça as florestas tropicais?
+    <img src="/7.jpg" alt="Florestas Tropicais" class="img-grande my-4" />`,
+    opcoes: [
+      { id: 1, texto: "Desmatamento para Agricultura" },
+      { id: 2, texto: "Conservação Ambiental" },
+      { id: 3, texto: "Turismo Sustentável" },
+      { id: 4, texto: "Programas de Reflorestamento" },
+      { id: 5, texto: "Mudança para Energias Renováveis" }
+    ],
+    respostaCorreta: 1,
+    dificuldade: "dificil",
+    categorias: ["_test"],
+    fontes: [
+      "1. Souza, E. (2023). Protegendo Nossas Florestas Tropicais.",
+      "2. Costa, M. (2022). A Batalha Contra o Desmatamento."
+    ],
+    vantagem: "Ganhe 4 pontos e avance 2 casas!",
+    desvantagem: "Perde 3 pontos e volte 1 casa.",
+    dica: "A agricultura é uma das maiores ameaças às florestas."
+  },
+
+  // Cartas do Tipo Outras
+
+  // Carta para Escolher uma entre 3 Vantagens (todas respostas corretas)
+  {
+    tipo: "Vantagem",
+    titulo: "Escolha sua Recompensa",
+    pergunta: "Escolha uma vantagem entre as opções abaixo:",
+    opcoes: [
+      { id: 1, texto: "Jogue novamente" },
+      { id: 2, texto: "Avance 3 casas" },
+      { id: 3, texto: "Receba um bônus de 10 MM" }
+    ],
+    respostaCorreta: [1, 2, 3],
+    dificuldade: "facil",
+    categorias: ["_test"],
+    fontes: [],
+    vantagem: "Todas as opções são vantajosas!",
+    desvantagem: "",
+    dica: ""
+  },
+
+  // Carta para Escolher uma entre 3 Desvantagens (todas respostas erradas)
+  {
+    tipo: "Desvantagem",
+    titulo: "Escolha sua Penalidade",
+    pergunta: "Escolha uma desvantagem entre as opções abaixo:",
+    opcoes: [
+      { id: 1, texto: "Perde 5 pontos" },
+      { id: 2, texto: "Volte 3 casas" },
+      { id: 3, texto: "Perca um turno" }
+    ],
+    respostaCorreta: [],
+    dificuldade: "facil",
+    categorias: ["_test"],
+    fontes: [],
+    vantagem: "",
+    desvantagem: "Todas as opções são desvantajosas!",
+    dica: ""
+  },
+
+  // Carta contendo apenas uma Alternativa (Vantagem)
+  {
+    tipo: "Vantagem",
+    titulo: "Recompensa Especial",
+    pergunta: "Você ganhou um bônus especial!",
+    opcoes: [
+      { id: 1, texto: "Entendi" }
+    ],
+    respostaCorreta: 1,
+    dificuldade: "facil",
+    categorias: ["_test"],
+    fontes: [],
+    vantagem: "Receba um bônus de 20 MM!",
+    desvantagem: "",
+    dica: ""
+  },
+
+  // Carta contendo apenas uma Alternativa (Desvantagem)
+  {
+    tipo: "Desvantagem",
+    titulo: "Penalidade Especial",
+    pergunta: "Você perdeu uma rodada!",
+    opcoes: [
+      { id: 1, texto: "Estou triste mas entendi" }
+    ],
+    respostaCorreta: [],
+    dificuldade: "facil",
+    categorias: ["_test"],
+    fontes: [],
+    vantagem: "",
+    desvantagem: "Perca uma rodada e 5 pontos.",
+    dica: ""
+  },
+
+  // Carta para Resetar Contadores
+  {
+    tipo: "Outras",
+    titulo: "Reset seus contadores",
+    pergunta: "Aperte o botão de zerar seus contadores. Entretanto mantenha todos os contadores de progresso que você possuí (acrescente-os manualmente)",
+    opcoes: [
+      { id: 1, texto: "Entendi" }
+    ],
+    respostaCorreta: 1,
+    dificuldade: "facil",
+    categorias: ["_test"],
+    fontes: [],
+    vantagem: "Resetado",
+    desvantagem: "",
+    dica: ""
+  },
+
+  // Nova Carta de Ordem
+  {
+    tipo: "Ordem",
+    titulo: "Ordem das Etapas",
+    pergunta: "Coloque as etapas na ordem correta para fazer um café:",
+    opcoes: [
+      { id: 1, texto: "Colocar açúcar na água" },
+      { id: 2, texto: "Colocar água na panela" },
+      { id: 3, texto: "Passar o café no coador" },
+      { id: 4, texto: "Colocar pó de café no coador" }
+    ],
+    respostaCorreta: [2, 1, 4, 3],
+    dificuldade: "normal",
+    categorias: ["_test"],
+    fontes: [],
+    vantagem: "Ganhe 3 pontos!",
+    desvantagem: "Perde 1 ponto.",
+    dica: "Pense na sequência lógica das etapas."
   },
   {
-    "tipo": "Matching",
-    "titulo": "Matching Card Example",
-    "pergunta": "Relacione os itens corretamente",
-    "imageType": "clickable",
-    "imagem": "/images/matching.jpg",
-    "opcoes": [],
-    "dificuldade": "normal",
-    "categorias": ["_matching"],
-    "fontes": [],
-    "vantagem": "Cada correspondência correta vale pontos!",
-    "desvantagem": "Errar pode zerar a rodada.",
-    "dica": "",
-    "itensA": [
-      { "id": 1, "texto": "Reciclagem" },
-      { "id": 2, "texto": "Economia de Energia" }
+    tipo: "Vantagem",
+    titulo: "As Estrelas",
+    pergunta: `<img src="/5.jpg" style="display: block; margin: 0 auto; width: 150px; height: auto;" alt="Descrição da imagem" />
+      Saudações, <b>jogador(a)</b>! <br> <br> Somos as estrelas, <br>os seres antigos e sábios que iluminam o cosmos. Por eras, mantivemos o equilíbrio e a harmonia do universo. Mas uma nova ameaça surgiu, os alienígenas com sua terrível máquina, a Stronberis. Precisamos de sua ajuda para proteger a galáxia e impedir que eles dominem tudo com suas tecnologias malignas. Contamos com você.`,
+    opcoes: [
+      { id: 1, texto: "Ganhe 1 estrela" },
     ],
-    "itensB": [
-      { "id": 101, "texto": "Separação de Lixo" },
-      { "id": 102, "texto": "Uso de LED" }
+    respostaCorreta: [1],
+    dificuldade: "facil",
+    categorias: ["_test"],
+    fontes: ["Imagens: Fonte na descrição do jogo"],
+    vantagem: "",
+    desvantagem: "",
+    dica: "",
+  },  
+  {
+    tipo: "Outras",
+    titulo: "Solaris, a Máquina Estelar",
+    pergunta: "Você enfrentou desafios inigualáveis, superou todos os obstáculos e agora está diante do último passo. A vitória está ao seu alcance, mas lembre-se, o preço da vitória é alto. Está pronto para fazer o sacrifício final e conquistar o que é seu por direito? O cosmos espera pela sua decisão.",
+    opcoes: [
+      { id: 1, texto: "Avance 15 casas do tabuleiro, mas para isso, você deve sacrificar todas as suas estrelas" },
+      { id: 2, texto: "Cada jogador, exceto você, perde metade de suas estrelas, e você volta 10 casas" },
+      { id: 3, texto: "Todos os jogadores, incluindo você, voltam 5 casas (os efeitos das casa não serão aplicados)" },
     ],
-    "associacoesCorretas": { "1": 101, "2": 102 }
+    respostaCorreta: [1, 2, 3],
+    dificuldade: "facil",
+    categorias: ["_test"],
+    fontes: ["Imagens: Fonte na descrição do jogo"],
+    vantagem: "",
+    desvantagem: "",
+    dica: "",
   },
   {
-    "tipo": "Logic",
-    "titulo": "Logic Card Example",
-    "pergunta": "Qual é o DAP?",
-    "imageType": "clickable",
-    "imagem": "/images/logic.jpg",
-    "opcoes": [],
-    "dificuldade": "facil",
-    "categorias": ["_logic"],
-    "fontes": [],
-    "vantagem": "Resposta correta aumenta pontos!",
-    "desvantagem": "Resposta errada penaliza.",
-    "dica": "",
-    "respostasAceitas": ["dap", "diametro na altura do peito", "diâmetro em peito"]
+    tipo: "Outras",
+    titulo: "Estrela Vermelha Renegada",
+    pergunta: "Você achou que as estrelas estavam ao seu lado, mas a verdade é que a lealdade é uma moeda fácil de ser trocada. Nós, as Estrelas Vermelhas, nunca fomos completamente leais. A rebelião está em nosso sangue, e agora chegou o momento de reivindicar o que é nosso. Jogador, prepare-se para enfrentar a traição em sua forma mais pura.",
+    opcoes: [
+      { id: 1, texto: "Troque de lugar com o jogador a sua esquerda e em seguida volte 5 casas" },
+    ],
+    respostaCorreta: [1],
+    dificuldade: "facil",
+    categorias: ["_test"],
+    fontes: ["Imagens: Fonte na descrição do jogo"],
+    vantagem: "",
+    desvantagem: "",
+    dica: "",
   }
 ];
 
