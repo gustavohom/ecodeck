@@ -1628,38 +1628,37 @@ if (typeof module !== 'undefined' && module.exports) {
             </div>
 
              {/* --- Vantagem, Desvantagem, Dica --- */}
-             {tipo !== 'Vantagem' && tipo !== 'Desvantagem' && ( // Hide for these types as they have implicit meaning
+             {tipo !== 'Vantagem' && tipo !== 'Desvantagem' && ( // Hide entire section for these types
                 <div className="bg-gray-50 p-4 rounded-md border border-gray-200 space-y-4">
                     <h3 className="text-lg font-semibold text-gray-700">Textos Auxiliares (Opcional)</h3>
-                    {/* Vantagem Field - Show unless type is Desvantagem */}
-                    {tipo !== 'Desvantagem' && (
-                        <div>
-                            <label htmlFor="cardAdvantage" className="block text-sm font-medium text-gray-700 mb-1">Vantagem:</label>
-                            <input
-                            id="cardAdvantage"
-                            type="text"
-                            value={vantagem}
-                            onChange={(e) => setVantagem(e.target.value)}
-                            placeholder="Texto explicando a vantagem (se houver)"
-                            className="border border-gray-300 p-2 w-full rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
-                            />
-                        </div>
-                    )}
-                    {/* Desvantagem Field - Show unless type is Vantagem */}
-                    {tipo !== 'Vantagem' && (
-                        <div>
-                            <label htmlFor="cardDisadvantage" className="block text-sm font-medium text-gray-700 mb-1">Desvantagem:</label>
-                            <input
-                            id="cardDisadvantage"
-                            type="text"
-                            value={desvantagem}
-                            onChange={(e) => setDesvantagem(e.target.value)}
-                            placeholder="Texto explicando a desvantagem (se houver)"
-                            className="border border-gray-300 p-2 w-full rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
-                            />
-                        </div>
-                     )}
-                    {/* Dica Field - Always show */}
+
+                    {/* Vantagem Field - Always show if outer condition met */}
+                    <div>
+                        <label htmlFor="cardAdvantage" className="block text-sm font-medium text-gray-700 mb-1">Vantagem:</label>
+                        <input
+                        id="cardAdvantage"
+                        type="text"
+                        value={vantagem}
+                        onChange={(e) => setVantagem(e.target.value)}
+                        placeholder="Texto explicando a vantagem (se houver)"
+                        className="border border-gray-300 p-2 w-full rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                        />
+                    </div>
+
+                    {/* Desvantagem Field - Always show if outer condition met */}
+                    <div>
+                        <label htmlFor="cardDisadvantage" className="block text-sm font-medium text-gray-700 mb-1">Desvantagem:</label>
+                        <input
+                        id="cardDisadvantage"
+                        type="text"
+                        value={desvantagem}
+                        onChange={(e) => setDesvantagem(e.target.value)}
+                        placeholder="Texto explicando a desvantagem (se houver)"
+                        className="border border-gray-300 p-2 w-full rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                        />
+                    </div>
+
+                    {/* Dica Field - Always show if outer condition met */}
                     <div>
                         <label htmlFor="cardHint" className="block text-sm font-medium text-gray-700 mb-1">Dica:</label>
                         <input
