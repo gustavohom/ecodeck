@@ -8,8 +8,6 @@ interface Opcao {
   id: number;
   texto: string;
   ordemTemp?: string; // Temporary state for ordering UI (Ordem type)
-  // --- New Fields for RelacionarColunas ---
-  // We'll use two separate lists for RelacionarColunas, but Opcao remains the base
 }
 
 // Represents an item in Column B for RelacionarColunas type
@@ -110,19 +108,21 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
     }
   } else if (tipo === "MultiplaEscolha" || tipo === "Outras") {
     if (Array.isArray(respostaCorreta)) {
-      (respostaCorreta as number[]).forEach((x) => correctSet.add(x));
+      (respostaCorreta as number[]).forEach((x) => typeof x === 'number' && correctSet.add(x)); // Ensure it's a number
     } else if (typeof respostaCorreta === 'number' && respostaCorreta !== 0) {
       correctSet.add(respostaCorreta); // Handle single number case if needed
     }
   } else if (tipo === "RelacionarColunas" && Array.isArray(respostaCorreta)) {
       (respostaCorreta as Pairing[]).forEach(p => {
-          pairingsMap.set(p.colunaAId, p.colunaBId);
+          if (typeof p === 'object' && p !== null && 'colunaAId' in p) { // Basic check for Pairing structure
+             pairingsMap.set(p.colunaAId, p.colunaBId);
+          }
       });
   }
 
   // Render options based on type
   if (tipo === "Ordem") {
-    const seq = Array.isArray(respostaCorreta) ? (respostaCorreta as number[]) : [];
+    const seq = Array.isArray(respostaCorreta) ? (respostaCorreta as number[]).filter(id => typeof id === 'number') : [];
     const ordemMap = new Map<number, number>();
     seq.forEach((id, index) => {
       ordemMap.set(id, index + 1);
@@ -191,6 +191,11 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
     );
   }
 
+  // Filter meta for display (exclude colunaB)
+  const displayMeta = meta ? Object.fromEntries(
+      Object.entries(meta).filter(([key]) => key !== 'colunaB')
+  ) : null;
+
   return (
     <div
       style={{
@@ -222,8 +227,8 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
 
       {/* Display other fields */}
       <div style={{ marginTop: "16px", paddingTop: '10px', borderTop: '1px dashed #eee', fontSize: "0.75rem", color: "#555" }}>
-        {categorias.length > 0 && <p style={{ margin: '3px 0' }}><strong>Categorias:</strong> {categorias.join(", ")}</p>}
-        {fontes.length > 0 && <p style={{ margin: '3px 0' }}><strong>Fontes:</strong> {fontes.join(", ")}</p>}
+        {categorias && categorias.length > 0 && <p style={{ margin: '3px 0' }}><strong>Categorias:</strong> {categorias.join(", ")}</p>}
+        {fontes && fontes.length > 0 && <p style={{ margin: '3px 0' }}><strong>Fontes:</strong> {fontes.join(", ")}</p>}
       </div>
 
       {dica && (
@@ -241,14 +246,11 @@ const CardStaticView: React.FC<{ card: Carta }> = ({ card }) => {
           <strong>Desvantagem:</strong> {desvantagem}
         </p>
       )}
-       {meta && Object.keys(meta).length > 0 && !(tipo === 'RelacionarColunas' && meta.colunaB) && ( // Don't show raw ColB meta
+       {displayMeta && Object.keys(displayMeta).length > 0 && (
          <div style={{ marginTop: "10px", fontSize: "0.75rem", color: "#777", borderTop: '1px dashed #eee', paddingTop: '6px' }}>
             <p style={{ margin: '2px 0', fontWeight: 'bold' }}>Metadados Adicionais:</p>
             <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', background: '#f9f9f9', padding: '6px', borderRadius: '4px', fontSize: '11px' }}>
-                {JSON.stringify(
-                    Object.fromEntries(Object.entries(meta).filter(([key]) => key !== 'colunaB')), // Exclude colunaB here too
-                    null, 2
-                )}
+                {JSON.stringify(displayMeta, null, 2)}
             </pre>
          </div>
        )}
@@ -281,8 +283,6 @@ const CriadorDeCarta: React.FC = () => {
   const [imagem, setImagem] = useState(""); // Image path/URL
 
   // Stores correct answer(s). Structure depends on 'tipo'.
-  // Using 'any' here simplifies state management across diverse types,
-  // but ensure type safety in handler functions.
   const [respostaCorretaState, setRespostaCorretaState] = useState<any>([]);
 
   const [dificuldade, setDificuldade] = useState<Dificuldade>("facil");
@@ -344,6 +344,7 @@ const CriadorDeCarta: React.FC = () => {
          // Clear pairings if type is not RelacionarColunas
          if (pairings.length > 0) setPairings([]);
       }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [opcoes, tipo]); // Rerun when options or type changes
 
 
@@ -400,25 +401,47 @@ const CriadorDeCarta: React.FC = () => {
         }
 
          // --- Data Migration/Validation (Optional but recommended) ---
-         // Ensure loaded cards have necessary fields based on type, potentially adding defaults
          newCards = newCards.map(card => {
              let migratedCard = { ...card };
-             // Example: Ensure 'meta' exists if needed by type
-             if (migratedCard.tipo === 'Tempo' && !migratedCard.meta?.timeLimit) {
-                 console.warn(`Carta "${migratedCard.titulo}" do tipo Tempo sem timeLimit no meta. Adicionando default.`);
-                 migratedCard.meta = { ...migratedCard.meta, timeLimit: 60 }; // Default 60s
-             }
-             if (migratedCard.tipo === 'RelacionarColunas' && !migratedCard.meta?.colunaB) {
-                  console.warn(`Carta "${migratedCard.titulo}" do tipo RelacionarColunas sem colunaB no meta. Adicionando default.`);
-                 migratedCard.meta = { ...migratedCard.meta, colunaB: [] };
-             }
-             // Ensure respostaCorreta has the correct format for RelacionarColunas
-             if (migratedCard.tipo === 'RelacionarColunas') {
-                 if (!Array.isArray(migratedCard.respostaCorreta) || (migratedCard.respostaCorreta.length > 0 && typeof migratedCard.respostaCorreta[0] !== 'object')) {
-                     console.warn(`Carta "${migratedCard.titulo}" do tipo RelacionarColunas com formato de resposta incorreto. Resetando.`);
-                     migratedCard.respostaCorreta = []; // Reset pairings if format is wrong
+             // Ensure required fields have default values if missing
+             migratedCard.opcoes = migratedCard.opcoes ?? [];
+             migratedCard.categorias = migratedCard.categorias ?? [];
+             migratedCard.fontes = migratedCard.fontes ?? [];
+             migratedCard.respostaCorreta = migratedCard.respostaCorreta ?? (migratedCard.tipo === 'Pergunta' ? 0 : []); // Default based on type maybe?
+
+             // Example: Ensure 'meta' exists if needed by type and add defaults
+             if (migratedCard.tipo === 'Tempo') {
+                 migratedCard.meta = { ...migratedCard.meta }; // Ensure meta object exists
+                 if (!migratedCard.meta.timeLimit) {
+                    console.warn(`Carta "${migratedCard.titulo}" do tipo Tempo sem timeLimit no meta. Adicionando default 60.`);
+                    migratedCard.meta.timeLimit = 60; // Default 60s
                  }
              }
+             if (migratedCard.tipo === 'RelacionarColunas') {
+                 migratedCard.meta = { ...migratedCard.meta }; // Ensure meta object exists
+                  if (!migratedCard.meta.colunaB || !Array.isArray(migratedCard.meta.colunaB)) {
+                      console.warn(`Carta "${migratedCard.titulo}" do tipo RelacionarColunas sem colunaB válida no meta. Adicionando default [].`);
+                     migratedCard.meta.colunaB = [];
+                 }
+                  // Ensure respostaCorreta has the correct format for RelacionarColunas
+                 if (!Array.isArray(migratedCard.respostaCorreta) || (migratedCard.respostaCorreta.length > 0 && (typeof migratedCard.respostaCorreta[0] !== 'object' || !('colunaAId' in migratedCard.respostaCorreta[0])))) {
+                     console.warn(`Carta "${migratedCard.titulo}" do tipo RelacionarColunas com formato de resposta incorreto. Resetando para [].`);
+                     migratedCard.respostaCorreta = []; // Reset pairings if format is wrong
+                 } else {
+                     // Ensure loaded pairings are valid pairings
+                     migratedCard.respostaCorreta = (migratedCard.respostaCorreta as any[]).filter(p => typeof p === 'object' && p !== null && 'colunaAId' in p);
+                 }
+             }
+             // Ensure standard respostaCorreta is array of numbers or single number
+             if (['Pergunta', 'MultiplaEscolha', 'Ordem', 'Outras', 'Tempo', 'AreaClicavel', 'Vantagem', 'Desvantagem'].includes(migratedCard.tipo)) {
+                  if (Array.isArray(migratedCard.respostaCorreta)) {
+                      migratedCard.respostaCorreta = (migratedCard.respostaCorreta as any[]).filter(id => typeof id === 'number');
+                  } else if (typeof migratedCard.respostaCorreta !== 'number') {
+                       console.warn(`Carta "${migratedCard.titulo}" com tipo de resposta incorreta. Resetando.`);
+                       migratedCard.respostaCorreta = migratedCard.tipo === 'Pergunta' ? 0 : [];
+                  }
+             }
+
 
              return migratedCard;
          });
@@ -439,7 +462,7 @@ const CriadorDeCarta: React.FC = () => {
       setBaralhosCarregados((prev) => [...prev, ...newBaralhos]);
     }
     // Clear the file input value to allow reloading the same file
-    e.target.value = "";
+    if (e.target) e.target.value = "";
   };
 
   const adicionarBaralho = (baralhoId: number) => {
@@ -448,10 +471,10 @@ const CriadorDeCarta: React.FC = () => {
         if (b.id === baralhoId && !b.adicionado) {
           const newCards = b.cartas.map((c) => ({
             ...c,
-             // Deep copy potentially complex fields
+             // Deep copy potentially complex fields to avoid reference issues
              opcoes: c.opcoes?.map(o => ({...o})) ?? [],
              meta: c.meta ? JSON.parse(JSON.stringify(c.meta)) : undefined,
-             respostaCorreta: c.respostaCorreta ? JSON.parse(JSON.stringify(c.respostaCorreta)) : undefined,
+             respostaCorreta: c.respostaCorreta ? JSON.parse(JSON.stringify(c.respostaCorreta)) : (c.tipo === 'Pergunta' ? 0 : []),
              categorias: [...(c.categorias ?? [])],
              fontes: [...(c.fontes ?? [])],
             origBaralhoId: b.id,
@@ -510,9 +533,9 @@ const CriadorDeCarta: React.FC = () => {
           setOpcoes((old) => old.filter((o) => o.id !== id));
           // Also remove from correct answers if it was selected (for standard types)
           if (Array.isArray(respostaCorretaState)) {
-              setRespostaCorretaState((rc: number[]) => rc.filter((x) => x !== id));
+              setRespostaCorretaState((rc: any[]) => rc.filter((x) => x !== id));
           } else if (typeof respostaCorretaState === 'number' && respostaCorretaState === id) {
-              setRespostaCorretaState(0); // Or [] ? Reset if the single correct one is removed
+              setRespostaCorretaState(tipo === 'Pergunta' ? 0 : []); // Reset if the single correct one is removed
           }
           // Remove any pairings involving this option A
           setPairings(prev => prev.filter(p => p.colunaAId !== id));
@@ -538,11 +561,15 @@ const CriadorDeCarta: React.FC = () => {
     if (!relevantTypes.includes(tipo)) return;
 
     if (tipo === "Pergunta" || tipo === "Tempo" || tipo === "AreaClicavel") { // Single answer types
-      setRespostaCorretaState((prev: number[]) => (prev.includes(id) ? [] : [id]));
+      setRespostaCorretaState((prev: any) => (Array.isArray(prev) && prev.includes(id)) ? [] : [id]);
     } else { // MultiplaEscolha, Outras
-      setRespostaCorretaState((prev: number[]) =>
-        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-      );
+      setRespostaCorretaState((prev: any[]) => {
+          // Ensure prev is an array
+          const currentArray = Array.isArray(prev) ? prev : [];
+          return currentArray.includes(id)
+            ? currentArray.filter((x) => x !== id)
+            : [...currentArray, id]
+      });
     }
   };
 
@@ -561,9 +588,9 @@ const CriadorDeCarta: React.FC = () => {
   // Handle Time Limit input for 'Tempo' type
   const handleTimeLimitChange = (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      // Allow only numbers or empty string
+      // Allow only positive integers or empty string
        if (/^\d*$/.test(value)) {
-           setTimeLimit(value);
+           setTimeLimit(value === "" ? "" : Math.max(0, parseInt(value, 10))); // Store as number or empty string
        }
   }
 
@@ -623,24 +650,23 @@ const CriadorDeCarta: React.FC = () => {
   // --- Card Management ---
 
   const resetCarta = (keepLocked = true) => {
-    // Preserve type selection? Or reset to default? Resetting for now.
     setTipo("Pergunta");
     setTitulo("");
     setPergunta("");
     setOpcoes([]);
     setNovaOpcao("");
-    setColunaBOpcoes([]); // Reset Col B
-    setNovaOpcaoB("");   // Reset Col B input
-    setPairings([]);     // Reset pairings
+    setColunaBOpcoes([]);
+    setNovaOpcaoB("");
+    setPairings([]);
     setImagem("");
     setDica("");
     setVantagem("");
     setDesvantagem("");
-    setRespostaCorretaState([]); // Reset correct answers state
+    setRespostaCorretaState([]); // Reset correct answers state to empty array
     setDificuldade("facil");
     setImageType("clickable");
-    setTimeLimit(""); // Reset time limit
-    setCurrentMeta({}); // Reset metadata
+    setTimeLimit("");
+    setCurrentMeta({});
     setMetaKey("");
     setMetaValue("");
     setEditIndex(null);
@@ -662,12 +688,10 @@ const CriadorDeCarta: React.FC = () => {
     if (!imgPath) {
       return rawPergunta; // No image, return text as is
     }
-     // Use simpler, shared styles if possible, but unique IDs are safer for modals
      const uniqueSuffix = cardTitle.replace(/[^a-zA-Z0-9]/g, '-') + '-' + Math.random().toString(36).substring(2, 8);
      const modalId = `zoomModal-${uniqueSuffix}`;
 
     if (imgType === "clickable") {
-      // Inject CSS - consider moving this to a global CSS file if used often
       const css = `
         .zoom-modal-${uniqueSuffix} { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: none; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.85); z-index: 10000; }
         .zoom-modal-content-${uniqueSuffix} { margin: 1rem; max-width: 95%; max-height: 95%; position: relative; }
@@ -706,7 +730,6 @@ ${rawPergunta}
         return;
     }
 
-    // Basic options count validation (adapt for new types)
     const needsOptions = ["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "Tempo", "AreaClicavel"];
     if (needsOptions.includes(tipo) && opcoes.length === 0) {
         alert(`Cartas do tipo '${tipo}' devem ter pelo menos uma opção.`);
@@ -730,7 +753,7 @@ ${rawPergunta}
 
 
     // --- Prepare RespostaCorreta based on Type ---
-    let finalRespostaCorreta: RespostaCorreta = []; // Default to empty array
+    let finalRespostaCorreta: RespostaCorreta = []; // Default
 
     if (tipo === "Ordem") {
       const sorted = [...opcoes]
@@ -743,7 +766,6 @@ ${rawPergunta}
       }
        if (opcoes.some(o => !o.ordemTemp?.trim() || parseInt(o.ordemTemp, 10) <= 0)) {
             console.warn("Algumas opções do tipo 'Ordem' não têm número de ordem válido definido.");
-            // Optional: alert("Atenção: Algumas opções do tipo 'Ordem' não têm número de ordem válido. Elas não serão incluídas na sequência correta.")
        }
       finalRespostaCorreta = sorted.map((o) => o.id);
 
@@ -754,7 +776,7 @@ ${rawPergunta}
       finalRespostaCorreta = [];
 
     } else if (tipo === "Pergunta" || tipo === "Tempo" || tipo === "AreaClicavel") {
-      const selectedAnswers = Array.isArray(respostaCorretaState) ? respostaCorretaState : [];
+      const selectedAnswers = Array.isArray(respostaCorretaState) ? respostaCorretaState.filter(id => typeof id === 'number') : [];
       if (selectedAnswers.length === 1) {
         finalRespostaCorreta = selectedAnswers[0]; // Store as single number
       } else {
@@ -763,23 +785,21 @@ ${rawPergunta}
       }
 
     } else if (tipo === "MultiplaEscolha" || tipo === "Outras") {
-        const selectedAnswers = Array.isArray(respostaCorretaState) ? respostaCorretaState : [];
+        const selectedAnswers = Array.isArray(respostaCorretaState) ? respostaCorretaState.filter(id => typeof id === 'number') : [];
         if (selectedAnswers.length === 0 && tipo === "MultiplaEscolha") {
-            // Allow no correct answer for 'Outras', maybe require for 'MultiplaEscolha'?
-            // alert("Erro: Selecione pelo menos uma resposta correta para 'MultiplaEscolha'.");
-            // return;
+             console.warn("Carta 'MultiplaEscolha' salva sem nenhuma resposta correta selecionada.");
+            // alert("Erro: Selecione pelo menos uma resposta correta para 'MultiplaEscolha'."); return; // Uncomment to enforce selection
         }
         finalRespostaCorreta = [...selectedAnswers]; // Store as array
 
     } else if (tipo === "RelacionarColunas") {
-       // Filter pairings to include only those where a B option is actually selected
-       const validPairings = pairings.filter(p => p.colunaBId !== null);
+       const validPairings = pairings.filter(p => p.colunaBId !== null && typeof p.colunaBId === 'number');
        if (validPairings.length !== opcoes.length) {
-            const confirmUnmatched = window.confirm(`Atenção: ${opcoes.length - validPairings.length} item(ns) da Coluna A não foram pareados com um item da Coluna B. Deseja salvar assim mesmo?`);
+            const confirmUnmatched = window.confirm(`Atenção: ${opcoes.length - validPairings.length} item(ns) da Coluna A não foram pareados com um item da Coluna B. Deseja salvar assim mesmo? (Itens não pareados serão salvos como 'null')`);
             if (!confirmUnmatched) return;
        }
-       // Check for duplicate B selections (one B item matched to multiple A items)
-       const bCounts = validPairings.reduce((acc, p) => {
+       // Check for duplicate B selections
+       const bCounts = pairings.reduce((acc, p) => {
             if (p.colunaBId !== null) {
                 acc[p.colunaBId] = (acc[p.colunaBId] || 0) + 1;
             }
@@ -792,20 +812,26 @@ ${rawPergunta}
            return;
        }
 
-       finalRespostaCorreta = pairings; // Store the full pairing structure
+       finalRespostaCorreta = pairings; // Store the full pairing structure {colunaAId, colunaBId | null}
+
+    } else {
+        // Fallback for potentially unhandled types? Default to empty array.
+        finalRespostaCorreta = [];
     }
 
     // --- Prepare Metadata ---
-    const finalMeta = { ...currentMeta };
+    const finalMeta: Record<string, any> = { ...currentMeta }; // Start with generic meta
     if (tipo === "Tempo") {
         finalMeta.timeLimit = parseInt(String(timeLimit), 10);
     }
      if (tipo === "RelacionarColunas") {
-        // Store Column B options within meta
         finalMeta.colunaB = colunaBOpcoes.map(o => ({ id: o.id, texto: o.texto }));
     } else {
-        // Remove potentially lingering colunaB from meta if type changed
-        delete finalMeta.colunaB;
+        delete finalMeta.colunaB; // Clean up if type changed away from RelacionarColunas
+    }
+    // Remove timeLimit if type is not Tempo
+    if (tipo !== "Tempo") {
+        delete finalMeta.timeLimit;
     }
 
 
@@ -819,14 +845,13 @@ ${rawPergunta}
       pergunta: computedPergunta,
       imageType: imagem ? imageType : undefined,
       imagem: imagem || undefined,
-      // For RelacionarColunas, 'opcoes' is Column A. For others, it's the standard options.
-      opcoes: opcoes.map(({ ordemTemp, ...rest }) => rest), // Clean temp field if present
+      opcoes: opcoes.map(({ ordemTemp, ...rest }) => rest), // Clean temp field
       respostaCorreta: finalRespostaCorreta,
       dificuldade,
-      categorias,
-      fontes,
-      vantagem: tipo !== 'Desvantagem' ? vantagem : '', // Clear if Desvantagem type
-      desvantagem: tipo !== 'Vantagem' ? desvantagem : '', // Clear if Vantagem type
+      categorias: [...categorias],
+      fontes: [...fontes],
+      vantagem: tipo !== 'Desvantagem' ? vantagem : '',
+      desvantagem: tipo !== 'Vantagem' ? desvantagem : '',
       dica,
       meta: Object.keys(finalMeta).length > 0 ? finalMeta : undefined,
     };
@@ -856,14 +881,13 @@ ${rawPergunta}
     resetCarta(false); // Full reset before loading
     setEditIndex(index);
     setTipo(carta.tipo as TipoCarta);
-    setTitulo(carta.titulo);
+    setTitulo(carta.titulo || "");
 
-    // --- Image and Pergunta Handling (same as before) ---
-    let p = carta.pergunta;
+    // --- Image and Pergunta Handling ---
+    let p = carta.pergunta || "";
     let extractedImage = carta.imagem || "";
     let extractedImageType = carta.imageType || "clickable";
     if (!extractedImage && p.includes('<img')) {
-        // Basic regex, might need refinement for complex cases
         const modalImgRegex = /<div style="text-align: center[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"[^>]*onclick="document\.getElementById\('zoomModal-[^']+'\)\.style\.display='flex'"[^>]*>/;
         const heroImgRegex = /<div style="text-align: center[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"[^>]*style="[^"]*border-radius: 50%[^"]*"[^>]*>/;
 
@@ -873,7 +897,6 @@ ${rawPergunta}
          if (modalMatch && modalMatch[1]) {
             extractedImage = modalMatch[1];
             extractedImageType = "clickable";
-            // Attempt to remove the image container and potentially its style block if exists nearby (simplified removal)
              p = p.replace(/<style>[\s\S]*?<\/style>/, '').replace(modalMatch[0], '').trim();
         } else if (heroMatch && heroMatch[1]) {
             extractedImage = heroMatch[1];
@@ -889,13 +912,18 @@ ${rawPergunta}
     // --- Options, Correct Answer, and Type-Specific Fields ---
      const copyOp = carta.opcoes?.map((o) => ({ ...o, ordemTemp: "" })) ?? []; // Base options / Col A
 
-     // Load Column B and Pairings for RelacionarColunas
+     // Default correct answer state
+     let loadedRespostaState: any = [];
+
      if (carta.tipo === "RelacionarColunas") {
-         const colB = carta.meta?.colunaB as OpcaoColunaB[] || [];
+         const colB = (carta.meta?.colunaB as OpcaoColunaB[])?.map(o => ({...o})) ?? [];
          setColunaBOpcoes(colB);
-         const loadedPairings = (Array.isArray(carta.respostaCorreta) ? carta.respostaCorreta : []) as Pairing[];
+         // Ensure pairings are loaded correctly, defaulting to null for B if missing
+         const loadedPairings = (Array.isArray(carta.respostaCorreta) ? carta.respostaCorreta : [])
+            .filter(p => typeof p === 'object' && p !== null && 'colunaAId' in p) // Basic validation
+            .map(p => ({ colunaAId: p.colunaAId, colunaBId: p.colunaBId ?? null })) as Pairing[];
          setPairings(loadedPairings);
-         setRespostaCorretaState([]); // Clear standard selection state
+         // loadedRespostaState remains [] for this type
 
      } else if (carta.tipo === "Ordem") {
        const seq = (Array.isArray(carta.respostaCorreta) ? carta.respostaCorreta : []) as number[];
@@ -903,25 +931,25 @@ ${rawPergunta}
          const pos = seq.indexOf(op.id);
          op.ordemTemp = pos >= 0 ? String(pos + 1) : "";
        });
-        setRespostaCorretaState([]); // Clear standard selection state
+       // loadedRespostaState remains [] for this type
 
      } else if (carta.tipo === "Vantagem" || carta.tipo === "Desvantagem") {
-         setRespostaCorretaState([]); // No specific selections
+        // loadedRespostaState remains []
 
-     } else if (carta.tipo === "Pergunta" || carta.tipo === "Tempo" || carta.tipo === "AreaClicavel") {
+     } else if (tipo === "Pergunta" || tipo === "Tempo" || tipo === "AreaClicavel") { // Single answer types
          if (typeof carta.respostaCorreta === "number" && carta.respostaCorreta !== 0) {
-             setRespostaCorretaState([carta.respostaCorreta]);
+             loadedRespostaState = [carta.respostaCorreta];
          } else if (Array.isArray(carta.respostaCorreta) && carta.respostaCorreta.length === 1 && typeof carta.respostaCorreta[0] === 'number') {
-              setRespostaCorretaState([carta.respostaCorreta[0]]); // Handle legacy array[1]
-         } else {
-             setRespostaCorretaState([]); // No correct answer or invalid format
-         }
-     } else { // MultiplaEscolha, Outras
+              loadedRespostaState = [carta.respostaCorreta[0]]; // Handle legacy array[1]
+         } // else remains []
+
+     } else { // MultiplaEscolha, Outras (Array of numbers)
          const arr = (Array.isArray(carta.respostaCorreta) ? carta.respostaCorreta : []) as number[];
-         setRespostaCorretaState(arr.filter(x => typeof x === 'number' && x !== 0)); // Ensure only valid number IDs
+         loadedRespostaState = arr.filter(x => typeof x === 'number' && x !== 0);
      }
 
     setOpcoes(copyOp); // Set options/Column A
+    setRespostaCorretaState(loadedRespostaState); // Set the correct answer state
 
     // --- Load Time Limit ---
     if (carta.tipo === "Tempo") {
@@ -931,13 +959,14 @@ ${rawPergunta}
     }
 
     // --- Other Fields ---
-    setDificuldade(carta.dificuldade as Dificuldade);
+    setDificuldade(carta.dificuldade as Dificuldade || 'facil'); // Default difficulty
     setCategorias([...(carta.categorias ?? [])]);
     setFontes([...(carta.fontes ?? [])]);
     setVantagem(carta.vantagem || "");
     setDesvantagem(carta.desvantagem || "");
     setDica(carta.dica || "");
-    // Load other metadata, excluding fields handled separately (like timeLimit, colunaB)
+
+    // Load other metadata, excluding fields handled separately
     const otherMeta = { ... (carta.meta || {}) };
     delete otherMeta.timeLimit;
     delete otherMeta.colunaB;
@@ -951,6 +980,9 @@ ${rawPergunta}
         setCards((old) => old.filter((_, i) => i !== index));
         if (editIndex === index) {
             resetCarta(true); // Reset form if deleting the card being edited
+        } else if (editIndex !== null && editIndex > index) {
+            // Adjust edit index if deleting a card before the one being edited
+            setEditIndex(editIndex - 1);
         }
     }
   };
@@ -962,15 +994,20 @@ ${rawPergunta}
   // --- Exporting ---
   const prepareForDownload = (): Omit<Carta, 'origBaralhoId' | 'edited'>[] => {
     return cards.map(({ origBaralhoId, edited, opcoes: cardOpcoes, meta: cardMeta, ...rest }) => {
-        // Clean temporary fields from options
         const cleanOpcoes = cardOpcoes.map(({ ordemTemp, ...op }) => op);
-        // Ensure meta doesn't contain empty/null fields added during editing
-        const cleanMeta = cardMeta ? Object.fromEntries(Object.entries(cardMeta).filter(([_, v]) => v !== null && v !== undefined)) : undefined;
+        const cleanMeta = cardMeta ? Object.fromEntries(Object.entries(cardMeta).filter(([_, v]) => v !== null && v !== undefined && v !== '')) : undefined;
+
+        // Ensure respostaCorreta for RelacionarColunas only contains valid pairings
+        let finalResposta = rest.respostaCorreta;
+        if (rest.tipo === 'RelacionarColunas' && Array.isArray(finalResposta)) {
+            finalResposta = (finalResposta as Pairing[]).filter(p => typeof p === 'object' && p !== null && 'colunaAId' in p);
+        }
 
         return {
             ...rest,
             opcoes: cleanOpcoes,
             meta: cleanMeta && Object.keys(cleanMeta).length > 0 ? cleanMeta : undefined,
+            respostaCorreta: finalResposta,
         };
     });
   };
@@ -979,7 +1016,13 @@ ${rawPergunta}
   const generateCode = () => {
     const deckFinal = prepareForDownload();
     const varName = deckName.replace(/[^a-zA-Z0-9_$]/g, '_') || 'meu_baralho';
-    const deck = JSON.stringify(deckFinal, null, 2);
+    // Use a replacer function to handle potential circular references if any were introduced, although unlikely here
+    const deck = JSON.stringify(deckFinal, (key, value) => {
+        // Simple check for undefined or potentially problematic values if needed
+        // if (value === undefined) { return null; } // Example
+        return value;
+    }, 2); // Indent with 2 spaces
+
     return `// Baralho gerado por CriadorDeCarta
 // Nome: ${deckName}
 // Data: ${new Date().toISOString()}
@@ -989,8 +1032,11 @@ const ${varName} = ${deck};
 // Para compatibilidade com CommonJS (Node.js) ou ES Modules
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = ${varName};
-} else if (typeof export !== 'undefined') {
-  export default ${varName};
+} else if (typeof exports !== 'undefined') {
+  // Support basic export for environments like older bundlers or direct script includes
+  exports.${varName} = ${varName};
+  // Attempt default export as well for ES module compatibility
+  try { Object.defineProperty(exports, "__esModule", { value: true }); exports.default = ${varName}; } catch (e) {}
 }
 `;
   };
@@ -1010,11 +1056,13 @@ if (typeof module !== 'undefined' && module.exports) {
   const getCurrentCardDataForPreview = (): Carta => {
      let previewRespostaCorreta: RespostaCorreta = [];
      const currentOpcoes = opcoes.map(({ ordemTemp, ...rest }) => rest); // Clean temp field
-     const currentMeta = { ...currentMeta }; // Copy current meta
+
+     // Use a different name for the local meta object to avoid shadowing state variable
+     const previewMeta: Record<string, any> = { ...currentMeta }; // Create a typed copy from state
 
      if (tipo === "Ordem") {
         const sorted = [...opcoes]
-          .filter(o => o.ordemTemp?.trim())
+          .filter(o => o.ordemTemp?.trim() && parseInt(o.ordemTemp, 10) > 0)
           .sort((a, b) => parseInt(a.ordemTemp!, 10) - parseInt(b.ordemTemp!, 10));
         previewRespostaCorreta = sorted.map(o => o.id);
      } else if (tipo === "Vantagem") {
@@ -1022,21 +1070,21 @@ if (typeof module !== 'undefined' && module.exports) {
      } else if (tipo === "Desvantagem") {
          previewRespostaCorreta = [];
      } else if (tipo === "Pergunta" || tipo === "Tempo" || tipo === "AreaClicavel") {
-          const selected = Array.isArray(respostaCorretaState) ? respostaCorretaState : [];
+          const selected = Array.isArray(respostaCorretaState) ? respostaCorretaState.filter(id => typeof id === 'number') : [];
           previewRespostaCorreta = selected.length > 0 ? selected[0] : 0; // Use 0 if none selected for preview?
      } else if (tipo === "MultiplaEscolha" || tipo === "Outras") {
-         previewRespostaCorreta = Array.isArray(respostaCorretaState) ? [...respostaCorretaState] : [];
+         previewRespostaCorreta = Array.isArray(respostaCorretaState) ? [...respostaCorretaState.filter(id => typeof id === 'number')] : [];
      } else if (tipo === "RelacionarColunas") {
          previewRespostaCorreta = [...pairings]; // Use the current pairings from state
-         // Add Col B to meta for preview component
-         currentMeta.colunaB = colunaBOpcoes.map(o => ({id: o.id, texto: o.texto}));
+         // Add Col B to the local meta copy for preview component
+         previewMeta.colunaB = colunaBOpcoes.map(o => ({id: o.id, texto: o.texto})); // Modify previewMeta
      }
 
-     // Add Time Limit to meta if applicable
+     // Add Time Limit to the local meta copy if applicable
      if (tipo === "Tempo") {
          const limit = parseInt(String(timeLimit), 10);
          if (!isNaN(limit) && limit > 0) {
-            currentMeta.timeLimit = limit;
+            previewMeta.timeLimit = limit; // Modify previewMeta
          }
      }
 
@@ -1051,13 +1099,14 @@ if (typeof module !== 'undefined' && module.exports) {
           opcoes: currentOpcoes,
           respostaCorreta: previewRespostaCorreta,
           dificuldade,
-          categorias,
-          fontes,
+          categorias: [...categorias], // Use copy
+          fontes: [...fontes], // Use copy
           vantagem,
           desvantagem,
           dica,
-          meta: Object.keys(currentMeta).length > 0 ? currentMeta : undefined,
-          // These don't really matter for preview, but needed for type compatibility
+          // Use the modified local copy here
+          meta: Object.keys(previewMeta).length > 0 ? previewMeta : undefined,
+          // Dummy values for type compatibility in preview context
           edited: false,
           origBaralhoId: undefined,
       };
@@ -1215,7 +1264,7 @@ if (typeof module !== 'undefined' && module.exports) {
                  <p className="text-xs text-gray-500 mt-2">
                    Preencha o caminho para incluir uma imagem. O estilo só é aplicável se houver um caminho.
                  </p>
-                 {tipo === "AreaClicavel" && <p className="text-xs text-orange-600 mt-1 font-medium">O tipo AreaClicavel depende desta imagem.</p>}
+                 {tipo === "AreaClicavel" && <p className="text-xs text-orange-600 mt-1 font-medium">O tipo 'AreaClicavel' depende desta imagem.</p>}
             </div>
 
             {/* --- Pergunta/Description --- */}
@@ -1238,7 +1287,7 @@ if (typeof module !== 'undefined' && module.exports) {
                     <input
                       id="timeLimit"
                       type="number" // Use number type for better input control
-                      min="1"
+                      min="1" // Minimum 1 second
                       step="1"
                       value={timeLimit}
                       onChange={handleTimeLimitChange}
@@ -1266,7 +1315,7 @@ if (typeof module !== 'undefined' && module.exports) {
                     onChange={(e) => setNovaOpcao(e.target.value)}
                     placeholder={tipo === 'AreaClicavel' ? 'Nome da área (ex: Botão Vermelho)' : 'Texto da nova opção'}
                     className="border border-gray-300 p-2 rounded-md flex-1 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
-                    onKeyDown={(e) => e.key === 'Enter' && handleAddOpcao()}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddOpcao('A')}
                   />
                   <button
                     onClick={() => handleAddOpcao('A')}
@@ -1448,7 +1497,7 @@ if (typeof module !== 'undefined' && module.exports) {
                                     );
                                 })}
                               </div>
-                               <p className="text-xs text-gray-600 mt-2">Selecione o item correspondente da Coluna B para cada item da Coluna A.</p>
+                               <p className="text-xs text-gray-600 mt-2">Selecione o item correspondente da Coluna B para cada item da Coluna A. Itens não pareados terão 'null' como par.</p>
                         </div>
                      )}
                 </div>
@@ -1582,6 +1631,7 @@ if (typeof module !== 'undefined' && module.exports) {
              {tipo !== 'Vantagem' && tipo !== 'Desvantagem' && ( // Hide for these types as they have implicit meaning
                 <div className="bg-gray-50 p-4 rounded-md border border-gray-200 space-y-4">
                     <h3 className="text-lg font-semibold text-gray-700">Textos Auxiliares (Opcional)</h3>
+                    {/* Vantagem Field - Show unless type is Desvantagem */}
                     {tipo !== 'Desvantagem' && (
                         <div>
                             <label htmlFor="cardAdvantage" className="block text-sm font-medium text-gray-700 mb-1">Vantagem:</label>
@@ -1595,6 +1645,7 @@ if (typeof module !== 'undefined' && module.exports) {
                             />
                         </div>
                     )}
+                    {/* Desvantagem Field - Show unless type is Vantagem */}
                     {tipo !== 'Vantagem' && (
                         <div>
                             <label htmlFor="cardDisadvantage" className="block text-sm font-medium text-gray-700 mb-1">Desvantagem:</label>
@@ -1608,6 +1659,7 @@ if (typeof module !== 'undefined' && module.exports) {
                             />
                         </div>
                      )}
+                    {/* Dica Field - Always show */}
                     <div>
                         <label htmlFor="cardHint" className="block text-sm font-medium text-gray-700 mb-1">Dica:</label>
                         <input
@@ -1624,10 +1676,11 @@ if (typeof module !== 'undefined' && module.exports) {
 
 
              {/* --- Metadata Section --- */}
-             {tipo !== 'Tempo' && tipo !== 'RelacionarColunas' && ( // Hide if metadata is handled by specific fields already
+             {/* Hide if metadata is handled by specific fields already (Tempo, Relacionar) */}
+             {tipo !== 'Tempo' && tipo !== 'RelacionarColunas' && (
                  <div className="bg-gray-50 p-4 rounded-md border border-gray-200 space-y-4">
                  <h3 className="text-lg font-semibold text-gray-700">Metadados Customizados (Opcional)</h3>
-                 <p className="text-xs text-gray-500">Adicione pares chave-valor para dados específicos do jogo (ex: points, effectId). Valores numéricos, true ou false serão salvos como tal.</p>
+                 <p className="text-xs text-gray-500">Adicione pares chave-valor para dados específicos do jogo (ex: points, effectId). Valores numéricos, 'true'/'false' serão salvos como tal.</p>
                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                      <input
                      type="text"
@@ -1711,7 +1764,6 @@ if (typeof module !== 'undefined' && module.exports) {
        {showPreview && (
         <div className="mb-6 md:mb-8 bg-gray-100 p-4 rounded-lg shadow-inner">
           <h2 className="text-xl font-bold mb-3 text-center text-gray-700">Pré-visualização Estática</h2>
-          {/* Centering the preview card */}
            <div className="flex justify-center">
                <CardStaticView card={getCurrentCardDataForPreview()} />
            </div>
@@ -1736,7 +1788,7 @@ if (typeof module !== 'undefined' && module.exports) {
         ) : (
           <div className="flex flex-wrap gap-3 mb-4">
             {cards.map((c, index) => (
-              <div key={index} className={`flex items-center rounded-md shadow-sm border transition-all duration-200 ${index === editIndex ? 'ring-2 ring-offset-1 ring-indigo-500 border-indigo-300' : (c.edited ? 'border-blue-300 hover:border-blue-400' : 'border-gray-300 hover:border-gray-400')}`}>
+              <div key={`${index}-${c.titulo}`} className={`flex items-center rounded-md shadow-sm border transition-all duration-200 ${index === editIndex ? 'ring-2 ring-offset-1 ring-indigo-500 border-indigo-300' : (c.edited ? 'border-blue-300 hover:border-blue-400' : 'border-gray-300 hover:border-gray-400')}`}>
                 <button
                   onClick={() => loadCardForEdit(index)}
                   className={`pl-3 pr-2 py-1 rounded-l-md text-sm font-medium transition duration-150 ease-in-out flex items-center gap-1 ${index === editIndex ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'}`}
