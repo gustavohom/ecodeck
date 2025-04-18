@@ -868,7 +868,7 @@ export default ${varName};
             ))}
           </ul>
           <p className="text-xs text-gray-500 mt-3">
-            "Adicionar" copia as cartas do baralho carregado para o seu baralho principal. "Remover da Lista" remove as cartas originárias desse baralho (a menos que tenham sido editadas e a opção acima esteja marcada).
+            Adicionar copia as cartas do baralho carregado para o seu baralho principal. Remover da Lista remove as cartas originárias desse baralho (a menos que tenham sido editadas e a opção acima esteja marcada).
           </p>
         </div>
       )}
@@ -1082,12 +1082,12 @@ export default ${varName};
             </ul>
             {tipo === "Desvantagem" && (
               <p className="text-xs text-gray-500 bg-red-100 p-2 rounded border border-red-200">
-                <strong className="font-semibold">Nota:</strong> Para cartas de Desvantagem, todas as opções listadas são inerentemente consideradas "incorretas" ou representam uma desvantagem no contexto do jogo. Nenhuma precisa ser marcada.
+                <strong className="font-semibold">Nota:</strong> Para cartas de Desvantagem, todas as opções listadas são inerentemente consideradas incorretas ou representam uma desvantagem no contexto do jogo. Nenhuma precisa ser marcada.
               </p>
             )}
             {tipo === "Vantagem" && (
               <p className="text-xs text-gray-500 bg-green-100 p-2 rounded border border-green-200">
-                <strong className="font-semibold">Nota:</strong> Para cartas de Vantagem, todas as opções listadas são inerentemente consideradas "corretas" ou representam uma vantagem no contexto do jogo. Nenhuma precisa ser marcada individualmente.
+                <strong className="font-semibold">Nota:</strong> Para cartas de Vantagem, todas as opções listadas são inerentemente consideradas corretas ou representam uma vantagem no contexto do jogo. Nenhuma precisa ser marcada individualmente.
               </p>
             )}
           </div>
