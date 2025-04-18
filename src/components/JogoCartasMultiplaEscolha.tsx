@@ -1215,7 +1215,7 @@ if (typeof module !== 'undefined' && module.exports) {
                  <p className="text-xs text-gray-500 mt-2">
                    Preencha o caminho para incluir uma imagem. O estilo só é aplicável se houver um caminho.
                  </p>
-                 {tipo === "AreaClicavel" && <p className="text-xs text-orange-600 mt-1 font-medium">O tipo 'AreaClicavel' depende desta imagem.</p>}
+                 {tipo === "AreaClicavel" && <p className="text-xs text-orange-600 mt-1 font-medium">O tipo AreaClicavel depende desta imagem.</p>}
             </div>
 
             {/* --- Pergunta/Description --- */}
@@ -1627,7 +1627,7 @@ if (typeof module !== 'undefined' && module.exports) {
              {tipo !== 'Tempo' && tipo !== 'RelacionarColunas' && ( // Hide if metadata is handled by specific fields already
                  <div className="bg-gray-50 p-4 rounded-md border border-gray-200 space-y-4">
                  <h3 className="text-lg font-semibold text-gray-700">Metadados Customizados (Opcional)</h3>
-                 <p className="text-xs text-gray-500">Adicione pares chave-valor para dados específicos do jogo (ex: points, effectId). Valores numéricos, 'true'/'false' serão salvos como tal.</p>
+                 <p className="text-xs text-gray-500">Adicione pares chave-valor para dados específicos do jogo (ex: points, effectId). Valores numéricos, true ou false serão salvos como tal.</p>
                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                      <input
                      type="text"
