@@ -12,7 +12,7 @@ const ecologia_forestal_cards = [
     ],
     "respostaCorreta": 3,
     "dificuldade": "facil",
-    "categorias": ["Aquecimento Global", "Poluição"],
+    "categorias": ["1"],
     "fontes": ["IPCC Report"],
     "vantagem": "Correto! O CO₂ é um grande vilão.",
     "desvantagem": "Incorreto. O principal é o CO₂.",
@@ -34,7 +34,7 @@ const ecologia_forestal_cards = [
     ],
     "respostaCorreta": [1, 3, 5],
     "dificuldade": "normal",
-    "categorias": ["Energia Renovável"],
+    "categorias": ["2"],
     "fontes": ["Ministério de Minas e Energia"],
     "vantagem": "Excelente! Você conhece as fontes limpas.",
     "desvantagem": "Algumas dessas fontes não são renováveis.",
@@ -56,7 +56,7 @@ const ecologia_forestal_cards = [
     ],
     "respostaCorreta": [2, 4, 5, 3, 1], // Repensar, Recusar, Reduzir, Reutilizar, Reciclar
     "dificuldade": "dificil",
-    "categorias": ["Sustentabilidade", "Consumo Consciente"],
+    "categorias": ["3"],
     "fontes": ["Instituto Akatu"],
     "vantagem": "Ordem perfeita! A prioridade é a chave.",
     "desvantagem": "A ordem está um pouco fora de lugar.",
@@ -74,7 +74,7 @@ const ecologia_forestal_cards = [
     ],
     "respostaCorreta": [1], // O jogador apenas clica para confirmar
     "dificuldade": "facil",
-    "categorias": ["Resíduos", "Sustentabilidade"],
+    "categorias": ["4"],
     "fontes": [],
     "vantagem": "Recebeu 1 Pulo!", // Efeito a ser aplicado pelo jogo
     "desvantagem": "",
@@ -92,7 +92,7 @@ const ecologia_forestal_cards = [
     ],
     "respostaCorreta": [], // Nenhuma opção é "correta", apenas confirmação
     "dificuldade": "facil",
-    "categorias": ["Poluição", "Manutenção"],
+    "categorias": ["5"],
     "fontes": [],
     "vantagem": "",
     "desvantagem": "Perdeu 15 de Progresso.", // Efeito a ser aplicado
@@ -111,7 +111,7 @@ const ecologia_forestal_cards = [
     ],
     "respostaCorreta": [1, 2], // Ambas são "válidas" no sentido de escolha
     "dificuldade": "normal",
-    "categorias": ["Eventos Climáticos", "Comunidade"],
+    "categorias": ["6"],
     "fontes": [],
     "vantagem": "Ação comunitária recompensada!", // Se escolher 1
     "desvantagem": "A segurança é importante.", // Se escolher 2
@@ -133,7 +133,7 @@ const ecologia_forestal_cards = [
     "respostaCorreta": 4,
     "tempoLimite": 10, // 10 segundos
     "dificuldade": "facil",
-    "categorias": ["Reciclagem", "Resíduos"],
+    "categorias": ["7"],
     "fontes": ["CONAMA"],
     "vantagem": "Rápido e correto na separação!",
     "desvantagem": "Tempo esgotado ou lixeira errada!",
@@ -166,7 +166,7 @@ const ecologia_forestal_cards = [
     ],
     "opcoes": [],
     "dificuldade": "normal",
-    "categorias": ["Biomas", "Ecologia", "Brasil"],
+    "categorias": ["8"],
     "fontes": ["IBGE"],
     "vantagem": "Você conhece bem os biomas do Brasil!",
     "desvantagem": "Algumas associações estão incorretas.",
@@ -188,7 +188,7 @@ const ecologia_forestal_cards = [
     "respostaCorreta": 1,
     "opcoes": [],
     "dificuldade": "facil",
-    "categorias": ["Botânica", "Árvores"],
+    "categorias": ["9"],
     "fontes": ["Livro de Biologia"],
     "vantagem": "Exato! Bem na copa.",
     "desvantagem": "O clique foi um pouco fora da copa.",
@@ -212,7 +212,7 @@ const ecologia_forestal_cards = [
     "respostaCorreta": [1, 3, 4, 2], // água, CO₂, glicose, O₂
     "opcoes": [],
     "dificuldade": "normal",
-    "categorias": ["Botânica", "Ecologia Básica", "Ciclos Naturais"],
+    "categorias": ["10"],
     "fontes": ["Livro de Ciências"],
     "vantagem": "Frase completa e cientificamente correta!",
     "desvantagem": "A ordem dos fatores alterou o produto!",
@@ -246,7 +246,7 @@ const ecologia_forestal_cards = [
     "respostaCorreta": 3,
     "dificuldade": "facil",
     "categorias": [
-      "_baralhoTeste"
+      "11"
     ],
     "fontes": [
       "fonte 1",
@@ -276,7 +276,7 @@ const ecologia_forestal_cards = [
     "respostaCorreta": 2,
     "dificuldade": "normal",
     "categorias": [
-      "_baralhoTeste"
+      "12"
     ],
     "fontes": [
       "fonte 1",
@@ -317,7 +317,7 @@ const ecologia_forestal_cards = [
     ],
     "dificuldade": "dificil",
     "categorias": [
-      "_baralhoTeste"
+      "13"
     ],
     "fontes": [
       "fonte 1",
@@ -364,7 +364,7 @@ const ecologia_forestal_cards = [
     ],
     "dificuldade": "dificil",
     "categorias": [
-      "_baralhoTeste"
+      "14"
     ],
     "fontes": [
       "fonte 1",
@@ -411,7 +411,7 @@ const ecologia_forestal_cards = [
     ],
     "dificuldade": "dificil",
     "categorias": [
-      "_baralhoTeste"
+      "15"
     ],
     "fontes": [],
     "vantagem": "vat",
@@ -435,7 +435,7 @@ const ecologia_forestal_cards = [
     ],
     "dificuldade": "facil",
     "categorias": [
-      "_baralhoTeste"
+      "15"
     ],
     "fontes": [],
     "vantagem": "",
@@ -464,7 +464,7 @@ const ecologia_forestal_cards = [
     ],
     "dificuldade": "facil",
     "categorias": [
-      "_baralhoTeste"
+      "17"
     ],
     "fontes": [
       "Fonte"
@@ -492,7 +492,7 @@ const ecologia_forestal_cards = [
     "respostaCorreta": [],
     "dificuldade": "facil",
     "categorias": [
-      "_baralhoTeste"
+      "18"
     ],
     "fontes": [
       "Fonte"
@@ -522,7 +522,7 @@ const ecologia_forestal_cards = [
     ],
     "dificuldade": "dificil",
     "categorias": [
-      "_baralhoTeste"
+      "19"
     ],
     "fontes": [
       "Fonte"
@@ -561,13 +561,52 @@ const ecologia_forestal_cards = [
     ],
     "dificuldade": "dificil",
     "categorias": [
-      "_baralhoTeste"
+      "20"
     ],
     "fontes": [],
     "vantagem": "vant",
     "desvantagem": "desva",
     "dica": "dica"
+  },
+
+  {
+    tipo: "Vantagem",
+    titulo: "As Estrelas",
+    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+      Saudações jogador(a). Somos as estrelas, os seres antigos e sábios que iluminam o cosmos. Por eras, mantivemos o equilíbrio e a harmonia do universo. Mas uma 
+      nova ameaça surgiu, os alienígenas com sua terrível máquina, a Stronberis. Precisamos de sua ajuda para proteger a galáxia e impedir que eles dominem tudo com 
+      suas tecnologias malignas. Contamos com você.`,
+    opcoes: [
+      { id: 1, texto: "Ganhe 1 estrela" },
+    ],
+    respostaCorreta: [1],
+    dificuldade: "facil",
+    categorias: ["21"],
+    fontes: ["Imagens: Fonte na descrição do jogo"],
+    vantagem: "",
+    desvantagem: "",
+    dica: "",
+  },
+  {
+    tipo: "Outras",
+    titulo: "Solaris",
+    pergunta: `<img src="/img/espancao_estrelas/estrelas (25).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
+    Você enfrentou desafios inigualáveis, superou todos os obstáculos e agora está diante do último passo. A vitória está ao seu alcance, mas lembre-se, o preço da vitória é 
+    alto. Está pronto para fazer o sacrifício final e conquistar o que é seu por direito? O cosmos espera pela sua decisão.`,
+    opcoes: [
+      { id: 1, texto: "Avance 15 casas do tabuleiro, mas para isso, você deve sacrificar todas as suas estrelas" },
+      { id: 2, texto: "Cada jogador, exceto você, perde metade de suas estrelas, e você volta 10 casas" },
+      { id: 3, texto: "Todos os jogadores, incluindo você, voltam 5 casas (os efeitos das casa não serão aplicados)" },
+    ],
+    respostaCorreta: [1, 2, 3],
+    dificuldade: "facil",
+    categorias: ["22"],
+    fontes: ["Imagens: Fonte na descrição do jogo"],
+    vantagem: "",
+    desvantagem: "",
+    dica: "",
   }
+
 ];
 
 export default ecologia_forestal_cards;
