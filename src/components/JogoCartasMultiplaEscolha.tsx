@@ -209,14 +209,6 @@ const probabilitySettings = [
     { value: 0.8, color: "#f87171", label: "80%" }, // Red-400
 ];
 
-const cartasOriginais: Carta[] = [
-    ...manejoPlantadas,
-    ...manejoNativas,
-    ...ecologiaFlorestal,
-    ...estrelasAliens,
-    ...testCards,
-].map((card, index) => ({ ...card, id: card.id || `orig_${index}` })); // Garante ID único inicial
-
 // --- Funções Utilitárias ---
 
 // Função para parsear arquivos JS (simplificada)
