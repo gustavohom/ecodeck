@@ -1095,7 +1095,9 @@ const EcoChallenge: React.FC = () => {
                  setMensagem(`${cartaAtual.titulo}: ${cor ? cartaAtual.vantagem : cartaAtual.desvantagem}`);
                 break;
             default:
-                console.error("Tipo de carta não tratado na verificação:", cartaAtual.tipo);
+                const _exhaustiveCheck: never = cartaAtual; // Se adicionar novo tipo a 'Carta' e esquecer o case, isso dará erro!
+                console.error("Tipo de carta não tratado na verificação:", _exhaustiveCheck);
+                // ---- FIM DA CORREÇÃO ----
                 return; // Não fazer nada se o tipo for desconhecido
         }
 
