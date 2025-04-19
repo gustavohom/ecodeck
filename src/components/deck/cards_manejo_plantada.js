@@ -977,6 +977,498 @@ const manejo = [
     "desvantagem": "",
     "dica": "Buscar conhecimento especializado ajuda."
   },
+  {
+    "id": "criativa_video_1",
+    "tipo": "Pergunta",
+    "titulo": "Vídeo: Ciclo da Água",
+    "pergunta": "Assista ao vídeo sobre o ciclo da água e responda:<br><br>\n<div style=\"margin: 10px auto; max-width: 400px; border: 1px solid #ccc; padding: 5px; background: #f9f9f9; border-radius: 5px;\">\n  <video controls width=\"100%\" preload=\"metadata\">\n    <source src=\"/videos/ciclo_agua_exemplo.mp4#t=0.1\" type=\"video/mp4\"> <!-- #t=0.1 ajuda a carregar o primeiro frame -->\n    Seu navegador não suporta o elemento video.\n  </video>\n  <p style=\"text-align:center; font-size:0.8em; margin-top: 5px;\">Use o controle de tela cheia (fullscreen) do player para \"ampliar\".</p>\n</div>\n<br>Qual processo transforma a água líquida em vapor?",
+    "opcoes": [
+      { "id": 1, "texto": "Condensação" },
+      { "id": 2, "texto": "Precipitação" },
+      { "id": 3, "texto": "Evaporação" },
+      { "id": 4, "texto": "Infiltração" }
+    ],
+    "respostaCorreta": 3,
+    "dificuldade": "facil",
+    "categorias": ["Criat__Video"],
+    "fontes": ["Vídeo Educacional"],
+    "vantagem": "Correto!",
+    "desvantagem": "Incorreto, reveja o vídeo.",
+    "dica": "É quando a água 'sobe' invisível."
+  },
+
+  // 2. Carta de Contato/Social
+  {
+    "id": "criativa_social_1",
+    "tipo": "Outras", // Tipo 'Outras' para interação simples
+    "titulo": "Conecte-se!",
+    "pergunta": "<div style='text-align: center; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa;'>\n  <h4 style='margin-bottom: 15px;'>Gostou do Jogo? Conecte-se!</h4>\n  <p style='margin-bottom: 20px; font-size: 0.9em;'>Siga o desenvolvedor nas redes ou entre em contato:</p>\n  <div style='display: flex; justify-content: center; gap: 20px; margin-bottom: 20px;'>\n    <!-- LinkedIn -->\n    <a href=\"https://www.linkedin.com/in/gustavomourao1\" target=\"_blank\" rel=\"noopener noreferrer\" title=\"LinkedIn: gustavomourao1\" style=\"text-decoration: none; color: #0a66c2;\">\n      <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z\"/></svg>\n    </a>\n    <!-- Instagram (Exemplo) -->\n    <a href=\"https://www.instagram.com/SEU_INSTAGRAM_AQUI\" target=\"_blank\" rel=\"noopener noreferrer\" title=\"Instagram\" style=\"text-decoration: none; color: #e1306c;\">\n       <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"currentColor\" ><path d=\"M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z\"/></svg>\n    </a>\n  </div>\n  <p style='font-size: 0.9em;'><strong>Email:</strong> seu.email.aqui@provedor.com</p>\n</div>",
+    "opcoes": [
+      { "id": 1, "texto": "Obrigado pela informação!" }
+    ],
+    "respostaCorreta": [1], // Apenas confirmação
+    "dificuldade": "facil",
+    "categorias": ["Criat__Social"],
+    "fontes": [],
+    "vantagem": "Conexões fortalecem a rede!",
+    "desvantagem": "",
+    "dica": ""
+  },
+
+  // 3. Carta com Áudio
+  {
+    "id": "criativa_audio_1",
+    "tipo": "Pergunta",
+    "titulo": "Som da Natureza",
+    "pergunta": "Ouça o som abaixo. A qual animal pertence este canto?<br><br>\n<div style='text-align: center; margin: 15px 0;'>\n  <audio controls controlsList=\"nodownload noplaybackrate\" preload=\"metadata\">\n    <source src=\"/audio/canto_sabia_exemplo.mp3\" type=\"audio/mpeg\">\n    Seu navegador não suporta o elemento áudio.\n  </audio>\n</div>",
+    "opcoes": [
+      { "id": 1, "texto": "Sabiá-laranjeira" },
+      { "id": 2, "texto": "Bem-te-vi" },
+      { "id": 3, "texto": "Canário-da-terra" },
+      { "id": 4, "texto": "Coruja" }
+    ],
+    "respostaCorreta": 1,
+    "dificuldade": "normal",
+    "categorias": ["Criat__Audio"],
+    "fontes": ["Sons da Fauna Brasileira"],
+    "vantagem": "Correto! É o belo canto do Sabiá.",
+    "desvantagem": "Não, este é outro pássaro ou animal.",
+    "dica": "É um canto melodioso, comum em jardins."
+  },
+
+  // --- MAIS 21 CARTAS CRIATIVAS ---
+
+  // 4. Mini-Jogo: Separando o Lixo (Pergunta com Imagem/Lista)
+  {
+    "id": "criativa_minigame_lixo_1",
+    "tipo": "MultiplaEscolha",
+    "titulo": "Mini-Jogo: Coleta Seletiva",
+    "pergunta": "Arraste (mentalmente) os itens para suas lixeiras corretas. Quais itens vão para a lixeira <strong>AZUL</strong> (Papel)?<br>\n<ul style='list-style: none; padding: 0; margin: 10px 0;'>\n  <li>📰 Jornal Velho</li>\n  <li>🍾 Garrafa de Vidro</li>\n  <li>📦 Caixa de Papelão</li>\n  <li>🥫 Lata de Alumínio</li>\n  <li><span style='text-decoration: line-through;'>🚫</span> Guardanapo Sujo</li>\n  <li>✉️ Envelope</li>\n</ul>\n<img src='/images/lixeiras_4cores.png' alt='Lixeiras coloridas' style='max-width: 200px; display: block; margin: 10px auto;'>",
+    "opcoes": [
+      { "id": 1, "texto": "Jornal Velho" },
+      { "id": 2, "texto": "Garrafa de Vidro" },
+      { "id": 3, "texto": "Caixa de Papelão" },
+      { "id": 4, "texto": "Lata de Alumínio" },
+      { "id": 5, "texto": "Guardanapo Sujo" },
+      { "id": 6, "texto": "Envelope" }
+    ],
+    "respostaCorreta": [1, 3, 6], // Jornal, Caixa, Envelope
+    "dificuldade": "normal",
+    "categorias": ["Criat__Minigame"],
+    "fontes": ["Regras Coleta Seletiva"],
+    "vantagem": "Separação perfeita!",
+    "desvantagem": "Algum item foi para a lixeira errada.",
+    "dica": "Papel e papelão limpos vão no azul. Lixo orgânico ou sujo não!"
+  },
+
+  // 5. Efeito Cascata (Desvantagem com Atraso Simulado)
+  {
+    "id": "criativa_cascata_1",
+    "tipo": "Desvantagem",
+    "titulo": "Efeito Cascata: Poluição",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 1px solid #f59e0b; border-radius: 5px; background: #fffbeb;'>\n <p>Um pequeno descuido (como jogar lixo no lugar errado) iniciou uma reação em cadeia negativa no ecossistema local.</p>\n <p style='font-size: 2em; margin: 10px 0;'> dominoes ➡️</p> <!-- Dominó -> Seta -> Cocô -->\n <p><strong>Penalidade:</strong> Você está bem por enquanto, mas perderá <strong>10 de Progresso</strong> no <strong>início</strong> da sua próxima jogada.</p>\n <p style='font-size:0.8em'>(O Jogo controlará a penalidade futura)</p>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Entendido..." } ],
+    "respostaCorreta": [],
+    "dificuldade": "normal",
+    "categorias": ["Criat__EfeitoAtrasado"],
+    "fontes": [],
+    "vantagem": "",
+    "desvantagem": "A consequência virá na próxima rodada (-10 Progresso).",
+    "dica": "Pequenas ações podem ter grandes impactos."
+  },
+
+  // 6. Medidor de Poluição (Visualização Simples)
+  {
+    "id": "criativa_medidor_1",
+    "tipo": "Pergunta",
+    "titulo": "Qualidade do Ar",
+    "pergunta": "O medidor indica a qualidade do ar na região. Qual o nível atual?<br><br>\n<style>\n.air-gauge { width: 80%; max-width: 300px; height: 25px; background: linear-gradient(to right, lime, yellow, orange, red, purple); margin: 15px auto; border: 1px solid #555; border-radius: 15px; position: relative; }\n.air-needle { position: absolute; top: -5px; left: 70%; /* Posição da agulha indica o nível */ width: 3px; height: 35px; background: black; border-radius: 2px; transform-origin: bottom center; transform: translateX(-50%); box-shadow: 0 0 3px rgba(0,0,0,0.5); }\n.air-label { position: absolute; top: 30px; left: 70%; transform: translateX(-50%); font-size: 0.8em; font-weight: bold; background: rgba(255,255,255,0.7); padding: 2px 4px; border-radius: 3px; }\n</style>\n<div class=\"air-gauge\">\n  <div class=\"air-needle\"></div>\n  <div class=\"air-label\">Ruim</div> <!-- O texto indica o nível -->\n</div>",
+    "opcoes": [
+      { "id": 1, "texto": "Boa (Verde)" },
+      { "id": 2, "texto": "Moderada (Amarelo)" },
+      { "id": 3, "texto": "Ruim (Laranja/Vermelho)" },
+      { "id": 4, "texto": "Péssima (Roxo)" }
+    ],
+    "respostaCorreta": 3, // Corresponde à posição da agulha e ao label
+    "dificuldade": "facil",
+    "categorias": ["Criat__Visualizacao"],
+    "fontes": ["Monitoramento Fictício"],
+    "vantagem": "Correto! A qualidade do ar precisa melhorar.",
+    "desvantagem": "Incorreto, veja a posição da 'agulha' e o rótulo.",
+    "dica": "A cor e o texto indicam o nível."
+  },
+
+  // 7. Carta de Evento Aleatório (Popup :target)
+  {
+    "id": "criativa_evento_popup_1",
+    "tipo": "Vantagem", // Ou Desvantagem, dependendo do evento
+    "titulo": "Evento Inesperado!",
+    "pergunta": "<style>\n.event-popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1001; }\n.event-popup-overlay:target { display: flex; }\n.event-popup-content { background: white; padding: 25px; border-radius: 8px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; max-width: 300px; }\n.event-popup-close { position: absolute; top: 8px; right: 12px; font-size: 24px; color: #888; text-decoration: none; }\n.event-popup-close:hover { color: #333; }\n.event-trigger { display: inline-block; padding: 10px 20px; background: #ffc107; color: black; text-decoration: none; border-radius: 5px; font-weight: bold; cursor: pointer; }\n.event-trigger:hover { background: #e0a800; }\n</style>\n<p style='text-align: center;'>Um evento aleatório ocorreu! Clique para revelar:</p>\n<div style='text-align: center; margin-top: 15px;'>\n  <a href=\"#event-reveal-1\" class=\"event-trigger\">Revelar Evento!</a>\n</div>\n<div id=\"event-reveal-1\" class=\"event-popup-overlay\">\n  <div class=\"event-popup-content\">\n    <a href=\"#\" class=\"event-popup-close\" title=\"Fechar\">×</a>\n    <h4>Chuva de Meteoros!</h4>\n    <p style='font-size: 3em; margin: 10px 0;'>☄️✨</p>\n    <p>Um fenômeno raro! Por sorte, nenhum dano. Todos os jogadores ganham <strong>+1 Estrela Bônus</strong> pela observação!</p>\n  </div>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Ver o que aconteceu!" } ],
+    "respostaCorreta": [1],
+    "dificuldade": "facil",
+    "categorias": ["Criat__EventoPopup"],
+    "fontes": [],
+    "vantagem": "Evento revelado!", // Efeito aplicado no jogo
+    "desvantagem": "",
+    "dica": "Clique no botão amarelo!"
+  },
+
+  // 8. "Construa" sua Solução (MultiplaEscolha Temática)
+  {
+    "id": "criativa_construcao_1",
+    "tipo": "MultiplaEscolha",
+    "titulo": "Construa um Filtro de Água Caseiro",
+    "pergunta": "Selecione os <strong>materiais corretos e na ordem aproximada</strong> (de baixo para cima) para montar um filtro de água caseiro simples:",
+    "opcoes": [
+      { "id": 1, "texto": "1º (Fundo): Algodão" },
+      { "id": 2, "texto": "2º: Carvão Ativado" },
+      { "id": 3, "texto": "3º: Areia Fina" },
+      { "id": 4, "texto": "4º: Areia Grossa" },
+      { "id": 5, "texto": "5º: Cascalho/Pedras Pequenas" },
+      { "id": 6, "texto": "Adicionar Açúcar" },
+      { "id": 7, "texto": "Usar Terra Comum" }
+    ],
+    "respostaCorreta": [1, 2, 3, 4, 5],
+    "dificuldade": "normal",
+    "categorias": ["Criat__Construcao"],
+    "fontes": ["Experimentos Científicos"],
+    "vantagem": "Filtro montado corretamente!",
+    "desvantagem": "Algum material ou a ordem está incorreta.",
+    "dica": "Começa com o filtro mais fino no fundo e vai aumentando a granulação."
+  },
+
+  // 9. Carta de Política Pública (Outras - Escolha com Efeito)
+  {
+    "id": "criativa_politica_1",
+    "tipo": "Outras",
+    "titulo": "Votação: Incentivo a Ciclovias",
+    "pergunta": "<div style='padding:10px; border: 1px solid gray; border-radius: 4px; background: #eee;'>\n <p>Está em votação uma nova política para expandir massivamente as ciclovias na cidade.</p>\n <p style='font-size: 2em; text-align: center; margin: 10px 0;'>🗳️🚲</p>\n <p><strong>Aprovar:</strong> Melhora a qualidade do ar e saúde (+15 Progresso), mas requer investimento (-1 Estrela Bônus).</p>\n <p><strong>Rejeitar:</strong> Mantém o status quo (sem efeito).</p>\n <br><strong>Qual seu voto?</strong>\n</div>",
+    "opcoes": [
+      { "id": 1, "texto": "Aprovar (+15 Progresso, -1 Estrela)" },
+      { "id": 2, "texto": "Rejeitar (Sem Efeito)" }
+    ],
+    "respostaCorreta": [1, 2], // Ambas válidas
+    "dificuldade": "normal",
+    "categorias": ["Criat__Politica"],
+    "fontes": [],
+    "vantagem": "Política votada! As consequências foram aplicadas.", // Se escolher 1
+    "desvantagem": "Política votada! O status quo foi mantido.", // Se escolher 2
+    "dica": "Pese os custos e benefícios para a cidade."
+  },
+
+  // 10. Memória Ecológica (<details>)
+  {
+    "id": "criativa_memoria_1",
+    "tipo": "Pergunta",
+    "titulo": "Jogo da Memória Ecológica",
+    "pergunta": "Clique para revelar a imagem escondida por 3 segundos e tente lembrar qual animal era.<br><br>\n<style>\n.memory-reveal { display: block; width: 120px; height: 120px; border: 2px dashed blue; margin: 15px auto; background: lightblue; text-align:center; line-height: 120px; font-weight:bold; cursor: pointer; user-select: none; }\n.memory-reveal:active + .memory-hidden-content { display: block; animation: flashReveal 3s forwards; }\n.memory-hidden-content { display: none; text-align:center; }\n.memory-hidden-content img { max-width: 100px; height: auto; margin-top: 10px; }\n@keyframes flashReveal { 0% { opacity: 1; } 99% { opacity: 1; } 100% { opacity: 0; display:none !important; } /* Hack to re-hide */ }\n</style>\n<div class=\"memory-reveal\" onclick=\"this.nextElementSibling.style.display='block'; setTimeout(() => { this.nextElementSibling.style.display='none'; }, 3000);\">Clique Aqui</div>\n<div class=\"memory-hidden-content\">\n  <img src=\"/images/arara_azul.jpg\" alt=\"Animal escondido\">\n</div>\n<br>Qual animal apareceu rapidamente?",
+    "opcoes": [
+      { "id": 1, "texto": "Tucano" },
+      { "id": 2, "texto": "Mico-Leão" },
+      { "id": 3, "texto": "Arara Azul" },
+      { "id": 4, "texto": "Capivara" }
+    ],
+    "respostaCorreta": 3,
+    "dificuldade": "normal",
+    "categorias": ["Criat__Memoria"],
+    "fontes": [],
+    "vantagem": "Boa memória!",
+    "desvantagem": "Não era esse. Tente observar mais rápido!",
+    "dica": "É uma ave grande e azul."
+  },
+
+    // 11. Carta de Notícia com Imagem e Link
+    {
+    "id": "criativa_noticia_1",
+    "tipo": "Pergunta",
+    "titulo": "Notícia: Recorde de Energia Eólica",
+    "pergunta": "<div style='border: 1px solid #ddd; padding: 15px; border-radius: 5px; background: #fff;'>\n  <img src='/images/turbinas_eolicas.jpg' alt='Turbinas eólicas' style='float: left; width: 100px; height: auto; margin-right: 15px; margin-bottom: 5px; border-radius: 3px;'>\n  <h4 style='margin-top: 0; margin-bottom: 5px;'>Brasil Bate Recorde de Geração Eólica</h4>\n  <p style='font-size: 0.9em; text-align: justify;'>A geração de energia a partir dos ventos atingiu um novo pico histórico no último mês, suprindo XX% da demanda do Nordeste. <a href='#' onclick='alert(\"Link clicado! Em um jogo real, isso poderia abrir uma notícia externa.\"); return false;' style='color: blue; text-decoration: underline;'>Leia mais...</a></p>\n  <div style='clear: both;'></div>\n</div><br>Este tipo de notícia é positivo ou negativo para a sustentabilidade?",
+    "opcoes": [
+      { "id": 1, "texto": "Positivo" },
+      { "id": 2, "texto": "Negativo" },
+      { "id": 3, "texto": "Indiferente" }
+    ],
+    "respostaCorreta": 1,
+    "dificuldade": "facil",
+    "categorias": ["Criat__Noticia"],
+    "fontes": ["Noticiário Fictício"],
+    "vantagem": "Correto! Mais energia limpa é ótimo.",
+    "desvantagem": "Energia eólica é uma fonte renovável importante.",
+    "dica": "Energia do vento polui?"
+  },
+
+  // 12. Slide de Decisão (Simulado com HTML/CSS)
+  {
+    "id": "criativa_slider_1",
+    "tipo": "Outras",
+    "titulo": "Termostato Inteligente",
+    "pergunta": "Ajuste o termostato para economizar energia. <br><i>(Imagine deslizar o controle)</i><br><br>\n<style>\n.slider-track { width: 80%; max-width: 300px; height: 10px; background: linear-gradient(to right, lightblue, yellow, orange, red); margin: 25px auto 5px auto; border-radius: 5px; position: relative; }\n.slider-thumb { position: absolute; top: 50%; left: 30%; /* Posição inicial simulada */ width: 20px; height: 20px; background: #555; border-radius: 50%; transform: translate(-50%, -50%); cursor: pointer; border: 2px solid white; }\n.slider-labels { display: flex; justify-content: space-between; width: 80%; max-width: 300px; margin: 0 auto; font-size: 0.8em; }\n</style>\n<div class=\"slider-track\"><div class=\"slider-thumb\"></div></div>\n<div class=\"slider-labels\"><span>❄️ Frio (Gasta +)</span><span>🔥 Quente (Gasta -)</span></div>\n<br>Qual opção abaixo melhor representa uma configuração <strong>econômica</strong>?",
+    "opcoes": [
+      { "id": 1, "texto": "Manter muito Frio (Azul)" },
+      { "id": 2, "texto": "Deixar Moderado/Quente (Laranja/Vermelho)" }
+    ],
+    "respostaCorreta": [2], // Indica a opção que representa economia
+    "dificuldade": "facil",
+    "categorias": ["Criat__SliderSimulado"],
+    "fontes": [],
+    "vantagem": "Boa escolha! Menos ar condicionado, mais economia.",
+    "desvantagem": "Temperaturas extremas no ar condicionado gastam mais.",
+    "dica": "Qual extremo gasta menos energia?"
+  },
+
+  // 13. Carta de Troca entre Jogadores (Simulada)
+  {
+    "id": "criativa_troca_1",
+    "tipo": "Outras",
+    "titulo": "Mercado de Trocas",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 1px dashed #9ca3af; border-radius: 5px; background: #f9fafb;'>\n <p>Oportunidade de trocar recursos com outro jogador!</p>\n <p style='font-size: 2em; margin: 10px 0;'>🤝</p>\n <p>Você pode oferecer <strong>1 Pulo</strong> em troca de <strong>1 Estrela Bônus</strong> de alguém.</p>\n <p style='font-size:0.8em'>(Negocie com os outros jogadores. Se alguém aceitar, ambos confirmam na próxima rodada e o Mestre ajusta os contadores)</p>\n <br><strong>Quer propor essa troca?</strong>\n</div>",
+    "opcoes": [
+      { "id": 1, "texto": "Sim, vou procurar um parceiro!" },
+      { "id": 2, "texto": "Não, prefiro manter meu Pulo." }
+    ],
+    "respostaCorreta": [1, 2],
+    "dificuldade": "normal",
+    "categorias": ["Criat__TrocaJogadores"],
+    "fontes": [],
+    "vantagem": "Proposta feita! Veja se alguém aceita.",
+    "desvantagem": "Ok, sem trocas por agora.",
+    "dica": "Negociar pode beneficiar ambos."
+  },
+
+  // 14. Charada Ambiental
+  {
+    "id": "criativa_charada_1",
+    "tipo": "Pergunta",
+    "titulo": "Charada Verde",
+    "pergunta": "Sou essencial para a vida, cubro a maior parte do planeta, mas estou cada vez mais poluída e meu nível sobe.<br><br>Quem sou eu?",
+    "opcoes": [
+      { "id": 1, "texto": "O Ar" },
+      { "id": 2, "texto": "A Floresta" },
+      { "id": 3, "texto": "O Oceano" },
+      { "id": 4, "texto": "O Solo" }
+    ],
+    "respostaCorreta": 3,
+    "dificuldade": "facil",
+    "categorias": ["Criat__Charada"],
+    "fontes": [],
+    "vantagem": "Correto! Precisamos cuidar dos nossos oceanos.",
+    "desvantagem": "Pense na maior extensão do planeta.",
+    "dica": "É azul e salgado."
+  },
+
+    // 15. Infográfico Simples (HTML/CSS)
+    {
+    "id": "criativa_infografico_1",
+    "tipo": "Pergunta",
+    "titulo": "Impacto do Plástico",
+    "pergunta": "Observe o infográfico simplificado. Qual a maior fonte de plástico nos oceanos mencionada?<br><br>\n<style>\n.infographic { border: 1px solid #ccc; padding: 15px; background: white; border-radius: 5px; max-width: 350px; margin: auto; font-size: 0.9em; }\n.infographic h5 { margin: 0 0 10px 0; text-align: center; color: #1d4ed8; }\n.info-item { display: flex; align-items: center; margin-bottom: 8px; }\n.info-icon { font-size: 1.5em; margin-right: 10px; width: 30px; text-align: center; }\n.info-text { flex-grow: 1; }\n.info-bar { height: 10px; background-color: #bfdbfe; border-radius: 5px; margin-top: 3px; overflow: hidden; }\n.info-bar-fill { height: 100%; background-color: #3b82f6; border-radius: 5px; }\n</style>\n<div class=\"infographic\">\n  <h5>Fontes de Plástico nos Oceanos (Estimativa)</h5>\n  <div class=\"info-item\">\n    <span class=\"info-icon\">🎣</span>\n    <div class=\"info-text\">Pesca (Redes, etc.)<div class=\"info-bar\"><div class=\"info-bar-fill\" style=\"width: 45%;\"></div></div></div>\n  </div>\n  <div class=\"info-item\">\n    <span class=\"info-icon\">🛍️</span>\n    <div class=\"info-text\">Embalagens e Descarte Urbano<div class=\"info-bar\"><div class=\"info-bar-fill\" style=\"width: 80%;\"></div></div></div>\n  </div>\n   <div class=\"info-item\">\n    <span class=\"info-icon\">🚢</span>\n    <div class=\"info-text\">Transporte Marítimo<div class=\"info-bar\"><div class=\"info-bar-fill\" style=\"width: 25%;\"></div></div></div>\n  </div>\n</div>",
+    "opcoes": [
+      { "id": 1, "texto": "Pesca" },
+      { "id": 2, "texto": "Embalagens / Descarte Urbano" },
+      { "id": 3, "texto": "Transporte Marítimo" }
+    ],
+    "respostaCorreta": 2,
+    "dificuldade": "facil",
+    "categorias": ["Criat__Infografico"],
+    "fontes": ["Dados Ambientais"],
+    "vantagem": "Correto! O descarte inadequado é um grande problema.",
+    "desvantagem": "Observe qual barra é a maior.",
+    "dica": "Qual barra azul é a mais longa?"
+  },
+
+  // 16. Escolha de Transporte (Impacto no Progresso)
+  {
+    "id": "criativa_transporte_1",
+    "tipo": "Outras",
+    "titulo": "Como ir ao Trabalho?",
+    "pergunta": "Você precisa ir trabalhar. Qual meio de transporte você escolhe hoje?",
+    "opcoes": [
+      { "id": 1, "texto": "Carro Sozinho (-5 Progresso)" },
+      { "id": 2, "texto": "Transporte Público (+5 Progresso)" },
+      { "id": 3, "texto": "Bicicleta (+10 Progresso)" },
+      { "id": 4, "texto": "Carona Solidária (+3 Progresso)" }
+    ],
+    "respostaCorreta": [1, 2, 3, 4], // Todas são escolhas
+    "dificuldade": "facil",
+    "categorias": ["Criat__EscolhaTransporte"],
+    "fontes": [],
+    "vantagem": "Escolha feita! O impacto no progresso foi aplicado.", // Mensagem genérica
+    "desvantagem": "", // Não há resposta errada, apenas consequências diferentes
+    "dica": "Pense no impacto ambiental e na eficiência."
+  },
+
+    // 17. Animação CSS Simples
+    {
+    "id": "criativa_css_anim_1",
+    "tipo": "Pergunta",
+    "titulo": "Ciclo Animado",
+    "pergunta": "A animação CSS abaixo tenta representar um ciclo. Qual ciclo natural ela melhor simboliza?<br><br>\n<style>\n@keyframes waterCycle { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 25% { transform: translateY(-20px) rotate(5deg); opacity: 0.5; } 50% { transform: translateY(-40px) rotate(0deg); opacity: 0.2; } 75% { transform: translateY(-20px) rotate(-5deg); opacity: 0.5; } 100% { transform: translateY(0) rotate(0deg); opacity: 1; } }\n.water-drop { display: inline-block; font-size: 2.5em; animation: waterCycle 4s ease-in-out infinite; margin: 20px; }\n</style>\n<div style='text-align:center;'>\n  <span>☀️</span>\n  <span class='water-drop'>💧</span>\n  <span>☁️</span>\n</div>",
+    "opcoes": [
+      { "id": 1, "texto": "Ciclo do Carbono" },
+      { "id": 2, "texto": "Ciclo da Água" },
+      { "id": 3, "texto": "Ciclo do Nitrogênio" },
+      { "id": 4, "texto": "Cadeia Alimentar" }
+    ],
+    "respostaCorreta": 2,
+    "dificuldade": "facil",
+    "categorias": ["Criat__CSSAnimacao"],
+    "fontes": [],
+    "vantagem": "Correto! Simboliza a evaporação e condensação.",
+    "desvantagem": "Incorreto. Observe os símbolos e o movimento.",
+    "dica": "Gota d'água, Sol, Nuvem..."
+  },
+
+  // 18. Verdadeiro ou Falso com Justificativa (Pergunta)
+  {
+    "id": "criativa_vf_justifica_1",
+    "tipo": "Pergunta",
+    "titulo": "Verdadeiro ou Falso?",
+    "pergunta": "Afirmação: \"Produtos com selo 'natural' são sempre livres de agrotóxicos.\"<br><br>Esta afirmação é verdadeira ou falsa?",
+    "opcoes": [
+      { "id": 1, "texto": "Verdadeira" },
+      { "id": 2, "texto": "Falsa (Selo 'orgânico' que garante ausência de agrotóxicos sintéticos)" }
+    ],
+    "respostaCorreta": 2,
+    "dificuldade": "normal",
+    "categorias": ["Criat__VerdadeiroFalso"],
+    "fontes": ["Certificação Orgânica"],
+    "vantagem": "Correto! 'Natural' não tem regulamentação clara como 'orgânico'.",
+    "desvantagem": "Incorreto. O termo 'natural' pode ser vago.",
+    "dica": "Qual selo tem regras mais rígidas sobre pesticidas?"
+  },
+
+  // 19. Conselho Ambiental (Vantagem)
+  {
+    "id": "criativa_conselho_1",
+    "tipo": "Vantagem",
+    "titulo": "Conselho do Sábio",
+    "pergunta": "<div style='padding: 15px; border-left: 5px solid #16a34a; background-color: #f0fdf4;'>\n  <p style='font-style: italic;'>\"A melhor forma de prever o futuro é criá-lo. Pequenas ações sustentáveis hoje garantem um amanhã melhor.\"</p>\n  <p style='text-align: right; font-size: 0.9em; margin-top: 10px;'>- Sábio da Montanha Verde</p>\n  <p style='text-align: center; font-weight: bold; margin-top: 15px;'>Ganhe +10 de Progresso pela inspiração!</p>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Absorver a sabedoria" } ],
+    "respostaCorreta": [1],
+    "dificuldade": "facil",
+    "categorias": ["Criat__Conselho"],
+    "fontes": [],
+    "vantagem": "+10 de Progresso pela inspiração!",
+    "desvantagem": "",
+    "dica": "Inspire-se!"
+  },
+
+  // 20. Código Morse Ambiental (Pergunta)
+  {
+    "id": "criativa_morse_1",
+    "tipo": "Pergunta",
+    "titulo": "Código Morse Verde",
+    "pergunta": "Decifre a mensagem em código Morse:<br><br><code style='font-size: 1.3em; display: block; text-align: center; letter-spacing: 5px; margin: 15px 0; padding: 10px; background:#eee;'>... .- .-.. ...- . / .- / ..-. .-.. --- .-. . ... - .-</code><br><br><small>(Lembrete: S=... A=.- L=.-.. V=...- E= . / F=..-. L=.-.. O=--- R=.-. E= . S=... T= - A=.-)</small>",
+    "opcoes": [
+      { "id": 1, "texto": "RECICLE O LIXO" },
+      { "id": 2, "texto": "PROTEJA OS RIOS" },
+      { "id": 3, "texto": "SALVE A FLORESTA" },
+      { "id": 4, "texto": "USE MENOS PLASTICO" }
+    ],
+    "respostaCorreta": 3,
+    "dificuldade": "normal",
+    "categorias": ["Criat__CodigoMorse"],
+    "fontes": ["Código Morse"],
+    "vantagem": "Mensagem decifrada!",
+    "desvantagem": "Tradução incorreta.",
+    "dica": "Use o lembrete para traduzir letra por letra."
+  },
+
+    // 21. Gerador de Ideias (Outras - Informativo)
+  {
+    "id": "criativa_gerador_ideia_1",
+    "tipo": "Outras",
+    "titulo": "Gerador de Ideias Sustentáveis",
+    "pergunta": "<div style='padding: 15px; border: 1px solid #6366f1; border-radius: 5px; background: #eef2ff; text-align: center;'>\n  <p>Precisando de inspiração? Aqui vai uma ideia aleatória:</p>\n  <p style='font-size: 2em; margin: 10px 0;'>💡</p>\n  <p style='font-size: 1.1em; font-style: italic; margin-bottom: 15px;'><strong>\"Organize um dia de troca de roupas e objetos usados com seus amigos ou vizinhos.\"</strong></p>\n  <p style='font-size: 0.8em;'>Reduz o consumo, fortalece laços!</p>\n</div>",
+    "opcoes": [
+      { "id": 1, "texto": "Boa ideia!" }
+    ],
+    "respostaCorreta": [1], // Apenas confirmação
+    "dificuldade": "facil",
+    "categorias": ["Criat__GeradorIdeia"],
+    "fontes": [],
+    "vantagem": "Que a ideia inspire boas ações!",
+    "desvantagem": "",
+    "dica": "Compartilhar é cuidar (do planeta também)."
+  },
+
+  // 22. Previsão do Tempo Extremo (Desvantagem)
+  {
+    "id": "criativa_previsao_1",
+    "tipo": "Desvantagem",
+    "titulo": "Alerta de Temporal!",
+    "pergunta": "<div style='padding: 15px; border: 2px solid #facc15; border-radius: 5px; background: #fefce8; text-align: center;'>\n  <p><strong>ALERTA METEOROLÓGICO!</strong></p>\n  <p style='font-size: 2.5em; margin: 5px 0;'>⛈️🌬️</p>\n  <p>Fortes chuvas e ventos se aproximam. Prepare-se!</p>\n  <p><strong>Todos os jogadores devem recuar 1 casa no tabuleiro como medida de precaução.</strong></p>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Se preparar para o impacto!" } ],
+    "respostaCorreta": [],
+    "dificuldade": "facil",
+    "categorias": ["Criat__Previsao"],
+    "fontes": [],
+    "vantagem": "",
+    "desvantagem": "Todos recuaram 1 casa!", // Efeito aplicado a todos
+    "dica": "Eventos climáticos extremos exigem cautela."
+  },
+
+  // 23. Caça ao Tesouro Ecológico (Pergunta com Descrição)
+  {
+    "id": "criativa_caca_tesouro_1",
+    "tipo": "Pergunta",
+    "titulo": "Caça ao Tesouro Verde",
+    "pergunta": "Você seguiu as pistas e encontrou um local descrito como:<br><br><i>\"Onde a água doce encontra a salgada, lar de caranguejos e raízes aéreas que se adaptam à maré.\"</i><br><br>Que ecossistema é esse?",
+    "opcoes": [
+      { "id": 1, "texto": "Recife de Coral" },
+      { "id": 2, "texto": "Manguezal" },
+      { "id": 3, "texto": "Floresta Temperada" },
+      { "id": 4, "texto": "Deserto" }
+    ],
+    "respostaCorreta": 2,
+    "dificuldade": "normal",
+    "categorias": ["Criat__CacaTesouro"],
+    "fontes": ["Ecossistemas Costeiros"],
+    "vantagem": "Tesouro encontrado! É o manguezal.",
+    "desvantagem": "Pista errada. Esse ecossistema é diferente.",
+    "dica": "Pense em áreas costeiras com lama e árvores adaptadas."
+  },
+
+    // 24. Medidor de Biodiversidade (Visualização Simples)
+  {
+    "id": "criativa_biodiv_meter_1",
+    "tipo": "Vantagem",
+    "titulo": "Biodiversidade Local",
+    "pergunta": "Seus esforços de conservação aumentaram a biodiversidade local! Veja o indicador:<br><br>\n<style>\n.bio-meter { width: 70%; max-width: 250px; height: 120px; border: 2px solid #15803d; border-radius: 8px; margin: 15px auto; padding: 10px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to top, #bbf7d0, #f0fdf4); }\n.bio-level { background-color: #22c55e; height: 85%; /* Nível Alto */ border-radius: 4px; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:1.1em; transition: height 0.5s ease; }\n.bio-icon { font-size: 1.5em; margin-right: 5px; }\n</style>\n<div class=\"bio-meter\">\n  <div class=\"bio-level\"><span class=\"bio-icon\">🦋</span><span>Alta</span></div>\n</div>\n<p style=\"text-align:center; font-weight:bold;\">Ganhe +1 Estrela Fixa!</p>",
+    "opcoes": [ { "id": 1, "texto": "Comemorar a vida!" } ],
+    "respostaCorreta": [1],
+    "dificuldade": "facil",
+    "categorias": ["Criat__Biodiversidade"],
+    "fontes": [],
+    "vantagem": "Ganhou 1 Estrela Fixa pela alta biodiversidade!", // Efeito aplicado
+    "desvantagem": "",
+    "dica": "Quanto mais vida, melhor!"
+  },
+
+  // 25. Quebra-Cabeça de Palavras (CompletarFrase Desafiador)
+  {
+    "id": "criativa_cf_palavras_1",
+    "tipo": "CompletarFrase",
+    "titulo": "Termo Ambiental Oculto",
+    "pergunta": "Reorganize os fragmentos para formar um termo importante relacionado à variedade de vida na Terra:",
+    "fraseIncompleta": "O termo é: __1____2____3____4____5____6____7____8____9____10____11____12__", // 12 letras
+    "fragmentos": [
+      { "id": 1, "texto": "D" }, { "id": 2, "texto": "I" }, { "id": 3, "texto": "V" },
+      { "id": 4, "texto": "E" }, { "id": 5, "texto": "R" }, { "id": 6, "texto": "S" },
+      { "id": 7, "texto": "I" }, { "id": 8, "texto": "D" }, { "id": 9, "texto": "A" },
+      { "id": 10, "texto": "D" }, { "id": 11, "texto": "E" }, { "id": 12, "texto": "B" },
+      { "id": 13, "texto": "I" }, { "id": 14, "texto": "O" } // Letras extras para confundir
+    ],
+    "respostaCorreta": [12, 2, 4, 3, 4, 5, 6, 7, 8, 9, 10, 4], // B I O D I V E R S I D A D E
+    "opcoes": [],
+    "dificuldade": "dificil",
+    "categorias": ["Criat__QuebraCabeca"],
+    "fontes": [],
+    "vantagem": "Correto! BIODIVERSIDADE é a chave!",
+    "desvantagem": "Letras fora de ordem.",
+    "dica": "Começa com 'B' e se refere à variedade de vida."
+  },
 
   // 22. Impacto a Longo Prazo (Outras - Escolha Simulada)
   {
