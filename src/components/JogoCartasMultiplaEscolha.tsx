@@ -644,7 +644,7 @@ const EcoChallenge: React.FC = () => {
                         </div>
                     )}
                     {(!ocultarCarta || cartaRevelada) ? (
-                        <ScrollArea className="h-40 md:h-56 rounded-md border p-3 mt-2 bg-white/80"> {/* Altura aumentada */}
+                        <ScrollArea className="h-54 md:h-56 rounded-md border p-3 mt-2 bg-white/80"> {/* Altura aumentada */}
                             <div
                                 className="text-sm prose prose-sm max-w-none"
                                 dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }}
