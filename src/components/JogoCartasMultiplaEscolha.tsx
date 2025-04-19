@@ -8,12 +8,12 @@ import {
     BookOpen, Home, SkipForward, Star, Award, MinusCircle, ChevronUp, Zap, Filter,
     Trash, EyeOff, Eye, Dice6, X as XIcon, Timer, Link2, MousePointerClick, Check, TextSelect
 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert"; // Alert importado corretamente
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils"; // Certifique-se que este utilitário existe ou remova/adapte `cn()`
+import { cn } from "@/lib/utils";
 
 // Importar Decks
 import manejoPlantadas from "./deck/cards_manejo_plantada";
@@ -146,7 +146,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files; if (!files || files.length === 0) return; setIsLoading(true); setErrorMessage(null);
         let newDecks: CustomDeck[] = []; let errors: string[] = [];
-        for (let i = 0; i < files.length; i++) { /* ... (lógica de upload como antes) ... */
+        for (let i = 0; i < files.length; i++) {
             const file = files[i]; const content = await file.text();
             try {
                 let newCards: Carta[] = []; const deckName = file.name.replace(/\.(js|json)$/, "");
@@ -171,7 +171,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 
     const handleStartGame = (continueGame = false) => {
         let gameStateToStart: Partial<GameState>;
-        if (continueGame && typeof window !== "undefined") { /* ... (lógica continuar jogo como antes) ... */
+        if (continueGame && typeof window !== "undefined") {
              const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
              try {
                  const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
@@ -185,7 +185,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                       gameStateToStart.probabilityIndex = probabilityIndex;
                  } else { return handleStartGame(false); }
              } catch (e) { console.error("Erro ao carregar jogo salvo:", e); return handleStartGame(false); }
-        } else { /* ... (lógica novo jogo como antes) ... */
+        } else {
             if (categoriasSelecionadas.length === 0 || playerInputs.length === 0) return;
             const initializedPlayers: Player[] = playerInputs.map((input, index) => ({ id: index, name: input.name.trim() || `Jogador ${index + 1}`, color: input.color || predefinedColors[index % predefinedColors.length], fixedStars: 0, respostasCertas: 0, respostasErradas: 0, respostasSeguidas: 0, progresso: 0, pulosDisponiveis: 0, contadorDeEstrelas: 0, rodadasPreso: 0 }));
             gameStateToStart = { players: initializedPlayers, currentPlayerId: initializedPlayers[0]?.id ?? null, categoriasSelecionadas: categoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex, customDecks: customDecks, usedDeckIds: customDecks.filter(d => d.used).map(d => d.id), jogoIniciado: true };
@@ -254,7 +254,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                         className="w-full flex items-center justify-center space-x-2"
                         style={{
                             backgroundColor: probabilitySettings[probabilityIndex].color,
-                            color: probabilitySettings[probabilityIndex].textColor
+                            color: probabilitySettings[probabilityIndex].textColor // Usa a cor de texto definida
                         }}
                     >
                         <span>% Excluir Especiais:</span>
@@ -269,6 +269,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         </Card>
     );
 };
+
 
 // --- Componente Principal EcoChallenge ---
 const EcoChallenge: React.FC = () => {
@@ -420,7 +421,7 @@ const EcoChallenge: React.FC = () => {
         const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
         if(!currentPlayer) return;
         let cor = false; let pontosGanhos = 20; let pontosPerdidos = 10;
-        let darPuloDificil = cartaAtual.dificuldade === "dificil"; let mensagemResultado = ""; let alertVariant: "default" | "destructive" | "info" = "info"; // Para cor da mensagem
+        let darPuloDificil = cartaAtual.dificuldade === "dificil"; let mensagemResultado = "";
         if (cartaAtual.tipo === "ContraTempo" && timerIntervalRef.current) { clearInterval(timerIntervalRef.current); }
         switch (cartaAtual.tipo) {
             case "Pergunta": case "ContraTempo": if (cartaAtual.tipo === "ContraTempo" && (tempoRestante === null || tempoRestante <= 0)) { cor = false; } else { cor = selecionado === cartaAtual.respostaCorreta; } break;
@@ -429,9 +430,9 @@ const EcoChallenge: React.FC = () => {
             case "RelacionarColunas": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = paresFormados.length === cartaAtual.respostaCorreta.length && paresFormados.map(p => `${p.aId}-${p.bId}`).sort().join(',') === cartaAtual.respostaCorreta.map(p => `${p.aId}-${p.bId}`).sort().join(','); if (cor) pontosGanhos = 30; darPuloDificil = true; break;
             case "PontoCerto": if (!coordenadasClique || !Array.isArray(cartaAtual.zonasClicaveis)) { cor = false; break; } const zonaCorreta = cartaAtual.zonasClicaveis.find(z => z.id === cartaAtual.respostaCorreta); cor = zonaCorreta ? isClickInZone(coordenadasClique, zonaCorreta) : false; if (cor) pontosGanhos = 25; darPuloDificil = true; break;
             case "CompletarFrase": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = fragmentosSelecionados.length === cartaAtual.respostaCorreta.length && fragmentosSelecionados.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 25; darPuloDificil = true; break;
-            case "Vantagem": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `Vantagem: ${cartaAtual.pergunta}. ${cartaAtual.vantagem || ''}`; alertVariant = "default"; break; // Verde
-            case "Desvantagem": cor = false; mensagemResultado = `Desvantagem: ${cartaAtual.pergunta}. ${cartaAtual.desvantagem || ''}`; alertVariant = "destructive"; break; // Vermelho
-            case "Outras": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `${cartaAtual.titulo}: ${cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...')}`; alertVariant = cor ? "default" : "destructive"; break; // Verde ou Vermelho
+            case "Vantagem": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `Vantagem: ${cartaAtual.pergunta}. ${cartaAtual.vantagem || ''}`; /* Efeito aqui */ break;
+            case "Desvantagem": cor = false; mensagemResultado = `Desvantagem: ${cartaAtual.pergunta}. ${cartaAtual.desvantagem || ''}`; /* Efeito aqui */ break;
+            case "Outras": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `${cartaAtual.titulo}: ${cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...')}`; break;
             default: const _exhaustiveCheck: never = cartaAtual; console.error("Tipo não tratado:", _exhaustiveCheck); return;
         }
         setRespondido(true);
@@ -441,25 +442,20 @@ const EcoChallenge: React.FC = () => {
                 const pulosGanhos = (completouBarra ? 1 : 0) + (darPuloDificil ? 1 : 0); const estrelasFixasGanhsa = completouBarra ? 1 : 0;
                 updateCurrentPlayer({ respostasCertas: currentPlayer.respostasCertas + 1, respostasSeguidas: currentPlayer.respostasSeguidas + 1, progresso: completouBarra ? 0 : novoProgresso, pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + pulosGanhos, 2), fixedStars: currentPlayer.fixedStars + estrelasFixasGanhsa, });
                 mensagemResultado = `Correto! ${cartaAtual.vantagem || ''}${completouBarra ? ' Barra completa!' : ''}`;
-                alertVariant = "default"; // Verde
             } else {
                 updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - pontosPerdidos, 0), });
                 let detalheErro = "";
                 if (cartaAtual.tipo === "Ordem" && Array.isArray(cartaAtual.respostaCorreta) && Array.isArray(cartaAtual.opcoes)) { const ordemCorretaTexto = cartaAtual.respostaCorreta.map(id => cartaAtual.opcoes.find(o => o.id === id)?.texto).join(" -> "); detalheErro = ` Ordem correta: ${ordemCorretaTexto}.`; }
                 mensagemResultado = `Incorreto. ${cartaAtual.desvantagem || ''}${detalheErro}`;
-                alertVariant = "destructive"; // Vermelho
             }
         }
-        // Define a mensagem final e a cor da caixa de mensagem
         setMensagem(mensagemResultado);
-        // Passa a cor para o estado ou usa diretamente no render da Alert
-        // Para simplicidade, vamos determinar a classe no render da Alert
     };
 
-    const resetarContadoresJogador = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp || !window.confirm(`Resetar ${cp.name}?`)) return; updateCurrentPlayer({ respostasCertas: 0, respostasErradas: 0, progresso: 0, pulosDisponiveis: 0, respostasSeguidas: 0, rodadasPreso: 0, contadorDeEstrelas: 0, fixedStars: 0 }); setMensagem(`${cp.name} resetado.`); };
-    const toggleDica = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (dicaUsada) { setMensagem("Dica já utilizada."); return; } if (!cartaAtual.dica) { setMensagem("Carta sem dica."); return; } if (cp.respostasSeguidas >= 2) { setMostrarDica(true); setDicaUsada(true); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Dica revelada! (-2 sequências)"); } else { setMensagem("São necessárias 2 respostas corretas seguidas."); } };
+    const resetarContadoresJogador = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !window.confirm(`Resetar ${cp.name}?`)) return; updateCurrentPlayer({ respostasCertas: 0, respostasErradas: 0, progresso: 0, pulosDisponiveis: 0, respostasSeguidas: 0, rodadasPreso: 0, contadorDeEstrelas: 0, fixedStars: 0 }); setMensagem(`${cp.name} resetado.`); };
+    const toggleDica = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (dicaUsada) { setMensagem("Dica já utilizada."); return; } if (!cartaAtual.dica) { setMensagem("Carta sem dica."); return; } if (cp.respostasSeguidas >= 2) { setMostrarDica(true); setDicaUsada(true); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Dica revelada! (-2 sequências)"); } else { setMensagem("São necessárias 2 respostas corretas seguidas."); } };
     const toggleFontes = () => { if (!cartaAtual || (gameState?.ocultarCarta && !cartaRevelada)) return; if (cartaAtual.fontes && cartaAtual.fontes.length > 0) { setMostrarFontes(!mostrarFontes); } else { setMensagem("Nenhuma fonte disponível."); } };
-    const pularPergunta = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (!tiposPergunta.includes(cartaAtual.tipo)) { setMensagem("Não pode pular este tipo."); return; } if (cp.pulosDisponiveis > 0) { updateCurrentPlayer({ pulosDisponiveis: cp.pulosDisponiveis - 1 }); setMensagem("Carta pulada!"); setTimeout(selecionarCartaAleatoria, 500); } else { setMensagem("Sem pulos disponíveis."); } };
+    const pularPergunta = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (!tiposPergunta.includes(cartaAtual.tipo)) { setMensagem("Não pode pular este tipo."); return; } if (cp.pulosDisponiveis > 0) { updateCurrentPlayer({ pulosDisponiveis: cp.pulosDisponiveis - 1 }); setMensagem("Carta pulada!"); setTimeout(selecionarCartaAleatoria, 500); } else { setMensagem("Sem pulos disponíveis."); } };
     const eliminarRespostaErrada = () => {
         const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return;
         const tiposEliminaveis: Carta['tipo'][] = ["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"];
@@ -486,12 +482,12 @@ const EcoChallenge: React.FC = () => {
 
     // --- Renderização ---
     if (!gameState) {
-         const savedStateRaw = typeof window !== "undefined" ? localStorage.getItem("estadoEcoChallenge") : null;
-         let savedState = null; try { savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; } catch {}
-         const hasSaved = !!(savedState && savedState.jogoIniciado);
-         const initialPlayers = savedState?.players || []; const initialCategorias = savedState?.categoriasSelecionadas || [];
-         const initialOcultar = savedState?.ocultarCarta ?? true; const initialProbIndex = savedState?.probabilityIndex ?? 0;
-        return (<TelaInicial onStartGame={(initialState) => { if (initialState) { setGameState(initialState as GameState); } }} categoriasDisponiveis={Array.from(new Set(cartasOriginais.flatMap(c => c.categorias || []))).sort()} initialCategoriasSelecionadas={initialCategorias} initialPlayers={initialPlayers} initialOcultarCarta={initialOcultar} initialProbabilityIndex={initialProbIndex} hasSavedGame={hasSaved} />);
+        const savedStateRaw = typeof window !== "undefined" ? localStorage.getItem("estadoEcoChallenge") : null;
+        let savedState = null; try { savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; } catch {}
+        const hasSaved = !!(savedState && savedState.jogoIniciado);
+        const initialPlayers = savedState?.players || []; const initialCategorias = savedState?.categoriasSelecionadas || [];
+        const initialOcultar = savedState?.ocultarCarta ?? true; const initialProbIndex = savedState?.probabilityIndex ?? 0;
+       return (<TelaInicial onStartGame={(initialState) => { if (initialState) { setGameState(initialState as GameState); } }} categoriasDisponiveis={Array.from(new Set(cartasOriginais.flatMap(c => c.categorias || []))).sort()} initialCategoriasSelecionadas={initialCategorias} initialPlayers={initialPlayers} initialOcultarCarta={initialOcultar} initialProbabilityIndex={initialProbIndex} hasSavedGame={hasSaved} />);
     }
     const { players, currentPlayerId, ocultarCarta } = gameState;
     const currentPlayer = players.find(p => p.id === currentPlayerId);
@@ -499,6 +495,23 @@ const EcoChallenge: React.FC = () => {
     if (!cartaAtual || !currentPlayer) { return (<div className="flex items-center justify-center min-h-screen"><p>Carregando...</p><Button onClick={voltarTelaInicial} className="ml-4">Voltar</Button></div>); }
     const obterEstiloCarta = () => { if (ocultarCarta && !cartaRevelada) return "border-gray-300 bg-gray-100"; switch (cartaAtual.tipo) { case "Vantagem": return "border-green-500 bg-green-50"; case "Desvantagem": return "border-red-500 bg-red-50"; case "Outras": return "border-blue-500 bg-blue-50"; case "ContraTempo": return "border-yellow-500 bg-yellow-50"; default: return "border-gray-300 bg-white"; } };
     const isVerificarDisabled = () => { if (respondido) return true; switch (cartaAtual.tipo) { case "Pergunta": case "ContraTempo": case "Vantagem": case "Desvantagem": case "Outras": return selecionado === null; case "MultiplaEscolha": return selecoesMultiplas.length === 0; case "Ordem": return ordemSelecoes.length !== (cartaAtual.opcoes?.length ?? 0); case "RelacionarColunas": return paresFormados.length !== (cartaAtual.respostaCorreta?.length ?? 0); case "PontoCerto": return coordenadasClique === null; case "CompletarFrase": return fragmentosSelecionados.length !== (cartaAtual.respostaCorreta?.length ?? 0); default: return true; } };
+
+    // Define a variante da Alert com base na mensagem
+    const getAlertVariant = (): "default" | "destructive" => {
+        if (!mensagem) return "default"; // Ou algum outro padrão se necessário
+        const lowerMsg = mensagem.toLowerCase();
+        if (lowerMsg.includes('incorreto') || lowerMsg.includes('desvantagem') || lowerMsg.includes('tempo esgotado')) {
+            return "destructive";
+        }
+        if (lowerMsg.includes('correto') || lowerMsg.includes('vantagem')) {
+            return "default";
+        }
+        return "default"; // Default para mensagens informativas (azul será aplicado via classe)
+    };
+
+    const isInfoAlert = !mensagem.toLowerCase().includes('correto') && !mensagem.toLowerCase().includes('vantagem') &&
+                        !mensagem.toLowerCase().includes('incorreto') && !mensagem.toLowerCase().includes('desvantagem') &&
+                        !mensagem.toLowerCase().includes('tempo esgotado');
 
     return (
         <div className="flex flex-col items-center p-2 md:p-4 min-h-screen bg-gradient-to-b from-green-50 to-blue-50 font-sans">
@@ -508,7 +521,6 @@ const EcoChallenge: React.FC = () => {
                 style={players.length > 0 && currentPlayer && !(ocultarCarta && !cartaRevelada) ? { boxShadow: `0 0 15px 3px ${currentPlayer.color}` } : {}}
             >
                 <CardHeader className="pb-3">
-                    {/* Cabeçalho: Filtro, Título, Categoria, Dificuldade */}
                     <div className="flex justify-between items-start mb-2 gap-2">
                         <div className="flex items-center space-x-2">
                             <Button
@@ -518,7 +530,7 @@ const EcoChallenge: React.FC = () => {
                                 title={mostrarSomentePerguntas ? "Mostrar todas as cartas" : "Mostrar somente perguntas"}
                                 className={cn(
                                     "flex-shrink-0",
-                                    mostrarSomentePerguntas && "ring-2 ring-offset-1 ring-blue-500" // Ênfase no filtro ativo
+                                    mostrarSomentePerguntas && "ring-2 ring-offset-1 ring-blue-500 bg-blue-100 border-blue-300" // Destaque reforçado
                                 )}
                             >
                                 <Filter className="h-4 w-4" />
@@ -546,7 +558,6 @@ const EcoChallenge: React.FC = () => {
                             </Badge>
                         )}
                     </div>
-                    {/* Timer (se aplicável) */}
                     {cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && !respondido && cartaRevelada && (
                         <div className="mt-2">
                             <Progress value={(tempoRestante / cartaAtual.tempoLimite) * 100} className="h-2 [&>*]:bg-yellow-500" />
@@ -555,16 +566,15 @@ const EcoChallenge: React.FC = () => {
                             </p>
                         </div>
                     )}
-                    {/* Área da Pergunta / Placeholder */}
                     {(!ocultarCarta || cartaRevelada) ? (
-                        <ScrollArea className="h-36 md:h-48 rounded-md border p-3 mt-2 bg-white/80"> {/* Altura aumentada */}
+                        <ScrollArea className="h-36 md:h-48 rounded-md border p-3 mt-2 bg-white/80">
                             <div
-                                className="text-sm prose prose-sm max-w-none" // Use prose para estilizar HTML interno
+                                className="text-sm prose prose-sm max-w-none"
                                 dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }}
                             />
                         </ScrollArea>
                     ) : (
-                        <div className="h-36 md:h-48 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200"> {/* Altura aumentada */}
+                        <div className="h-36 md:h-48 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200">
                             <EyeOff className="h-8 w-8 text-gray-500" />
                             <p className="text-sm text-gray-600">Carta Oculta</p>
                             {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>}
@@ -586,20 +596,33 @@ const EcoChallenge: React.FC = () => {
                     )}
                 </CardHeader>
 
-                {/* Conteúdo da Resposta */}
                 {(!ocultarCarta || cartaRevelada) && (
                     <CardContent className="pt-0 pb-4">
                         <div className="space-y-2">
                             {renderizarConteudoResposta()}
                         </div>
-                        {/* Dica */}
-                        {mostrarDica && cartaAtual.dica && ( <Alert variant="default" className="mt-4 bg-blue-50 border-blue-300"><HelpCircle className="h-4 w-4 text-blue-700" /><AlertDescription className="text-sm text-blue-800"><strong>Dica:</strong> {cartaAtual.dica}</AlertDescription></Alert> )}
-                        {/* Fontes */}
-                        {mostrarFontes && cartaAtual.fontes && cartaAtual.fontes.length > 0 && ( <Alert variant="default" className="mt-4 bg-gray-50 border-gray-300"><BookOpen className="h-4 w-4 text-gray-700" /><AlertDescription className="text-sm text-gray-800"><strong>Fontes:</strong><ul className="list-disc list-inside mt-1 text-xs">{cartaAtual.fontes.map((fonte, idx) => (<li key={idx}>{fonte}</li>))}</ul></AlertDescription></Alert> )}
+                        {mostrarDica && cartaAtual.dica && (
+                            <Alert variant="default" className="mt-4 bg-blue-50 border-blue-300 text-blue-800"> {/* Azul para dica */}
+                                <HelpCircle className="h-4 w-4 text-blue-700" />
+                                <AlertDescription className="text-sm">
+                                    <strong>Dica:</strong> {cartaAtual.dica}
+                                </AlertDescription>
+                            </Alert>
+                        )}
+                        {mostrarFontes && cartaAtual.fontes && cartaAtual.fontes.length > 0 && (
+                             <Alert variant="default" className="mt-4 bg-gray-50 border-gray-300">
+                                <BookOpen className="h-4 w-4 text-gray-700" />
+                                <AlertDescription className="text-sm text-gray-800">
+                                    <strong>Fontes:</strong>
+                                    <ul className="list-disc list-inside mt-1 text-xs">
+                                        {cartaAtual.fontes.map((fonte, idx) => (<li key={idx}>{fonte}</li>))}
+                                    </ul>
+                                </AlertDescription>
+                            </Alert>
+                        )}
                     </CardContent>
                 )}
 
-                {/* Footer */}
                 <CardFooter className="flex flex-col items-center pt-4 border-t bg-gray-50/50 rounded-b-lg">
                     {/* Botões de Ação Primários */}
                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
@@ -627,10 +650,10 @@ const EcoChallenge: React.FC = () => {
                             </Button>
                         ) : !respondido ? (
                             <Button
-                                onClick={isVerificarDisabled() ? undefined : verificarResposta} // Só chama verificar se não estiver desabilitado
+                                onClick={isVerificarDisabled() ? undefined : verificarResposta} // Ação condicional
                                 className={cn("w-full bg-green-600 hover:bg-green-700 text-white", isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400")}
-                                disabled={isVerificarDisabled()} // Controla visualmente
-                                onMouseDown={() => handleLongPressStart(rolarDado)} // Long press sempre ativo
+                                disabled={isVerificarDisabled()}
+                                onMouseDown={() => handleLongPressStart(rolarDado)} // Long press sempre escuta
                                 onMouseUp={handleLongPressEnd}
                                 onMouseLeave={handleLongPressEnd}
                                 onTouchStart={() => handleLongPressStart(rolarDado)}
@@ -648,14 +671,13 @@ const EcoChallenge: React.FC = () => {
                     {/* Mensagem Feedback */}
                     {mensagem && (
                         <Alert
-                            variant={
-                                mensagem.toLowerCase().includes('correto') || mensagem.toLowerCase().includes('vantagem') ? "default" // Verde
-                                : (mensagem.toLowerCase().includes('incorreto') || mensagem.toLowerCase().includes('desvantagem') || mensagem.toLowerCase().includes('tempo esgotado')) ? "destructive" // Vermelho
-                                : "info" // Azul (para outras mensagens como dica, pulo, etc.)
-                            }
+                            variant={getAlertVariant()} // Usa a função para determinar a variante base
                             className={cn(
-                                'text-center text-sm font-semibold mb-3',
-                                // As variantes do Alert já cuidam das cores geralmente
+                                'text-center text-sm font-semibold mb-3 w-full', // Garante largura total
+                                // Aplica cor azul se a variante for 'default' E a mensagem for informativa
+                                getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800'
+                                // Shadcn cuida das cores para variant="destructive" (vermelho)
+                                // Shadcn cuida das cores para variant="default" (verde por padrão, a menos que sobrescrito acima)
                             )}
                         >
                             <AlertDescription>{mensagem}</AlertDescription>
@@ -703,8 +725,7 @@ const EcoChallenge: React.FC = () => {
                     const isEliminated = opcoesEliminadas.includes(op.id);
                     const isWrongSelection = respondido && isSelected && !isCorrect;
                     let btnClass = "";
-                    // Remove opacidade, mantém cores fortes
-                    if (respondido) { if (isCorrect) btnClass = "bg-green-100 border-green-400 hover:bg-green-200 text-green-900"; else if (isSelected) btnClass = "bg-red-100 border-red-400 hover:bg-red-200 text-red-900"; else btnClass = "border-gray-300 text-gray-700"; } // Não selecionada e não correta
+                    if (respondido) { if (isCorrect) btnClass = "bg-green-100 border-green-400 hover:bg-green-200 text-green-900"; else if (isSelected) btnClass = "bg-red-100 border-red-400 hover:bg-red-200 text-red-900"; else btnClass = "border-gray-300 text-gray-700"; } // Texto forte
                     else if (isSelected) { btnClass = "bg-blue-100 border-blue-400"; }
                     return ( <Button key={op.id} onClick={() => handleSelecao(op.id)} variant={isSelected || (respondido && isCorrect) ? "secondary" : "outline"} className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} </Button> );
                 });
@@ -716,8 +737,7 @@ const EcoChallenge: React.FC = () => {
                     const isWrongSelection = respondido && isSelected && !isCorrect;
                     const missedCorrect = respondido && isCorrect && !isSelected;
                     let btnClass = "";
-                     // Remove opacidade
-                    if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; else btnClass = "border-gray-300 text-gray-700"; } // Errada não marcada
+                    if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; else btnClass = "border-gray-300 text-gray-700"; } // Texto forte
                     else if (isSelected) { btnClass = "bg-blue-100 border-blue-500"; }
                     return ( <Button key={op.id} onClick={() => handleSelecaoMultipla(op.id)} variant={isSelected ? "secondary" : "outline"} className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <div className={`w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center ${isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white'}`}>{isSelected && <Check className="w-3 h-3 text-white" />}</div> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600">✓</span>} </Button> );
                 });
@@ -729,8 +749,7 @@ const EcoChallenge: React.FC = () => {
                     const isCorrectOrder = respondido && isSelected && selectionIndex === correctIndex; const isWrongOrder = respondido && isSelected && selectionIndex !== correctIndex;
                     const isCorrectOptionOverall = respondido && correctIndex !== null && correctIndex > 0;
                     let btnClass = "";
-                     // Remove opacidade
-                    if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; } // Não faz parte da ordem
+                    if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; } // Texto forte
                     else if (isSelected) { btnClass = "bg-blue-100 border-blue-500"; }
                     return ( <Button key={op.id} onClick={() => handleSelecaoOrdem(op.id)} variant={isSelected ? "secondary" : "outline"} className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass )} disabled={respondido}> {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)} <span className="flex-1">{op.texto}</span> {respondido && isCorrectOptionOverall && (<span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${ isCorrectOrder ? 'bg-green-500 text-white' : isWrongOrder ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}`}>{correctIndex}</span>)} {isWrongOrder && selectionIndex !== null && <span className="text-xs text-red-600 ml-1">(Sua: {selectionIndex})</span>} </Button> );
                 });
