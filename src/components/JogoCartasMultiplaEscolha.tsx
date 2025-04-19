@@ -30,10 +30,10 @@ interface Opcao {
 }
 
 interface CartaBase {
-    id: string | number; // ID único para a carta
+    id: string | number;
     tipo: string;
     titulo: string;
-    pergunta: string; // Pode conter HTML básico
+    pergunta: string;
     dificuldade: "facil" | "normal" | "dificil";
     categorias: string[];
     fontes: string[];
@@ -42,7 +42,6 @@ interface CartaBase {
     dica: string;
 }
 
-// Tipos Existentes + Novos
 interface CartaPergunta extends CartaBase { tipo: "Pergunta"; opcoes: Opcao[]; respostaCorreta: number; }
 interface CartaMultiplaEscolha extends CartaBase { tipo: "MultiplaEscolha"; opcoes: Opcao[]; respostaCorreta: number[]; }
 interface CartaOrdem extends CartaBase { tipo: "Ordem"; opcoes: Opcao[]; respostaCorreta: number[]; }
@@ -57,7 +56,6 @@ interface CartaPontoCerto extends CartaBase { tipo: "PontoCerto"; imagemURL: str
 interface FragmentoCompletar { id: number; texto: string; }
 interface CartaCompletarFrase extends CartaBase { tipo: "CompletarFrase"; fraseIncompleta: string; fragmentos: FragmentoCompletar[]; respostaCorreta: number[]; opcoes: []; }
 
-// Tipo União Completo
 type Carta =
     | CartaPergunta | CartaMultiplaEscolha | CartaOrdem | CartaVantagem | CartaDesvantagem | CartaOutras
     | CartaContraTempo | CartaRelacionarColunas | CartaPontoCerto | CartaCompletarFrase;
@@ -79,14 +77,12 @@ const predefinedColors = [
     "#a6cee3","#fb9a99","#fdbf6f","#ffed6f","#ccebc5","#ff4444",
 ];
 const probabilitySettings = [
-    { value: 0, color: "#ffffff", label: "0%" }, // 0% chance de EXCLUIR especiais
-    { value: 0.4, color: "#4ade80", label: "40%" },// 40% chance de EXCLUIR especiais
-    { value: 0.6, color: "#facc15", label: "60%" },// 60% chance de EXCLUIR especiais
-    { value: 0.8, color: "#f87171", label: "80%" },// 80% chance de EXCLUIR especiais
+    { value: 0, color: "#e5e7eb", label: "0%", textColor: "#1f2937" },  // Cinza claro, texto escuro
+    { value: 0.4, color: "#16a34a", label: "40%", textColor: "#ffffff" }, // Verde escuro, texto branco
+    { value: 0.6, color: "#f97316", label: "60%", textColor: "#ffffff" }, // Laranja, texto branco (ajustado se necessário)
+    { value: 0.8, color: "#dc2626", label: "80%", textColor: "#ffffff" }, // Vermelho, texto branco
 ];
-// Tipos considerados "perguntas" para o filtro
 const tiposPergunta: Carta['tipo'][] = ["Pergunta", "MultiplaEscolha", "Ordem", "ContraTempo", "RelacionarColunas", "PontoCerto", "CompletarFrase"];
-// Tipos considerados "especiais" para o ajuste de probabilidade
 const tiposEspeciais: Carta['tipo'][] = ["Vantagem", "Desvantagem", "Outras"];
 
 // --- Carregamento Inicial das Cartas ---
@@ -106,7 +102,6 @@ const cartasOriginais: Carta[] = [
     ...card,
     id: card.id || `orig_${index}_${Math.random().toString(16).slice(2)}`
 }));
-
 
 // --- Funções Utilitárias ---
 function parseJSDeckFile(content: string): Carta[] {
@@ -132,7 +127,6 @@ function isClickInZone(clickCoords: { x: number; y: number } | null, zone: ZonaC
     const { x, y } = clickCoords;
     return (x >= zone.x && x <= zone.x + zone.largura && y >= zone.y && y <= zone.y + zone.altura);
 }
-
 
 // --- Componente TelaInicial ---
 interface TelaInicialProps {
@@ -248,49 +242,212 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     return (
         <Card className="w-full max-w-md mx-auto mt-8 shadow-lg">
             <CardHeader>
-                <CardTitle className="text-2xl font-bold text-center text-green-700">Eco Challenge</CardTitle>
-                <p className="text-sm text-center text-gray-600">O Jogo da Sustentabilidade</p>
+                <CardTitle className="text-2xl font-bold text-center text-green-700">
+                    Eco Challenge
+                </CardTitle>
+                <p className="text-sm text-center text-gray-600">
+                    O Jogo da Sustentabilidade
+                </p>
             </CardHeader>
             <CardContent className="space-y-6">
                 {/* Seleção de Categorias */}
                 <div className="space-y-2">
                     <h3 className="text-lg font-semibold text-gray-800">Categorias</h3>
-                    <Input type="text" placeholder="Pesquisar Categoria..." value={termoBusca} onChange={(e) => setTermoBusca(e.target.value)} className="w-full p-2 border rounded"/>
+                    <Input
+                        type="text"
+                        placeholder="Pesquisar Categoria..."
+                        value={termoBusca}
+                        onChange={(e) => setTermoBusca(e.target.value)}
+                        className="w-full p-2 border rounded"
+                    />
                     <ScrollArea className="h-40 border rounded-md p-3 bg-gray-50">
-                        {categoriasFiltradas.length > 0 ? (categoriasFiltradas.map((categoria) => (<div key={categoria} className="flex items-center space-x-2 mb-1 hover:bg-gray-100 p-1 rounded"><input type="checkbox" id={`cat-${categoria}`} checked={categoriasSelecionadas.includes(categoria)} onChange={() => {setCategoriasSelecionadas((prev) => prev.includes(categoria) ? prev.filter((c) => c !== categoria) : [...prev, categoria]);}} className="form-checkbox h-4 w-4 text-green-600"/><label htmlFor={`cat-${categoria}`} className="text-sm cursor-pointer flex-1">{categoria}</label></div>))) : (<p className="text-sm text-gray-500 italic">Nenhuma categoria encontrada.</p>)}
+                        {categoriasFiltradas.length > 0 ? (
+                            categoriasFiltradas.map((categoria) => (
+                                <div key={categoria} className="flex items-center space-x-2 mb-1 hover:bg-gray-100 p-1 rounded">
+                                    <input
+                                        type="checkbox"
+                                        id={`cat-${categoria}`}
+                                        checked={categoriasSelecionadas.includes(categoria)}
+                                        onChange={() => {
+                                            setCategoriasSelecionadas((prev) =>
+                                                prev.includes(categoria)
+                                                    ? prev.filter((c) => c !== categoria)
+                                                    : [...prev, categoria]
+                                            );
+                                        }}
+                                        className="form-checkbox h-4 w-4 text-green-600"
+                                    />
+                                    <label htmlFor={`cat-${categoria}`} className="text-sm cursor-pointer flex-1">
+                                        {categoria}
+                                    </label>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-sm text-gray-500 italic">Nenhuma categoria encontrada.</p>
+                        )}
                     </ScrollArea>
                     <div className="flex space-x-2 mt-2">
-                        <Button onClick={() => setCategoriasSelecionadas(todasCategorias)} variant="outline" size="sm" className="flex-1">Todas</Button>
-                        <Button onClick={() => setCategoriasSelecionadas([])} variant="outline" size="sm" className="flex-1">Nenhuma</Button>
+                        <Button onClick={() => setCategoriasSelecionadas(todasCategorias)} variant="outline" size="sm" className="flex-1">
+                            Todas
+                        </Button>
+                        <Button onClick={() => setCategoriasSelecionadas([])} variant="outline" size="sm" className="flex-1">
+                            Nenhuma
+                        </Button>
                     </div>
                 </div>
+
                 {/* Configuração de Jogadores */}
                 <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Jogadores</h3>
                     <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
-                        {playerInputs.map((player, index) => (<div key={player.id} className="border p-3 rounded-md shadow-sm bg-white relative"><div className="flex items-center space-x-2"><Input type="text" placeholder={`Jogador ${index + 1}`} value={player.name} maxLength={12} onChange={(e) => handlePlayerChange(index, "name", e.target.value)} className="flex-grow"/><Button variant="outline" size="icon" className="w-8 h-8 flex-shrink-0" onClick={() => toggleColorPicker(index)} style={{ backgroundColor: player.color }} aria-label="Selecionar cor"/><Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0 text-red-500 hover:bg-red-100" onClick={() => deletePlayer(index)} aria-label="Remover jogador"><Trash className="h-4 w-4" /></Button></div>{player.showColorPicker && (<div className="absolute z-20 mt-2 right-12 w-48 bg-white border rounded-md shadow-lg p-2 grid grid-cols-6 gap-1">{predefinedColors.map((color, idx) => (<button key={idx} aria-label={`Selecionar cor ${color}`} style={{ backgroundColor: color }} className={`w-6 h-6 rounded border ${player.color === color ? 'ring-2 ring-offset-1 ring-black' : 'border-gray-300'}`} onClick={() => {handlePlayerChange(index, "color", color); toggleColorPicker(index);}}/>))}</div>)}</div>))}
+                        {playerInputs.map((player, index) => (
+                            <div key={player.id} className="border p-3 rounded-md shadow-sm bg-white relative">
+                                <div className="flex items-center space-x-2">
+                                    <Input
+                                        type="text"
+                                        placeholder={`Jogador ${index + 1}`}
+                                        value={player.name}
+                                        maxLength={12}
+                                        onChange={(e) => handlePlayerChange(index, "name", e.target.value)}
+                                        className="flex-grow"
+                                    />
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="w-8 h-8 flex-shrink-0"
+                                        onClick={() => toggleColorPicker(index)}
+                                        style={{ backgroundColor: player.color }}
+                                        aria-label="Selecionar cor"
+                                    />
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="w-8 h-8 flex-shrink-0 text-red-500 hover:bg-red-100"
+                                        onClick={() => deletePlayer(index)}
+                                        aria-label="Remover jogador"
+                                    >
+                                        <Trash className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                                {player.showColorPicker && (
+                                    <div className="absolute z-20 mt-2 right-12 w-48 bg-white border rounded-md shadow-lg p-2 grid grid-cols-6 gap-1">
+                                        {predefinedColors.map((color, idx) => (
+                                            <button
+                                                key={idx}
+                                                aria-label={`Selecionar cor ${color}`}
+                                                style={{ backgroundColor: color }}
+                                                className={cn(
+                                                    'w-6 h-6 rounded border',
+                                                    player.color === color ? 'ring-2 ring-offset-1 ring-black' : 'border-gray-300'
+                                                )}
+                                                onClick={() => {
+                                                    handlePlayerChange(index, "color", color);
+                                                    toggleColorPicker(index);
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
                     </div>
-                    {playerInputs.length < 8 && (<Button onClick={addPlayerInput} variant="secondary" className="w-full">+ Adicionar Jogador</Button>)}
+                    {playerInputs.length < 8 && (
+                        <Button onClick={addPlayerInput} variant="secondary" className="w-full">
+                            + Adicionar Jogador
+                        </Button>
+                    )}
                 </div>
-                 {/* Baralhos Personalizados */}
+
+                {/* Baralhos Personalizados */}
                 <div className="space-y-2">
                     <h3 className="text-lg font-semibold text-gray-800">Baralhos Personalizados</h3>
-                    {errorMessage && (<Alert variant="destructive"><AlertDescription>{errorMessage}</AlertDescription></Alert>)}
-                    <Input type="file" multiple accept=".js,.json" onChange={handleCustomDeckUpload} disabled={isLoading} className="text-sm"/>
+                    {errorMessage && (
+                        <Alert variant="destructive">
+                            <AlertDescription>{errorMessage}</AlertDescription>
+                        </Alert>
+                    )}
+                    <Input
+                        type="file"
+                        multiple
+                        accept=".js,.json"
+                        onChange={handleCustomDeckUpload}
+                        disabled={isLoading}
+                        className="text-sm"
+                    />
                     {isLoading && <p className="text-sm text-blue-600">Carregando baralhos...</p>}
-                    {customDecks.length > 0 && (<ScrollArea className="h-32 border rounded-md p-2 bg-gray-50 space-y-2">{customDecks.map((deck) => (<div key={deck.id} className="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded"><span className="flex-1 text-sm truncate" title={`${deck.name} (${deck.cards.length} cartas)`}>{deck.name} ({deck.cards.length})</span><Button size="sm" variant={deck.used ? "default" : "outline"} onClick={() => toggleDeckUsage(deck.id)} className={`h-7 px-2 text-xs ${deck.used ? 'bg-green-600 hover:bg-green-700' : ''}`}>{deck.used ? "Ativo" : "Usar"}</Button><Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:bg-red-100" onClick={() => removeDeck(deck.id)} aria-label={`Remover baralho ${deck.name}`}><Trash className="h-4 w-4" /></Button></div>))}</ScrollArea>)}
-                    {customDecks.length === 0 && !isLoading && (<p className="text-sm text-gray-500 italic">Nenhum baralho personalizado adicionado.</p>)}
+                    {customDecks.length > 0 && (
+                        <ScrollArea className="h-32 border rounded-md p-2 bg-gray-50 space-y-2">
+                            {customDecks.map((deck) => (
+                                <div key={deck.id} className="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                                    <span className="flex-1 text-sm truncate" title={`${deck.name} (${deck.cards.length} cartas)`}>
+                                        {deck.name} ({deck.cards.length})
+                                    </span>
+                                    <Button
+                                        size="sm"
+                                        variant={deck.used ? "default" : "outline"}
+                                        onClick={() => toggleDeckUsage(deck.id)}
+                                        className={cn(
+                                            'h-7 px-2 text-xs',
+                                            deck.used ? 'bg-green-600 hover:bg-green-700' : ''
+                                        )}
+                                    >
+                                        {deck.used ? "Ativo" : "Usar"}
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 p-0 text-red-500 hover:bg-red-100"
+                                        onClick={() => removeDeck(deck.id)}
+                                        aria-label={`Remover baralho ${deck.name}`}
+                                    >
+                                        <Trash className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
+                        </ScrollArea>
+                    )}
+                    {customDecks.length === 0 && !isLoading && (
+                        <p className="text-sm text-gray-500 italic">Nenhum baralho personalizado adicionado.</p>
+                    )}
                 </div>
+
                 {/* Opções de Jogo */}
                 <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Opções</h3>
-                    <Button onClick={() => setOcultarCarta(!ocultarCarta)} variant="outline" className="w-full flex items-center justify-center space-x-2">{ocultarCarta ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}<span>{ocultarCarta ? "Ocultar Carta Ativado" : "Ocultar Carta Desativado"}</span></Button>
-                    <Button onClick={cycleProbability} className="w-full flex items-center justify-center space-x-2 text-white" style={{ backgroundColor: probabilitySettings[probabilityIndex].color }}><span>% Excluir Especiais:</span><span className="font-bold">{probabilitySettings[probabilityIndex].label}</span></Button> {/* Label Ajustado */}
+                    <Button
+                        onClick={() => setOcultarCarta(!ocultarCarta)}
+                        variant="outline"
+                        className="w-full flex items-center justify-center space-x-2"
+                    >
+                        {ocultarCarta ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        <span>{ocultarCarta ? "Ocultar Carta Ativado" : "Ocultar Carta Desativado"}</span>
+                    </Button>
+                    <Button
+                        onClick={cycleProbability}
+                        className="w-full flex items-center justify-center space-x-2"
+                        style={{
+                            backgroundColor: probabilitySettings[probabilityIndex].color,
+                            color: probabilitySettings[probabilityIndex].textColor // Usa a cor de texto definida
+                        }}
+                    >
+                        <span>% Excluir Especiais:</span>
+                        <span className="font-bold">{probabilitySettings[probabilityIndex].label}</span>
+                    </Button>
                 </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-3 pt-6 border-t">
-                {hasSavedGame && (<Button onClick={() => handleStartGame(true)} className="w-full bg-blue-600 hover:bg-blue-700">Continuar Jogo Salvo</Button>)}
-                <Button onClick={() => handleStartGame(false)} className="w-full bg-green-600 hover:bg-green-700" disabled={categoriasSelecionadas.length === 0 || playerInputs.length === 0 || isLoading}>{hasSavedGame ? "Iniciar Novo Jogo" : "Iniciar Jogo"}</Button>
+                {hasSavedGame && (
+                    <Button onClick={() => handleStartGame(true)} className="w-full bg-blue-600 hover:bg-blue-700">
+                        Continuar Jogo Salvo
+                    </Button>
+                )}
+                <Button
+                    onClick={() => handleStartGame(false)}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    disabled={categoriasSelecionadas.length === 0 || playerInputs.length === 0 || isLoading}
+                >
+                    {hasSavedGame ? "Iniciar Novo Jogo" : "Iniciar Jogo"}
+                </Button>
             </CardFooter>
         </Card>
     );
@@ -299,7 +456,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 
 // --- Componente Principal EcoChallenge ---
 const EcoChallenge: React.FC = () => {
-    // --- State Hooks ---
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [cartaAtual, setCartaAtual] = useState<Carta | null>(null);
     const [respondido, setRespondido] = useState(false);
@@ -324,26 +480,23 @@ const EcoChallenge: React.FC = () => {
     const [isDieModalOpen, setIsDieModalOpen] = useState(false);
     const [isRolling, setIsRolling] = useState(false);
 
-    // Refs
     const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
 
-    // --- Funções de Gerenciamento de Estado ---
     const updateGameState = useCallback((newState: Partial<GameState>) => {
         setGameState(prev => {
             if (!prev) return null;
             const updatedState = { ...prev, ...newState };
             if (typeof window !== "undefined") {
-                 try {
-                     const { customDecks, ...stateToSave } = updatedState;
-                     stateToSave.usedDeckIds = customDecks.filter(d => d.used).map(d => d.id);
-                     // Salva o estado de 'mostrarSomentePerguntas'
-                     localStorage.setItem("estadoEcoChallenge", JSON.stringify({...stateToSave, mostrarSomentePerguntas: mostrarSomentePerguntas}));
-                 } catch (e) { console.error("Erro ao salvar estado:", e); }
+                try {
+                    const { customDecks, ...stateToSave } = updatedState;
+                    stateToSave.usedDeckIds = customDecks.filter(d => d.used).map(d => d.id);
+                    localStorage.setItem("estadoEcoChallenge", JSON.stringify({...stateToSave, mostrarSomentePerguntas: mostrarSomentePerguntas}));
+                } catch (e) { console.error("Erro ao salvar estado:", e); }
             }
             return updatedState;
         });
-    }, [mostrarSomentePerguntas]); // Inclui como dependência
+    }, [mostrarSomentePerguntas]);
 
     const updateCurrentPlayer = useCallback((partialPlayerData: Partial<Player>) => {
         if (!gameState || gameState.currentPlayerId === null) return;
@@ -353,7 +506,6 @@ const EcoChallenge: React.FC = () => {
         updateGameState({ players: updatedPlayers });
     }, [gameState, updateGameState]);
 
-    // --- Inicialização e Carregamento ---
     useEffect(() => {
         if (typeof window !== "undefined") {
             const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
@@ -365,24 +517,18 @@ const EcoChallenge: React.FC = () => {
                     const usedDeckIdsFromSave = savedState.usedDeckIds || [];
                     const finalCustomDecks = currentCustomDecks.map(deck => ({ ...deck, used: usedDeckIdsFromSave.includes(deck.id) }));
                     setGameState({ ...savedState, customDecks: finalCustomDecks });
-                    setMostrarSomentePerguntas(savedState.mostrarSomentePerguntas ?? false); // Restaura do save
+                    setMostrarSomentePerguntas(savedState.mostrarSomentePerguntas ?? false);
                     return;
                 }
             } catch (e) { console.error("Erro ao carregar estado:", e); localStorage.removeItem("estadoEcoChallenge"); }
         }
     }, []);
 
-    // --- Seleção de Carta ---
     const selecionarCartaAleatoria = useCallback(() => {
         if (!gameState) return;
         const { categoriasSelecionadas, probabilityIndex, customDecks } = gameState;
-        const probabilidadeExcluirEspecial = probabilitySettings[probabilityIndex].value; // 0, 0.4, 0.6, 0.8
-
-        // Determina se as cartas especiais devem ser *incluídas* nesta rodada
-        // Se probabilidadeExcluirEspecial é 0, sempre inclui.
-        // Se for > 0, rola um dado: se o resultado for MAIOR ou IGUAL à probabilidade de excluir, INCLUI.
+        const probabilidadeExcluirEspecial = probabilitySettings[probabilityIndex].value;
         const incluirCartasEspeciais = probabilidadeExcluirEspecial === 0 || Math.random() >= probabilidadeExcluirEspecial;
-        // Ex: Se probabilidadeExcluirEspecial = 0.4 (40%), incluirCartasEspeciais será true 60% das vezes.
 
         let baralhoCompleto = [...cartasOriginais];
         customDecks.forEach(deck => { if (deck.used) { baralhoCompleto = [...baralhoCompleto, ...deck.cards]; } });
@@ -392,8 +538,8 @@ const EcoChallenge: React.FC = () => {
             if (!categoriaValida) return false;
             const isTipoPergunta = tiposPergunta.includes(c.tipo);
             const isTipoEspecial = tiposEspeciais.includes(c.tipo);
-            if (mostrarSomentePerguntas && !isTipoPergunta) return false; // Filtro UI: Só perguntas
-            if (!incluirCartasEspeciais && isTipoEspecial) return false; // Filtro Probabilidade: Exclui especiais
+            if (mostrarSomentePerguntas && !isTipoPergunta) return false;
+            if (!incluirCartasEspeciais && isTipoEspecial) return false;
             return true;
         });
 
@@ -406,7 +552,6 @@ const EcoChallenge: React.FC = () => {
         const novaCarta = cartasFiltradas[idxAleat];
         setCartaAtual(novaCarta);
 
-        // Resetar estados
         setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setMostrarFontes(false);
         setOpcoesEliminadas([]); setCartaRevelada(!gameState.ocultarCarta); setRolledNumber(null); setIsDieModalOpen(false);
         setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null);
@@ -415,9 +560,8 @@ const EcoChallenge: React.FC = () => {
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
         if (novaCarta.tipo === "ContraTempo") { setTempoRestante(novaCarta.tempoLimite); }
 
-    }, [gameState, mostrarSomentePerguntas]); // Adicionado mostrarSomentePerguntas
+    }, [gameState, mostrarSomentePerguntas]);
 
-    // --- Efeitos ---
     useEffect(() => {
         if (gameState?.jogoIniciado && !cartaAtual && !noCardsAvailable) { selecionarCartaAleatoria(); }
     }, [gameState?.jogoIniciado, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]);
@@ -429,8 +573,7 @@ const EcoChallenge: React.FC = () => {
                     if (prev === null || prev <= 1) {
                         clearInterval(timerIntervalRef.current!);
                         setRespondido(true); setMensagem(`Tempo esgotado! ${cartaAtual.desvantagem || 'Tente novamente.'}`);
-                        // Acessa diretamente o estado atual para evitar dependência stale
-                        setGameState(currentGameState => {
+                        setGameState(currentGameState => { // Update state safely
                             if (!currentGameState) return null;
                             const localCurrentPlayer = currentGameState.players.find(p => p.id === currentGameState.currentPlayerId);
                             if (localCurrentPlayer) {
@@ -449,10 +592,8 @@ const EcoChallenge: React.FC = () => {
             }, 1000);
         } else if (timerIntervalRef.current && (respondido || tempoRestante === 0)) { clearInterval(timerIntervalRef.current); }
         return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
-    }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId]); // Removido updateCurrentPlayer, ajustado acesso ao estado
+    }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId]); // Dependency updated
 
-
-    // --- Handlers de Interação ---
     const handleSelecao = (id: number) => { if (!respondido) setSelecionado(id); };
     const handleSelecaoMultipla = (id: number) => { if (!respondido) { setSelecoesMultiplas((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
     const handleSelecaoOrdem = (id: number) => { if (!respondido) { setOrdemSelecoes((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
@@ -462,16 +603,13 @@ const EcoChallenge: React.FC = () => {
     const handleSelecionarFragmento = (id: number) => { if (respondido) return; setFragmentosSelecionados(prev => [...prev, id]); };
     const limparFragmentos = () => { if (!respondido) { setFragmentosSelecionados([]); } };
 
-    // --- Verificação da Resposta ---
     const verificarResposta = () => {
         if (!cartaAtual || !gameState || !gameState.players || gameState.currentPlayerId === null || respondido) return;
         const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
         if(!currentPlayer) return;
-
         let cor = false; let pontosGanhos = 20; let pontosPerdidos = 10;
         let darPuloDificil = cartaAtual.dificuldade === "dificil"; let mensagemResultado = "";
         if (cartaAtual.tipo === "ContraTempo" && timerIntervalRef.current) { clearInterval(timerIntervalRef.current); }
-
         switch (cartaAtual.tipo) {
             case "Pergunta": case "ContraTempo": if (cartaAtual.tipo === "ContraTempo" && (tempoRestante === null || tempoRestante <= 0)) { cor = false; } else { cor = selecionado === cartaAtual.respostaCorreta; } break;
             case "MultiplaEscolha": cor = Array.isArray(cartaAtual.respostaCorreta) && selecoesMultiplas.length === cartaAtual.respostaCorreta.length && selecoesMultiplas.sort().toString() === cartaAtual.respostaCorreta.sort().toString(); if (cor) pontosGanhos = 25; break;
@@ -479,8 +617,8 @@ const EcoChallenge: React.FC = () => {
             case "RelacionarColunas": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = paresFormados.length === cartaAtual.respostaCorreta.length && paresFormados.map(p => `${p.aId}-${p.bId}`).sort().join(',') === cartaAtual.respostaCorreta.map(p => `${p.aId}-${p.bId}`).sort().join(','); if (cor) pontosGanhos = 30; darPuloDificil = true; break;
             case "PontoCerto": if (!coordenadasClique || !Array.isArray(cartaAtual.zonasClicaveis)) { cor = false; break; } const zonaCorreta = cartaAtual.zonasClicaveis.find(z => z.id === cartaAtual.respostaCorreta); cor = zonaCorreta ? isClickInZone(coordenadasClique, zonaCorreta) : false; if (cor) pontosGanhos = 25; darPuloDificil = true; break;
             case "CompletarFrase": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = fragmentosSelecionados.length === cartaAtual.respostaCorreta.length && fragmentosSelecionados.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 25; darPuloDificil = true; break;
-            case "Vantagem": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `Vantagem: ${cartaAtual.pergunta}. ${cartaAtual.vantagem || ''}`; /* Aplicar efeito via updateCurrentPlayer se necessário */ break;
-            case "Desvantagem": cor = false; mensagemResultado = `Desvantagem: ${cartaAtual.pergunta}. ${cartaAtual.desvantagem || ''}`; /* Aplicar efeito via updateCurrentPlayer se necessário */ break;
+            case "Vantagem": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `Vantagem: ${cartaAtual.pergunta}. ${cartaAtual.vantagem || ''}`; /* Efeito aqui */ break;
+            case "Desvantagem": cor = false; mensagemResultado = `Desvantagem: ${cartaAtual.pergunta}. ${cartaAtual.desvantagem || ''}`; /* Efeito aqui */ break;
             case "Outras": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `${cartaAtual.titulo}: ${cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...')}`; break;
             default: const _exhaustiveCheck: never = cartaAtual; console.error("Tipo não tratado:", _exhaustiveCheck); return;
         }
@@ -501,14 +639,12 @@ const EcoChallenge: React.FC = () => {
         setMensagem(mensagemResultado);
     };
 
-    // --- Funções Auxiliares de Jogo ---
     const resetarContadoresJogador = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !window.confirm(`Resetar ${cp.name}?`)) return; updateCurrentPlayer({ respostasCertas: 0, respostasErradas: 0, progresso: 0, pulosDisponiveis: 0, respostasSeguidas: 0, rodadasPreso: 0, contadorDeEstrelas: 0, fixedStars: 0 }); setMensagem(`${cp.name} resetado.`); };
     const toggleDica = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (dicaUsada) { setMensagem("Dica já utilizada."); return; } if (!cartaAtual.dica) { setMensagem("Carta sem dica."); return; } if (cp.respostasSeguidas >= 2) { setMostrarDica(true); setDicaUsada(true); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Dica revelada! (-2 sequências)"); } else { setMensagem("São necessárias 2 respostas corretas seguidas."); } };
     const toggleFontes = () => { if (!cartaAtual || (gameState?.ocultarCarta && !cartaRevelada)) return; if (cartaAtual.fontes && cartaAtual.fontes.length > 0) { setMostrarFontes(!mostrarFontes); } else { setMensagem("Nenhuma fonte disponível."); } };
     const pularPergunta = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (!tiposPergunta.includes(cartaAtual.tipo)) { setMensagem("Não pode pular este tipo."); return; } if (cp.pulosDisponiveis > 0) { updateCurrentPlayer({ pulosDisponiveis: cp.pulosDisponiveis - 1 }); setMensagem("Carta pulada!"); setTimeout(selecionarCartaAleatoria, 500); } else { setMensagem("Sem pulos disponíveis."); } };
     const eliminarRespostaErrada = () => {
-        const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId);
-        if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return;
+        const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return;
         const tiposEliminaveis: Carta['tipo'][] = ["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"];
         if (!tiposEliminaveis.includes(cartaAtual.tipo) || !('opcoes' in cartaAtual) || cartaAtual.opcoes.length <= 2) { setMensagem("Não é possível eliminar opções para este tipo de carta ou já há poucas opções."); return; }
         if (cp.respostasSeguidas < 2) { setMensagem("São necessárias 2 respostas corretas seguidas."); return; }
@@ -549,41 +685,129 @@ const EcoChallenge: React.FC = () => {
 
     return (
         <div className="flex flex-col items-center p-2 md:p-4 min-h-screen bg-gradient-to-b from-green-50 to-blue-50 font-sans">
-            <Card className={cn("w-full max-w-lg mx-auto mt-4 shadow-xl border-2 rounded-lg", obterEstiloCarta())} style={players.length > 0 && currentPlayer && !(ocultarCarta && !cartaRevelada) ? { boxShadow: `0 0 15px 3px ${currentPlayer.color}` } : {}}>
+            {/* Card Principal */}
+            <Card
+                className={cn(
+                    "w-full max-w-lg mx-auto mt-4 shadow-xl border-2 rounded-lg transition-all duration-300",
+                    obterEstiloCarta()
+                )}
+                style={
+                    players.length > 0 && currentPlayer && !(ocultarCarta && !cartaRevelada)
+                        ? { boxShadow: `0 0 15px 3px ${currentPlayer.color}` }
+                        : {}
+                }
+            >
                 <CardHeader className="pb-3">
+                    {/* Cabeçalho: Filtro, Título, Categoria, Dificuldade */}
                     <div className="flex justify-between items-start mb-2 gap-2">
                         <div className="flex items-center space-x-2">
-                            <Button onClick={() => setMostrarSomentePerguntas(!mostrarSomentePerguntas)} size="sm" variant={mostrarSomentePerguntas ? "secondary" : "outline"} title={mostrarSomentePerguntas ? "Mostrar todas" : "Só perguntas"} className="flex-shrink-0"> <Filter className="h-4 w-4" /> </Button>
+                            <Button
+                                onClick={() => setMostrarSomentePerguntas(!mostrarSomentePerguntas)}
+                                size="sm"
+                                variant={mostrarSomentePerguntas ? "secondary" : "outline"}
+                                title={mostrarSomentePerguntas ? "Mostrar todas" : "Só perguntas"}
+                                className="flex-shrink-0"
+                            >
+                                <Filter className="h-4 w-4" />
+                            </Button>
                             <div className="flex-1">
-                                <CardTitle className="text-lg md:text-xl font-bold leading-tight">{ocultarCarta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo}</CardTitle>
-                                {(!ocultarCarta || cartaRevelada) && cartaAtual.categorias && (<p className="text-xs text-gray-500 mt-1">{cartaAtual.categorias.join(", ")}</p>)}
+                                <CardTitle className="text-lg md:text-xl font-bold leading-tight">
+                                    {ocultarCarta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo}
+                                </CardTitle>
+                                {(!ocultarCarta || cartaRevelada) && cartaAtual.categorias && (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {cartaAtual.categorias.join(", ")}
+                                    </p>
+                                )}
                             </div>
                         </div>
-                        {(!ocultarCarta || cartaRevelada) && (<Badge variant={cartaAtual.dificuldade === "facil" ? "secondary" : cartaAtual.dificuldade === "normal" ? "default" : "destructive"} className="capitalize flex-shrink-0 h-6">{cartaAtual.dificuldade}</Badge>)}
+                        {(!ocultarCarta || cartaRevelada) && (
+                            <Badge
+                                variant={
+                                    cartaAtual.dificuldade === "facil" ? "secondary" :
+                                    cartaAtual.dificuldade === "normal" ? "default" : "destructive"
+                                }
+                                className="capitalize flex-shrink-0 h-6"
+                            >
+                                {cartaAtual.dificuldade}
+                            </Badge>
+                        )}
                     </div>
-                    {cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && !respondido && cartaRevelada && ( <div className="mt-2"><Progress value={(tempoRestante / cartaAtual.tempoLimite) * 100} className="h-2 [&>*]:bg-yellow-500" /><p className="text-center text-sm font-semibold text-yellow-700 mt-1"><Timer className="inline h-4 w-4 mr-1" /> Tempo: {tempoRestante}s</p></div> )}
+                    {/* Timer (se aplicável) */}
+                    {cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && !respondido && cartaRevelada && (
+                        <div className="mt-2">
+                            <Progress value={(tempoRestante / cartaAtual.tempoLimite) * 100} className="h-2 [&>*]:bg-yellow-500" />
+                            <p className="text-center text-sm font-semibold text-yellow-700 mt-1">
+                                <Timer className="inline h-4 w-4 mr-1" /> Tempo: {tempoRestante}s
+                            </p>
+                        </div>
+                    )}
+                    {/* Área da Pergunta / Placeholder */}
                     {(!ocultarCarta || cartaRevelada) ? (
                         <ScrollArea className="h-32 md:h-40 rounded-md border p-3 mt-2 bg-white/80">
-                            <div className="text-sm prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }}/>
+                            <div
+                                className="text-sm prose prose-sm max-w-none"
+                                dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }}
+                            />
                         </ScrollArea>
                     ) : (
                         <div className="h-32 md:h-40 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200">
-                            <EyeOff className="h-8 w-8 text-gray-500" /> <p className="text-sm text-gray-600">Carta Oculta</p>
+                            <EyeOff className="h-8 w-8 text-gray-500" />
+                            <p className="text-sm text-gray-600">Carta Oculta</p>
                             {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>}
-                            <Button onClick={rolarDado} variant="outline" size="sm" className="mt-2 bg-white" onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <Dice6 className="h-4 w-4 mr-1" /> Rolar Dado </Button>
+                            <Button
+                                onClick={rolarDado}
+                                variant="outline"
+                                size="sm"
+                                className="mt-2 bg-white"
+                                onMouseDown={() => handleLongPressStart(rolarDado)}
+                                onMouseUp={handleLongPressEnd}
+                                onMouseLeave={handleLongPressEnd}
+                                onTouchStart={() => handleLongPressStart(rolarDado)}
+                                onTouchEnd={handleLongPressEnd}
+                                onTouchCancel={handleLongPressEnd}
+                            >
+                                <Dice6 className="h-4 w-4 mr-1" /> Rolar Dado
+                            </Button>
                         </div>
                     )}
                 </CardHeader>
 
+                {/* Conteúdo da Resposta */}
                 {(!ocultarCarta || cartaRevelada) && (
                     <CardContent className="pt-0 pb-4">
-                        <div className="space-y-2">{renderizarConteudoResposta()}</div>
-                        {mostrarDica && cartaAtual.dica && ( <Alert variant="default" className="mt-4 bg-blue-50 border-blue-300"><HelpCircle className="h-4 w-4 text-blue-700" /><AlertDescription className="text-sm text-blue-800"><strong>Dica:</strong> {cartaAtual.dica}</AlertDescription></Alert> )}
-                        {mostrarFontes && cartaAtual.fontes && cartaAtual.fontes.length > 0 && ( <Alert variant="default" className="mt-4 bg-gray-50 border-gray-300"><BookOpen className="h-4 w-4 text-gray-700" /><AlertDescription className="text-sm text-gray-800"><strong>Fontes:</strong><ul className="list-disc list-inside mt-1 text-xs">{cartaAtual.fontes.map((fonte, idx) => (<li key={idx}>{fonte}</li>))}</ul></AlertDescription></Alert> )}
+                        <div className="space-y-2">
+                            {renderizarConteudoResposta()}
+                        </div>
+                        {/* Dica */}
+                        {mostrarDica && cartaAtual.dica && (
+                            <Alert variant="default" className="mt-4 bg-blue-50 border-blue-300">
+                                <HelpCircle className="h-4 w-4 text-blue-700" />
+                                <AlertDescription className="text-sm text-blue-800">
+                                    <strong>Dica:</strong> {cartaAtual.dica}
+                                </AlertDescription>
+                            </Alert>
+                        )}
+                        {/* Fontes */}
+                        {mostrarFontes && cartaAtual.fontes && cartaAtual.fontes.length > 0 && (
+                             <Alert variant="default" className="mt-4 bg-gray-50 border-gray-300">
+                                <BookOpen className="h-4 w-4 text-gray-700" />
+                                <AlertDescription className="text-sm text-gray-800">
+                                    <strong>Fontes:</strong>
+                                    <ul className="list-disc list-inside mt-1 text-xs">
+                                        {cartaAtual.fontes.map((fonte, idx) => (
+                                            <li key={idx}>{fonte}</li>
+                                        ))}
+                                    </ul>
+                                </AlertDescription>
+                            </Alert>
+                        )}
                     </CardContent>
                 )}
 
+                {/* Footer */}
                 <CardFooter className="flex flex-col items-center pt-4 border-t bg-gray-50/50 rounded-b-lg">
+                    {/* Botões de Ação Primários */}
                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
                         <Button onClick={toggleFontes} size="sm" variant="outline" disabled={!cartaAtual.fontes || cartaAtual.fontes.length === 0 || (ocultarCarta && !cartaRevelada)} className="h-8 px-2"> <BookOpen className="h-4 w-4" /></Button>
                         <Button onClick={pularPergunta} size="sm" variant={currentPlayer.pulosDisponiveis > 0 ? "secondary" : "outline"} disabled={currentPlayer.pulosDisponiveis === 0 || !tiposPergunta.includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-8 px-2"> <SkipForward className="h-4 w-4" /> </Button>
@@ -594,19 +818,84 @@ const EcoChallenge: React.FC = () => {
                     </div>
                     {/* Botões de Ajuste Manual - Tamanho Ajustado */}
                     <div className="flex flex-wrap justify-center gap-1 w-full mb-3">
-                        <Button onClick={diminuirAcertos} variant="outline" className="h-8 px-2" title="Diminuir Acertos"><ThumbsUp className="h-4 w-4 text-green-500 transform scale-x-[-1]" /></Button>
-                        <Button onClick={diminuirErros} variant="outline" className="h-8 px-2" title="Diminuir Erros"><ThumbsDown className="h-4 w-4 text-red-500 transform scale-x-[-1]" /></Button>
-                        <Button onClick={diminuirContadorDeEstrelas} variant="outline" className="h-8 px-2" title="Diminuir Estrela Bônus"><Star className="h-4 w-4 text-red-500" /></Button>
-                        <Button onClick={incrementarContadorDeEstrelas} variant="outline" className="h-8 px-2" title="Aumentar Estrela Bônus"><Star className="h-4 w-4 text-yellow-500" /></Button>
-                        <Button onClick={diminuirRodadasPreso} variant="outline" className="h-8 px-2" title="Diminuir Rodada Preso"><ChevronUp className="h-4 w-4 text-red-500 transform rotate-180" /></Button>
-                        <Button onClick={incrementarRodadasPreso} variant="outline" className="h-8 px-2" title="Aumentar Rodada Preso"><ChevronUp className="h-4 w-4 text-purple-500" /></Button>
+                        <Button onClick={diminuirAcertos} variant="outline" className="h-8 px-2" title="Diminuir Acertos">
+                            <ThumbsUp className="h-4 w-4 text-green-500 transform scale-x-[-1]" />
+                        </Button>
+                        <Button onClick={diminuirErros} variant="outline" className="h-8 px-2" title="Diminuir Erros">
+                            <ThumbsDown className="h-4 w-4 text-red-500 transform scale-x-[-1]" />
+                        </Button>
+                        <Button onClick={diminuirContadorDeEstrelas} variant="outline" className="h-8 px-2" title="Diminuir Estrela Bônus">
+                            <Star className="h-4 w-4 text-red-500" />
+                        </Button>
+                        <Button onClick={incrementarContadorDeEstrelas} variant="outline" className="h-8 px-2" title="Aumentar Estrela Bônus">
+                            <Star className="h-4 w-4 text-yellow-500" />
+                        </Button>
+                        <Button onClick={diminuirRodadasPreso} variant="outline" className="h-8 px-2" title="Diminuir Rodada Preso">
+                            <ChevronUp className="h-4 w-4 text-red-500 transform rotate-180" />
+                        </Button>
+                        <Button onClick={incrementarRodadasPreso} variant="outline" className="h-8 px-2" title="Aumentar Rodada Preso">
+                            <ChevronUp className="h-4 w-4 text-purple-500" />
+                        </Button>
                     </div>
+                    {/* Botão Principal */}
                     <div className="w-full mb-3">
-                        {ocultarCarta && !cartaRevelada ? ( <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white"><Eye className="mr-2 h-4 w-4"/> Revelar Carta</Button>
-                        ) : !respondido ? ( <Button onClick={verificarResposta} className={cn("w-full bg-green-600 hover:bg-green-700 text-white", isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400")} disabled={isVerificarDisabled()} onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}><Check className="mr-2 h-4 w-4"/> Verificar</Button>
-                        ) : ( <Button onClick={selecionarCartaAleatoria} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onMouseDown={() => handleLongPressStart(selecionarCartaAleatoria)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(selecionarCartaAleatoria)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}><SkipForward className="mr-2 h-4 w-4"/> Próxima Carta</Button> )}
+                        {ocultarCarta && !cartaRevelada ? (
+                            <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                                <Eye className="mr-2 h-4 w-4"/> Revelar Carta
+                            </Button>
+                        ) : !respondido ? (
+                            <Button
+                                onClick={verificarResposta}
+                                className={cn(
+                                    "w-full bg-green-600 hover:bg-green-700 text-white",
+                                    isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400"
+                                )}
+                                disabled={isVerificarDisabled()}
+                                onMouseDown={() => handleLongPressStart(rolarDado)}
+                                onMouseUp={handleLongPressEnd}
+                                onMouseLeave={handleLongPressEnd}
+                                onTouchStart={() => handleLongPressStart(rolarDado)}
+                                onTouchEnd={handleLongPressEnd}
+                                onTouchCancel={handleLongPressEnd}
+                            >
+                                <Check className="mr-2 h-4 w-4"/> Verificar
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={selecionarCartaAleatoria}
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                                onMouseDown={() => handleLongPressStart(selecionarCartaAleatoria)}
+                                onMouseUp={handleLongPressEnd}
+                                onMouseLeave={handleLongPressEnd}
+                                onTouchStart={() => handleLongPressStart(selecionarCartaAleatoria)}
+                                onTouchEnd={handleLongPressEnd}
+                                onTouchCancel={handleLongPressEnd}
+                            >
+                                <SkipForward className="mr-2 h-4 w-4"/> Próxima Carta
+                            </Button>
+                        )}
                     </div>
-                    {mensagem && ( <Alert variant={mensagem.toLowerCase().includes('correto') || mensagem.toLowerCase().includes('vantagem') ? "default" : "destructive"} className={`text-center text-sm font-semibold mb-3 ${mensagem.toLowerCase().includes('correto') || mensagem.toLowerCase().includes('vantagem') ? 'bg-green-100 border-green-300 text-green-800' : 'bg-red-100 border-red-300 text-red-800'}`}><AlertDescription>{mensagem}</AlertDescription></Alert> )}
+                    {/* Mensagem Feedback */}
+                    {mensagem && (
+                        <Alert
+                            variant={
+                                mensagem.toLowerCase().includes('correto') || mensagem.toLowerCase().includes('vantagem') || mensagem.toLowerCase().includes('eliminada') || mensagem.toLowerCase().includes('adicionada') || mensagem.toLowerCase().includes('removida')
+                                    ? "default"
+                                    : "destructive"
+                            }
+                            className={cn(
+                                'text-center text-sm font-semibold mb-3',
+                                mensagem.toLowerCase().includes('correto') || mensagem.toLowerCase().includes('vantagem')
+                                    ? 'bg-green-100 border-green-300 text-green-800'
+                                    : (mensagem.toLowerCase().includes('incorreto') || mensagem.toLowerCase().includes('desvantagem'))
+                                        ? 'bg-red-100 border-red-300 text-red-800'
+                                        : 'bg-blue-100 border-blue-300 text-blue-800' // Azul para outras mensagens (dica, pulo, etc.)
+                            )}
+                        >
+                            <AlertDescription>{mensagem}</AlertDescription>
+                        </Alert>
+                    )}
+                    {/* Progresso e Stats */}
                     <div className="w-full">
                         <Progress value={currentPlayer.progresso} className="h-2.5 [&>*]:bg-orange-500" />
                         <div className="flex justify-between items-center w-full mt-2 text-xs text-gray-700 flex-wrap gap-x-3 gap-y-1">
@@ -624,14 +913,65 @@ const EcoChallenge: React.FC = () => {
 
             {/* Seleção de Jogador */}
             <div className="mt-6 w-full max-w-md">
-                 <p className="text-center text-sm font-medium mb-2 text-gray-800">Vez de: <span style={{ color: currentPlayer.color }} className="font-bold">{currentPlayer.name}</span></p>
-                 <div className={`grid gap-2 ${ players.length > 4 ? (players.length > 6 ? "grid-cols-4" : "grid-cols-3") : `grid-cols-${Math.max(players.length, 1)}` }`}>
-                     {players.map((pl) => (<Button key={pl.id} onClick={() => updateGameState({ currentPlayerId: pl.id })} size="sm" variant={currentPlayerId === pl.id ? "default" : "outline"} className="truncate text-xs md:text-sm h-9" style={{ backgroundColor: currentPlayerId === pl.id ? pl.color : 'white', color: currentPlayerId === pl.id ? 'white' : pl.color, borderColor: pl.color, borderWidth: currentPlayerId === pl.id ? '2px' : '1px', }}>{pl.name}</Button>))}
-                 </div>
+                <p className="text-center text-sm font-medium mb-2 text-gray-800">
+                    Vez de: <span style={{ color: currentPlayer.color }} className="font-bold">{currentPlayer.name}</span>
+                </p>
+                <div
+                    className={cn(
+                        'grid gap-2',
+                        players.length > 4 ? (players.length > 6 ? "grid-cols-4" : "grid-cols-3") : `grid-cols-${Math.max(players.length, 1)}`
+                    )}
+                >
+                    {players.map((pl) => (
+                        <Button
+                            key={pl.id}
+                            onClick={() => updateGameState({ currentPlayerId: pl.id })}
+                            size="sm"
+                            variant={currentPlayerId === pl.id ? "default" : "outline"}
+                            className="truncate text-xs md:text-sm h-9"
+                            style={{
+                                backgroundColor: currentPlayerId === pl.id ? pl.color : 'white',
+                                color: currentPlayerId === pl.id ? 'white' : pl.color,
+                                borderColor: pl.color,
+                                borderWidth: currentPlayerId === pl.id ? '2px' : '1px',
+                            }}
+                        >
+                            {pl.name}
+                        </Button>
+                    ))}
+                </div>
             </div>
 
             {/* Modal do Dado */}
-            {isDieModalOpen && ( <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50"><div className="bg-white p-6 rounded-lg shadow-xl text-center relative w-64 h-64 flex flex-col justify-center items-center"><Button className="absolute top-2 right-2" variant="ghost" size="icon" onClick={() => setIsDieModalOpen(false)} disabled={isRolling}><XIcon className="h-6 w-6 text-gray-500" /></Button>{isRolling ? (<><p className="text-lg mb-4 font-semibold">Rolando...</p><p className="text-7xl font-bold mb-6 animate-bounce">{rollingNumber}</p></>) : (<><p className="text-lg mb-2">Resultado:</p><p className="text-8xl font-bold mb-4">{rolledNumber}</p><Button onClick={rolarDado} size="lg"><Dice6 className="h-5 w-5 mr-2" /> Rolar Novamente</Button></>)}</div></div> )}
+            {isDieModalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-xl text-center relative w-64 h-64 flex flex-col justify-center items-center">
+                        <Button
+                            className="absolute top-2 right-2"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setIsDieModalOpen(false)}
+                            disabled={isRolling}
+                        >
+                            <XIcon className="h-6 w-6 text-gray-500" />
+                        </Button>
+                        {isRolling ? (
+                            <>
+                                <p className="text-lg mb-4 font-semibold">Rolando...</p>
+                                <p className="text-7xl font-bold mb-6 animate-bounce">{rollingNumber}</p>
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-lg mb-2">Resultado:</p>
+                                <p className="text-8xl font-bold mb-4">{rolledNumber}</p>
+                                <Button onClick={rolarDado} size="lg">
+                                    <Dice6 className="h-5 w-5 mr-2" /> Rolar Novamente
+                                </Button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 
@@ -668,9 +1008,9 @@ const EcoChallenge: React.FC = () => {
                     const isSelected = ordemSelecoes.includes(op.id); const selectionIndex = isSelected ? ordemSelecoes.indexOf(op.id) + 1 : null;
                     const correctIndex = Array.isArray(cOrdem.respostaCorreta) ? cOrdem.respostaCorreta.indexOf(op.id) + 1 : null;
                     const isCorrectOrder = respondido && isSelected && selectionIndex === correctIndex; const isWrongOrder = respondido && isSelected && selectionIndex !== correctIndex;
-                    const isCorrectOptionOverall = respondido && correctIndex !== null && correctIndex > 0; // Verifica se a opção pertence à ordem correta
+                    const isCorrectOptionOverall = respondido && correctIndex !== null && correctIndex > 0;
                     let btnClass = "";
-                    if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "opacity-70 border-gray-300"; else btnClass = "opacity-50"; } // Não faz parte da ordem
+                    if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "opacity-70 border-gray-300"; else btnClass = "opacity-50"; }
                     else if (isSelected) { btnClass = "bg-blue-100 border-blue-500"; }
                     return ( <Button key={op.id} onClick={() => handleSelecaoOrdem(op.id)} variant={isSelected ? "secondary" : "outline"} className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass )} disabled={respondido}> {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)} <span className="flex-1">{op.texto}</span> {respondido && isCorrectOptionOverall && (<span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${ isCorrectOrder ? 'bg-green-500 text-white' : isWrongOrder ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}`}>{correctIndex}</span>)} {isWrongOrder && selectionIndex !== null && <span className="text-xs text-red-600 ml-1">(Sua: {selectionIndex})</span>} </Button> );
                 });
