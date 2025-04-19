@@ -2109,7 +2109,190 @@ const manejo = [
       "vantagem": "Ótimo revisar suas práticas!",
       "desvantagem": "",
       "dica": "Clique nos itens para ver comentários."
-    }
+    },
+    // Caverna 1: O Cristal e o Abismo
+    {
+      "id": "cave_adv_1",
+      "tipo": "Outras",
+      "titulo": "Caverna dos Cristais Cintilantes",
+      "pergunta": "<style>\n/* Estilos gerais dos popups da caverna (reutilizados) */\n.cave-popup { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(30, 41, 59, 0.9); display:none; justify-content:center; align-items:center; z-index:1010; padding:15px; }\n.cave-popup:target { display:flex; }\n.cave-content { background:#475569; color: #e2e8f0; padding:25px; border-radius:8px; max-width:380px; text-align:center; position:relative; border: 3px solid #64748b; }\n.cave-content h5 { margin:0 0 15px 0; color: #cbd5e1; border-bottom: 1px solid #64748b; padding-bottom: 8px; }\n.cave-content p { margin-bottom: 15px; font-size:0.95em; line-height:1.5; }\n.cave-content a { color: #93c5fd; text-decoration: underline; margin: 0 10px; cursor: pointer; }\n.cave-close { position:absolute; top:8px; right:12px; font-size:24px; color:#9ca3af; text-decoration:none; }\n.cave-close:hover { color: white; }\n.cave-start-btn { display:inline-block; padding: 10px 15px; background:#6366f1; color:white; border-radius:5px; text-decoration:none; font-weight:bold; }\n</style>\n<p style='text-align:center;'>Você encontra a entrada de uma caverna escura, com um brilho azulado vindo de dentro...</p>\n<p style='text-align:center;'><a href=\"#cave1-start\" class='cave-start-btn'>Entrar na Caverna</a></p>\n\n<!-- Cenas da Caverna 1 -->\n<div id=\"cave1-start\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Entrada Ecoante</h5>\n    <p>O ar é úmido. Você vê um túnel estreito à <strong>esquerda</strong> e uma passagem mais larga à <strong>direita</strong> que desce.</p>\n    <a href=\"#cave1-left\">Ir pela Esquerda</a> <a href=\"#cave1-right\">Ir pela Direita</a>\n  </div>\n</div>\n<div id=\"cave1-left\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Túnel Estreito</h5>\n    <p>Você se espreme e encontra uma pequena câmara com um cristal cintilante!</p>\n    <p><strong>Efeito: +1 Estrela Bônus</strong></p>\n    <a href=\"#\">Sair com o Cristal</a>\n  </div>\n</div>\n<div id=\"cave1-right\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Passagem Descendente</h5>\n    <p>Você desce com cuidado. O caminho termina abruptamente em um abismo escuro. Você quase caiu!</p>\n    <p><strong>Efeito: Perca 1 Rodada (susto e tempo perdido)</strong></p>\n    <a href=\"#\">Retornar com Cuidado</a>\n  </div>\n</div>\n<p style='text-align:center; font-size:0.8em;'>Explore e clique na opção final correspondente.</p>",
+      "opcoes": [
+        { "id": 1, "texto": "Saí com +1 Estrela Bônus" },
+        { "id": 2, "texto": "Saí, mas perdi 1 Rodada" }
+      ],
+      "respostaCorreta": [1, 2],
+      "dificuldade": "facil",
+      "categorias": ["Teste_Caverna1"],
+      "fontes": [],
+      "vantagem": "Aventura na Caverna Concluída!",
+      "desvantagem": "Aventura na Caverna Concluída!",
+      "dica": "Brilho geralmente indica algo bom..."
+    },
+  
+    // Caverna 2: O Rio Subterrâneo e a Criatura
+    {
+      "id": "cave_adv_2",
+      "tipo": "Outras",
+      "titulo": "Caverna do Rio Murmurante",
+      "pergunta": "<style> /* Reutilizando estilos .cave-* da carta anterior */ </style>\n<p style='text-align:center;'>Um rio some por uma fenda na rocha. Você decide seguir...</p>\n<p style='text-align:center;'><a href=\"#cave2-start\" class='cave-start-btn'>Seguir o Rio</a></p>\n\n<!-- Cenas da Caverna 2 -->\n<div id=\"cave2-start\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Seguindo o Rio</h5><p>Você acompanha o rio subterrâneo. Ouve um barulho estranho à frente. O caminho se divide: seguir pela <strong>margem seca</strong> ou tentar atravessar por <strong>pedras escorregadias</strong> no meio do rio?</p><a href=\"#cave2-dry\">Margem Seca</a> <a href=\"#cave2-wet\">Pedras Molhadas</a></div></div>\n<div id=\"cave2-dry\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Margem Seca</h5><p>Seguro, mas lento. Você avança e vê a saída, mas parece que perdeu algo pelo caminho.</p><p><strong>Efeito: Sem Bônus/Penalidade</strong></p><a href=\"#\">Sair da Caverna</a></div></div>\n<div id=\"cave2-wet\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Pedras Molhadas</h5><p>Você escorrega, mas se segura! Ao se levantar, vê algo brilhando na água: uma Gema Rara!</p><p><strong>Efeito: +1 Estrela Fixa</strong></p><a href=\"#\">Sair com a Gema</a></div></div>\n\n<p style='text-align:center; font-size:0.8em;'>Explore e clique na opção final correspondente.</p>",
+      "opcoes": [
+        { "id": 1, "texto": "Saí sem nada de especial (Margem Seca)" },
+        { "id": 2, "texto": "Saí com +1 Estrela Fixa (Pedras Molhadas)" }
+      ],
+      "respostaCorreta": [1, 2],
+      "dificuldade": "normal",
+      "categorias": ["Teste_Caverna2"],
+      "fontes": [],
+      "vantagem": "Aventura no Rio Concluída!",
+      "desvantagem": "Aventura no Rio Concluída!",
+      "dica": "Às vezes, o caminho mais arriscado tem recompensas."
+    },
+  
+    // Caverna 3: O Labirinto e o Eco
+    {
+      "id": "cave_adv_3",
+      "tipo": "Outras",
+      "titulo": "Caverna dos Ecos Perdidos",
+      "pergunta": "<style> /* Reutilizando estilos .cave-* */ </style>\n<p style='text-align:center;'>Esta caverna parece um labirinto. Você grita 'Olá!' e ouve ecos vindo de múltiplas direções...</p>\n<p style='text-align:center;'><a href=\"#cave3-start\" class='cave-start-btn'>Explorar o Labirinto</a></p>\n\n<!-- Cenas da Caverna 3 -->\n<div id=\"cave3-start\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Encruzilhada dos Ecos</h5><p>Um eco parece vir da <strong>esquerda</strong> (som metálico), um da <strong>frente</strong> (som de água), e um da <strong>direita</strong> (silêncio).</p><a href=\"#cave3-left\">Seguir Som Metálico</a> <a href=\"#cave3-front\">Seguir Som de Água</a> <a href=\"#cave3-right\">Seguir Silêncio</a></div></div>\n<div id=\"cave3-left\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Som Metálico</h5><p>Você encontra ferramentas de mineração abandonadas. Útil!</p><p><strong>Efeito: Ganha 1 'Kit de Reparo' (recurso)</strong></p><a href=\"#\">Sair com o Kit</a></div></div>\n<div id=\"cave3-front\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Som de Água</h5><p>Você acha uma bela cachoeira subterrânea. Refrescante!</p><p><strong>Efeito: +10 Progresso</strong></p><a href=\"#\">Sair Revigorado</a></div></div>\n<div id=\"cave3-right\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Caminho Silencioso</h5><p>O túnel termina em uma parede... sem saída. Você perde tempo voltando.</p><p><strong>Efeito: Perca 1 Rodada</strong></p><a href=\"#\">Retornar Frustrado</a></div></div>\n\n<p style='text-align:center; font-size:0.8em;'>Siga os ecos e clique na opção final.</p>",
+      "opcoes": [
+        { "id": 1, "texto": "Saí com 1 Kit de Reparo" },
+        { "id": 2, "texto": "Saí com +10 Progresso" },
+        { "id": 3, "texto": "Saí, mas perdi 1 Rodada" }
+      ],
+      "respostaCorreta": [1, 2, 3],
+      "dificuldade": "normal",
+      "categorias": ["Teste_Caverna3"],
+      "fontes": [],
+      "vantagem": "Exploração do Labirinto Concluída!",
+      "desvantagem": "Exploração do Labirinto Concluída!",
+      "dica": "Confie nos seus ouvidos... ou na sua intuição."
+    },
+  
+    // Caverna 4: O Guardião Adormecido (Risco/Recompensa)
+    {
+      "id": "cave_adv_4",
+      "tipo": "Outras",
+      "titulo": "Covil do Guardião Rochoso",
+      "pergunta": "<style> /* Reutilizando estilos .cave-* */ </style>\n<p style='text-align:center;'>Você entra em uma câmara ampla. No centro, uma criatura feita de pedra dorme profundamente. Atrás dela, um baú antigo.</p>\n<p style='text-align:center;'><a href=\"#cave4-start\" class='cave-start-btn'>Avaliar a Situação</a></p>\n\n<!-- Cenas da Caverna 4 -->\n<div id=\"cave4-start\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>O Guardião Adormecido</h5><p>O Guardião Rochoso ressona. Você pode tentar <strong>passar furtivamente</strong> até o baú ou <strong>tentar acordá-lo</strong> (?).</p><a href=\"#cave4-sneak\">Passar Furtivamente</a> <a href=\"#cave4-wake\">Tentar Acordar</a> <a href=\"#cave4-leave\">Sair sem arriscar</a></div></div>\n<div id=\"cave4-sneak\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Furtividade</h5><p>Você pisa em falso! O Guardião acorda furioso!</p><p><strong>Efeito: Perca 20 Progresso e fuja!</strong></p><a href=\"#\">Fugir!</a></div></div>\n<div id=\"cave4-wake\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Acordar o Guardião</h5><p>Inesperadamente, o Guardião abre um olho, sorri (!?) e aponta para o baú, como se o oferecesse.</p><p><strong>Efeito: Abra o Baú! (+1 Estrela Fixa e +1 Pulo)</strong></p><a href=\"#\">Agradecer e Pegar</a></div></div>\n<div id=\"cave4-leave\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Sair Quieto</h5><p>Você decide não arriscar e sai da caverna.</p><p><strong>Efeito: Sem Bônus/Penalidade</strong></p><a href=\"#\">Sair em Segurança</a></div></div>\n\n<p style='text-align:center; font-size:0.8em;'>Qual sua decisão? Confirme o resultado.</p>",
+      "opcoes": [
+        { "id": 1, "texto": "Fugi e Perdi 20 Progresso" },
+        { "id": 2, "texto": "Ganhei +1 Estrela Fixa e +1 Pulo" },
+        { "id": 3, "texto": "Saí sem nada acontecer" }
+      ],
+      "respostaCorreta": [1, 2, 3],
+      "dificuldade": "dificil",
+      "categorias": ["Teste_Caverna4"],
+      "fontes": [],
+      "vantagem": "Decisão tomada na caverna!",
+      "desvantagem": "Decisão tomada na caverna!",
+      "dica": "Aparências podem enganar..."
+    },
+  
+    // Caverna 5: A Escolha dos Artefatos
+    {
+      "id": "cave_adv_5",
+      "tipo": "Outras",
+      "titulo": "Santuário dos Artefatos",
+      "pergunta": "<style> /* Reutilizando estilos .cave-* */ \n.artifact-option { border: 2px solid transparent; padding: 10px; margin: 5px; border-radius: 5px; cursor: pointer; background: #334155; }\n.artifact-option:hover { border-color: #93c5fd; }\n</style>\n<p style='text-align:center;'>Você chega a um santuário antigo com três artefatos em pedestais. Você só pode levar um.</p>\n<p style='text-align:center;'><a href=\"#cave5-start\" class='cave-start-btn'>Examinar Artefatos</a></p>\n\n<!-- Cenas da Caverna 5 -->\n<div id=\"cave5-start\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Escolha seu Artefato</h5><p>Selecione um para levar:</p>\n  <div style='display:flex; justify-content: space-around; gap: 10px; margin-top:15px;'>\n   <a href=\"#cave5-orb\" class='artifact-option'>🔮 Orbe da Visão (+10 Progresso)</a>\n   <a href=\"#cave5-boots\" class='artifact-option'>👟 Botas da Leveza (+1 Pulo)</a>\n   <a href=\"#cave5-shield\" class='artifact-option'>🛡️ Escudo Protetor (Ignora próxima Desvantagem)</a>\n  </div>\n</div></div>\n\n<!-- Resultados (apenas para o jogador confirmar a escolha) -->\n<div id=\"cave5-orb\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Orbe da Visão</h5><p>Você escolheu o Orbe!</p><p><strong>Efeito: +10 Progresso</strong></p><a href=\"#\">Sair com o Orbe</a></div></div>\n<div id=\"cave5-boots\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Botas da Leveza</h5><p>Você escolheu as Botas!</p><p><strong>Efeito: +1 Pulo</strong></p><a href=\"#\">Sair com as Botas</a></div></div>\n<div id=\"cave5-shield\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Escudo Protetor</h5><p>Você escolheu o Escudo!</p><p><strong>Efeito: Ignora próxima Desvantagem</strong></p><a href=\"#\">Sair com o Escudo</a></div></div>\n\n<p style='text-align:center; font-size:0.8em;'>Escolha um artefato clicando nele e confirme abaixo.</p>",
+      "opcoes": [
+        { "id": 1, "texto": "Peguei o Orbe (+10 Progresso)" },
+        { "id": 2, "texto": "Peguei as Botas (+1 Pulo)" },
+        { "id": 3, "texto": "Peguei o Escudo (Ignora Desvantagem)" }
+      ],
+      "respostaCorreta": [1, 2, 3],
+      "dificuldade": "normal",
+      "categorias": ["Teste_Caverna5"],
+      "fontes": [],
+      "vantagem": "Artefato adquirido!",
+      "desvantagem": "Artefato adquirido!",
+      "dica": "Escolha o que mais te ajudará agora."
+    },
+      // 1. Mapa Interativo (CSS Hover + :target para Info)
+      {
+        "id": "func_mapa_1",
+        "tipo": "Outras",
+        "titulo": "Exploração Regional",
+        "pergunta": "<style>\n.map-container { position: relative; max-width: 400px; margin: 15px auto; border: 2px solid #6b7280; }\n.map-container img { display: block; width: 100%; height: auto; }\n.map-hotspot { position: absolute; border-radius: 50%; cursor: pointer; background-color: rgba(255, 255, 0, 0.4); /* Amarelo semi-transparente */ transition: background-color 0.2s; }\n.map-hotspot:hover { background-color: rgba(255, 255, 0, 0.7); }\n/* Posições e tamanhos (exemplo) */\n.hs-floresta { top: 20%; left: 15%; width: 20%; height: 25%; }\n.hs-montanha { top: 10%; left: 60%; width: 25%; height: 30%; }\n.hs-rio { top: 60%; left: 10%; width: 80%; height: 15%; border-radius: 10px; }\n/* Popups de informação */\n.map-info-popup { position: fixed; ... /* Estilos de popup :target, como em exemplos anteriores */ z-index: 1020; background: rgba(0,0,0,0.8); }\n.map-info-popup:target { display: flex; }\n.map-info-content { background: white; padding: 20px; border-radius: 5px; max-width: 300px; text-align: center; position: relative; }\n.map-info-close { position: absolute; top: 5px; right: 10px; font-size: 20px; text-decoration: none; color: #888; }\n</style>\n<p style='text-align:center;'>Você obteve um mapa da região. Clique nas áreas para saber mais:</p>\n<div class=\"map-container\">\n  <img src=\"/images/mapa_regiao_exemplo.png\" alt=\"Mapa da Região\">\n  <a href=\"#info-floresta\" class=\"map-hotspot hs-floresta\" title=\"Floresta Densa\"></a>\n  <a href=\"#info-montanha\" class=\"map-hotspot hs-montanha\" title=\"Montanhas Rochosas\"></a>\n  <a href=\"#info-rio\" class=\"map-hotspot hs-rio\" title=\"Rio Veloz\"></a>\n</div>\n<!-- Popups -->\n<div id=\"info-floresta\" class=\"map-info-popup\"><div class=\"map-info-content\"><a href=\"#\" class=\"map-info-close\">×</a><h5>Floresta Densa</h5><p>Rica em biodiversidade, mas difícil travessia. (Possível tarefa de coleta ou penalidade de movimento)</p></div></div>\n<div id=\"info-montanha\" class=\"map-info-popup\"><div class=\"map-info-content\"><a href=\"#\" class=\"map-info-close\">×</a><h5>Montanhas Rochosas</h5><p>Fonte de minerais, mas perigosa. (Chance de achar recurso ou sofrer acidente)</p></div></div>\n<div id=\"info-rio\" class=\"map-info-popup\"><div class=\"map-info-content\"><a href=\"#\" class=\"map-info-close\">×</a><h5>Rio Veloz</h5><p>Fonte de água, mas pode causar enchentes. (Bônus de água ou evento negativo)</p></div></div>\n<p style='text-align:center; font-size:0.8em;'>Após explorar, prossiga.</p>",
+        "opcoes": [ { "id": 1, "texto": "Continuar Jornada" } ],
+        "respostaCorreta": [1],
+        "dificuldade": "normal",
+        "categorias": ["Teste_6"],
+        "fontes": [],
+        "vantagem": "Informações coletadas!",
+        "desvantagem": "",
+        "dica": "Clique nas áreas destacadas no mapa."
+      },
+    
+      // 2. Simulação de "Arrastar e Soltar" (CSS Checkbox Hack)
+      {
+        "id": "func_dragdrop_sim_1",
+        "tipo": "Pergunta",
+        "titulo": "Organize os Resíduos",
+        "pergunta": "<style>\n.drag-area { border: 2px dashed #9ca3af; padding: 15px; margin-top: 15px; background: #f3f4f6; min-height: 80px; }\n.drag-items { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }\n.drag-item { border: 1px solid #6b7280; padding: 5px 10px; background: white; border-radius: 4px; cursor: pointer; user-select: none; }\n.drag-item input[type='radio'] { display: none; }\n/* Estilo quando 'selecionado' (radio checked) */\n.drag-item input[type='radio']:checked + label { background-color: #60a5fa; color: white; border-color: #2563eb; box-shadow: 0 0 5px #60a5fa; }\n.drop-target { border: 2px solid #16a34a; padding: 20px; text-align: center; background: #f0fdf4; color: #14532d; font-weight: bold; }\n/* Mostrar mensagem de sucesso SÓ se o item CORRETO for selecionado (exemplo com ID 'item-plastico') */\n#item-plastico:checked ~ .drag-area .drop-target::after { content: ' Plástico no lugar certo!'; color: green; }\n#item-vidro:checked ~ .drag-area .drop-target::after { content: ' Vidro NÃO vai aqui!'; color: red; }\n</style>\n<p>Qual destes itens deve ir para a Lixeira de <strong>PLÁSTICO</strong> (Vermelha)?<br><i>(Clique no item para 'pegá-lo' e veja o resultado na área de descarte)</i></p>\n<div class=\"drag-items\">\n  <div class=\"drag-item\">\n    <input type=\"radio\" name=\"drag-item\" id=\"item-plastico\" value=\"plastico\">\n    <label for=\"item-plastico\">🧴 Garrafa Plástica</label>\n  </div>\n  <div class=\"drag-item\">\n    <input type=\"radio\" name=\"drag-item\" id=\"item-vidro\" value=\"vidro\">\n    <label for=\"item-vidro\">🍾 Garrafa Vidro</label>\n  </div>\n</div>\n<div class=\"drag-area\">\n  <div class=\"drop-target\">Lixeira Vermelha (Plástico)</div>\n</div>",
+        "opcoes": [
+          { "id": 1, "texto": "Garrafa Plástica" },
+          { "id": 2, "texto": "Garrafa Vidro" }
+        ],
+        "respostaCorreta": 1, // Resposta da pergunta, não da interação CSS
+        "dificuldade": "facil",
+        "categorias": ["Teste_7"],
+        "fontes": ["Coleta Seletiva"],
+        "vantagem": "Correto!",
+        "desvantagem": "Incorreto.",
+        "dica": "Clique nos itens para simular o descarte."
+      },
+    
+      // 3. Contador Visual de Recursos (HTML + CSS Básico)
+      {
+        "id": "func_resource_counter_1",
+        "tipo": "Vantagem",
+        "titulo": "Coleta Eficiente",
+        "pergunta": "<style>\n.resource-display { display: flex; justify-content: space-around; gap: 15px; background: #fff7ed; border: 1px solid #fb923c; padding: 15px; border-radius: 5px; margin-top: 10px; }\n.resource-item { text-align: center; }\n.resource-icon { font-size: 2em; display: block; margin-bottom: 5px; }\n.resource-count { font-weight: bold; font-size: 1.2em; background: white; padding: 2px 8px; border-radius: 10px; border: 1px solid #fed7aa; }\n</style>\n<p style='text-align:center;'>Sua eficiência na coleta rendeu bons frutos!</p>\n<div class=\"resource-display\">\n  <div class=\"resource-item\">\n    <span class=\"resource-icon\">💧</span>\n    <span class=\"resource-count\">+3</span> Água Limpa\n  </div>\n  <div class=\"resource-item\">\n    <span class=\"resource-icon\">🌱</span>\n    <span class=\"resource-count\">+5</span> Sementes\n  </div>\n</div>\n<p style='text-align:center; font-size:0.8em; margin-top: 10px;'>(Adicione estes recursos ao seu inventário no jogo)</p>",
+        "opcoes": [ { "id": 1, "texto": "Coletar Recursos" } ],
+        "respostaCorreta": [1],
+        "dificuldade": "facil",
+        "categorias": ["Teste_8"],
+        "fontes": [],
+        "vantagem": "Recursos adicionados ao inventário!",
+        "desvantagem": "",
+        "dica": "Gerencie bem seus recursos."
+      },
+    
+      // 4. SVG Animado: Crescimento de Árvore
+      {
+        "id": "func_svg_anim_1",
+        "tipo": "Vantagem",
+        "titulo": "Crescimento Acelerado",
+        "pergunta": "<style>\n@keyframes growTreeTrunk { 0% { height: 0; } 100% { height: 40px; } }\n@keyframes growTreeLeaves { 0%, 50% { transform: scale(0); } 100% { transform: scale(1); } }\n.tree-svg { display: block; margin: 15px auto; width: 100px; height: 120px; }\n.trunk { animation: growTreeTrunk 1.5s ease-out forwards; }\n.leaves { animation: growTreeLeaves 1s ease-in forwards; animation-delay: 1.3s; transform-origin: bottom center; transform: scale(0); }\n</style>\n<p style='text-align:center;'>Sua ação de reflorestamento deu resultado rápido!</p>\n<svg class=\"tree-svg\" viewBox=\"0 0 50 60\">\n  <!-- Chão -->\n  <rect x=\"0\" y=\"55\" width=\"50\" height=\"5\" fill=\"#8c6b44\"/>\n  <!-- Tronco -->\n  <rect class=\"trunk\" x=\"22\" y=\"15\" width=\"6\" height=\"0\" fill=\"#a16207\" transform=\"translate(0, 40) scale(1, -1)\"/>\n  <!-- Copa (Folhas) -->\n  <ellipse class=\"leaves\" cx=\"25\" cy=\"15\" rx=\"18\" ry=\"12\" fill=\"#16a34a\"/>\n</svg>\n<p style='text-align:center; font-weight:bold;'>Ganhe +1 Estrela Fixa!</p>",
+        "opcoes": [ { "id": 1, "texto": "Ver a árvore crescer!" } ],
+        "respostaCorreta": [1],
+        "dificuldade": "facil",
+        "categorias": ["Teste_9"],
+        "fontes": [],
+        "vantagem": "Ganhou +1 Estrela Fixa!",
+        "desvantagem": "",
+        "dica": "Reflorestar é vital."
+      },
+    
+      // 5. Formulário Falso com Validação Visual CSS
+      {
+        "id": "func_form_css_1",
+        "tipo": "Pergunta",
+        "titulo": "Licença Ambiental (Simulada)",
+        "pergunta": "<style>\n.fake-form { border: 1px solid #ccc; padding: 15px; border-radius: 5px; background: #fafafa; }\n.fake-form label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }\n.fake-form input[type='text'] { width: calc(100% - 16px); padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px; }\n/* Validação CSS com :valid/:invalid (exemplo simples) */\n.fake-form input[type='text']:invalid { border-color: red; }\n.fake-form input[type='text']:valid { border-color: green; }\n.validation-message { font-size: 0.8em; margin-top: -5px; margin-bottom: 10px; visibility: hidden; }\n.fake-form input[type='text']:invalid + .validation-message { visibility: visible; color: red; }\n.fake-form input[type='text']:valid + .validation-message { visibility: visible; color: green; }\n</style>\n<div class=\"fake-form\">\n  <p>Para obter a licença, preencha o código de verificação (é uma palavra relacionada à água).</p>\n  <label for=\"licence-code\">Código (6 letras):</label>\n  <input type=\"text\" id=\"licence-code\" name=\"licence-code\" required pattern=\"[Aa][Gg][Uu][Aa][Mm][Aa]\" maxlength=\"6\">\n  <span class=\"validation-message\">Inválido!</span>\n</div>\n<br>Qual palavra é o código correto?",
+        "opcoes": [
+            {"id": 1, "texto": "FLORESTA"},
+            {"id": 2, "texto": "RECICLA"},
+            {"id": 3, "texto": "AGUAMA"} // Código correto baseado no pattern
+        ],
+        "respostaCorreta": 3,
+        "dificuldade": "normal",
+        "categorias": ["Teste_10\"],
+        "fontes": [],
+        "vantagem": "Correto! Licença concedida (simulada).",
+        "desvantagem": "Código incorreto.",
+        "dica": "Digite 'AGUAMA' no campo para ver a validação visual."
+      }
 ];
 
 export default manejo;
