@@ -558,6 +558,443 @@ const manejo = [
     "vantagem": "Correto, vidro é na lixeira verde!",
     "desvantagem": "Cor incorreta para o vidro.",
     "dica": "Lembre das cores: papel, metal, vidro, plástico."
+  },
+
+  // --- CARTAS COM FOCO EM MECÂNICAS DE TABULEIRO ---
+
+  // 1. Atalho Sustentável
+  {
+    "id": "criativa_atalho_1",
+    "tipo": "Vantagem",
+    "titulo": "Atalho Verde",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 2px solid green; border-radius: 5px; background: #e8f5e9;'>\n  <p>Você descobriu um caminho eficiente e de baixo impacto!</p>\n  <p style='font-size: 2em; margin: 10px 0;'></p> <!-- Pedestre + Árvore -->\n  <strong>Avance 3 casas extras no tabuleiro!</strong>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Seguir pelo atalho!" } ],
+    "respostaCorreta": [1],
+    "dificuldade": "facil",
+    "categorias": ["Criativa_Movimento"],
+    "fontes": [],
+    "vantagem": "Você avançou 3 casas!", // Efeito a ser implementado no jogo
+    "desvantagem": "",
+    "dica": "A sustentabilidade te leva mais longe."
+  },
+
+  // 2. Obstáculo: Trânsito Poluente
+  {
+    "id": "criativa_obstaculo_1",
+    "tipo": "Desvantagem",
+    "titulo": "Congestionamento",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 2px solid red; border-radius: 5px; background: #ffebee;'>\n  <p>Preso no trânsito! A poluição atmosférica atrasa seu progresso.</p>\n  <p style='font-size: 2em; margin: 10px 0;'></p> <!-- Carros -->\n  <strong>Perca sua próxima jogada (fique 1 rodada preso).</strong>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Esperar passar..." } ],
+    "respostaCorreta": [],
+    "dificuldade": "facil",
+    "categorias": ["Criativa_Movimento"],
+    "fontes": [],
+    "vantagem": "",
+    "desvantagem": "Você perdeu uma rodada!", // Efeito a ser implementado no jogo
+    "dica": "Transporte público ou bicicleta poderiam evitar isso."
+  },
+
+  // 3. Investimento em Energia Limpa (Escolha)
+  {
+    "id": "criativa_investimento_1",
+    "tipo": "Outras",
+    "titulo": "Investir em Solar?",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 1px solid #fbbf24; border-radius: 5px; background: #fffbeb;'>\n  <p>Oportunidade de investir em painéis solares para sua comunidade.</p>\n  <p style='font-size: 2em; margin: 10px 0;'></p> <!-- Lâmpada + Gráfico Subindo -->\n  <p><strong>Custo:</strong> Perca 1 Estrela Bônus agora.<br><strong>Retorno Potencial:</strong> Ganhe 3 Estrelas Bônus daqui a 5 rodadas.</p>\n  <p style='font-size:0.8em'>(O Jogo controlará o retorno futuro)</p>\n</div>\n<br>Você deseja fazer o investimento?",
+    "opcoes": [
+      { "id": 1, "texto": "Sim, investir! (-1 Estrela Agora)" },
+      { "id": 2, "texto": "Não, obrigado." }
+    ],
+    "respostaCorreta": [1], // ID da opção de investir
+    "dificuldade": "normal",
+    "categorias": ["Criativa_EscolhaRecurso"],
+    "fontes": [],
+    "vantagem": "Investimento realizado! Aguarde o retorno.", // Se escolher 1 (Efeito -1 estrela aplicado no verificarResposta)
+    "desvantagem": "Oportunidade de investimento recusada.", // Se escolher 2
+    "dica": "Pensar a longo prazo pode valer a pena."
+  },
+
+  // 4. Desastre Ambiental (Afeta Todos)
+  {
+    "id": "criativa_desastre_1",
+    "tipo": "Desvantagem",
+    "titulo": "Derramamento Químico",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 2px solid purple; border-radius: 5px; background: #f3e8ff;'>\n  <p>Um acidente industrial causou um derramamento químico no rio!</p>\n  <p style='font-size: 2em; margin: 10px 0;'>☣️</p> <!-- Radioativo + Peixe Morto -->\n  <strong>Todos os jogadores perdem 15 de Progresso imediatamente!</strong>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Que tragédia!" } ],
+    "respostaCorreta": [],
+    "dificuldade": "normal",
+    "categorias": ["Criativa_EventoGlobal"],
+    "fontes": [],
+    "vantagem": "",
+    "desvantagem": "Todos perderam 15 de Progresso!", // Efeito deve ser aplicado a todos no jogo
+    "dica": "A falta de regulamentação afeta a todos."
+  },
+
+  // 5. Inovação Tecnológica (Beneficia Todos)
+  {
+    "id": "criativa_inovacao_1",
+    "tipo": "Vantagem",
+    "titulo": "Tecnologia de Captura de Carbono",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 2px solid cyan; border-radius: 5px; background: #ecfeff;'>\n  <p>Uma nova tecnologia eficiente de captura de carbono foi implementada!</p>\n   <p style='font-size: 2em; margin: 10px 0;'>️✨</p> <!-- Ferramenta + Brilhos -->\n  <strong>Todos os jogadores ganham 1 Pulo imediatamente!</strong>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Ótima notícia!" } ],
+    "respostaCorreta": [1],
+    "dificuldade": "normal",
+    "categorias": ["Criativa_EventoGlobal"],
+    "fontes": [],
+    "vantagem": "Todos ganharam 1 Pulo!", // Efeito deve ser aplicado a todos no jogo
+    "desvantagem": "",
+    "dica": "A inovação pode trazer soluções."
+  },
+
+  // --- REFORÇANDO TIPOS EXISTENTES COM HTML ---
+
+  // 6. Quiz Rápido com Imagem (ContraTempo)
+  {
+    "id": "criativa_ct_img_1",
+    "tipo": "ContraTempo",
+    "titulo": "Identificação Rápida",
+    "pergunta": "Rápido! Que animal ameaçado é este?<br><img src='/images/mico_leao_dourado.jpg' alt='Mico-leão-dourado' style='max-width:150px; height:auto; display:block; margin:10px auto; border-radius:4px;'>",
+    "opcoes": [
+      { "id": 1, "texto": "Onça Pintada" },
+      { "id": 2, "texto": "Mico-Leão-Dourado" },
+      { "id": 3, "texto": "Arara Azul" },
+      { "id": 4, "texto": "Lobo Guará" }
+    ],
+    "respostaCorreta": 2,
+    "tempoLimite": 10,
+    "dificuldade": "facil",
+    "categorias": ["Criativa_ContraTempo"],
+    "fontes": ["Fauna Brasileira"],
+    "vantagem": "Correto! Um símbolo da Mata Atlântica.",
+    "desvantagem": "Não é esse. Tempo ou resposta incorreta!",
+    "dica": "É um primata pequeno e de pelagem laranja."
+  },
+
+  // 7. Quebra-Cabeça Visual (PontoCerto)
+  {
+    "id": "criativa_pc_puzzle_1",
+    "tipo": "PontoCerto",
+    "titulo": "Encaixe a Peça",
+    "pergunta": "Clique no local onde a peça de energia eólica se encaixa no cenário de energias renováveis.",
+    "imagemURL": "/images/cenario_energias_puzzle.png", // Imagem com um espaço faltando
+    "zonasClicaveis": [
+      // Coordenadas e dimensões como fração da imagem (0 a 1)
+      { "id": 1, "x": 0.65, "y": 0.2, "largura": 0.25, "altura": 0.35, "descricao": "Espaço para Eólica" }, // Correta
+      { "id": 2, "x": 0.1, "y": 0.5, "largura": 0.3, "altura": 0.3, "descricao": "Painel Solar" },
+      { "id": 3, "x": 0.4, "y": 0.7, "largura": 0.4, "altura": 0.2, "descricao": "Represa Hidrelétrica" }
+    ],
+    "respostaCorreta": 1,
+    "opcoes": [],
+    "dificuldade": "normal",
+    "categorias": ["Criativa_PontoCerto"],
+    "fontes": ["Ilustração"],
+    "vantagem": "Encaixe perfeito!",
+    "desvantagem": "A peça não se encaixa aí.",
+    "dica": "Procure por um espaço vazio no céu ou colina."
+  },
+
+  // 8. Dilema Ético (Outras)
+  {
+    "id": "criativa_dilema_1",
+    "tipo": "Outras",
+    "titulo": "Dilema da Empresa",
+    "pergunta": "Sua empresa pode economizar muito usando um fornecedor mais barato, mas que tem práticas ambientais duvidosas. O que você faz?",
+    "opcoes": [
+      { "id": 1, "texto": "Escolho o fornecedor barato (Ganha 2 Estrelas Bônus, -10 Progresso)" },
+      { "id": 2, "texto": "Procuro um fornecedor sustentável, mesmo mais caro (+10 Progresso)" }
+    ],
+    "respostaCorreta": [1, 2], // Ambas são escolhas válidas com consequências
+    "dificuldade": "normal",
+    "categorias": ["Criativa_EscolhaEtica"],
+    "fontes": [],
+    "vantagem": "Decisão tomada. As consequências virão...", // Mensagem genérica, efeito aplicado no verificarResposta
+    "desvantagem": "Decisão tomada. As consequências virão...",
+    "dica": "Qual o impacto a longo prazo?"
+  },
+
+    // 9. Relacionar Causa e Efeito (RelacionarColunas)
+  {
+    "id": "criativa_rc_causa_efeito_1",
+    "tipo": "RelacionarColunas",
+    "titulo": "Causa e Efeito Ambiental",
+    "pergunta": "Relacione a causa ao seu principal efeito ambiental:",
+    "colunaA": [
+      { "id": 1, "texto": "Desmatamento Excessivo" },
+      { "id": 2, "texto": "Emissão de CFCs (antigo)" },
+      { "id": 3, "texto": "Uso de Agrotóxicos" },
+      { "id": 4, "texto": "Queima de Combustíveis Fósseis" }
+    ],
+    "colunaB": [
+      { "id": 10, "texto": "Destruição da Camada de Ozônio" },
+      { "id": 11, "texto": "Aumento do Efeito Estufa" },
+      { "id": 12, "texto": "Perda de Biodiversidade e Erosão" },
+      { "id": 13, "texto": "Contaminação do Solo e da Água" }
+    ],
+    "respostaCorreta": [
+      { "aId": 1, "bId": 12 }, { "aId": 2, "bId": 10 },
+      { "aId": 3, "bId": 13 }, { "aId": 4, "bId": 11 }
+    ],
+    "opcoes": [],
+    "dificuldade": "normal",
+    "categorias": ["Criativa_RelacionarColunas"],
+    "fontes": ["Ecologia Geral"],
+    "vantagem": "Conexões bem estabelecidas!",
+    "desvantagem": "Algumas relações estão trocadas.",
+    "dica": "CFCs afetavam algo lá no alto..."
+  },
+
+  // 10. Complete a Lei (CompletarFrase)
+  {
+    "id": "criativa_cf_lei_1",
+    "tipo": "CompletarFrase",
+    "titulo": "Complete a Lei",
+    "pergunta": "Complete o princípio da Política Nacional de Resíduos Sólidos:",
+    "fraseIncompleta": "A responsabilidade pelo ciclo de vida dos produtos é __1__, envolvendo fabricantes, importadores, distribuidores, comerciantes, consumidores e titulares dos serviços públicos de __2__ e manejo de resíduos sólidos.",
+    "fragmentos": [
+      { "id": 1, "texto": "limpeza urbana" },
+      { "id": 2, "texto": "compartilhada" },
+      { "id": 3, "texto": "exclusiva" },
+      { "id": 4, "texto": "voluntária" }
+    ],
+    "respostaCorreta": [2, 1], // compartilhada, limpeza urbana
+    "opcoes": [],
+    "dificuldade": "dificil",
+    "categorias": ["Criativa_CompletarFrase"],
+    "fontes": ["Lei 12.305/2010"],
+    "vantagem": "Exato! A responsabilidade é de todos.",
+    "desvantagem": "Princípio importante, mas não é bem assim.",
+    "dica": "A palavra chave indica que vários atores estão envolvidos."
+  },
+
+  // --- CARTAS COM MAIS FOCO VISUAL/HTML ---
+
+  // 11. Mini-Relatório com Tabela
+  {
+    "id": "criativa_html_tabela_1",
+    "tipo": "Pergunta",
+    "titulo": "Relatório de Emissões (Fictício)",
+    "pergunta": "Analise a tabela de emissões de CO₂ por setor em Megatoneladas (Mt). Qual setor emitiu <strong>MENOS</strong>?<br>\n<style>\n.report-table { width: 90%; margin: 15px auto; border-collapse: collapse; font-size: 0.9em; }\n.report-table th, .report-table td { border: 1px solid #ddd; padding: 6px; text-align: left; }\n.report-table th { background-color: #f2f2f2; }\n.report-table tr:nth-child(even) { background-color: #f9f9f9; }\n</style>\n<table class=\"report-table\">\n  <thead><tr><th>Setor</th><th>Emissão (Mt CO₂)</th></tr></thead>\n  <tbody>\n    <tr><td>Energia</td><td>450</td></tr>\n    <tr><td>Indústria</td><td>320</td></tr>\n    <tr><td>Transporte</td><td>510</td></tr>\n    <tr><td>Agropecuária</td><td>280</td></tr>\n  </tbody>\n</table>",
+    "opcoes": [
+      { "id": 1, "texto": "Energia" },
+      { "id": 2, "texto": "Indústria" },
+      { "id": 3, "texto": "Transporte" },
+      { "id": 4, "texto": "Agropecuária" }
+    ],
+    "respostaCorreta": 4,
+    "dificuldade": "facil",
+    "categorias": ["Criativa_HTML_Tabela"],
+    "fontes": ["Dados Fictícios"],
+    "vantagem": "Correto! A agropecuária foi a menor emissora nesta tabela.",
+    "desvantagem": "Incorreto, compare os valores numéricos.",
+    "dica": "Procure o menor número na segunda coluna."
+  },
+
+  // 12. "Antes e Depois" com <details>
+  {
+    "id": "criativa_html_details_1",
+    "tipo": "Vantagem",
+    "titulo": "Restauração Florestal",
+    "pergunta": "<div style='text-align: center;'>\n  <p>Sua iniciativa ajudou a restaurar uma área degradada!</p>\n  <details style=\"margin: 10px auto; display: block; width: fit-content; max-width: 220px; border: 1px solid #ccc; border-radius: 5px; overflow: hidden;\">\n    <summary style=\"cursor: pointer; list-style: none; padding: 5px; background: #e0e0e0;\">Ver Antes e Depois</summary>\n    <div style=\"padding: 5px;\">\n      <p style=\"font-size:0.8em; margin:0 0 5px 0;\"><strong>Antes:</strong></p>\n      <img src=\"/images/area_degradada.jpg\" alt=\"Área degradada\" style=\"max-width:100%; height:auto; margin-bottom:10px;\">\n      <p style=\"font-size:0.8em; margin:0 0 5px 0;\"><strong>Depois:</strong></p>\n      <img src=\"/images/area_restaurada.jpg\" alt=\"Área restaurada\" style=\"max-width:100%; height:auto;\">\n    </div>\n  </details>\n  <p><strong>Receba +20 de Progresso!</strong></p>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Ver o resultado!" } ],
+    "respostaCorreta": [1],
+    "dificuldade": "facil",
+    "categorias": ["Criativa_HTML_Detalhes"],
+    "fontes": [],
+    "vantagem": "+20 de Progresso pela restauração!",
+    "desvantagem": "",
+    "dica": "Clique para ver a transformação."
+  },
+
+  // --- CARTAS SIMULANDO INTERAÇÕES MAIS COMPLEXAS ---
+  // (Lembre-se: A lógica real pode precisar ser gerenciada fora da carta)
+
+  // 13. Leilão de Créditos de Carbono (Simulado)
+  {
+    "id": "criativa_leilao_1",
+    "tipo": "Outras",
+    "titulo": "Leilão de Carbono",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 1px solid #4b5563; border-radius: 5px; background: #f3f4f6;'>\n  <p>Um leilão de créditos de carbono está acontecendo!</p>\n  <p style='font-size: 2em; margin: 10px 0;'></p> <!-- Dinheiro + Martelo Leilão -->\n  <p>Você pode dar um lance usando Estrelas Bônus. O maior lance leva um benefício (ex: avançar casas).</p>\n  <p style='font-size:0.8em'>(O Mestre do Jogo conduzirá o leilão entre os interessados)</p>\n  <br><strong>Deseja participar do leilão?</strong>\n</div>",
+    "opcoes": [
+      { "id": 1, "texto": "Sim, quero participar!" },
+      { "id": 2, "texto": "Não, vou observar." }
+    ],
+    "respostaCorreta": [1, 2], // Ambas são válidas
+    "dificuldade": "normal",
+    "categorias": ["Criativa_LeilaoSimulado"],
+    "fontes": [],
+    "vantagem": "Boa sorte no leilão!", // Se escolher 1
+    "desvantagem": "Você decidiu não participar.", // Se escolher 2
+    "dica": "Créditos de carbono ajudam a compensar emissões."
+  },
+
+  // 14. Desafio Comunitário (Simulado)
+  {
+    "id": "criativa_desafio_1",
+    "tipo": "Outras",
+    "titulo": "Desafio Comunitário: Meta de Reciclagem",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 1px solid #2563eb; border-radius: 5px; background: #eff6ff;'>\n  <p><strong>Desafio para TODOS os jogadores!</strong></p>\n  <p style='font-size: 2em; margin: 10px 0;'>炙</p> <!-- Símbolo Reciclar + Alvo -->\n  <p>Se, coletivamente, os jogadores conseguirem doar (perder voluntariamente) um total de <strong>5 Estrelas Bônus</strong> até o início da próxima rodada deste jogador, todos ganham +1 Pulo.</p>\n  <p style='font-size:0.8em'>(Coordene com os outros jogadores! O Mestre valida a meta)</p>\n</div>",
+    "opcoes": [
+      { "id": 1, "texto": "Entendido! Vamos tentar!" }
+    ],
+    "respostaCorreta": [1],
+    "dificuldade": "dificil",
+    "categorias": ["Criativa_DesafioComunitario"],
+    "fontes": [],
+    "vantagem": "Boa sorte no desafio!",
+    "desvantagem": "",
+    "dica": "Trabalho em equipe é essencial."
+  },
+
+  // 15. Pegadinha / Fake News
+  {
+    "id": "criativa_pegadinha_1",
+    "tipo": "Pergunta",
+    "titulo": "Notícia Urgente?",
+    "pergunta": "“Cientistas descobrem que plantar eucalipto <i>cura</i> o aquecimento global por absorver CO₂ mais rápido que florestas nativas!”<br><br>Esta afirmação é totalmente <strong>verdadeira</strong> ou <strong>enganosa</strong>?",
+    "opcoes": [
+      { "id": 1, "texto": "Totalmente Verdadeira" },
+      { "id": 2, "texto": "Enganosa (ignora biodiversidade, uso de água, etc.)" }
+    ],
+    "respostaCorreta": 2,
+    "dificuldade": "normal",
+    "categorias": ["Criativa_Pegadinha"],
+    "fontes": ["Discussões sobre Monoculturas"],
+    "vantagem": "Correto! É uma visão simplista e enganosa.",
+    "desvantagem": "Cuidado! Absorver CO₂ rápido não é toda a história.",
+    "dica": "Sustentabilidade envolve mais do que apenas um fator."
+  },
+
+  // --- MAIS EXEMPLOS VARIADOS ---
+
+  // 16. Ciclo de Vida do Produto (Ordem)
+  {
+    "id": "criativa_ordem_ciclo_1",
+    "tipo": "Ordem",
+    "titulo": "Ciclo de Vida Simplificado",
+    "pergunta": "Ordene as fases do ciclo de vida de um produto eletrônico:",
+    "opcoes": [
+      { "id": 1, "texto": "Uso pelo consumidor" },
+      { "id": 2, "texto": "Descarte / Fim de vida" },
+      { "id": 3, "texto": "Extração de Matéria-Prima" },
+      { "id": 4, "texto": "Produção / Manufatura" },
+      { "id": 5, "texto": "Distribuição" }
+    ],
+    "respostaCorreta": [3, 4, 5, 1, 2],
+    "dificuldade": "normal",
+    "categorias": ["Criativa_Ordem"],
+    "fontes": ["Análise de Ciclo de Vida"],
+    "vantagem": "Ciclo completo e na ordem certa!",
+    "desvantagem": "A sequência das fases está incorreta.",
+    "dica": "Tudo começa com a retirada de recursos da natureza."
+  },
+
+  // 17. Oportunidade de Mercado (Vantagem Condicional Simulada)
+  {
+    "id": "criativa_vantagem_mercado_1",
+    "tipo": "Vantagem",
+    "titulo": "Mercado de Orgânicos em Alta",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 1px solid #16a34a; border-radius: 5px; background: #f0fdf4;'>\n <p>A demanda por produtos orgânicos disparou!</p>\n <p style='font-size: 2em; margin: 10px 0;'>塞</p> <!-- Vegetal + Saco Dinheiro -->\n <p>Se você tiver <strong>pelo menos 2 Estrelas Bônus</strong>, pode trocá-las agora por <strong>+30 de Progresso</strong>.</p>\n <p style='font-size:0.8em'>(O jogo verificará suas estrelas)</p>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Aproveitar a oportunidade!" } ],
+    "respostaCorreta": [1],
+    "dificuldade": "normal",
+    "categorias": ["Criativa_VantagemCondicional"],
+    "fontes": [],
+    "vantagem": "+30 Progresso (se tinha estrelas suficientes)!", // Efeito aplicado no verificarResposta
+    "desvantagem": "Não tinha estrelas suficientes.", // Mensagem alternativa se a condição não for atendida
+    "dica": "Investir em orgânicos pode dar retorno."
+  },
+
+  // 18. Fiscalização Ambiental (Desvantagem Condicional Simulada)
+  {
+    "id": "criativa_desvantagem_fiscal_1",
+    "tipo": "Desvantagem",
+    "titulo": "Fiscalização Surpresa",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 1px solid #ef4444; border-radius: 5px; background: #fee2e2;'>\n <p>Um fiscal ambiental apareceu para verificar suas práticas!</p>\n <p style='font-size: 2em; margin: 10px 0;'></p> <!-- Guarda + Prancheta -->\n <p>Se você tiver <strong>mais de 3 Respostas Erradas</strong> no total, você foi multado!</p>\n <p><strong>Penalidade:</strong> Perca 1 Estrela Bônus (se tiver) ou 1 Pulo (se não tiver estrela).</p>\n <p style='font-size:0.8em'>(O jogo verificará seus erros e aplicará a penalidade)</p>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Receber a fiscalização..." } ],
+    "respostaCorreta": [],
+    "dificuldade": "normal",
+    "categorias": ["Criativa_DesvantagemCondicional"],
+    "fontes": [],
+    "vantagem": "",
+    "desvantagem": "Multado! Perdeu 1 Estrela ou Pulo.", // Mensagem se a condição for atendida
+    "dica": "Manter boas práticas evita problemas."
+  },
+
+  // 19. "O Que Falta?" (PontoCerto)
+  {
+    "id": "criativa_pc_falta_1",
+    "tipo": "PontoCerto",
+    "titulo": "Completando o Ciclo",
+    "pergunta": "Este diagrama simplificado mostra a compostagem. Clique onde o <strong>adubo final</strong> seria aplicado.",
+    "imagemURL": "/images/diagrama_compostagem_incompleto.png", // Imagem mostrando lixo orgânico -> composteira -> ??? -> Horta/Jardim
+    "zonasClicaveis": [
+      { "id": 1, "x": 0.7, "y": 0.6, "largura": 0.25, "altura": 0.3, "descricao": "Horta/Jardim" }, // Correta
+      { "id": 2, "x": 0.1, "y": 0.1, "largura": 0.3, "altura": 0.4, "descricao": "Lixo Orgânico Inicial" },
+      { "id": 3, "x": 0.4, "y": 0.3, "largura": 0.25, "altura": 0.4, "descricao": "Composteira" }
+    ],
+    "respostaCorreta": 1,
+    "opcoes": [],
+    "dificuldade": "facil",
+    "categorias": ["Criativa_PontoCerto"],
+    "fontes": ["Compostagem"],
+    "vantagem": "Exato! O adubo volta para a terra.",
+    "desvantagem": "O adubo é usado em outro lugar do ciclo.",
+    "dica": "Onde as plantas crescem?"
+  },
+
+  // 20. Decodificador Simples
+  {
+    "id": "criativa_decodificador_1",
+    "tipo": "Pergunta",
+    "titulo": "Mensagem Secreta Verde",
+    "pergunta": "Decifre a mensagem usando a cifra de César simples (deslocamento de +1 letra, A->B, B->C,... Z->A):<br><br><strong style='font-family: monospace; font-size: 1.2em; display: block; text-align: center; letter-spacing: 3px; background: #eee; padding: 10px; border-radius: 4px;'>QFDJDMBS FN QPSUBOUF</strong>",
+    "opcoes": [
+      { "id": 1, "texto": "PLANTAR ARVORES" },
+      { "id": 2, "texto": "RECICLAR E IMPORTANTE" },
+      { "id": 3, "texto": "SALVAR AS BALEIAS" },
+      { "id": 4, "texto": "ECONOMIZAR AGUA" }
+    ],
+    "respostaCorreta": 2,
+    "dificuldade": "normal",
+    "categorias": ["Criativa_Puzzle"],
+    "fontes": [],
+    "vantagem": "Mensagem decifrada corretamente!",
+    "desvantagem": "Código errado. Tente deslocar as letras.",
+    "dica": "A letra 'Q' vira 'R', 'F' vira 'G'..."
+  },
+
+  // 21. Ajuda Externa (Vantagem Direta)
+  {
+    "id": "criativa_ajuda_1",
+    "tipo": "Vantagem",
+    "titulo": "Consultoria Ambiental",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 1px solid #06b6d4; border-radius: 5px; background: #ecfeff;'>\n  <p>Você contratou uma consultoria e otimizou seus processos!</p>\n  <p style='font-size: 2em; margin: 10px 0;'></p> <!-- Pasta + Gráfico -->\n  <strong>Ganhe 2 Pulos para usar quando quiser!</strong>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Excelente!" } ],
+    "respostaCorreta": [1],
+    "dificuldade": "facil",
+    "categorias": ["Criativa_BonusDireto"],
+    "fontes": [],
+    "vantagem": "Você ganhou 2 Pulos!", // Efeito aplicado no verificarResposta
+    "desvantagem": "",
+    "dica": "Buscar conhecimento especializado ajuda."
+  },
+
+  // 22. Impacto a Longo Prazo (Outras - Escolha Simulada)
+  {
+    "id": "criativa_longo_prazo_1",
+    "tipo": "Outras",
+    "titulo": "Plantar Agora, Colher Depois",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 1px solid #fb923c; border-radius: 5px; background: #fff7ed;'>\n  <p>Você tem a chance de dedicar tempo agora para plantar árvores frutíferas.</p>\n  <p style='font-size: 2em; margin: 10px 0;'></p> <!-- Árvore + Maçã -->\n  <p><strong>Opção 1:</strong> Não plantar (sem efeito imediato).</p>\n  <p><strong>Opção 2:</strong> Plantar (-5 Progresso agora, mas existe uma chance de ganhar +1 Estrela Fixa no futuro).</p>\n  <p style='font-size:0.8em'>(O jogo/mestre pode sortear a chance da colheita futura)</p>\n</div>\n<br>Você vai plantar?",
+    "opcoes": [
+      { "id": 1, "texto": "Sim, vou plantar! (-5 Progresso)" },
+      { "id": 2, "texto": "Não, foco no presente." }
+    ],
+    "respostaCorreta": [1, 2], // Ambas válidas
+    "dificuldade": "normal",
+    "categorias": ["Criativa_LongoPrazo"],
+    "fontes": [],
+    "vantagem": "Plantação iniciada! Tomara que dê bons frutos.", // Se escolher 1 (Efeito -5 Progresso no verificarResposta)
+    "desvantagem": "Decidiu não plantar.", // Se escolher 2
+    "dica": "Paciência e cuidado podem gerar grandes recompensas."
   }
 ];
 
