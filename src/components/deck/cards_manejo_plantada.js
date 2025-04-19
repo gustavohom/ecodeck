@@ -1696,603 +1696,815 @@ const manejo = [
     { "id": "criativa_destino_1", "tipo": "Outras", "titulo": "Encruzilhada do Destino", "pergunta": "<style>\n.destiny-choice a { display: inline-block; padding: 15px; margin: 10px; border: 2px solid #8b5cf6; border-radius: 50%; font-size: 2em; text-decoration: none; background: white; transition: background 0.3s; }\n.destiny-choice a:hover { background: #ede9fe; }\n.destiny-popup { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; z-index:1003; }\n.destiny-popup:target { display:flex; }\n.destiny-content { background:white; padding:20px; border-radius:5px; text-align:center; position:relative; }\n.destiny-close { position:absolute; top:5px; right:10px; font-size:24px; text-decoration:none; color:#888; }\n</style>\n<p style='text-align:center;'>O destino te oferece três caminhos misteriosos. Escolha um clicando no símbolo:</p>\n<div class='destiny-choice' style='text-align:center;'>\n  <a href='#destiny-1'>❓</a>\n  <a href='#destiny-2'>❓</a>\n  <a href='#destiny-3'>❓</a>\n</div>\n\n<div id='destiny-1' class='destiny-popup'><div class='destiny-content'><a href='#' class='destiny-close'>×</a><h4>Caminho da Água</h4><p style='font-size:3em'>💧</p><p>Você encontrou uma nascente! <strong>+10 Progresso.</strong></p></div></div>\n<div id='destiny-2' class='destiny-popup'><div class='destiny-content'><a href='#' class='destiny-close'>×</a><h4>Caminho da Terra</h4><p style='font-size:3em'>🌳</p><p>Boas práticas de manejo! <strong>+1 Pulo.</strong></p></div></div>\n<div id='destiny-3' class='destiny-popup'><div class='destiny-content'><a href='#' class='destiny-close'>×</a><h4>Caminho do Vento</h4><p style='font-size:3em'>💨</p><p>Uma rajada te atrasou! <strong>-5 Progresso.</strong></p></div></div>\n<p style='text-align:center; font-size:0.8em;'>Após escolher, clique no botão abaixo para confirmar o efeito.</p>", "opcoes": [ {"id": 1, "texto": "Confirmar Destino Escolhido"} ], // Jogador clica no símbolo, depois confirma aqui
     "respostaCorreta": [1], "dificuldade": "facil", "categorias": ["_Criativa_EscolhaDestino"], "fontes": [], "vantagem": "Destino revelado!", "desvantagem": "", "dica": "Qual elemento te trará mais sorte?" },
 
-    // 24. Barra de Saúde do Planeta (Visualização)
-    {
-        "id": "criativa_healthbar_1",
-        "tipo": "Outras", // Informativo
-        "titulo": "Status Global",
-        "pergunta": "A saúde geral do planeta, baseada nas ações de todos, está assim:<br><br>\n<style>\n.planet-health-bar { width: 90%; height: 30px; background-color: #ef4444; /* Vermelho base */ margin: 15px auto; border-radius: 15px; border: 2px solid #b91c1c; overflow: hidden; position: relative; }\n.planet-health-fill { width: 40%; /* Nível atual da saúde */ height: 100%; background-color: #84cc16; /* Verde */ border-radius: 13px 0 0 13px; transition: width 0.5s ease-in-out; }\n.planet-health-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; text-shadow: 1px 1px 2px black; font-size: 0.9em; }\n</style>\n<div class=\"planet-health-bar\">\n  <div class=\"planet-health-fill\"></div>\n  <div class=\"planet-health-text\">Saúde do Planeta: 40%</div>\n</div>\n<p style='text-align:center; font-size:0.8em'>Melhorem suas ações para aumentar a barra!</p>",
-        "opcoes": [ { "id": 1, "texto": "Entendido" } ],
-        "respostaCorreta": [1],
-        "dificuldade": "facil",
-        "categorias": ["_Criativa_HealthBar"],
-        "fontes": [],
-        "vantagem": "Continue jogando para melhorar a saúde do planeta!",
-        "desvantagem": "",
-        "dica": "A barra verde indica a saúde atual."
-    },
+  // 24. Barra de Saúde do Planeta (Visualização)
+  {
+      "id": "criativa_healthbar_1",
+      "tipo": "Outras", // Informativo
+      "titulo": "Status Global",
+      "pergunta": "A saúde geral do planeta, baseada nas ações de todos, está assim:<br><br>\n<style>\n.planet-health-bar { width: 90%; height: 30px; background-color: #ef4444; /* Vermelho base */ margin: 15px auto; border-radius: 15px; border: 2px solid #b91c1c; overflow: hidden; position: relative; }\n.planet-health-fill { width: 40%; /* Nível atual da saúde */ height: 100%; background-color: #84cc16; /* Verde */ border-radius: 13px 0 0 13px; transition: width 0.5s ease-in-out; }\n.planet-health-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; text-shadow: 1px 1px 2px black; font-size: 0.9em; }\n</style>\n<div class=\"planet-health-bar\">\n  <div class=\"planet-health-fill\"></div>\n  <div class=\"planet-health-text\">Saúde do Planeta: 40%</div>\n</div>\n<p style='text-align:center; font-size:0.8em'>Melhorem suas ações para aumentar a barra!</p>",
+      "opcoes": [ { "id": 1, "texto": "Entendido" } ],
+      "respostaCorreta": [1],
+      "dificuldade": "facil",
+      "categorias": ["_Criativa_HealthBar"],
+      "fontes": [],
+      "vantagem": "Continue jogando para melhorar a saúde do planeta!",
+      "desvantagem": "",
+      "dica": "A barra verde indica a saúde atual."
+  },
 
-    // 25. Mensagem Criptografada (Atbash Simples)
-    {
-        "id": "criativa_atbash_1",
-        "tipo": "Pergunta",
-        "titulo": "Código Secreto Atbash",
-        "pergunta": "Decifre a mensagem usando a cifra Atbash (A=Z, B=Y, C=X,...):<br><br><code style='font-family: monospace; font-size: 1.2em; display: block; text-align: center; letter-spacing: 3px; background: #eee; padding: 10px; border-radius: 4px;'>HVWFIGZ URIZ</code>",
-        "opcoes": [
-            { "id": 1, "texto": "PLANTE ARVORE" },
-            { "id": 2, "texto": "RECICLE LIXO" },
-            { "id": 3, "texto": "PRESERVE AGUA" },
-            { "id": 4, "texto": "REDUZA CONSUMO" }
-        ],
-        "respostaCorreta": 1, // HVWFIGZ URIZ -> PLANTAR ARVORE
-        "dificuldade": "normal",
-        "categorias": ["_Criativa_Criptografia"],
-        "fontes": ["Cifra Atbash"],
-        "vantagem": "Código quebrado! Mensagem revelada.",
-        "desvantagem": "Tradução incorreta. Lembre-se: A vira Z, B vira Y...",
-        "dica": "É uma inversão direta do alfabeto."
-    },
-      // --- LAYOUT E APRESENTAÇÃO ---
-      {
-        "id": "html_grid_layout_1",
-        "tipo": "Pergunta",
-        "titulo": "Análise de Impacto (Grid)",
-        "pergunta": "<style>\n.impact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }\n.impact-item { border: 1px solid #ccc; padding: 8px; border-radius: 4px; text-align: center; background-color: #f9f9f9; }\n.impact-item strong { display: block; margin-bottom: 5px; font-size: 1.1em; }\n.impact-value { font-size: 1.5em; font-weight: bold; }\n.impact-value.high { color: #dc2626; } /* Red */\n.impact-value.medium { color: #f97316; } /* Orange */\n.impact-value.low { color: #16a34a; } /* Green */\n</style>\n<p>Compare o impacto ambiental aproximado (emissões de CO₂eq por porção):</p>\n<div class=\"impact-grid\">\n  <div class=\"impact-item\"><strong>Carne Bovina</strong><span class=\"impact-value high\">🥩 ALTO</span></div>\n  <div class=\"impact-item\"><strong>Frango</strong><span class=\"impact-value medium\">🍗 MÉDIO</span></div>\n  <div class=\"impact-item\"><strong>Lentilhas</strong><span class=\"impact-value low\">🌱 BAIXO</span></div>\n  <div class=\"impact-item\"><strong>Arroz</strong><span class=\"impact-value low\">🍚 BAIXO</span></div>\n</div>\n<br>Qual alimento listado tem o <strong>MAIOR</strong> impacto?",
-        "opcoes": [
-            {"id": 1, "texto": "Carne Bovina"},
-            {"id": 2, "texto": "Frango"},
-            {"id": 3, "texto": "Lentilhas"},
-            {"id": 4, "texto": "Arroz"}
-        ],
-        "respostaCorreta": 1,
-        "dificuldade": "facil",
-        "categorias": ["_test_cri_iva_Grid"],
-        "fontes": ["Dados de Pegada de Carbono"],
-        "vantagem": "Correto! A pecuária bovina tem um impacto significativo.",
-        "desvantagem": "Incorreto. Compare os níveis de impacto.",
-        "dica": "Procure pela classificação 'ALTO'."
-    },
-    {
-        "id": "html_flex_columns_1",
-        "tipo": "Pergunta",
-        "titulo": "Prós e Contras (Flexbox)",
-        "pergunta": "<style>\n.pros-cons-container { display: flex; gap: 15px; margin-top: 10px; }\n.pros-cons-col { flex: 1; border: 1px solid; border-radius: 5px; padding: 10px; }\n.pros-col { border-color: #16a34a; background-color: #f0fdf4; }\n.cons-col { border-color: #dc2626; background-color: #fee2e2; }\n.pros-cons-col h5 { margin: 0 0 10px 0; text-align: center; }\n.pros-cons-col ul { list-style: none; padding-left: 0; font-size: 0.9em; margin: 0; }\n.pros-cons-col li { margin-bottom: 5px; padding-left: 1.2em; position: relative; }\n.pros-col li::before { content: '✓'; color: #16a34a; position: absolute; left: 0; font-weight: bold; }\n.cons-col li::before { content: '✗'; color: #dc2626; position: absolute; left: 0; font-weight: bold; }\n</style>\n<p>Analise os prós e contras da energia hidrelétrica:</p>\n<div class=\"pros-cons-container\">\n  <div class=\"pros-cons-col pros-col\">\n    <h5>Prós (+)</h5>\n    <ul><li>Energia Renovável</li><li>Baixa emissão de GEE</li><li>Custo operacional baixo</li></ul>\n  </div>\n  <div class=\"pros-cons-col cons-col\">\n    <h5>Contras (-)</h5>\n    <ul><li>Impacto social (deslocamentos)</li><li>Impacto ambiental (alagamentos)</li><li>Dependência de chuvas</li></ul>\n  </div>\n</div><br>Qual é um <strong>CONTRA</strong> significativo da energia hidrelétrica listado?",
-        "opcoes": [
-            {"id": 1, "texto": "Baixa emissão de GEE"},
-            {"id": 2, "texto": "Impacto social"},
-            {"id": 3, "texto": "Custo operacional baixo"}
-        ],
-        "respostaCorreta": 2,
-        "dificuldade": "facil",
-        "categorias": ["_test_cri_iva_Flexbox"],
-        "fontes": ["Fontes de Energia"],
-        "vantagem": "Correto! O impacto social é um grande desafio.",
-        "desvantagem": "Incorreto. Esse item está listado como um 'Pró'.",
-        "dica": "Procure na coluna com o 'X' vermelho."
-    },
-    {
-        "id": "html_gradient_bg_1",
-        "tipo": "Vantagem",
-        "titulo": "Amanhecer Sustentável",
-        "pergunta": "<div style='padding: 20px; border-radius: 8px; color: #333; text-align: center; background: linear-gradient(to bottom, #a7f3d0, #6ee7b7, #34d399);'>\n  <p style='font-size: 2.5em; margin-bottom: 10px;'>🌅</p>\n  <p style='font-weight: bold; font-size: 1.1em;'>Um novo dia começa com esperança e ações verdes!</p>\n  <p>Seu compromisso inspira! Ganhe <strong>+15 de Progresso</strong>.</p>\n</div>",
-        "opcoes": [ { "id": 1, "texto": "Começar bem o dia!" } ],
-        "respostaCorreta": [1],
-        "dificuldade": "facil",
-        "categorias": ["_test_cri_iva_Gradient"],
-        "fontes": [],
-        "vantagem": "Ganhou +15 Progresso!",
-        "desvantagem": "",
-        "dica": "Aproveite a energia positiva!"
-    },
-    {
-        "id": "html_blockquote_1",
-        "tipo": "Outras",
-        "titulo": "Voz da Experiência",
-        "pergunta": "<blockquote style='border-left: 4px solid #fbbf24; margin: 15px 0; padding: 10px 15px; background-color: #fffbeb; font-style: italic;'>\n  \"Não herdamos a terra de nossos ancestrais, nós a pegamos emprestada de nossos filhos.\"\n  <footer style='text-align: right; font-style: normal; font-size: 0.9em; margin-top: 8px;'>— Provérbio Nativo Americano</footer>\n</blockquote>\n<p>Esta citação enfatiza principalmente qual aspecto da sustentabilidade?</p>",
-        "opcoes": [
-            {"id": 1, "texto": "Lucro econômico a curto prazo"},
-            {"id": 2, "texto": "Responsabilidade intergeracional"},
-            {"id": 3, "texto": "Exploração máxima de recursos"}
-        ],
-        "respostaCorreta": 2,
-        "dificuldade": "facil",
-        "categorias": ["_test_cri_iva_Blockquote"],
-        "fontes": ["Citações Famosas"],
-        "vantagem": "Correto! Pensar nas futuras gerações é crucial.",
-        "desvantagem": "Incorreto. A citação fala sobre o futuro.",
-        "dica": "A quem pertence a terra no futuro, segundo o provérbio?"
-    },
-
-    // --- INTERATIVIDADE SIMULADA ---
-
-    {
-        "id": "html_tooltip_1",
-        "tipo": "Pergunta",
-        "titulo": "Glossário Rápido (Tooltip)",
-        "pergunta": "<style>\n.tooltip { position: relative; display: inline-block; border-bottom: 1px dotted black; cursor: help; }\n.tooltip .tooltiptext { visibility: hidden; width: 160px; background-color: #555; color: #fff; text-align: center; border-radius: 6px; padding: 5px 8px; position: absolute; z-index: 1; bottom: 125%; /* Position above */ left: 50%; margin-left: -80px; opacity: 0; transition: opacity 0.3s; font-size: 0.85em; }\n.tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }\n.tooltip .tooltiptext::after { content: \"\"; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #555 transparent transparent transparent; }\n</style>\nO que significa <span class=\"tooltip\">ESG<span class=\"tooltiptext\">Environmental, Social, and Governance (Ambiental, Social e Governança) - Fatores usados para medir a sustentabilidade e o impacto ético de um investimento.</span></span> no mundo corporativo?",
-        "opcoes": [
-            {"id": 1, "texto": "Energia Solar Garantida"},
-            {"id": 2, "texto": "Padrões de Sustentabilidade e Governança"},
-            {"id": 3, "texto": "Estratégia de Superávit Global"}
-        ],
-        "respostaCorreta": 2,
-        "dificuldade": "normal",
-        "categorias": ["_test_cri_iva_Tooltip"],
-        "fontes": ["Termos Corporativos"],
-        "vantagem": "Correto! ESG é um critério cada vez mais importante.",
-        "desvantagem": "Incorreto. Passe o mouse sobre ESG para ver a sigla.",
-        "dica": "Passe o mouse sobre a sigla 'ESG' na pergunta."
-    },
-    {
-        "id": "html_flipcard_1",
-        "tipo": "Vantagem",
-        "titulo": "Carta Surpresa (Flip)",
-        "pergunta": "<style>\n.flip-card-container { perspective: 1000px; width: 180px; height: 100px; margin: 15px auto; }\n.flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }\n.flip-card-container:hover .flip-card-inner { transform: rotateY(180deg); }\n.flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border: 1px solid #ccc; border-radius: 8px; display: flex; justify-content: center; align-items: center; text-align: center; padding: 10px; }\n.flip-card-front { background-color: #bbdefb; color: black; }\n.flip-card-back { background-color: #a5d6a7; color: #1b5e20; transform: rotateY(180deg); }\n</style>\n<p style='text-align:center;'>Passe o mouse sobre a carta para revelar sua sorte!</p>\n<div class=\"flip-card-container\">\n  <div class=\"flip-card-inner\">\n    <div class=\"flip-card-front\">\n      <p style='font-size: 1.5em;'>?</p>\n      <p style='font-size: 0.9em;'>Carta Misteriosa</p>\n    </div>\n    <div class=\"flip-card-back\">\n      <p>🍀 Sorte! Você encontrou um recurso raro! Ganhe <strong>+1 Estrela Bônus</strong>.</p>\n    </div>\n  </div>\n</div>",
-        "opcoes": [ { "id": 1, "texto": "Revelar a Sorte!" } ],
-        "respostaCorreta": [1],
-        "dificuldade": "facil",
-        "categorias": ["_test_cri_iva_FlipCard"],
-        "fontes": [],
-        "vantagem": "Ganhou +1 Estrela Bônus!", // Efeito real
-        "desvantagem": "",
-        "dica": "Passe o mouse (ou toque em mobile) na carta azul."
-    },
-    {
-        "id": "html_secret_reveal_1",
-        "tipo": "Outras",
-        "titulo": "Pista Secreta",
-        "pergunta": "<p>Você encontrou uma mensagem cifrada deixada por um antigo protetor da floresta.</p>\n<details style='margin: 10px auto; width: fit-content;'>\n  <summary style='cursor: pointer; border: 1px solid; padding: 5px 10px; border-radius: 4px; background: #fef3c7; color: #ca8a04;'>Revelar Mensagem</summary>\n  <p style='margin-top: 10px; padding: 10px; background: #fffbeb; border: 1px dashed #fde047;'>\n    <i>\"O verdadeiro tesouro não é ouro, mas a <strong>água limpa</strong> que flui livremente.\"</i>\n    <br><br><strong>Efeito:</strong> Se estiver em uma casa de RIO ou NASCENTE, ganhe +10 Progresso.\n  </p>\n</details>",
-        "opcoes": [ { "id": 1, "texto": "Entendido." } ],
-        "respostaCorreta": [1],
-        "dificuldade": "normal",
-        "categorias": ["_test_cri_iva_SecretReveal"],
-        "fontes": [],
-        "vantagem": "Mensagem revelada! Verifique sua posição no tabuleiro.", // Efeito condicional aplicado no jogo
-        "desvantagem": "",
-        "dica": "Clique para ler a mensagem."
-    },
-    {
-        "id": "html_checklist_1",
-        "tipo": "Pergunta",
-        "titulo": "Checklist de Ações",
-        "pergunta": "<style>\n.checklist { list-style: none; padding-left: 0; margin: 10px 0; }\n.checklist li { margin-bottom: 8px; position: relative; padding-left: 25px; }\n.checklist li::before { content: ''; display: inline-block; width: 16px; height: 16px; border: 2px solid #6ee7b7; border-radius: 3px; position: absolute; left: 0; top: 2px; background-color: white; }\n/* Marcar um item (exemplo) */\n.checklist li.checked::after { content: '✔'; color: #047857; position: absolute; left: 3px; top: 1px; font-size: 14px; font-weight: bold; }\n</style>\n<p>Qual ação deste checklist <strong>NÃO</strong> contribui diretamente para reduzir sua pegada de carbono?</p>\n<ul class=\"checklist\">\n  <li class=\"checked\">Reduzir consumo de carne</li>\n  <li class=\"checked\">Usar transporte público/bicicleta</li>\n  <li>Comprar produtos locais</li>\n  <li class=\"checked\">Economizar energia em casa</li>\n</ul>",
-        "opcoes": [
-            {"id": 1, "texto": "Reduzir consumo de carne"},
-            {"id": 2, "texto": "Usar transporte público/bicicleta"},
-            {"id": 3, "texto": "Comprar produtos locais"}, // Embora bom, o impacto direto no *carbono* é menor que os outros
-            {"id": 4, "texto": "Economizar energia"}
-        ],
-        "respostaCorreta": 3,
-        "dificuldade": "normal",
-        "categorias": ["_test_cri_iva_Checklist"],
-        "fontes": ["Pegada de Carbono"],
-        "vantagem": "Correto! Embora comprar local seja bom, os outros têm impacto mais direto nas emissões de carbono.",
-        "desvantagem": "Incorreto. Esta ação tem um impacto significativo na pegada de carbono.",
-        "dica": "Pense em emissões de transporte e produção de energia/alimentos."
-    },
-
-    // --- APRESENTAÇÃO VISUAL TEMÁTICA ---
-    {
-        "id": "html_torn_paper_1",
-        "tipo": "Desvantagem",
-        "titulo": "Notificação Urgente",
-        "pergunta": "<style>\n.torn-paper {\n  background-color: #fdf6e3; /* Cor de papel velho */\n  padding: 25px;\n  margin: 15px auto;\n  max-width: 300px;\n  border: 1px solid #ddd;\n  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);\n  position: relative;\n  /* Efeito \"rasgado\" (simplificado com pseudo-elementos) */\n}\n.torn-paper::before, .torn-paper::after {\n  content: ''; position: absolute; width: 100%; height: 10px; background-size: 20px 10px;\n}\n.torn-paper::before { top: -1px; background-image: linear-gradient(45deg, transparent 75%, #fdf6e3 75%), linear-gradient(-45deg, transparent 75%, #fdf6e3 75%); background-position: 0 0, 10px 0; }\n.torn-paper::after { bottom: -1px; transform: rotate(180deg); background-image: linear-gradient(45deg, transparent 75%, #fdf6e3 75%), linear-gradient(-45deg, transparent 75%, #fdf6e3 75%); background-position: 10px 0, 0 0; }\n</style>\n<div class=\"torn-paper\">\n  <h5 style='text-align:center; color: #b91c1c; margin:0 0 10px 0;'>AVISO DE MULTA</h5>\n  <p style='font-size:0.9em; text-align:center;'>Descarte inadequado de resíduos detectado! Pague a multa ou perca a próxima rodada.</p>\n  <p style='text-align:center; font-weight:bold; margin-top:15px;'>Opção: Perca 1 Estrela Bônus</p>\n</div>",
-        "opcoes": [ { "id": 1, "texto": "Pagar a Multa (-1 Estrela)" } ], // Ou lógica para perder rodada
-        "respostaCorreta": [1],
-        "dificuldade": "facil",
-        "categorias": ["_test_cri_iva_PapelRasgado"],
-        "fontes": [],
-        "vantagem": "Multa paga (se tinha estrela).",
-        "desvantagem": "Não tinha estrela para pagar (perde rodada - efeito no jogo).",
-        "dica": "O descarte correto é importante."
-    },
-    {
-        "id": "html_calendar_1",
-        "tipo": "Vantagem",
-        "titulo": "Dia da Terra!",
-        "pergunta": "<style>\n.calendar-day { width: 150px; border: 1px solid #ccc; margin: 15px auto; border-radius: 5px; overflow: hidden; box-shadow: 1px 1px 3px rgba(0,0,0,0.1); }\n.calendar-header { background-color: #16a34a; color: white; text-align: center; padding: 5px; font-weight: bold; }\n.calendar-date { font-size: 3em; text-align: center; padding: 15px 10px; background: white; font-weight: bold; }\n.calendar-event { font-size: 0.9em; text-align: center; padding: 8px; background: #d1fae5; color: #065f46; }\n</style>\n<div class=\"calendar-day\">\n  <div class=\"calendar-header\">Abril</div>\n  <div class=\"calendar-date\">22</div>\n  <div class=\"calendar-event\">🌍 Dia da Terra!</div>\n</div>\n<p style='text-align:center; margin-top: 10px;'>Em comemoração, todos os jogadores ganham +5 de Progresso!</p>",
-        "opcoes": [ { "id": 1, "texto": "Celebrar!" } ],
-        "respostaCorreta": [1],
-        "dificuldade": "facil",
-        "categorias": ["_test_cri_iva_Calendario"],
-        "fontes": ["Datas Comemorativas"],
-        "vantagem": "Todos ganharam +5 Progresso!", // Efeito em todos
-        "desvantagem": "",
-        "dica": "Uma data importante para o planeta."
-    },
-    {
-        "id": "html_comic_strip_1",
-        "tipo": "Outras",
-        "titulo": "A Gota Viajante",
-        "pergunta": "<style>\n.comic-panel { border: 2px solid #3b82f6; background: white; padding: 8px; margin: 5px auto; max-width: 300px; border-radius: 4px; }\n.comic-panel img { display: block; width: 80%; margin: 5px auto; height: auto; border: 1px solid #eee; }\n.comic-caption { font-size: 0.85em; text-align: center; margin-top: 5px; font-style: italic; color: #1e3a8a; }\n</style>\n<div style='border: 1px solid #ccc; padding: 10px; background: #eff6ff;'>\n <p style='text-align:center; font-weight:bold; margin-bottom: 10px;'>A Jornada da Gotinha:</p>\n <div class='comic-panel'>\n   <img src='/images/gota_no_rio.png' alt='Gota no rio'>\n   <p class='comic-caption'>1. No rio, tranquila...</p>\n </div>\n <div class='comic-panel'>\n   <img src='/images/gota_evaporando.png' alt='Gota evaporando'>\n   <p class='comic-caption'>2. O sol esquenta, hora de subir!</p>\n </div>\n <div class='comic-panel'>\n   <img src='/images/gota_na_nuvem.png' alt='Gota na nuvem'>\n   <p class='comic-caption'>3. Encontro amigas na nuvem...</p>\n </div>\n <div class='comic-panel'>\n   <img src='/images/gota_caindo.png' alt='Gota caindo'>\n   <p class='comic-caption'>4. Pesa demais! Hora de voltar!</p>\n </div>\n</div><br>Qual etapa crucial do ciclo falta entre a 3 e a 4?",
-        "opcoes": [ {"id": 1, "texto": "Congelamento"}, {"id": 2, "texto": "Condensação (formação da gota maior)"}, {"id": 3, "texto": "Infiltração no solo"} ],
-        "respostaCorreta": 2,
-        "dificuldade": "normal",
-        "categorias": ["_test_cri_iva_ComicStrip"],
-        "fontes": ["Ciclo da Água"],
-        "vantagem": "Correto! A condensação forma as gotas de chuva.",
-        "desvantagem": "Essa etapa ocorre em outro momento do ciclo.",
-        "dica": "O que acontece com o vapor na nuvem antes de chover?"
-    },
-     {
-        "id": "html_qrcode_1",
-        "tipo": "Outras",
-        "titulo": "Dica Extra (QR Code)",
-        "pergunta": "<p style='text-align:center;'>Escaneie o QR Code com seu celular (se possível) para uma dica valiosa sobre pegada hídrica!</p>\n<img src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.watercalculator.org/' alt='QR Code para Water Calculator' style='display: block; margin: 15px auto; border: 5px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.2);'>\n<p style='text-align:center; font-size: 0.8em;'>(Aponta para watercalculator.org)</p>\n<br><p style='text-align:center;'>Use a dica para responder: Qual item geralmente tem a <strong>maior</strong> pegada hídrica?</p>",
-        "opcoes": [ {"id": 1, "texto": "1kg de Arroz"}, {"id": 2, "texto": "1kg de Carne Bovina"}, {"id": 3, "texto": "1 Camiseta de Algodão"} ],
-        "respostaCorreta": 2,
-        "dificuldade": "normal",
-        "categorias": ["_test_cri_iva_QRCode"],
-        "fontes": ["Water Footprint Network"],
-        "vantagem": "Correto! A produção de carne bovina consome muita água.",
-        "desvantagem": "Incorreto. A dica no QR Code ajudaria!",
-        "dica": "A produção de carne envolve água para o animal e para cultivar seu alimento."
-    },
-    {
-        "id": "html_spot_diff_1",
-        "tipo": "Pergunta",
-        "titulo": "Jogo dos 7 Erros (1 Erro)",
-        "pergunta": "<style>\n.diff-container { display: flex; justify-content: space-around; gap: 10px; margin: 15px 0; padding: 5px; background: #f3f4f6; border-radius: 5px; }\n.diff-img { width: 48%; border: 1px solid #d1d5db; }\n</style>\n<p>Encontre a <strong>única</strong> diferença significativa entre as duas imagens de reciclagem:</p>\n<div class=\"diff-container\">\n <img src=\"/images/reciclagem_a.png\" alt=\"Cena A\" class=\"diff-img\">\n <img src=\"/images/reciclagem_b_com_erro.png\" alt=\"Cena B com erro\" class=\"diff-img\">\n</div>",
-        "opcoes": [
-            {"id": 1, "texto": "A cor da lixeira de metal"},
-            {"id": 2, "texto": "Uma garrafa plástica no lixo de papel"}, // A diferença
-            {"id": 3, "texto": "O tipo de árvore ao fundo"},
-            {"id": 4, "texto": "A presença de uma pessoa"}
-        ],
-        "respostaCorreta": 2,
-        "dificuldade": "facil",
-        "categorias": ["_test_cri_iva_SpotDifference"],
-        "fontes": [],
-        "vantagem": "Exato! Separar corretamente é essencial.",
-        "desvantagem": "Olhe com mais atenção para os detalhes das lixeiras.",
-        "dica": "Verifique o conteúdo de cada lixeira."
-    },
-     {
-        "id": "html_wordsearch_1",
-        "tipo": "Pergunta",
-        "titulo": "Caça-Palavras Verde",
-        "pergunta": "<style>\n.wordsearch-grid { font-family: monospace; line-height: 1.2; font-size: 1.1em; border-collapse: collapse; margin: 15px auto; user-select: none; }\n.wordsearch-grid td { border: 1px solid #eee; padding: 2px 4px; text-align: center; width: 20px; height: 20px; }\n.wordsearch-grid .found { background-color: #a7f3d0; font-weight: bold; } /* Exemplo de marcação */\n</style>\n<p>Encontre a palavra <strong>\"SOLAR\"</strong> (horizontal, vertical ou diagonal) no caça-palavras abaixo. Em qual linha ela <strong>começa</strong>?</p>\n<table class=\"wordsearch-grid\">\n  <tr><td>R</td><td>E</td><td>N</td><td>O</td><td>V</td><td>A</td><td>R</td></tr>\n  <tr><td>S</td><td>O</td><td>L</td><td>A</td><td>R</td><td>G</td><td>U</td></tr>\n  <tr><td>U</td><td>L</td><td>I</td><td>X</td><td>O</td><td>U</td><td>A</td></tr>\n  <tr><td>S</td><td>A</td><td>R</td><td>V</td><td>O</td><td>A</td><td>T</td></tr>\n  <tr><td>T</td><td>M</td><td>E</td><td>T</td><td>A</td><td>L</td><td>E</td></tr>\n  <tr><td>A</td><td>A</td><td>Z</td><td>U</td><td>L</td><td>M</td><td>R</td></tr>\n</table>",
-        "opcoes": [ {"id": 1, "texto": "Linha 1"}, {"id": 2, "texto": "Linha 2"}, {"id": 3, "texto": "Linha 4"}, {"id": 4, "texto": "Linha 6"} ],
-        "respostaCorreta": 2,
-        "dificuldade": "facil",
-        "categorias": ["_test_cri_iva_WordSearch"],
-        "fontes": [],
-        "vantagem": "Correto! Achou a energia limpa.",
-        "desvantagem": "Procure novamente, a palavra está lá!",
-        "dica": "Está na horizontal."
-    },
-    {
-        "id": "html_crossword_1",
-        "tipo": "Pergunta",
-        "titulo": "Cruzadinha Ecológica",
-        "pergunta": "Qual palavra de 6 letras completa a cruzadinha?<br><br><i>1. Vertical:</i> Processo de transformar lixo orgânico em adubo.<br><br>\n<code style='font-family: monospace; font-size: 1.4em; display: block; margin: 10px auto; width: fit-content;'>\n  _ _ <span style='border-bottom: 2px solid black;'>C</span> _ _ _ <br>\n     O<br>\n     M<br>\n     P<br>\n     O<br>\n     S<br>\n     T<br>\n     A<br>\n     G<br>\n     E<br>\n     M<br>\n</code>",
-        "opcoes": [ {"id": 1, "texto": "RECICLAGEM"}, {"id": 2, "texto": "POLUIÇÃO"}, {"id": 3, "texto": "COMPOSTAGEM"} ],
-        "respostaCorreta": 3,
-        "dificuldade": "facil",
-        "categorias": ["_test_cri_iva_Crossword"],
-        "fontes": [],
-        "vantagem": "Correto!",
-        "desvantagem": "Essa palavra não se encaixa.",
-        "dica": "Começa com C e termina com M."
-    },
-    {
-        "id": "html_repair_diagram_1",
-        "tipo": "CompletarFrase", // Usando este tipo para a interação
-        "titulo": "Repare o Ciclo",
-        "pergunta": "O diagrama mostra o ciclo do Nitrogênio simplificado. Qual processo, realizado por bactérias no solo, converte nitrito em nitrato, forma utilizável pelas plantas?<br><br>\n<div style='text-align:center;'>\n  N₂ (Atmosfera) → Fixação → Amônia (NH₃) → Nitrificação (1ª parte) → Nitrito (NO₂) → <strong>__1__</strong> → Nitrato (NO₃) → Plantas\n</div>",
-        "fraseIncompleta": "O processo é a __1__.", // A frase a ser completada é implícita
-        "fragmentos": [
-            { "id": 1, "texto": "Desnitrificação" },
-            { "id": 2, "texto": "Nitrificação (2ª parte)" },
-            { "id": 3, "texto": "Amonificação" }
-        ],
-        "respostaCorreta": [2], // Nitrificação (2ª parte)
-        "opcoes": [], // Não usado diretamente
-        "dificuldade": "dificil",
-        "categorias": ["_test_cri_iva_RepairDiagram"],
-        "fontes": ["Ciclo do Nitrogênio"],
-        "vantagem": "Correto! É a segunda etapa da nitrificação.",
-        "desvantagem": "Incorreto. Esse processo ocorre em outra parte do ciclo.",
-        "dica": "É a continuação da Nitrificação."
-    },
-    {
-        "id": "html_soundwave_1",
-        "tipo": "Pergunta",
-        "titulo": "Poluição Sonora",
-        "pergunta": "A 'onda sonora' abaixo representa o nível de ruído. Qual situação ela provavelmente descreve?<br><br>\n<style>\n@keyframes wavePulse { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }\n.sound-wave { display: flex; align-items: flex-end; justify-content: center; height: 60px; margin: 15px auto; width: 150px; }\n.sound-wave div { width: 8px; height: 100%; margin: 0 2px; background-color: #f87171; /* Vermelho indica alto ruído */ border-radius: 4px; animation: wavePulse 0.8s infinite ease-in-out; }\n.sound-wave div:nth-child(2) { animation-delay: 0.1s; height: 80%; }\n.sound-wave div:nth-child(3) { animation-delay: 0.2s; height: 90%; }\n.sound-wave div:nth-child(4) { animation-delay: 0.3s; height: 70%; }\n.sound-wave div:nth-child(5) { animation-delay: 0.4s; height: 85%; }\n</style>\n<div class=\"sound-wave\">\n  <div></div><div></div><div></div><div></div><div></div>\n</div>",
-        "opcoes": [
-            {"id": 1, "texto": "Biblioteca silenciosa"},
-            {"id": 2, "texto": "Parque tranquilo"},
-            {"id": 3, "texto": "Rua com tráfego intenso e buzinas"}
-        ],
-        "respostaCorreta": 3,
-        "dificuldade": "facil",
-        "categorias": ["_test_cri_iva_SoundWave"],
-        "fontes": [],
-        "vantagem": "Correto! A intensidade visual representa barulho alto.",
-        "desvantagem": "Incorreto. Uma situação calma teria 'ondas' menores.",
-        "dica": "A cor vermelha e a animação indicam intensidade."
-    },
-    // 1. Decodificador Rotacional CSS (:target simulado)
-    {
-      "id": "teste_1",
+  // 25. Mensagem Criptografada (Atbash Simples)
+  {
+      "id": "criativa_atbash_1",
       "tipo": "Pergunta",
-      "titulo": "Decodificador Sustentável",
-      "pergunta": "<style>\n.decoder-wheel { position: relative; width: 200px; height: 200px; margin: 20px auto; }\n.decoder-outer { width: 100%; height: 100%; border: 5px solid #6b7280; border-radius: 50%; position: relative; background: #e5e7eb; }\n.decoder-inner { position: absolute; top: 25px; left: 25px; width: 150px; height: 150px; border: 3px solid #4b5563; border-radius: 50%; background: #f3f4f6; display: flex; justify-content: center; align-items: center; font-size: 2em; font-weight: bold; color: #1f2937; }\n.decoder-letter { position: absolute; width: 40px; height: 40px; text-align: center; line-height: 40px; font-weight: bold; cursor: pointer; border-radius: 50%; background: white; border: 1px solid #ccc; transition: background-color 0.2s; user-select: none; }\n.decoder-letter:hover { background-color: #d1d5db; }\n/* Posicionamento das Letras */\n.letter-a { top: 5px; left: 50%; transform: translateX(-50%); }\n.letter-b { top: 35px; right: 15px; transform: rotate(45deg); }\n.letter-c { top: 50%; right: 5px; transform: translateY(-50%) rotate(90deg); }\n.letter-d { bottom: 35px; right: 15px; transform: rotate(135deg); }\n.letter-e { bottom: 5px; left: 50%; transform: translateX(-50%) rotate(180deg); }\n/* Resultado com :target */\n#decode-result-area { min-height: 30px; margin-top: 10px; font-weight:bold; color: green; }\n#decode-a:target ~ #decode-result-area::before { content: 'Resultado para A: 💧'; }\n#decode-b:target ~ #decode-result-area::before { content: 'Resultado para B: 🌳'; }\n#decode-c:target ~ #decode-result-area::before { content: 'Resultado para C: ☀️'; }\n#decode-d:target ~ #decode-result-area::before { content: 'Resultado para D: 💨'; }\n#decode-e:target ~ #decode-result-area::before { content: 'Resultado para E: ♻️'; }\n/* Esconde os alvos vazios */\n.decode-target { display: none; }\n</style>\n<p style='text-align:center;'>Use o Decodificador! Clique em uma letra externa (A-E) para ver o símbolo correspondente no centro.</p>\n<div class=\"decoder-wheel\">\n  <div class=\"decoder-outer\">\n    <a href=\"#decode-a\"><div class=\"decoder-letter letter-a\">A</div></a>\n    <a href=\"#decode-b\"><div class=\"decoder-letter letter-b\">B</div></a>\n    <a href=\"#decode-c\"><div class=\"decoder-letter letter-c\">C</div></a>\n    <a href=\"#decode-d\"><div class=\"decoder-letter letter-d\">D</div></a>\n    <a href=\"#decode-e\"><div class=\"decoder-letter letter-e\">E</div></a>\n    <div class=\"decoder-inner\">\n        <!-- Alvos para :target (escondidos) -->\n        <span id=\"decode-a\" class=\"decode-target\"></span>\n        <span id=\"decode-b\" class=\"decode-target\"></span>\n        <span id=\"decode-c\" class=\"decode-target\"></span>\n        <span id=\"decode-d\" class=\"decode-target\"></span>\n        <span id=\"decode-e\" class=\"decode-target\"></span>\n        <!-- Área onde o resultado aparece via CSS ::before -->\n        <div id=\"decode-result-area\"></div>\n    </div>\n  </div>\n</div>\n<br>Qual letra corresponde ao símbolo de <strong>Reciclagem (♻️)</strong>?",
+      "titulo": "Código Secreto Atbash",
+      "pergunta": "Decifre a mensagem usando a cifra Atbash (A=Z, B=Y, C=X,...):<br><br><code style='font-family: monospace; font-size: 1.2em; display: block; text-align: center; letter-spacing: 3px; background: #eee; padding: 10px; border-radius: 4px;'>HVWFIGZ URIZ</code>",
       "opcoes": [
-          {"id": 1, "texto": "A"},
-          {"id": 2, "texto": "B"},
-          {"id": 3, "texto": "C"},
-          {"id": 4, "texto": "D"},
-          {"id": 5, "texto": "E"}
+          { "id": 1, "texto": "PLANTE ARVORE" },
+          { "id": 2, "texto": "RECICLE LIXO" },
+          { "id": 3, "texto": "PRESERVE AGUA" },
+          { "id": 4, "texto": "REDUZA CONSUMO" }
       ],
-      "respostaCorreta": 5,
+      "respostaCorreta": 1, // HVWFIGZ URIZ -> PLANTAR ARVORE
       "dificuldade": "normal",
-      "categorias": ["Teste_1"],
-      "fontes": [],
-      "vantagem": "Código decifrado!",
-      "desvantagem": "Letra errada. Clique nas letras para ver a correspondência.",
-      "dica": "Teste cada letra clicando nela."
-    },
-  
-    // 2. Combinação de Recursos (Visual com <details>)
+      "categorias": ["_Criativa_Criptografia"],
+      "fontes": ["Cifra Atbash"],
+      "vantagem": "Código quebrado! Mensagem revelada.",
+      "desvantagem": "Tradução incorreta. Lembre-se: A vira Z, B vira Y...",
+      "dica": "É uma inversão direta do alfabeto."
+  },
+    // --- LAYOUT E APRESENTAÇÃO ---
     {
-      "id": "teste_2",
-      "tipo": "Outras",
-      "titulo": "Oficina de Criação Sustentável",
-      "pergunta": "<style>\n.crafting-bench { border: 2px dashed #a16207; background: #fef3c7; padding: 15px; border-radius: 8px; }\n.crafting-section { margin-bottom: 15px; }\n.crafting-section h5 { margin: 0 0 10px 0; text-align: center; color: #a16207; border-bottom: 1px solid #fde047; padding-bottom: 5px; }\n.ingredient-list { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }\n.ingredient { cursor: pointer; border: 1px solid #d1d5db; padding: 5px 8px; border-radius: 4px; background: white; font-size: 0.9em; user-select: none; }\n/* Usando :focus-within ou similar seria melhor, mas <details> simula */\ndetails.ingredient-selected summary { border-color: #16a34a; background-color: #d1fae5; font-weight: bold; }\ndetails summary { list-style: none; /* Remove default marker */ display: inline-block; /* Fit content */ }\ndetails summary::-webkit-details-marker { display: none; /* Chrome/Safari */ }\n.craft-result { margin-top: 15px; padding: 10px; background: #f0fdf4; border: 1px solid #16a34a; border-radius: 4px; text-align: center; }\n</style>\n<div class=\"crafting-bench\">\n  <div class=\"crafting-section\">\n    <h5>Ingredientes Disponíveis (Clique para 'Selecionar')</h5>\n    <div class=\"ingredient-list\">\n      <details class=\"ingredient-selected\"> <summary class=\"ingredient\">💧 Água Limpa</summary> </details>\n      <details> <summary class=\"ingredient\">🌱 Sementes</summary> </details>\n      <details class=\"ingredient-selected\"> <summary class=\"ingredient\">☀️ Luz Solar</summary> </details>\n      <details> <summary class=\"ingredient\">🧱 Tijolos Reciclados</summary> </details>\n    </div>\n  </div>\n  <div class=\"crafting-section\">\n    <h5>Receita Possível:</h5>\n    <p style='text-align:center; font-size:0.9em;'>Água Limpa + Sementes + Luz Solar = ???</p>\n  </div>\n  <details style='margin-top: 15px;'>\n    <summary style='cursor: pointer; text-align:center; font-weight: bold; background: #6ee7b7; padding: 8px; border-radius: 4px;'>Combinar Ingredientes Selecionados</summary>\n    <div class=\"craft-result\">\n      <p>✨ Você criou: <strong>Horta Comunitária!</strong> (+15 Progresso)</p>\n    </div>\n  </details>\n</div>\n<p style='text-align:center; font-size:0.8em; margin-top: 10px;'>Confirme a criação abaixo (o efeito real depende dos ingredientes corretos - neste caso, são os pré-selecionados).</p>",
-      "opcoes": [
-          {"id": 1, "texto": "Confirmar Criação"},
-          {"id": 2, "texto": "Não criar nada agora"}
-      ],
-      "respostaCorreta": [1], // Confirma a tentativa de craft
-      "dificuldade": "normal",
-      "categorias": ["Teste_2"],
-      "fontes": [],
-      "vantagem": "Horta criada! +15 Progresso!", // Efeito aplicado no jogo se os ingredientes corretos fossem selecionados
-      "desvantagem": "Criação cancelada.",
-      "dica": "Clique nos ingredientes e depois em 'Combinar' para ver o resultado."
-    },
-  
-    // 3. Mini Aventura com Escolhas (Linked :target)
-    {
-      "id": "teste_3",
-      "tipo": "Outras",
-      "titulo": "Explorando a Caverna",
-      "pergunta": "<style>\n.adventure-popup { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(51, 65, 85, 0.85); display:none; justify-content:center; align-items:center; z-index:1005; padding:20px; }\n.adventure-popup:target { display:flex; }\n.adventure-content { background:#1f2937; color: #e5e7eb; padding:25px; border-radius:8px; max-width:350px; text-align:center; position:relative; border: 2px solid #4b5563; }\n.adventure-content h5 { margin:0 0 15px 0; color: #9ca3af; }\n.adventure-content p { margin-bottom: 15px; font-size:0.95em; line-height:1.5; }\n.adventure-content a { color: #60a5fa; text-decoration: underline; margin: 0 10px; }\n.adventure-close { position:absolute; top:10px; right:15px; font-size:24px; color:#9ca3af; text-decoration:none; }\n.adventure-close:hover { color: white; }\n.start-adventure { display:inline-block; padding: 10px 15px; background:#4f46e5; color:white; border-radius:5px; text-decoration:none; font-weight:bold; }\n</style>\n<p style='text-align:center;'>Você encontra a entrada de uma caverna misteriosa...</p>\n<p style='text-align:center;'><a href=\"#cave-start\" class='start-adventure'>Entrar na Caverna</a></p>\n\n<!-- Cena 1: Entrada -->\n<div id=\"cave-start\" class=\"adventure-popup\">\n  <div class=\"adventure-content\">\n    <a href=\"#\" class=\"adventure-close\">×</a>\n    <h5>Entrada da Caverna</h5>\n    <p>Está escuro. Você ouve o som de água pingando. Há dois túneis à frente.</p>\n    <a href=\"#cave-left\">Ir pela Esquerda</a>\n    <a href=\"#cave-right\">Ir pela Direita</a>\n  </div>\n</div>\n\n<!-- Cena 2: Esquerda -->\n<div id=\"cave-left\" class=\"adventure-popup\">\n  <div class=\"adventure-content\">\n    <a href=\"#\" class=\"adventure-close\">×</a>\n    <h5>Túnel da Esquerda</h5>\n    <p>Você encontra um veio de cristal brilhante! Parece valioso.</p>\n    <p><strong>Efeito: +1 Estrela Bônus</strong></p>\n    <a href=\"#\">Sair da Caverna</a>\n  </div>\n</div>\n\n<!-- Cena 3: Direita -->\n<div id=\"cave-right\" class=\"adventure-popup\">\n  <div class=\"adventure-content\">\n    <a href=\"#\" class=\"adventure-close\">×</a>\n    <h5>Túnel da Direita</h5>\n    <p>O chão cede um pouco! Você quase cai, mas se segura. Perdeu tempo.</p>\n    <p><strong>Efeito: Fique 1 Rodada Preso</strong></p>\n    <a href=\"#\">Sair da Caverna</a>\n  </div>\n</div>\n<p style='text-align:center; font-size:0.8em;'>Escolha seu caminho e clique na opção abaixo para confirmar o resultado.</p>",
-      "opcoes": [
-          {"id": 1, "texto": "Resultado da Exploração (Esquerda: +1 Estrela)"},
-          {"id": 2, "texto": "Resultado da Exploração (Direita: -1 Rodada)"}
-      ],
-      "respostaCorreta": [1, 2], // O jogador escolhe o resultado baseado no que viu
-      "dificuldade": "normal",
-      "categorias": ["Teste_3"],
-      "fontes": [],
-      "vantagem": "Aventura concluída!", // Se escolheu 1 (efeito aplicado no jogo)
-      "desvantagem": "Aventura concluída!", // Se escolheu 2 (efeito aplicado no jogo)
-      "dica": "Qual caminho parece mais promissor?"
-    },
-  
-    // 4. Cenário Animado (CSS Keyframes)
-    {
-      "id": "teste_4",
+      "id": "html_grid_layout_1",
       "tipo": "Pergunta",
-      "titulo": "Impacto da Poluição (Animado)",
-      "pergunta": "<style>\n@keyframes polluteRiver { 0% { background-color: #a5f3fc; /* Azul claro */ } 50% { background-color: #a3e635; /* Verde musgo */ } 100% { background-color: #a16207; /* Marrom escuro */ } }\n@keyframes fishDies { 0%, 40% { opacity: 1; transform: rotate(0deg); } 60% { transform: rotate(90deg); } 100% { opacity: 0.3; transform: rotate(180deg) translateY(10px); } }\n.animated-scenario { width: 250px; height: 100px; border: 2px solid #374151; margin: 15px auto; background-color: #a5f3fc; /* Azul inicial */ border-radius: 4px; position: relative; overflow: hidden; animation: polluteRiver 6s linear forwards; }\n.fish { font-size: 1.8em; position: absolute; top: 40%; left: 20%; animation: fishDies 6s linear forwards; animation-delay: 1s; }\n.pipe { position: absolute; top: 10px; right: -10px; width: 30px; height: 20px; background: #78716c; border-radius: 3px 0 0 3px; }\n.pipe::after { content: ''; position: absolute; top: 5px; left: -15px; width: 15px; height: 10px; background: #a16207; /* Marrom escuro */ animation: polluteRiver 6s linear forwards; border-radius: 2px; }\n</style>\n<p style='text-align:center;'>Observe a animação do rio sendo poluído:</p>\n<div class=\"animated-scenario\">\n  <div class=\"pipe\"></div>\n  <span class=\"fish\">🐠</span>\n</div>\n<br>Qual a consequência <strong>visual</strong> final da poluição mostrada?",
+      "titulo": "Análise de Impacto (Grid)",
+      "pergunta": "<style>\n.impact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }\n.impact-item { border: 1px solid #ccc; padding: 8px; border-radius: 4px; text-align: center; background-color: #f9f9f9; }\n.impact-item strong { display: block; margin-bottom: 5px; font-size: 1.1em; }\n.impact-value { font-size: 1.5em; font-weight: bold; }\n.impact-value.high { color: #dc2626; } /* Red */\n.impact-value.medium { color: #f97316; } /* Orange */\n.impact-value.low { color: #16a34a; } /* Green */\n</style>\n<p>Compare o impacto ambiental aproximado (emissões de CO₂eq por porção):</p>\n<div class=\"impact-grid\">\n  <div class=\"impact-item\"><strong>Carne Bovina</strong><span class=\"impact-value high\">🥩 ALTO</span></div>\n  <div class=\"impact-item\"><strong>Frango</strong><span class=\"impact-value medium\">🍗 MÉDIO</span></div>\n  <div class=\"impact-item\"><strong>Lentilhas</strong><span class=\"impact-value low\">🌱 BAIXO</span></div>\n  <div class=\"impact-item\"><strong>Arroz</strong><span class=\"impact-value low\">🍚 BAIXO</span></div>\n</div>\n<br>Qual alimento listado tem o <strong>MAIOR</strong> impacto?",
       "opcoes": [
-          {"id": 1, "texto": "O rio fica mais azul e limpo."},
-          {"id": 2, "texto": "O peixe nada mais rápido."},
-          {"id": 3, "texto": "O rio fica marrom e o peixe parece morrer/sofrer."}
+          {"id": 1, "texto": "Carne Bovina"},
+          {"id": 2, "texto": "Frango"},
+          {"id": 3, "texto": "Lentilhas"},
+          {"id": 4, "texto": "Arroz"}
+      ],
+      "respostaCorreta": 1,
+      "dificuldade": "facil",
+      "categorias": ["_test_cri_iva_Grid"],
+      "fontes": ["Dados de Pegada de Carbono"],
+      "vantagem": "Correto! A pecuária bovina tem um impacto significativo.",
+      "desvantagem": "Incorreto. Compare os níveis de impacto.",
+      "dica": "Procure pela classificação 'ALTO'."
+  },
+  {
+      "id": "html_flex_columns_1",
+      "tipo": "Pergunta",
+      "titulo": "Prós e Contras (Flexbox)",
+      "pergunta": "<style>\n.pros-cons-container { display: flex; gap: 15px; margin-top: 10px; }\n.pros-cons-col { flex: 1; border: 1px solid; border-radius: 5px; padding: 10px; }\n.pros-col { border-color: #16a34a; background-color: #f0fdf4; }\n.cons-col { border-color: #dc2626; background-color: #fee2e2; }\n.pros-cons-col h5 { margin: 0 0 10px 0; text-align: center; }\n.pros-cons-col ul { list-style: none; padding-left: 0; font-size: 0.9em; margin: 0; }\n.pros-cons-col li { margin-bottom: 5px; padding-left: 1.2em; position: relative; }\n.pros-col li::before { content: '✓'; color: #16a34a; position: absolute; left: 0; font-weight: bold; }\n.cons-col li::before { content: '✗'; color: #dc2626; position: absolute; left: 0; font-weight: bold; }\n</style>\n<p>Analise os prós e contras da energia hidrelétrica:</p>\n<div class=\"pros-cons-container\">\n  <div class=\"pros-cons-col pros-col\">\n    <h5>Prós (+)</h5>\n    <ul><li>Energia Renovável</li><li>Baixa emissão de GEE</li><li>Custo operacional baixo</li></ul>\n  </div>\n  <div class=\"pros-cons-col cons-col\">\n    <h5>Contras (-)</h5>\n    <ul><li>Impacto social (deslocamentos)</li><li>Impacto ambiental (alagamentos)</li><li>Dependência de chuvas</li></ul>\n  </div>\n</div><br>Qual é um <strong>CONTRA</strong> significativo da energia hidrelétrica listado?",
+      "opcoes": [
+          {"id": 1, "texto": "Baixa emissão de GEE"},
+          {"id": 2, "texto": "Impacto social"},
+          {"id": 3, "texto": "Custo operacional baixo"}
+      ],
+      "respostaCorreta": 2,
+      "dificuldade": "facil",
+      "categorias": ["_test_cri_iva_Flexbox"],
+      "fontes": ["Fontes de Energia"],
+      "vantagem": "Correto! O impacto social é um grande desafio.",
+      "desvantagem": "Incorreto. Esse item está listado como um 'Pró'.",
+      "dica": "Procure na coluna com o 'X' vermelho."
+  },
+  {
+      "id": "html_gradient_bg_1",
+      "tipo": "Vantagem",
+      "titulo": "Amanhecer Sustentável",
+      "pergunta": "<div style='padding: 20px; border-radius: 8px; color: #333; text-align: center; background: linear-gradient(to bottom, #a7f3d0, #6ee7b7, #34d399);'>\n  <p style='font-size: 2.5em; margin-bottom: 10px;'>🌅</p>\n  <p style='font-weight: bold; font-size: 1.1em;'>Um novo dia começa com esperança e ações verdes!</p>\n  <p>Seu compromisso inspira! Ganhe <strong>+15 de Progresso</strong>.</p>\n</div>",
+      "opcoes": [ { "id": 1, "texto": "Começar bem o dia!" } ],
+      "respostaCorreta": [1],
+      "dificuldade": "facil",
+      "categorias": ["_test_cri_iva_Gradient"],
+      "fontes": [],
+      "vantagem": "Ganhou +15 Progresso!",
+      "desvantagem": "",
+      "dica": "Aproveite a energia positiva!"
+  },
+  {
+      "id": "html_blockquote_1",
+      "tipo": "Outras",
+      "titulo": "Voz da Experiência",
+      "pergunta": "<blockquote style='border-left: 4px solid #fbbf24; margin: 15px 0; padding: 10px 15px; background-color: #fffbeb; font-style: italic;'>\n  \"Não herdamos a terra de nossos ancestrais, nós a pegamos emprestada de nossos filhos.\"\n  <footer style='text-align: right; font-style: normal; font-size: 0.9em; margin-top: 8px;'>— Provérbio Nativo Americano</footer>\n</blockquote>\n<p>Esta citação enfatiza principalmente qual aspecto da sustentabilidade?</p>",
+      "opcoes": [
+          {"id": 1, "texto": "Lucro econômico a curto prazo"},
+          {"id": 2, "texto": "Responsabilidade intergeracional"},
+          {"id": 3, "texto": "Exploração máxima de recursos"}
+      ],
+      "respostaCorreta": 2,
+      "dificuldade": "facil",
+      "categorias": ["_test_cri_iva_Blockquote"],
+      "fontes": ["Citações Famosas"],
+      "vantagem": "Correto! Pensar nas futuras gerações é crucial.",
+      "desvantagem": "Incorreto. A citação fala sobre o futuro.",
+      "dica": "A quem pertence a terra no futuro, segundo o provérbio?"
+  },
+
+  // --- INTERATIVIDADE SIMULADA ---
+
+  {
+      "id": "html_tooltip_1",
+      "tipo": "Pergunta",
+      "titulo": "Glossário Rápido (Tooltip)",
+      "pergunta": "<style>\n.tooltip { position: relative; display: inline-block; border-bottom: 1px dotted black; cursor: help; }\n.tooltip .tooltiptext { visibility: hidden; width: 160px; background-color: #555; color: #fff; text-align: center; border-radius: 6px; padding: 5px 8px; position: absolute; z-index: 1; bottom: 125%; /* Position above */ left: 50%; margin-left: -80px; opacity: 0; transition: opacity 0.3s; font-size: 0.85em; }\n.tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }\n.tooltip .tooltiptext::after { content: \"\"; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #555 transparent transparent transparent; }\n</style>\nO que significa <span class=\"tooltip\">ESG<span class=\"tooltiptext\">Environmental, Social, and Governance (Ambiental, Social e Governança) - Fatores usados para medir a sustentabilidade e o impacto ético de um investimento.</span></span> no mundo corporativo?",
+      "opcoes": [
+          {"id": 1, "texto": "Energia Solar Garantida"},
+          {"id": 2, "texto": "Padrões de Sustentabilidade e Governança"},
+          {"id": 3, "texto": "Estratégia de Superávit Global"}
+      ],
+      "respostaCorreta": 2,
+      "dificuldade": "normal",
+      "categorias": ["_test_cri_iva_Tooltip"],
+      "fontes": ["Termos Corporativos"],
+      "vantagem": "Correto! ESG é um critério cada vez mais importante.",
+      "desvantagem": "Incorreto. Passe o mouse sobre ESG para ver a sigla.",
+      "dica": "Passe o mouse sobre a sigla 'ESG' na pergunta."
+  },
+  {
+      "id": "html_flipcard_1",
+      "tipo": "Vantagem",
+      "titulo": "Carta Surpresa (Flip)",
+      "pergunta": "<style>\n.flip-card-container { perspective: 1000px; width: 180px; height: 100px; margin: 15px auto; }\n.flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }\n.flip-card-container:hover .flip-card-inner { transform: rotateY(180deg); }\n.flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border: 1px solid #ccc; border-radius: 8px; display: flex; justify-content: center; align-items: center; text-align: center; padding: 10px; }\n.flip-card-front { background-color: #bbdefb; color: black; }\n.flip-card-back { background-color: #a5d6a7; color: #1b5e20; transform: rotateY(180deg); }\n</style>\n<p style='text-align:center;'>Passe o mouse sobre a carta para revelar sua sorte!</p>\n<div class=\"flip-card-container\">\n  <div class=\"flip-card-inner\">\n    <div class=\"flip-card-front\">\n      <p style='font-size: 1.5em;'>?</p>\n      <p style='font-size: 0.9em;'>Carta Misteriosa</p>\n    </div>\n    <div class=\"flip-card-back\">\n      <p>🍀 Sorte! Você encontrou um recurso raro! Ganhe <strong>+1 Estrela Bônus</strong>.</p>\n    </div>\n  </div>\n</div>",
+      "opcoes": [ { "id": 1, "texto": "Revelar a Sorte!" } ],
+      "respostaCorreta": [1],
+      "dificuldade": "facil",
+      "categorias": ["_test_cri_iva_FlipCard"],
+      "fontes": [],
+      "vantagem": "Ganhou +1 Estrela Bônus!", // Efeito real
+      "desvantagem": "",
+      "dica": "Passe o mouse (ou toque em mobile) na carta azul."
+  },
+  {
+      "id": "html_secret_reveal_1",
+      "tipo": "Outras",
+      "titulo": "Pista Secreta",
+      "pergunta": "<p>Você encontrou uma mensagem cifrada deixada por um antigo protetor da floresta.</p>\n<details style='margin: 10px auto; width: fit-content;'>\n  <summary style='cursor: pointer; border: 1px solid; padding: 5px 10px; border-radius: 4px; background: #fef3c7; color: #ca8a04;'>Revelar Mensagem</summary>\n  <p style='margin-top: 10px; padding: 10px; background: #fffbeb; border: 1px dashed #fde047;'>\n    <i>\"O verdadeiro tesouro não é ouro, mas a <strong>água limpa</strong> que flui livremente.\"</i>\n    <br><br><strong>Efeito:</strong> Se estiver em uma casa de RIO ou NASCENTE, ganhe +10 Progresso.\n  </p>\n</details>",
+      "opcoes": [ { "id": 1, "texto": "Entendido." } ],
+      "respostaCorreta": [1],
+      "dificuldade": "normal",
+      "categorias": ["_test_cri_iva_SecretReveal"],
+      "fontes": [],
+      "vantagem": "Mensagem revelada! Verifique sua posição no tabuleiro.", // Efeito condicional aplicado no jogo
+      "desvantagem": "",
+      "dica": "Clique para ler a mensagem."
+  },
+  {
+      "id": "html_checklist_1",
+      "tipo": "Pergunta",
+      "titulo": "Checklist de Ações",
+      "pergunta": "<style>\n.checklist { list-style: none; padding-left: 0; margin: 10px 0; }\n.checklist li { margin-bottom: 8px; position: relative; padding-left: 25px; }\n.checklist li::before { content: ''; display: inline-block; width: 16px; height: 16px; border: 2px solid #6ee7b7; border-radius: 3px; position: absolute; left: 0; top: 2px; background-color: white; }\n/* Marcar um item (exemplo) */\n.checklist li.checked::after { content: '✔'; color: #047857; position: absolute; left: 3px; top: 1px; font-size: 14px; font-weight: bold; }\n</style>\n<p>Qual ação deste checklist <strong>NÃO</strong> contribui diretamente para reduzir sua pegada de carbono?</p>\n<ul class=\"checklist\">\n  <li class=\"checked\">Reduzir consumo de carne</li>\n  <li class=\"checked\">Usar transporte público/bicicleta</li>\n  <li>Comprar produtos locais</li>\n  <li class=\"checked\">Economizar energia em casa</li>\n</ul>",
+      "opcoes": [
+          {"id": 1, "texto": "Reduzir consumo de carne"},
+          {"id": 2, "texto": "Usar transporte público/bicicleta"},
+          {"id": 3, "texto": "Comprar produtos locais"}, // Embora bom, o impacto direto no *carbono* é menor que os outros
+          {"id": 4, "texto": "Economizar energia"}
+      ],
+      "respostaCorreta": 3,
+      "dificuldade": "normal",
+      "categorias": ["_test_cri_iva_Checklist"],
+      "fontes": ["Pegada de Carbono"],
+      "vantagem": "Correto! Embora comprar local seja bom, os outros têm impacto mais direto nas emissões de carbono.",
+      "desvantagem": "Incorreto. Esta ação tem um impacto significativo na pegada de carbono.",
+      "dica": "Pense em emissões de transporte e produção de energia/alimentos."
+  },
+
+  // --- APRESENTAÇÃO VISUAL TEMÁTICA ---
+  {
+      "id": "html_torn_paper_1",
+      "tipo": "Desvantagem",
+      "titulo": "Notificação Urgente",
+      "pergunta": "<style>\n.torn-paper {\n  background-color: #fdf6e3; /* Cor de papel velho */\n  padding: 25px;\n  margin: 15px auto;\n  max-width: 300px;\n  border: 1px solid #ddd;\n  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);\n  position: relative;\n  /* Efeito \"rasgado\" (simplificado com pseudo-elementos) */\n}\n.torn-paper::before, .torn-paper::after {\n  content: ''; position: absolute; width: 100%; height: 10px; background-size: 20px 10px;\n}\n.torn-paper::before { top: -1px; background-image: linear-gradient(45deg, transparent 75%, #fdf6e3 75%), linear-gradient(-45deg, transparent 75%, #fdf6e3 75%); background-position: 0 0, 10px 0; }\n.torn-paper::after { bottom: -1px; transform: rotate(180deg); background-image: linear-gradient(45deg, transparent 75%, #fdf6e3 75%), linear-gradient(-45deg, transparent 75%, #fdf6e3 75%); background-position: 10px 0, 0 0; }\n</style>\n<div class=\"torn-paper\">\n  <h5 style='text-align:center; color: #b91c1c; margin:0 0 10px 0;'>AVISO DE MULTA</h5>\n  <p style='font-size:0.9em; text-align:center;'>Descarte inadequado de resíduos detectado! Pague a multa ou perca a próxima rodada.</p>\n  <p style='text-align:center; font-weight:bold; margin-top:15px;'>Opção: Perca 1 Estrela Bônus</p>\n</div>",
+      "opcoes": [ { "id": 1, "texto": "Pagar a Multa (-1 Estrela)" } ], // Ou lógica para perder rodada
+      "respostaCorreta": [1],
+      "dificuldade": "facil",
+      "categorias": ["_test_cri_iva_PapelRasgado"],
+      "fontes": [],
+      "vantagem": "Multa paga (se tinha estrela).",
+      "desvantagem": "Não tinha estrela para pagar (perde rodada - efeito no jogo).",
+      "dica": "O descarte correto é importante."
+  },
+  {
+      "id": "html_calendar_1",
+      "tipo": "Vantagem",
+      "titulo": "Dia da Terra!",
+      "pergunta": "<style>\n.calendar-day { width: 150px; border: 1px solid #ccc; margin: 15px auto; border-radius: 5px; overflow: hidden; box-shadow: 1px 1px 3px rgba(0,0,0,0.1); }\n.calendar-header { background-color: #16a34a; color: white; text-align: center; padding: 5px; font-weight: bold; }\n.calendar-date { font-size: 3em; text-align: center; padding: 15px 10px; background: white; font-weight: bold; }\n.calendar-event { font-size: 0.9em; text-align: center; padding: 8px; background: #d1fae5; color: #065f46; }\n</style>\n<div class=\"calendar-day\">\n  <div class=\"calendar-header\">Abril</div>\n  <div class=\"calendar-date\">22</div>\n  <div class=\"calendar-event\">🌍 Dia da Terra!</div>\n</div>\n<p style='text-align:center; margin-top: 10px;'>Em comemoração, todos os jogadores ganham +5 de Progresso!</p>",
+      "opcoes": [ { "id": 1, "texto": "Celebrar!" } ],
+      "respostaCorreta": [1],
+      "dificuldade": "facil",
+      "categorias": ["_test_cri_iva_Calendario"],
+      "fontes": ["Datas Comemorativas"],
+      "vantagem": "Todos ganharam +5 Progresso!", // Efeito em todos
+      "desvantagem": "",
+      "dica": "Uma data importante para o planeta."
+  },
+  {
+      "id": "html_comic_strip_1",
+      "tipo": "Outras",
+      "titulo": "A Gota Viajante",
+      "pergunta": "<style>\n.comic-panel { border: 2px solid #3b82f6; background: white; padding: 8px; margin: 5px auto; max-width: 300px; border-radius: 4px; }\n.comic-panel img { display: block; width: 80%; margin: 5px auto; height: auto; border: 1px solid #eee; }\n.comic-caption { font-size: 0.85em; text-align: center; margin-top: 5px; font-style: italic; color: #1e3a8a; }\n</style>\n<div style='border: 1px solid #ccc; padding: 10px; background: #eff6ff;'>\n <p style='text-align:center; font-weight:bold; margin-bottom: 10px;'>A Jornada da Gotinha:</p>\n <div class='comic-panel'>\n   <img src='/images/gota_no_rio.png' alt='Gota no rio'>\n   <p class='comic-caption'>1. No rio, tranquila...</p>\n </div>\n <div class='comic-panel'>\n   <img src='/images/gota_evaporando.png' alt='Gota evaporando'>\n   <p class='comic-caption'>2. O sol esquenta, hora de subir!</p>\n </div>\n <div class='comic-panel'>\n   <img src='/images/gota_na_nuvem.png' alt='Gota na nuvem'>\n   <p class='comic-caption'>3. Encontro amigas na nuvem...</p>\n </div>\n <div class='comic-panel'>\n   <img src='/images/gota_caindo.png' alt='Gota caindo'>\n   <p class='comic-caption'>4. Pesa demais! Hora de voltar!</p>\n </div>\n</div><br>Qual etapa crucial do ciclo falta entre a 3 e a 4?",
+      "opcoes": [ {"id": 1, "texto": "Congelamento"}, {"id": 2, "texto": "Condensação (formação da gota maior)"}, {"id": 3, "texto": "Infiltração no solo"} ],
+      "respostaCorreta": 2,
+      "dificuldade": "normal",
+      "categorias": ["_test_cri_iva_ComicStrip"],
+      "fontes": ["Ciclo da Água"],
+      "vantagem": "Correto! A condensação forma as gotas de chuva.",
+      "desvantagem": "Essa etapa ocorre em outro momento do ciclo.",
+      "dica": "O que acontece com o vapor na nuvem antes de chover?"
+  },
+    {
+      "id": "html_qrcode_1",
+      "tipo": "Outras",
+      "titulo": "Dica Extra (QR Code)",
+      "pergunta": "<p style='text-align:center;'>Escaneie o QR Code com seu celular (se possível) para uma dica valiosa sobre pegada hídrica!</p>\n<img src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.watercalculator.org/' alt='QR Code para Water Calculator' style='display: block; margin: 15px auto; border: 5px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.2);'>\n<p style='text-align:center; font-size: 0.8em;'>(Aponta para watercalculator.org)</p>\n<br><p style='text-align:center;'>Use a dica para responder: Qual item geralmente tem a <strong>maior</strong> pegada hídrica?</p>",
+      "opcoes": [ {"id": 1, "texto": "1kg de Arroz"}, {"id": 2, "texto": "1kg de Carne Bovina"}, {"id": 3, "texto": "1 Camiseta de Algodão"} ],
+      "respostaCorreta": 2,
+      "dificuldade": "normal",
+      "categorias": ["_test_cri_iva_QRCode"],
+      "fontes": ["Water Footprint Network"],
+      "vantagem": "Correto! A produção de carne bovina consome muita água.",
+      "desvantagem": "Incorreto. A dica no QR Code ajudaria!",
+      "dica": "A produção de carne envolve água para o animal e para cultivar seu alimento."
+  },
+  {
+      "id": "html_spot_diff_1",
+      "tipo": "Pergunta",
+      "titulo": "Jogo dos 7 Erros (1 Erro)",
+      "pergunta": "<style>\n.diff-container { display: flex; justify-content: space-around; gap: 10px; margin: 15px 0; padding: 5px; background: #f3f4f6; border-radius: 5px; }\n.diff-img { width: 48%; border: 1px solid #d1d5db; }\n</style>\n<p>Encontre a <strong>única</strong> diferença significativa entre as duas imagens de reciclagem:</p>\n<div class=\"diff-container\">\n <img src=\"/images/reciclagem_a.png\" alt=\"Cena A\" class=\"diff-img\">\n <img src=\"/images/reciclagem_b_com_erro.png\" alt=\"Cena B com erro\" class=\"diff-img\">\n</div>",
+      "opcoes": [
+          {"id": 1, "texto": "A cor da lixeira de metal"},
+          {"id": 2, "texto": "Uma garrafa plástica no lixo de papel"}, // A diferença
+          {"id": 3, "texto": "O tipo de árvore ao fundo"},
+          {"id": 4, "texto": "A presença de uma pessoa"}
+      ],
+      "respostaCorreta": 2,
+      "dificuldade": "facil",
+      "categorias": ["_test_cri_iva_SpotDifference"],
+      "fontes": [],
+      "vantagem": "Exato! Separar corretamente é essencial.",
+      "desvantagem": "Olhe com mais atenção para os detalhes das lixeiras.",
+      "dica": "Verifique o conteúdo de cada lixeira."
+  },
+    {
+      "id": "html_wordsearch_1",
+      "tipo": "Pergunta",
+      "titulo": "Caça-Palavras Verde",
+      "pergunta": "<style>\n.wordsearch-grid { font-family: monospace; line-height: 1.2; font-size: 1.1em; border-collapse: collapse; margin: 15px auto; user-select: none; }\n.wordsearch-grid td { border: 1px solid #eee; padding: 2px 4px; text-align: center; width: 20px; height: 20px; }\n.wordsearch-grid .found { background-color: #a7f3d0; font-weight: bold; } /* Exemplo de marcação */\n</style>\n<p>Encontre a palavra <strong>\"SOLAR\"</strong> (horizontal, vertical ou diagonal) no caça-palavras abaixo. Em qual linha ela <strong>começa</strong>?</p>\n<table class=\"wordsearch-grid\">\n  <tr><td>R</td><td>E</td><td>N</td><td>O</td><td>V</td><td>A</td><td>R</td></tr>\n  <tr><td>S</td><td>O</td><td>L</td><td>A</td><td>R</td><td>G</td><td>U</td></tr>\n  <tr><td>U</td><td>L</td><td>I</td><td>X</td><td>O</td><td>U</td><td>A</td></tr>\n  <tr><td>S</td><td>A</td><td>R</td><td>V</td><td>O</td><td>A</td><td>T</td></tr>\n  <tr><td>T</td><td>M</td><td>E</td><td>T</td><td>A</td><td>L</td><td>E</td></tr>\n  <tr><td>A</td><td>A</td><td>Z</td><td>U</td><td>L</td><td>M</td><td>R</td></tr>\n</table>",
+      "opcoes": [ {"id": 1, "texto": "Linha 1"}, {"id": 2, "texto": "Linha 2"}, {"id": 3, "texto": "Linha 4"}, {"id": 4, "texto": "Linha 6"} ],
+      "respostaCorreta": 2,
+      "dificuldade": "facil",
+      "categorias": ["_test_cri_iva_WordSearch"],
+      "fontes": [],
+      "vantagem": "Correto! Achou a energia limpa.",
+      "desvantagem": "Procure novamente, a palavra está lá!",
+      "dica": "Está na horizontal."
+  },
+  {
+      "id": "html_crossword_1",
+      "tipo": "Pergunta",
+      "titulo": "Cruzadinha Ecológica",
+      "pergunta": "Qual palavra de 6 letras completa a cruzadinha?<br><br><i>1. Vertical:</i> Processo de transformar lixo orgânico em adubo.<br><br>\n<code style='font-family: monospace; font-size: 1.4em; display: block; margin: 10px auto; width: fit-content;'>\n  _ _ <span style='border-bottom: 2px solid black;'>C</span> _ _ _ <br>\n     O<br>\n     M<br>\n     P<br>\n     O<br>\n     S<br>\n     T<br>\n     A<br>\n     G<br>\n     E<br>\n     M<br>\n</code>",
+      "opcoes": [ {"id": 1, "texto": "RECICLAGEM"}, {"id": 2, "texto": "POLUIÇÃO"}, {"id": 3, "texto": "COMPOSTAGEM"} ],
+      "respostaCorreta": 3,
+      "dificuldade": "facil",
+      "categorias": ["_test_cri_iva_Crossword"],
+      "fontes": [],
+      "vantagem": "Correto!",
+      "desvantagem": "Essa palavra não se encaixa.",
+      "dica": "Começa com C e termina com M."
+  },
+  {
+      "id": "html_repair_diagram_1",
+      "tipo": "CompletarFrase", // Usando este tipo para a interação
+      "titulo": "Repare o Ciclo",
+      "pergunta": "O diagrama mostra o ciclo do Nitrogênio simplificado. Qual processo, realizado por bactérias no solo, converte nitrito em nitrato, forma utilizável pelas plantas?<br><br>\n<div style='text-align:center;'>\n  N₂ (Atmosfera) → Fixação → Amônia (NH₃) → Nitrificação (1ª parte) → Nitrito (NO₂) → <strong>__1__</strong> → Nitrato (NO₃) → Plantas\n</div>",
+      "fraseIncompleta": "O processo é a __1__.", // A frase a ser completada é implícita
+      "fragmentos": [
+          { "id": 1, "texto": "Desnitrificação" },
+          { "id": 2, "texto": "Nitrificação (2ª parte)" },
+          { "id": 3, "texto": "Amonificação" }
+      ],
+      "respostaCorreta": [2], // Nitrificação (2ª parte)
+      "opcoes": [], // Não usado diretamente
+      "dificuldade": "dificil",
+      "categorias": ["_test_cri_iva_RepairDiagram"],
+      "fontes": ["Ciclo do Nitrogênio"],
+      "vantagem": "Correto! É a segunda etapa da nitrificação.",
+      "desvantagem": "Incorreto. Esse processo ocorre em outra parte do ciclo.",
+      "dica": "É a continuação da Nitrificação."
+  },
+  {
+      "id": "html_soundwave_1",
+      "tipo": "Pergunta",
+      "titulo": "Poluição Sonora",
+      "pergunta": "A 'onda sonora' abaixo representa o nível de ruído. Qual situação ela provavelmente descreve?<br><br>\n<style>\n@keyframes wavePulse { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }\n.sound-wave { display: flex; align-items: flex-end; justify-content: center; height: 60px; margin: 15px auto; width: 150px; }\n.sound-wave div { width: 8px; height: 100%; margin: 0 2px; background-color: #f87171; /* Vermelho indica alto ruído */ border-radius: 4px; animation: wavePulse 0.8s infinite ease-in-out; }\n.sound-wave div:nth-child(2) { animation-delay: 0.1s; height: 80%; }\n.sound-wave div:nth-child(3) { animation-delay: 0.2s; height: 90%; }\n.sound-wave div:nth-child(4) { animation-delay: 0.3s; height: 70%; }\n.sound-wave div:nth-child(5) { animation-delay: 0.4s; height: 85%; }\n</style>\n<div class=\"sound-wave\">\n  <div></div><div></div><div></div><div></div><div></div>\n</div>",
+      "opcoes": [
+          {"id": 1, "texto": "Biblioteca silenciosa"},
+          {"id": 2, "texto": "Parque tranquilo"},
+          {"id": 3, "texto": "Rua com tráfego intenso e buzinas"}
       ],
       "respostaCorreta": 3,
       "dificuldade": "facil",
-      "categorias": ["Teste_4"],
+      "categorias": ["_test_cri_iva_SoundWave"],
       "fontes": [],
-      "vantagem": "Correto! A poluição tem efeitos visíveis e drásticos.",
-      "desvantagem": "Observe a cor final da água e o que acontece com o peixe.",
-      "dica": "A animação mostra uma degradação."
-    },
-  
-    // 5. Checklist Interativo (Checkbox Hack + CSS Sibling Selector)
-    {
-      "id": "teste_5",
-      "tipo": "Outras", // A interação principal é visual/informativa
-      "titulo": "Checklist Casa Ecológica",
-      "pergunta": "<style>\n.checklist-container { background: #f0f9ff; border: 1px solid #a5f3fc; padding: 15px; border-radius: 5px; }\n.checklist-item { margin-bottom: 10px; }\n.checklist-item input[type='checkbox'] { display: none; /* Esconde checkbox real */ }\n.checklist-item label { cursor: pointer; display: flex; align-items: center; font-size: 0.95em; }\n.checklist-item label::before { content: ''; display: inline-block; width: 18px; height: 18px; border: 2px solid #0ea5e9; border-radius: 3px; margin-right: 10px; background-color: white; transition: background-color 0.2s, border-color 0.2s; }\n.checklist-item input[type='checkbox']:checked + label::before { background-color: #0ea5e9; border-color: #0284c7; }\n.checklist-item input[type='checkbox']:checked + label::after { content: '✔'; color: white; position: absolute; left: 19px; /* Ajustar posição */ top: 1px; font-size: 14px; font-weight: bold; }\n.checklist-consequence { display: none; /* Escondido por padrão */ margin-left: 30px; margin-top: 5px; font-size: 0.85em; color: #0ea5e9; border-left: 2px solid #a5f3fc; padding-left: 8px; }\n/* Mostra consequência específica quando o checkbox correspondente é marcado */\n#check1:checked ~ #consequence1, \n#check2:checked ~ #consequence2, \n#check3:checked ~ #consequence3, \n#check4:checked ~ #consequence4 { display: block; }\n</style>\n<div class=\"checklist-container\">\n  <p style='font-weight: bold; margin-bottom: 10px;'>Marque as ações que você já implementou em casa:</p>\n  <div class=\"checklist-item\">\n    <input type=\"checkbox\" id=\"check1\"/>\n    <label for=\"check1\">Lâmpadas LED</label>\n    <p id=\"consequence1\" class=\"checklist-consequence\">Ótimo! Economiza muita energia.</p>\n  </div>\n  <div class=\"checklist-item\">\n    <input type=\"checkbox\" id=\"check2\"/>\n    <label for=\"check2\">Coleta Seletiva</label>\n    <p id=\"consequence2\" class=\"checklist-consequence\">Essencial para reduzir o lixo em aterros.</p>\n  </div>\n  <div class=\"checklist-item\">\n    <input type=\"checkbox\" id=\"check3\"/>\n    <label for=\"check3\">Reúso de Água</label>\n    <p id=\"consequence3\" class=\"checklist-consequence\">Excelente forma de conservar água.</p>\n  </div>\n  <div class=\"checklist-item\">\n    <input type=\"checkbox\" id=\"check4\"/>\n    <label for=\"check4\">Composteira</label>\n    <p id=\"consequence4\" class=\"checklist-consequence\">Transforma lixo orgânico em adubo rico.</p>\n  </div>\n</div>\n<p style='text-align:center; font-size: 0.8em; margin-top: 10px;'>Clique nas ações e depois confirme abaixo (sem efeito mecânico direto no jogo, apenas informativo).</p>",
-      "opcoes": [
-        { "id": 1, "texto": "Fechar Checklist" }
-      ],
-      "respostaCorreta": [1],
-      "dificuldade": "facil",
-      "categorias": ["Teste_5"],
-      "fontes": [],
-      "vantagem": "Ótimo revisar suas práticas!",
-      "desvantagem": "",
-      "dica": "Clique nos itens para ver comentários."
-    },
-    // Caverna 1: O Cristal e o Abismo
-    {
-      "id": "cave_adv_1",
-      "tipo": "Outras",
-      "titulo": "Caverna dos Cristais Cintilantes",
-      "pergunta": "<style>\n/* Estilos gerais dos popups da caverna (reutilizados) */\n.cave-popup { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(30, 41, 59, 0.9); display:none; justify-content:center; align-items:center; z-index:1010; padding:15px; }\n.cave-popup:target { display:flex; }\n.cave-content { background:#475569; color: #e2e8f0; padding:25px; border-radius:8px; max-width:380px; text-align:center; position:relative; border: 3px solid #64748b; }\n.cave-content h5 { margin:0 0 15px 0; color: #cbd5e1; border-bottom: 1px solid #64748b; padding-bottom: 8px; }\n.cave-content p { margin-bottom: 15px; font-size:0.95em; line-height:1.5; }\n.cave-content a { color: #93c5fd; text-decoration: underline; margin: 0 10px; cursor: pointer; }\n.cave-close { position:absolute; top:8px; right:12px; font-size:24px; color:#9ca3af; text-decoration:none; }\n.cave-close:hover { color: white; }\n.cave-start-btn { display:inline-block; padding: 10px 15px; background:#6366f1; color:white; border-radius:5px; text-decoration:none; font-weight:bold; }\n</style>\n<p style='text-align:center;'>Você encontra a entrada de uma caverna escura, com um brilho azulado vindo de dentro...</p>\n<p style='text-align:center;'><a href=\"#cave1-start\" class='cave-start-btn'>Entrar na Caverna</a></p>\n\n<!-- Cenas da Caverna 1 -->\n<div id=\"cave1-start\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Entrada Ecoante</h5>\n    <p>O ar é úmido. Você vê um túnel estreito à <strong>esquerda</strong> e uma passagem mais larga à <strong>direita</strong> que desce.</p>\n    <a href=\"#cave1-left\">Ir pela Esquerda</a> <a href=\"#cave1-right\">Ir pela Direita</a>\n  </div>\n</div>\n<div id=\"cave1-left\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Túnel Estreito</h5>\n    <p>Você se espreme e encontra uma pequena câmara com um cristal cintilante!</p>\n    <p><strong>Efeito: +1 Estrela Bônus</strong></p>\n    <a href=\"#\">Sair com o Cristal</a>\n  </div>\n</div>\n<div id=\"cave1-right\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Passagem Descendente</h5>\n    <p>Você desce com cuidado. O caminho termina abruptamente em um abismo escuro. Você quase caiu!</p>\n    <p><strong>Efeito: Perca 1 Rodada (susto e tempo perdido)</strong></p>\n    <a href=\"#\">Retornar com Cuidado</a>\n  </div>\n</div>\n<p style='text-align:center; font-size:0.8em;'>Explore e clique na opção final correspondente.</p>",
-      "opcoes": [
-        { "id": 1, "texto": "Saí com +1 Estrela Bônus" },
-        { "id": 2, "texto": "Saí, mas perdi 1 Rodada" }
-      ],
-      "respostaCorreta": [1, 2],
-      "dificuldade": "facil",
-      "categorias": ["Teste_Caverna1"],
-      "fontes": [],
-      "vantagem": "Aventura na Caverna Concluída!",
-      "desvantagem": "Aventura na Caverna Concluída!",
-      "dica": "Brilho geralmente indica algo bom..."
-    },
-  
-    // Caverna 2: O Rio Subterrâneo e a Criatura
-    {
-      "id": "cave_adv_2",
-      "tipo": "Outras",
-      "titulo": "Caverna do Rio Murmurante",
-      "pergunta": "<style> /* Reutilizando estilos .cave-* da carta anterior */ </style>\n<p style='text-align:center;'>Um rio some por uma fenda na rocha. Você decide seguir...</p>\n<p style='text-align:center;'><a href=\"#cave2-start\" class='cave-start-btn'>Seguir o Rio</a></p>\n\n<!-- Cenas da Caverna 2 -->\n<div id=\"cave2-start\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Seguindo o Rio</h5><p>Você acompanha o rio subterrâneo. Ouve um barulho estranho à frente. O caminho se divide: seguir pela <strong>margem seca</strong> ou tentar atravessar por <strong>pedras escorregadias</strong> no meio do rio?</p><a href=\"#cave2-dry\">Margem Seca</a> <a href=\"#cave2-wet\">Pedras Molhadas</a></div></div>\n<div id=\"cave2-dry\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Margem Seca</h5><p>Seguro, mas lento. Você avança e vê a saída, mas parece que perdeu algo pelo caminho.</p><p><strong>Efeito: Sem Bônus/Penalidade</strong></p><a href=\"#\">Sair da Caverna</a></div></div>\n<div id=\"cave2-wet\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Pedras Molhadas</h5><p>Você escorrega, mas se segura! Ao se levantar, vê algo brilhando na água: uma Gema Rara!</p><p><strong>Efeito: +1 Estrela Fixa</strong></p><a href=\"#\">Sair com a Gema</a></div></div>\n\n<p style='text-align:center; font-size:0.8em;'>Explore e clique na opção final correspondente.</p>",
-      "opcoes": [
-        { "id": 1, "texto": "Saí sem nada de especial (Margem Seca)" },
-        { "id": 2, "texto": "Saí com +1 Estrela Fixa (Pedras Molhadas)" }
-      ],
-      "respostaCorreta": [1, 2],
-      "dificuldade": "normal",
-      "categorias": ["Teste_Caverna2"],
-      "fontes": [],
-      "vantagem": "Aventura no Rio Concluída!",
-      "desvantagem": "Aventura no Rio Concluída!",
-      "dica": "Às vezes, o caminho mais arriscado tem recompensas."
-    },
-  
-    // Caverna 3: O Labirinto e o Eco
-    {
-      "id": "cave_adv_3",
-      "tipo": "Outras",
-      "titulo": "Caverna dos Ecos Perdidos",
-      "pergunta": "<style> /* Reutilizando estilos .cave-* */ </style>\n<p style='text-align:center;'>Esta caverna parece um labirinto. Você grita 'Olá!' e ouve ecos vindo de múltiplas direções...</p>\n<p style='text-align:center;'><a href=\"#cave3-start\" class='cave-start-btn'>Explorar o Labirinto</a></p>\n\n<!-- Cenas da Caverna 3 -->\n<div id=\"cave3-start\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Encruzilhada dos Ecos</h5><p>Um eco parece vir da <strong>esquerda</strong> (som metálico), um da <strong>frente</strong> (som de água), e um da <strong>direita</strong> (silêncio).</p><a href=\"#cave3-left\">Seguir Som Metálico</a> <a href=\"#cave3-front\">Seguir Som de Água</a> <a href=\"#cave3-right\">Seguir Silêncio</a></div></div>\n<div id=\"cave3-left\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Som Metálico</h5><p>Você encontra ferramentas de mineração abandonadas. Útil!</p><p><strong>Efeito: Ganha 1 'Kit de Reparo' (recurso)</strong></p><a href=\"#\">Sair com o Kit</a></div></div>\n<div id=\"cave3-front\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Som de Água</h5><p>Você acha uma bela cachoeira subterrânea. Refrescante!</p><p><strong>Efeito: +10 Progresso</strong></p><a href=\"#\">Sair Revigorado</a></div></div>\n<div id=\"cave3-right\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Caminho Silencioso</h5><p>O túnel termina em uma parede... sem saída. Você perde tempo voltando.</p><p><strong>Efeito: Perca 1 Rodada</strong></p><a href=\"#\">Retornar Frustrado</a></div></div>\n\n<p style='text-align:center; font-size:0.8em;'>Siga os ecos e clique na opção final.</p>",
-      "opcoes": [
-        { "id": 1, "texto": "Saí com 1 Kit de Reparo" },
-        { "id": 2, "texto": "Saí com +10 Progresso" },
-        { "id": 3, "texto": "Saí, mas perdi 1 Rodada" }
-      ],
-      "respostaCorreta": [1, 2, 3],
-      "dificuldade": "normal",
-      "categorias": ["Teste_Caverna3"],
-      "fontes": [],
-      "vantagem": "Exploração do Labirinto Concluída!",
-      "desvantagem": "Exploração do Labirinto Concluída!",
-      "dica": "Confie nos seus ouvidos... ou na sua intuição."
-    },
-  
-    // Caverna 4: O Guardião Adormecido (Risco/Recompensa)
-    {
-      "id": "cave_adv_4",
-      "tipo": "Outras",
-      "titulo": "Covil do Guardião Rochoso",
-      "pergunta": "<style> /* Reutilizando estilos .cave-* */ </style>\n<p style='text-align:center;'>Você entra em uma câmara ampla. No centro, uma criatura feita de pedra dorme profundamente. Atrás dela, um baú antigo.</p>\n<p style='text-align:center;'><a href=\"#cave4-start\" class='cave-start-btn'>Avaliar a Situação</a></p>\n\n<!-- Cenas da Caverna 4 -->\n<div id=\"cave4-start\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>O Guardião Adormecido</h5><p>O Guardião Rochoso ressona. Você pode tentar <strong>passar furtivamente</strong> até o baú ou <strong>tentar acordá-lo</strong> (?).</p><a href=\"#cave4-sneak\">Passar Furtivamente</a> <a href=\"#cave4-wake\">Tentar Acordar</a> <a href=\"#cave4-leave\">Sair sem arriscar</a></div></div>\n<div id=\"cave4-sneak\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Furtividade</h5><p>Você pisa em falso! O Guardião acorda furioso!</p><p><strong>Efeito: Perca 20 Progresso e fuja!</strong></p><a href=\"#\">Fugir!</a></div></div>\n<div id=\"cave4-wake\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Acordar o Guardião</h5><p>Inesperadamente, o Guardião abre um olho, sorri (!?) e aponta para o baú, como se o oferecesse.</p><p><strong>Efeito: Abra o Baú! (+1 Estrela Fixa e +1 Pulo)</strong></p><a href=\"#\">Agradecer e Pegar</a></div></div>\n<div id=\"cave4-leave\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Sair Quieto</h5><p>Você decide não arriscar e sai da caverna.</p><p><strong>Efeito: Sem Bônus/Penalidade</strong></p><a href=\"#\">Sair em Segurança</a></div></div>\n\n<p style='text-align:center; font-size:0.8em;'>Qual sua decisão? Confirme o resultado.</p>",
-      "opcoes": [
-        { "id": 1, "texto": "Fugi e Perdi 20 Progresso" },
-        { "id": 2, "texto": "Ganhei +1 Estrela Fixa e +1 Pulo" },
-        { "id": 3, "texto": "Saí sem nada acontecer" }
-      ],
-      "respostaCorreta": [1, 2, 3],
-      "dificuldade": "dificil",
-      "categorias": ["Teste_Caverna4"],
-      "fontes": [],
-      "vantagem": "Decisão tomada na caverna!",
-      "desvantagem": "Decisão tomada na caverna!",
-      "dica": "Aparências podem enganar..."
-    },
-  
-    // Caverna 5: A Escolha dos Artefatos
-    {
-      "id": "cave_adv_5",
-      "tipo": "Outras",
-      "titulo": "Santuário dos Artefatos",
-      "pergunta": "<style> /* Reutilizando estilos .cave-* */ \n.artifact-option { border: 2px solid transparent; padding: 10px; margin: 5px; border-radius: 5px; cursor: pointer; background: #334155; }\n.artifact-option:hover { border-color: #93c5fd; }\n</style>\n<p style='text-align:center;'>Você chega a um santuário antigo com três artefatos em pedestais. Você só pode levar um.</p>\n<p style='text-align:center;'><a href=\"#cave5-start\" class='cave-start-btn'>Examinar Artefatos</a></p>\n\n<!-- Cenas da Caverna 5 -->\n<div id=\"cave5-start\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Escolha seu Artefato</h5><p>Selecione um para levar:</p>\n  <div style='display:flex; justify-content: space-around; gap: 10px; margin-top:15px;'>\n   <a href=\"#cave5-orb\" class='artifact-option'>🔮 Orbe da Visão (+10 Progresso)</a>\n   <a href=\"#cave5-boots\" class='artifact-option'>👟 Botas da Leveza (+1 Pulo)</a>\n   <a href=\"#cave5-shield\" class='artifact-option'>🛡️ Escudo Protetor (Ignora próxima Desvantagem)</a>\n  </div>\n</div></div>\n\n<!-- Resultados (apenas para o jogador confirmar a escolha) -->\n<div id=\"cave5-orb\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Orbe da Visão</h5><p>Você escolheu o Orbe!</p><p><strong>Efeito: +10 Progresso</strong></p><a href=\"#\">Sair com o Orbe</a></div></div>\n<div id=\"cave5-boots\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Botas da Leveza</h5><p>Você escolheu as Botas!</p><p><strong>Efeito: +1 Pulo</strong></p><a href=\"#\">Sair com as Botas</a></div></div>\n<div id=\"cave5-shield\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Escudo Protetor</h5><p>Você escolheu o Escudo!</p><p><strong>Efeito: Ignora próxima Desvantagem</strong></p><a href=\"#\">Sair com o Escudo</a></div></div>\n\n<p style='text-align:center; font-size:0.8em;'>Escolha um artefato clicando nele e confirme abaixo.</p>",
-      "opcoes": [
-        { "id": 1, "texto": "Peguei o Orbe (+10 Progresso)" },
-        { "id": 2, "texto": "Peguei as Botas (+1 Pulo)" },
-        { "id": 3, "texto": "Peguei o Escudo (Ignora Desvantagem)" }
-      ],
-      "respostaCorreta": [1, 2, 3],
-      "dificuldade": "normal",
-      "categorias": ["Teste_Caverna5"],
-      "fontes": [],
-      "vantagem": "Artefato adquirido!",
-      "desvantagem": "Artefato adquirido!",
-      "dica": "Escolha o que mais te ajudará agora."
-    },
-      // 1. Mapa Interativo (CSS Hover + :target para Info)
-      {
-        "id": "func_mapa_1",
-        "tipo": "Outras",
-        "titulo": "Exploração Regional",
-        "pergunta": "<style>\n.map-container { position: relative; max-width: 400px; margin: 15px auto; border: 2px solid #6b7280; }\n.map-container img { display: block; width: 100%; height: auto; }\n.map-hotspot { position: absolute; border-radius: 50%; cursor: pointer; background-color: rgba(255, 255, 0, 0.4); /* Amarelo semi-transparente */ transition: background-color 0.2s; }\n.map-hotspot:hover { background-color: rgba(255, 255, 0, 0.7); }\n/* Posições e tamanhos (exemplo) */\n.hs-floresta { top: 20%; left: 15%; width: 20%; height: 25%; }\n.hs-montanha { top: 10%; left: 60%; width: 25%; height: 30%; }\n.hs-rio { top: 60%; left: 10%; width: 80%; height: 15%; border-radius: 10px; }\n/* Popups de informação */\n.map-info-popup { position: fixed; ... /* Estilos de popup :target, como em exemplos anteriores */ z-index: 1020; background: rgba(0,0,0,0.8); }\n.map-info-popup:target { display: flex; }\n.map-info-content { background: white; padding: 20px; border-radius: 5px; max-width: 300px; text-align: center; position: relative; }\n.map-info-close { position: absolute; top: 5px; right: 10px; font-size: 20px; text-decoration: none; color: #888; }\n</style>\n<p style='text-align:center;'>Você obteve um mapa da região. Clique nas áreas para saber mais:</p>\n<div class=\"map-container\">\n  <img src=\"/images/mapa_regiao_exemplo.png\" alt=\"Mapa da Região\">\n  <a href=\"#info-floresta\" class=\"map-hotspot hs-floresta\" title=\"Floresta Densa\"></a>\n  <a href=\"#info-montanha\" class=\"map-hotspot hs-montanha\" title=\"Montanhas Rochosas\"></a>\n  <a href=\"#info-rio\" class=\"map-hotspot hs-rio\" title=\"Rio Veloz\"></a>\n</div>\n<!-- Popups -->\n<div id=\"info-floresta\" class=\"map-info-popup\"><div class=\"map-info-content\"><a href=\"#\" class=\"map-info-close\">×</a><h5>Floresta Densa</h5><p>Rica em biodiversidade, mas difícil travessia. (Possível tarefa de coleta ou penalidade de movimento)</p></div></div>\n<div id=\"info-montanha\" class=\"map-info-popup\"><div class=\"map-info-content\"><a href=\"#\" class=\"map-info-close\">×</a><h5>Montanhas Rochosas</h5><p>Fonte de minerais, mas perigosa. (Chance de achar recurso ou sofrer acidente)</p></div></div>\n<div id=\"info-rio\" class=\"map-info-popup\"><div class=\"map-info-content\"><a href=\"#\" class=\"map-info-close\">×</a><h5>Rio Veloz</h5><p>Fonte de água, mas pode causar enchentes. (Bônus de água ou evento negativo)</p></div></div>\n<p style='text-align:center; font-size:0.8em;'>Após explorar, prossiga.</p>",
-        "opcoes": [ { "id": 1, "texto": "Continuar Jornada" } ],
-        "respostaCorreta": [1],
-        "dificuldade": "normal",
-        "categorias": ["Teste_6"],
-        "fontes": [],
-        "vantagem": "Informações coletadas!",
-        "desvantagem": "",
-        "dica": "Clique nas áreas destacadas no mapa."
-      },
+      "vantagem": "Correto! A intensidade visual representa barulho alto.",
+      "desvantagem": "Incorreto. Uma situação calma teria 'ondas' menores.",
+      "dica": "A cor vermelha e a animação indicam intensidade."
+  },
+  // 1. Decodificador Rotacional CSS (:target simulado)
+  {
+    "id": "teste_1",
+    "tipo": "Pergunta",
+    "titulo": "Decodificador Sustentável",
+    "pergunta": "<style>\n.decoder-wheel { position: relative; width: 200px; height: 200px; margin: 20px auto; }\n.decoder-outer { width: 100%; height: 100%; border: 5px solid #6b7280; border-radius: 50%; position: relative; background: #e5e7eb; }\n.decoder-inner { position: absolute; top: 25px; left: 25px; width: 150px; height: 150px; border: 3px solid #4b5563; border-radius: 50%; background: #f3f4f6; display: flex; justify-content: center; align-items: center; font-size: 2em; font-weight: bold; color: #1f2937; }\n.decoder-letter { position: absolute; width: 40px; height: 40px; text-align: center; line-height: 40px; font-weight: bold; cursor: pointer; border-radius: 50%; background: white; border: 1px solid #ccc; transition: background-color 0.2s; user-select: none; }\n.decoder-letter:hover { background-color: #d1d5db; }\n/* Posicionamento das Letras */\n.letter-a { top: 5px; left: 50%; transform: translateX(-50%); }\n.letter-b { top: 35px; right: 15px; transform: rotate(45deg); }\n.letter-c { top: 50%; right: 5px; transform: translateY(-50%) rotate(90deg); }\n.letter-d { bottom: 35px; right: 15px; transform: rotate(135deg); }\n.letter-e { bottom: 5px; left: 50%; transform: translateX(-50%) rotate(180deg); }\n/* Resultado com :target */\n#decode-result-area { min-height: 30px; margin-top: 10px; font-weight:bold; color: green; }\n#decode-a:target ~ #decode-result-area::before { content: 'Resultado para A: 💧'; }\n#decode-b:target ~ #decode-result-area::before { content: 'Resultado para B: 🌳'; }\n#decode-c:target ~ #decode-result-area::before { content: 'Resultado para C: ☀️'; }\n#decode-d:target ~ #decode-result-area::before { content: 'Resultado para D: 💨'; }\n#decode-e:target ~ #decode-result-area::before { content: 'Resultado para E: ♻️'; }\n/* Esconde os alvos vazios */\n.decode-target { display: none; }\n</style>\n<p style='text-align:center;'>Use o Decodificador! Clique em uma letra externa (A-E) para ver o símbolo correspondente no centro.</p>\n<div class=\"decoder-wheel\">\n  <div class=\"decoder-outer\">\n    <a href=\"#decode-a\"><div class=\"decoder-letter letter-a\">A</div></a>\n    <a href=\"#decode-b\"><div class=\"decoder-letter letter-b\">B</div></a>\n    <a href=\"#decode-c\"><div class=\"decoder-letter letter-c\">C</div></a>\n    <a href=\"#decode-d\"><div class=\"decoder-letter letter-d\">D</div></a>\n    <a href=\"#decode-e\"><div class=\"decoder-letter letter-e\">E</div></a>\n    <div class=\"decoder-inner\">\n        <!-- Alvos para :target (escondidos) -->\n        <span id=\"decode-a\" class=\"decode-target\"></span>\n        <span id=\"decode-b\" class=\"decode-target\"></span>\n        <span id=\"decode-c\" class=\"decode-target\"></span>\n        <span id=\"decode-d\" class=\"decode-target\"></span>\n        <span id=\"decode-e\" class=\"decode-target\"></span>\n        <!-- Área onde o resultado aparece via CSS ::before -->\n        <div id=\"decode-result-area\"></div>\n    </div>\n  </div>\n</div>\n<br>Qual letra corresponde ao símbolo de <strong>Reciclagem (♻️)</strong>?",
+    "opcoes": [
+        {"id": 1, "texto": "A"},
+        {"id": 2, "texto": "B"},
+        {"id": 3, "texto": "C"},
+        {"id": 4, "texto": "D"},
+        {"id": 5, "texto": "E"}
+    ],
+    "respostaCorreta": 5,
+    "dificuldade": "normal",
+    "categorias": ["Teste_1"],
+    "fontes": [],
+    "vantagem": "Código decifrado!",
+    "desvantagem": "Letra errada. Clique nas letras para ver a correspondência.",
+    "dica": "Teste cada letra clicando nela."
+  },
+
+  // 2. Combinação de Recursos (Visual com <details>)
+  {
+    "id": "teste_2",
+    "tipo": "Outras",
+    "titulo": "Oficina de Criação Sustentável",
+    "pergunta": "<style>\n.crafting-bench { border: 2px dashed #a16207; background: #fef3c7; padding: 15px; border-radius: 8px; }\n.crafting-section { margin-bottom: 15px; }\n.crafting-section h5 { margin: 0 0 10px 0; text-align: center; color: #a16207; border-bottom: 1px solid #fde047; padding-bottom: 5px; }\n.ingredient-list { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }\n.ingredient { cursor: pointer; border: 1px solid #d1d5db; padding: 5px 8px; border-radius: 4px; background: white; font-size: 0.9em; user-select: none; }\n/* Usando :focus-within ou similar seria melhor, mas <details> simula */\ndetails.ingredient-selected summary { border-color: #16a34a; background-color: #d1fae5; font-weight: bold; }\ndetails summary { list-style: none; /* Remove default marker */ display: inline-block; /* Fit content */ }\ndetails summary::-webkit-details-marker { display: none; /* Chrome/Safari */ }\n.craft-result { margin-top: 15px; padding: 10px; background: #f0fdf4; border: 1px solid #16a34a; border-radius: 4px; text-align: center; }\n</style>\n<div class=\"crafting-bench\">\n  <div class=\"crafting-section\">\n    <h5>Ingredientes Disponíveis (Clique para 'Selecionar')</h5>\n    <div class=\"ingredient-list\">\n      <details class=\"ingredient-selected\"> <summary class=\"ingredient\">💧 Água Limpa</summary> </details>\n      <details> <summary class=\"ingredient\">🌱 Sementes</summary> </details>\n      <details class=\"ingredient-selected\"> <summary class=\"ingredient\">☀️ Luz Solar</summary> </details>\n      <details> <summary class=\"ingredient\">🧱 Tijolos Reciclados</summary> </details>\n    </div>\n  </div>\n  <div class=\"crafting-section\">\n    <h5>Receita Possível:</h5>\n    <p style='text-align:center; font-size:0.9em;'>Água Limpa + Sementes + Luz Solar = ???</p>\n  </div>\n  <details style='margin-top: 15px;'>\n    <summary style='cursor: pointer; text-align:center; font-weight: bold; background: #6ee7b7; padding: 8px; border-radius: 4px;'>Combinar Ingredientes Selecionados</summary>\n    <div class=\"craft-result\">\n      <p>✨ Você criou: <strong>Horta Comunitária!</strong> (+15 Progresso)</p>\n    </div>\n  </details>\n</div>\n<p style='text-align:center; font-size:0.8em; margin-top: 10px;'>Confirme a criação abaixo (o efeito real depende dos ingredientes corretos - neste caso, são os pré-selecionados).</p>",
+    "opcoes": [
+        {"id": 1, "texto": "Confirmar Criação"},
+        {"id": 2, "texto": "Não criar nada agora"}
+    ],
+    "respostaCorreta": [1], // Confirma a tentativa de craft
+    "dificuldade": "normal",
+    "categorias": ["Teste_2"],
+    "fontes": [],
+    "vantagem": "Horta criada! +15 Progresso!", // Efeito aplicado no jogo se os ingredientes corretos fossem selecionados
+    "desvantagem": "Criação cancelada.",
+    "dica": "Clique nos ingredientes e depois em 'Combinar' para ver o resultado."
+  },
+
+  // 3. Mini Aventura com Escolhas (Linked :target)
+  {
+    "id": "teste_3",
+    "tipo": "Outras",
+    "titulo": "Explorando a Caverna",
+    "pergunta": "<style>\n.adventure-popup { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(51, 65, 85, 0.85); display:none; justify-content:center; align-items:center; z-index:1005; padding:20px; }\n.adventure-popup:target { display:flex; }\n.adventure-content { background:#1f2937; color: #e5e7eb; padding:25px; border-radius:8px; max-width:350px; text-align:center; position:relative; border: 2px solid #4b5563; }\n.adventure-content h5 { margin:0 0 15px 0; color: #9ca3af; }\n.adventure-content p { margin-bottom: 15px; font-size:0.95em; line-height:1.5; }\n.adventure-content a { color: #60a5fa; text-decoration: underline; margin: 0 10px; }\n.adventure-close { position:absolute; top:10px; right:15px; font-size:24px; color:#9ca3af; text-decoration:none; }\n.adventure-close:hover { color: white; }\n.start-adventure { display:inline-block; padding: 10px 15px; background:#4f46e5; color:white; border-radius:5px; text-decoration:none; font-weight:bold; }\n</style>\n<p style='text-align:center;'>Você encontra a entrada de uma caverna misteriosa...</p>\n<p style='text-align:center;'><a href=\"#cave-start\" class='start-adventure'>Entrar na Caverna</a></p>\n\n<!-- Cena 1: Entrada -->\n<div id=\"cave-start\" class=\"adventure-popup\">\n  <div class=\"adventure-content\">\n    <a href=\"#\" class=\"adventure-close\">×</a>\n    <h5>Entrada da Caverna</h5>\n    <p>Está escuro. Você ouve o som de água pingando. Há dois túneis à frente.</p>\n    <a href=\"#cave-left\">Ir pela Esquerda</a>\n    <a href=\"#cave-right\">Ir pela Direita</a>\n  </div>\n</div>\n\n<!-- Cena 2: Esquerda -->\n<div id=\"cave-left\" class=\"adventure-popup\">\n  <div class=\"adventure-content\">\n    <a href=\"#\" class=\"adventure-close\">×</a>\n    <h5>Túnel da Esquerda</h5>\n    <p>Você encontra um veio de cristal brilhante! Parece valioso.</p>\n    <p><strong>Efeito: +1 Estrela Bônus</strong></p>\n    <a href=\"#\">Sair da Caverna</a>\n  </div>\n</div>\n\n<!-- Cena 3: Direita -->\n<div id=\"cave-right\" class=\"adventure-popup\">\n  <div class=\"adventure-content\">\n    <a href=\"#\" class=\"adventure-close\">×</a>\n    <h5>Túnel da Direita</h5>\n    <p>O chão cede um pouco! Você quase cai, mas se segura. Perdeu tempo.</p>\n    <p><strong>Efeito: Fique 1 Rodada Preso</strong></p>\n    <a href=\"#\">Sair da Caverna</a>\n  </div>\n</div>\n<p style='text-align:center; font-size:0.8em;'>Escolha seu caminho e clique na opção abaixo para confirmar o resultado.</p>",
+    "opcoes": [
+        {"id": 1, "texto": "Resultado da Exploração (Esquerda: +1 Estrela)"},
+        {"id": 2, "texto": "Resultado da Exploração (Direita: -1 Rodada)"}
+    ],
+    "respostaCorreta": [1, 2], // O jogador escolhe o resultado baseado no que viu
+    "dificuldade": "normal",
+    "categorias": ["Teste_3"],
+    "fontes": [],
+    "vantagem": "Aventura concluída!", // Se escolheu 1 (efeito aplicado no jogo)
+    "desvantagem": "Aventura concluída!", // Se escolheu 2 (efeito aplicado no jogo)
+    "dica": "Qual caminho parece mais promissor?"
+  },
+
+  // 4. Cenário Animado (CSS Keyframes)
+  {
+    "id": "teste_4",
+    "tipo": "Pergunta",
+    "titulo": "Impacto da Poluição (Animado)",
+    "pergunta": "<style>\n@keyframes polluteRiver { 0% { background-color: #a5f3fc; /* Azul claro */ } 50% { background-color: #a3e635; /* Verde musgo */ } 100% { background-color: #a16207; /* Marrom escuro */ } }\n@keyframes fishDies { 0%, 40% { opacity: 1; transform: rotate(0deg); } 60% { transform: rotate(90deg); } 100% { opacity: 0.3; transform: rotate(180deg) translateY(10px); } }\n.animated-scenario { width: 250px; height: 100px; border: 2px solid #374151; margin: 15px auto; background-color: #a5f3fc; /* Azul inicial */ border-radius: 4px; position: relative; overflow: hidden; animation: polluteRiver 6s linear forwards; }\n.fish { font-size: 1.8em; position: absolute; top: 40%; left: 20%; animation: fishDies 6s linear forwards; animation-delay: 1s; }\n.pipe { position: absolute; top: 10px; right: -10px; width: 30px; height: 20px; background: #78716c; border-radius: 3px 0 0 3px; }\n.pipe::after { content: ''; position: absolute; top: 5px; left: -15px; width: 15px; height: 10px; background: #a16207; /* Marrom escuro */ animation: polluteRiver 6s linear forwards; border-radius: 2px; }\n</style>\n<p style='text-align:center;'>Observe a animação do rio sendo poluído:</p>\n<div class=\"animated-scenario\">\n  <div class=\"pipe\"></div>\n  <span class=\"fish\">🐠</span>\n</div>\n<br>Qual a consequência <strong>visual</strong> final da poluição mostrada?",
+    "opcoes": [
+        {"id": 1, "texto": "O rio fica mais azul e limpo."},
+        {"id": 2, "texto": "O peixe nada mais rápido."},
+        {"id": 3, "texto": "O rio fica marrom e o peixe parece morrer/sofrer."}
+    ],
+    "respostaCorreta": 3,
+    "dificuldade": "facil",
+    "categorias": ["Teste_4"],
+    "fontes": [],
+    "vantagem": "Correto! A poluição tem efeitos visíveis e drásticos.",
+    "desvantagem": "Observe a cor final da água e o que acontece com o peixe.",
+    "dica": "A animação mostra uma degradação."
+  },
+
+  // 5. Checklist Interativo (Checkbox Hack + CSS Sibling Selector)
+  {
+    "id": "teste_5",
+    "tipo": "Outras", // A interação principal é visual/informativa
+    "titulo": "Checklist Casa Ecológica",
+    "pergunta": "<style>\n.checklist-container { background: #f0f9ff; border: 1px solid #a5f3fc; padding: 15px; border-radius: 5px; }\n.checklist-item { margin-bottom: 10px; }\n.checklist-item input[type='checkbox'] { display: none; /* Esconde checkbox real */ }\n.checklist-item label { cursor: pointer; display: flex; align-items: center; font-size: 0.95em; }\n.checklist-item label::before { content: ''; display: inline-block; width: 18px; height: 18px; border: 2px solid #0ea5e9; border-radius: 3px; margin-right: 10px; background-color: white; transition: background-color 0.2s, border-color 0.2s; }\n.checklist-item input[type='checkbox']:checked + label::before { background-color: #0ea5e9; border-color: #0284c7; }\n.checklist-item input[type='checkbox']:checked + label::after { content: '✔'; color: white; position: absolute; left: 19px; /* Ajustar posição */ top: 1px; font-size: 14px; font-weight: bold; }\n.checklist-consequence { display: none; /* Escondido por padrão */ margin-left: 30px; margin-top: 5px; font-size: 0.85em; color: #0ea5e9; border-left: 2px solid #a5f3fc; padding-left: 8px; }\n/* Mostra consequência específica quando o checkbox correspondente é marcado */\n#check1:checked ~ #consequence1, \n#check2:checked ~ #consequence2, \n#check3:checked ~ #consequence3, \n#check4:checked ~ #consequence4 { display: block; }\n</style>\n<div class=\"checklist-container\">\n  <p style='font-weight: bold; margin-bottom: 10px;'>Marque as ações que você já implementou em casa:</p>\n  <div class=\"checklist-item\">\n    <input type=\"checkbox\" id=\"check1\"/>\n    <label for=\"check1\">Lâmpadas LED</label>\n    <p id=\"consequence1\" class=\"checklist-consequence\">Ótimo! Economiza muita energia.</p>\n  </div>\n  <div class=\"checklist-item\">\n    <input type=\"checkbox\" id=\"check2\"/>\n    <label for=\"check2\">Coleta Seletiva</label>\n    <p id=\"consequence2\" class=\"checklist-consequence\">Essencial para reduzir o lixo em aterros.</p>\n  </div>\n  <div class=\"checklist-item\">\n    <input type=\"checkbox\" id=\"check3\"/>\n    <label for=\"check3\">Reúso de Água</label>\n    <p id=\"consequence3\" class=\"checklist-consequence\">Excelente forma de conservar água.</p>\n  </div>\n  <div class=\"checklist-item\">\n    <input type=\"checkbox\" id=\"check4\"/>\n    <label for=\"check4\">Composteira</label>\n    <p id=\"consequence4\" class=\"checklist-consequence\">Transforma lixo orgânico em adubo rico.</p>\n  </div>\n</div>\n<p style='text-align:center; font-size: 0.8em; margin-top: 10px;'>Clique nas ações e depois confirme abaixo (sem efeito mecânico direto no jogo, apenas informativo).</p>",
+    "opcoes": [
+      { "id": 1, "texto": "Fechar Checklist" }
+    ],
+    "respostaCorreta": [1],
+    "dificuldade": "facil",
+    "categorias": ["Teste_5"],
+    "fontes": [],
+    "vantagem": "Ótimo revisar suas práticas!",
+    "desvantagem": "",
+    "dica": "Clique nos itens para ver comentários."
+  },
+  // Caverna 1: O Cristal e o Abismo
+  {
+    "id": "cave_adv_1",
+    "tipo": "Outras",
+    "titulo": "Caverna dos Cristais Cintilantes",
+    "pergunta": "<style>\n/* Estilos gerais dos popups da caverna (reutilizados) */\n.cave-popup { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(30, 41, 59, 0.9); display:none; justify-content:center; align-items:center; z-index:1010; padding:15px; }\n.cave-popup:target { display:flex; }\n.cave-content { background:#475569; color: #e2e8f0; padding:25px; border-radius:8px; max-width:380px; text-align:center; position:relative; border: 3px solid #64748b; }\n.cave-content h5 { margin:0 0 15px 0; color: #cbd5e1; border-bottom: 1px solid #64748b; padding-bottom: 8px; }\n.cave-content p { margin-bottom: 15px; font-size:0.95em; line-height:1.5; }\n.cave-content a { color: #93c5fd; text-decoration: underline; margin: 0 10px; cursor: pointer; }\n.cave-close { position:absolute; top:8px; right:12px; font-size:24px; color:#9ca3af; text-decoration:none; }\n.cave-close:hover { color: white; }\n.cave-start-btn { display:inline-block; padding: 10px 15px; background:#6366f1; color:white; border-radius:5px; text-decoration:none; font-weight:bold; }\n</style>\n<p style='text-align:center;'>Você encontra a entrada de uma caverna escura, com um brilho azulado vindo de dentro...</p>\n<p style='text-align:center;'><a href=\"#cave1-start\" class='cave-start-btn'>Entrar na Caverna</a></p>\n\n<!-- Cenas da Caverna 1 -->\n<div id=\"cave1-start\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Entrada Ecoante</h5>\n    <p>O ar é úmido. Você vê um túnel estreito à <strong>esquerda</strong> e uma passagem mais larga à <strong>direita</strong> que desce.</p>\n    <a href=\"#cave1-left\">Ir pela Esquerda</a> <a href=\"#cave1-right\">Ir pela Direita</a>\n  </div>\n</div>\n<div id=\"cave1-left\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Túnel Estreito</h5>\n    <p>Você se espreme e encontra uma pequena câmara com um cristal cintilante!</p>\n    <p><strong>Efeito: +1 Estrela Bônus</strong></p>\n    <a href=\"#\">Sair com o Cristal</a>\n  </div>\n</div>\n<div id=\"cave1-right\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Passagem Descendente</h5>\n    <p>Você desce com cuidado. O caminho termina abruptamente em um abismo escuro. Você quase caiu!</p>\n    <p><strong>Efeito: Perca 1 Rodada (susto e tempo perdido)</strong></p>\n    <a href=\"#\">Retornar com Cuidado</a>\n  </div>\n</div>\n<p style='text-align:center; font-size:0.8em;'>Explore e clique na opção final correspondente.</p>",
+    "opcoes": [
+      { "id": 1, "texto": "Saí com +1 Estrela Bônus" },
+      { "id": 2, "texto": "Saí, mas perdi 1 Rodada" }
+    ],
+    "respostaCorreta": [1, 2],
+    "dificuldade": "facil",
+    "categorias": ["Teste_Caverna1"],
+    "fontes": [],
+    "vantagem": "Aventura na Caverna Concluída!",
+    "desvantagem": "Aventura na Caverna Concluída!",
+    "dica": "Brilho geralmente indica algo bom..."
+  },
+
+  // Caverna 2: O Rio Subterrâneo e a Criatura
+  {
+    "id": "cave_adv_2",
+    "tipo": "Outras",
+    "titulo": "Caverna do Rio Murmurante",
+    "pergunta": "<style> /* Reutilizando estilos .cave-* da carta anterior */ </style>\n<p style='text-align:center;'>Um rio some por uma fenda na rocha. Você decide seguir...</p>\n<p style='text-align:center;'><a href=\"#cave2-start\" class='cave-start-btn'>Seguir o Rio</a></p>\n\n<!-- Cenas da Caverna 2 -->\n<div id=\"cave2-start\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Seguindo o Rio</h5><p>Você acompanha o rio subterrâneo. Ouve um barulho estranho à frente. O caminho se divide: seguir pela <strong>margem seca</strong> ou tentar atravessar por <strong>pedras escorregadias</strong> no meio do rio?</p><a href=\"#cave2-dry\">Margem Seca</a> <a href=\"#cave2-wet\">Pedras Molhadas</a></div></div>\n<div id=\"cave2-dry\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Margem Seca</h5><p>Seguro, mas lento. Você avança e vê a saída, mas parece que perdeu algo pelo caminho.</p><p><strong>Efeito: Sem Bônus/Penalidade</strong></p><a href=\"#\">Sair da Caverna</a></div></div>\n<div id=\"cave2-wet\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Pedras Molhadas</h5><p>Você escorrega, mas se segura! Ao se levantar, vê algo brilhando na água: uma Gema Rara!</p><p><strong>Efeito: +1 Estrela Fixa</strong></p><a href=\"#\">Sair com a Gema</a></div></div>\n\n<p style='text-align:center; font-size:0.8em;'>Explore e clique na opção final correspondente.</p>",
+    "opcoes": [
+      { "id": 1, "texto": "Saí sem nada de especial (Margem Seca)" },
+      { "id": 2, "texto": "Saí com +1 Estrela Fixa (Pedras Molhadas)" }
+    ],
+    "respostaCorreta": [1, 2],
+    "dificuldade": "normal",
+    "categorias": ["Teste_Caverna2"],
+    "fontes": [],
+    "vantagem": "Aventura no Rio Concluída!",
+    "desvantagem": "Aventura no Rio Concluída!",
+    "dica": "Às vezes, o caminho mais arriscado tem recompensas."
+  },
+
+  // Caverna 3: O Labirinto e o Eco
+  {
+    "id": "cave_adv_3",
+    "tipo": "Outras",
+    "titulo": "Caverna dos Ecos Perdidos",
+    "pergunta": "<style> /* Reutilizando estilos .cave-* */ </style>\n<p style='text-align:center;'>Esta caverna parece um labirinto. Você grita 'Olá!' e ouve ecos vindo de múltiplas direções...</p>\n<p style='text-align:center;'><a href=\"#cave3-start\" class='cave-start-btn'>Explorar o Labirinto</a></p>\n\n<!-- Cenas da Caverna 3 -->\n<div id=\"cave3-start\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Encruzilhada dos Ecos</h5><p>Um eco parece vir da <strong>esquerda</strong> (som metálico), um da <strong>frente</strong> (som de água), e um da <strong>direita</strong> (silêncio).</p><a href=\"#cave3-left\">Seguir Som Metálico</a> <a href=\"#cave3-front\">Seguir Som de Água</a> <a href=\"#cave3-right\">Seguir Silêncio</a></div></div>\n<div id=\"cave3-left\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Som Metálico</h5><p>Você encontra ferramentas de mineração abandonadas. Útil!</p><p><strong>Efeito: Ganha 1 'Kit de Reparo' (recurso)</strong></p><a href=\"#\">Sair com o Kit</a></div></div>\n<div id=\"cave3-front\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Som de Água</h5><p>Você acha uma bela cachoeira subterrânea. Refrescante!</p><p><strong>Efeito: +10 Progresso</strong></p><a href=\"#\">Sair Revigorado</a></div></div>\n<div id=\"cave3-right\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Caminho Silencioso</h5><p>O túnel termina em uma parede... sem saída. Você perde tempo voltando.</p><p><strong>Efeito: Perca 1 Rodada</strong></p><a href=\"#\">Retornar Frustrado</a></div></div>\n\n<p style='text-align:center; font-size:0.8em;'>Siga os ecos e clique na opção final.</p>",
+    "opcoes": [
+      { "id": 1, "texto": "Saí com 1 Kit de Reparo" },
+      { "id": 2, "texto": "Saí com +10 Progresso" },
+      { "id": 3, "texto": "Saí, mas perdi 1 Rodada" }
+    ],
+    "respostaCorreta": [1, 2, 3],
+    "dificuldade": "normal",
+    "categorias": ["Teste_Caverna3"],
+    "fontes": [],
+    "vantagem": "Exploração do Labirinto Concluída!",
+    "desvantagem": "Exploração do Labirinto Concluída!",
+    "dica": "Confie nos seus ouvidos... ou na sua intuição."
+  },
+
+  // Caverna 4: O Guardião Adormecido (Risco/Recompensa)
+  {
+    "id": "cave_adv_4",
+    "tipo": "Outras",
+    "titulo": "Covil do Guardião Rochoso",
+    "pergunta": "<style> /* Reutilizando estilos .cave-* */ </style>\n<p style='text-align:center;'>Você entra em uma câmara ampla. No centro, uma criatura feita de pedra dorme profundamente. Atrás dela, um baú antigo.</p>\n<p style='text-align:center;'><a href=\"#cave4-start\" class='cave-start-btn'>Avaliar a Situação</a></p>\n\n<!-- Cenas da Caverna 4 -->\n<div id=\"cave4-start\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>O Guardião Adormecido</h5><p>O Guardião Rochoso ressona. Você pode tentar <strong>passar furtivamente</strong> até o baú ou <strong>tentar acordá-lo</strong> (?).</p><a href=\"#cave4-sneak\">Passar Furtivamente</a> <a href=\"#cave4-wake\">Tentar Acordar</a> <a href=\"#cave4-leave\">Sair sem arriscar</a></div></div>\n<div id=\"cave4-sneak\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Furtividade</h5><p>Você pisa em falso! O Guardião acorda furioso!</p><p><strong>Efeito: Perca 20 Progresso e fuja!</strong></p><a href=\"#\">Fugir!</a></div></div>\n<div id=\"cave4-wake\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Acordar o Guardião</h5><p>Inesperadamente, o Guardião abre um olho, sorri (!?) e aponta para o baú, como se o oferecesse.</p><p><strong>Efeito: Abra o Baú! (+1 Estrela Fixa e +1 Pulo)</strong></p><a href=\"#\">Agradecer e Pegar</a></div></div>\n<div id=\"cave4-leave\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Sair Quieto</h5><p>Você decide não arriscar e sai da caverna.</p><p><strong>Efeito: Sem Bônus/Penalidade</strong></p><a href=\"#\">Sair em Segurança</a></div></div>\n\n<p style='text-align:center; font-size:0.8em;'>Qual sua decisão? Confirme o resultado.</p>",
+    "opcoes": [
+      { "id": 1, "texto": "Fugi e Perdi 20 Progresso" },
+      { "id": 2, "texto": "Ganhei +1 Estrela Fixa e +1 Pulo" },
+      { "id": 3, "texto": "Saí sem nada acontecer" }
+    ],
+    "respostaCorreta": [1, 2, 3],
+    "dificuldade": "dificil",
+    "categorias": ["Teste_Caverna4"],
+    "fontes": [],
+    "vantagem": "Decisão tomada na caverna!",
+    "desvantagem": "Decisão tomada na caverna!",
+    "dica": "Aparências podem enganar..."
+  },
+
+  // Caverna 5: A Escolha dos Artefatos
+  {
+    "id": "cave_adv_5",
+    "tipo": "Outras",
+    "titulo": "Santuário dos Artefatos",
+    "pergunta": "<style> /* Reutilizando estilos .cave-* */ \n.artifact-option { border: 2px solid transparent; padding: 10px; margin: 5px; border-radius: 5px; cursor: pointer; background: #334155; }\n.artifact-option:hover { border-color: #93c5fd; }\n</style>\n<p style='text-align:center;'>Você chega a um santuário antigo com três artefatos em pedestais. Você só pode levar um.</p>\n<p style='text-align:center;'><a href=\"#cave5-start\" class='cave-start-btn'>Examinar Artefatos</a></p>\n\n<!-- Cenas da Caverna 5 -->\n<div id=\"cave5-start\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Escolha seu Artefato</h5><p>Selecione um para levar:</p>\n  <div style='display:flex; justify-content: space-around; gap: 10px; margin-top:15px;'>\n   <a href=\"#cave5-orb\" class='artifact-option'>🔮 Orbe da Visão (+10 Progresso)</a>\n   <a href=\"#cave5-boots\" class='artifact-option'>👟 Botas da Leveza (+1 Pulo)</a>\n   <a href=\"#cave5-shield\" class='artifact-option'>🛡️ Escudo Protetor (Ignora próxima Desvantagem)</a>\n  </div>\n</div></div>\n\n<!-- Resultados (apenas para o jogador confirmar a escolha) -->\n<div id=\"cave5-orb\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Orbe da Visão</h5><p>Você escolheu o Orbe!</p><p><strong>Efeito: +10 Progresso</strong></p><a href=\"#\">Sair com o Orbe</a></div></div>\n<div id=\"cave5-boots\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Botas da Leveza</h5><p>Você escolheu as Botas!</p><p><strong>Efeito: +1 Pulo</strong></p><a href=\"#\">Sair com as Botas</a></div></div>\n<div id=\"cave5-shield\" class=\"cave-popup\"><div class=\"cave-content\"><a href=\"#\" class=\"cave-close\">×</a><h5>Escudo Protetor</h5><p>Você escolheu o Escudo!</p><p><strong>Efeito: Ignora próxima Desvantagem</strong></p><a href=\"#\">Sair com o Escudo</a></div></div>\n\n<p style='text-align:center; font-size:0.8em;'>Escolha um artefato clicando nele e confirme abaixo.</p>",
+    "opcoes": [
+      { "id": 1, "texto": "Peguei o Orbe (+10 Progresso)" },
+      { "id": 2, "texto": "Peguei as Botas (+1 Pulo)" },
+      { "id": 3, "texto": "Peguei o Escudo (Ignora Desvantagem)" }
+    ],
+    "respostaCorreta": [1, 2, 3],
+    "dificuldade": "normal",
+    "categorias": ["Teste_Caverna5"],
+    "fontes": [],
+    "vantagem": "Artefato adquirido!",
+    "desvantagem": "Artefato adquirido!",
+    "dica": "Escolha o que mais te ajudará agora."
+  },
+  // 1. Mapa Interativo (CSS Hover + :target para Info)
+  {
+    "id": "func_mapa_1",
+    "tipo": "Outras",
+    "titulo": "Exploração Regional",
+    "pergunta": "<style>\n.map-container { position: relative; max-width: 400px; margin: 15px auto; border: 2px solid #6b7280; }\n.map-container img { display: block; width: 100%; height: auto; }\n.map-hotspot { position: absolute; border-radius: 50%; cursor: pointer; background-color: rgba(255, 255, 0, 0.4); /* Amarelo semi-transparente */ transition: background-color 0.2s; }\n.map-hotspot:hover { background-color: rgba(255, 255, 0, 0.7); }\n/* Posições e tamanhos (exemplo) */\n.hs-floresta { top: 20%; left: 15%; width: 20%; height: 25%; }\n.hs-montanha { top: 10%; left: 60%; width: 25%; height: 30%; }\n.hs-rio { top: 60%; left: 10%; width: 80%; height: 15%; border-radius: 10px; }\n/* Popups de informação */\n.map-info-popup { position: fixed; ... /* Estilos de popup :target, como em exemplos anteriores */ z-index: 1020; background: rgba(0,0,0,0.8); }\n.map-info-popup:target { display: flex; }\n.map-info-content { background: white; padding: 20px; border-radius: 5px; max-width: 300px; text-align: center; position: relative; }\n.map-info-close { position: absolute; top: 5px; right: 10px; font-size: 20px; text-decoration: none; color: #888; }\n</style>\n<p style='text-align:center;'>Você obteve um mapa da região. Clique nas áreas para saber mais:</p>\n<div class=\"map-container\">\n  <img src=\"/images/mapa_regiao_exemplo.png\" alt=\"Mapa da Região\">\n  <a href=\"#info-floresta\" class=\"map-hotspot hs-floresta\" title=\"Floresta Densa\"></a>\n  <a href=\"#info-montanha\" class=\"map-hotspot hs-montanha\" title=\"Montanhas Rochosas\"></a>\n  <a href=\"#info-rio\" class=\"map-hotspot hs-rio\" title=\"Rio Veloz\"></a>\n</div>\n<!-- Popups -->\n<div id=\"info-floresta\" class=\"map-info-popup\"><div class=\"map-info-content\"><a href=\"#\" class=\"map-info-close\">×</a><h5>Floresta Densa</h5><p>Rica em biodiversidade, mas difícil travessia. (Possível tarefa de coleta ou penalidade de movimento)</p></div></div>\n<div id=\"info-montanha\" class=\"map-info-popup\"><div class=\"map-info-content\"><a href=\"#\" class=\"map-info-close\">×</a><h5>Montanhas Rochosas</h5><p>Fonte de minerais, mas perigosa. (Chance de achar recurso ou sofrer acidente)</p></div></div>\n<div id=\"info-rio\" class=\"map-info-popup\"><div class=\"map-info-content\"><a href=\"#\" class=\"map-info-close\">×</a><h5>Rio Veloz</h5><p>Fonte de água, mas pode causar enchentes. (Bônus de água ou evento negativo)</p></div></div>\n<p style='text-align:center; font-size:0.8em;'>Após explorar, prossiga.</p>",
+    "opcoes": [ { "id": 1, "texto": "Continuar Jornada" } ],
+    "respostaCorreta": [1],
+    "dificuldade": "normal",
+    "categorias": ["Teste_6"],
+    "fontes": [],
+    "vantagem": "Informações coletadas!",
+    "desvantagem": "",
+    "dica": "Clique nas áreas destacadas no mapa."
+  },
+
+  // 2. Simulação de "Arrastar e Soltar" (CSS Checkbox Hack)
+  {
+    "id": "func_dragdrop_sim_1",
+    "tipo": "Pergunta",
+    "titulo": "Organize os Resíduos",
+    "pergunta": "<style>\n.drag-area { border: 2px dashed #9ca3af; padding: 15px; margin-top: 15px; background: #f3f4f6; min-height: 80px; }\n.drag-items { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }\n.drag-item { border: 1px solid #6b7280; padding: 5px 10px; background: white; border-radius: 4px; cursor: pointer; user-select: none; }\n.drag-item input[type='radio'] { display: none; }\n/* Estilo quando 'selecionado' (radio checked) */\n.drag-item input[type='radio']:checked + label { background-color: #60a5fa; color: white; border-color: #2563eb; box-shadow: 0 0 5px #60a5fa; }\n.drop-target { border: 2px solid #16a34a; padding: 20px; text-align: center; background: #f0fdf4; color: #14532d; font-weight: bold; }\n/* Mostrar mensagem de sucesso SÓ se o item CORRETO for selecionado (exemplo com ID 'item-plastico') */\n#item-plastico:checked ~ .drag-area .drop-target::after { content: ' Plástico no lugar certo!'; color: green; }\n#item-vidro:checked ~ .drag-area .drop-target::after { content: ' Vidro NÃO vai aqui!'; color: red; }\n</style>\n<p>Qual destes itens deve ir para a Lixeira de <strong>PLÁSTICO</strong> (Vermelha)?<br><i>(Clique no item para 'pegá-lo' e veja o resultado na área de descarte)</i></p>\n<div class=\"drag-items\">\n  <div class=\"drag-item\">\n    <input type=\"radio\" name=\"drag-item\" id=\"item-plastico\" value=\"plastico\">\n    <label for=\"item-plastico\">🧴 Garrafa Plástica</label>\n  </div>\n  <div class=\"drag-item\">\n    <input type=\"radio\" name=\"drag-item\" id=\"item-vidro\" value=\"vidro\">\n    <label for=\"item-vidro\">🍾 Garrafa Vidro</label>\n  </div>\n</div>\n<div class=\"drag-area\">\n  <div class=\"drop-target\">Lixeira Vermelha (Plástico)</div>\n</div>",
+    "opcoes": [
+      { "id": 1, "texto": "Garrafa Plástica" },
+      { "id": 2, "texto": "Garrafa Vidro" }
+    ],
+    "respostaCorreta": 1, // Resposta da pergunta, não da interação CSS
+    "dificuldade": "facil",
+    "categorias": ["Teste_7"],
+    "fontes": ["Coleta Seletiva"],
+    "vantagem": "Correto!",
+    "desvantagem": "Incorreto.",
+    "dica": "Clique nos itens para simular o descarte."
+  },
+
+  // 3. Contador Visual de Recursos (HTML + CSS Básico)
+  {
+    "id": "func_resource_counter_1",
+    "tipo": "Vantagem",
+    "titulo": "Coleta Eficiente",
+    "pergunta": "<style>\n.resource-display { display: flex; justify-content: space-around; gap: 15px; background: #fff7ed; border: 1px solid #fb923c; padding: 15px; border-radius: 5px; margin-top: 10px; }\n.resource-item { text-align: center; }\n.resource-icon { font-size: 2em; display: block; margin-bottom: 5px; }\n.resource-count { font-weight: bold; font-size: 1.2em; background: white; padding: 2px 8px; border-radius: 10px; border: 1px solid #fed7aa; }\n</style>\n<p style='text-align:center;'>Sua eficiência na coleta rendeu bons frutos!</p>\n<div class=\"resource-display\">\n  <div class=\"resource-item\">\n    <span class=\"resource-icon\">💧</span>\n    <span class=\"resource-count\">+3</span> Água Limpa\n  </div>\n  <div class=\"resource-item\">\n    <span class=\"resource-icon\">🌱</span>\n    <span class=\"resource-count\">+5</span> Sementes\n  </div>\n</div>\n<p style='text-align:center; font-size:0.8em; margin-top: 10px;'>(Adicione estes recursos ao seu inventário no jogo)</p>",
+    "opcoes": [ { "id": 1, "texto": "Coletar Recursos" } ],
+    "respostaCorreta": [1],
+    "dificuldade": "facil",
+    "categorias": ["Teste_8"],
+    "fontes": [],
+    "vantagem": "Recursos adicionados ao inventário!",
+    "desvantagem": "",
+    "dica": "Gerencie bem seus recursos."
+  },
+
+  // 4. SVG Animado: Crescimento de Árvore
+  {
+    "id": "func_svg_anim_1",
+    "tipo": "Vantagem",
+    "titulo": "Crescimento Acelerado",
+    "pergunta": "<style>\n@keyframes growTreeTrunk { 0% { height: 0; } 100% { height: 40px; } }\n@keyframes growTreeLeaves { 0%, 50% { transform: scale(0); } 100% { transform: scale(1); } }\n.tree-svg { display: block; margin: 15px auto; width: 100px; height: 120px; }\n.trunk { animation: growTreeTrunk 1.5s ease-out forwards; }\n.leaves { animation: growTreeLeaves 1s ease-in forwards; animation-delay: 1.3s; transform-origin: bottom center; transform: scale(0); }\n</style>\n<p style='text-align:center;'>Sua ação de reflorestamento deu resultado rápido!</p>\n<svg class=\"tree-svg\" viewBox=\"0 0 50 60\">\n  <!-- Chão -->\n  <rect x=\"0\" y=\"55\" width=\"50\" height=\"5\" fill=\"#8c6b44\"/>\n  <!-- Tronco -->\n  <rect class=\"trunk\" x=\"22\" y=\"15\" width=\"6\" height=\"0\" fill=\"#a16207\" transform=\"translate(0, 40) scale(1, -1)\"/>\n  <!-- Copa (Folhas) -->\n  <ellipse class=\"leaves\" cx=\"25\" cy=\"15\" rx=\"18\" ry=\"12\" fill=\"#16a34a\"/>\n</svg>\n<p style='text-align:center; font-weight:bold;'>Ganhe +1 Estrela Fixa!</p>",
+    "opcoes": [ { "id": 1, "texto": "Ver a árvore crescer!" } ],
+    "respostaCorreta": [1],
+    "dificuldade": "facil",
+    "categorias": ["Teste_9"],
+    "fontes": [],
+    "vantagem": "Ganhou +1 Estrela Fixa!",
+    "desvantagem": "",
+    "dica": "Reflorestar é vital."
+  },
+
+  // 5. Formulário Falso com Validação Visual CSS
+  {
+    "id": "func_form_css_1",
+    "tipo": "Pergunta",
+    "titulo": "Licença Ambiental (Simulada)",
+    "pergunta": "<style>\n.fake-form { border: 1px solid #ccc; padding: 15px; border-radius: 5px; background: #fafafa; }\n.fake-form label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }\n.fake-form input[type='text'] { width: calc(100% - 16px); padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px; }\n/* Validação CSS com :valid/:invalid (exemplo simples) */\n.fake-form input[type='text']:invalid { border-color: red; }\n.fake-form input[type='text']:valid { border-color: green; }\n.validation-message { font-size: 0.8em; margin-top: -5px; margin-bottom: 10px; visibility: hidden; }\n.fake-form input[type='text']:invalid + .validation-message { visibility: visible; color: red; }\n.fake-form input[type='text']:valid + .validation-message { visibility: visible; color: green; }\n</style>\n<div class=\"fake-form\">\n  <p>Para obter a licença, preencha o código de verificação (é uma palavra relacionada à água).</p>\n  <label for=\"licence-code\">Código (6 letras):</label>\n  <input type=\"text\" id=\"licence-code\" name=\"licence-code\" required pattern=\"[Aa][Gg][Uu][Aa][Mm][Aa]\" maxlength=\"6\">\n  <span class=\"validation-message\">Inválido!</span>\n</div>\n<br>Qual palavra é o código correto?",
+    "opcoes": [
+        {"id": 1, "texto": "FLORESTA"},
+        {"id": 2, "texto": "RECICLA"},
+        {"id": 3, "texto": "AGUAMA"} // Código correto baseado no pattern
+    ],
+    "respostaCorreta": 3,
+    "dificuldade": "normal",
+    "categorias": ["Teste_10"],
+    "fontes": [],
+    "vantagem": "Correto! Licença concedida (simulada).",
+    "desvantagem": "Código incorreto.",
+    "dica": "Digite 'AGUAMA' no campo para ver a validação visual."
+  },
+
+  // --- Funcionalidades Anteriores como Base (1-5) ---
+  {
+    "id": "carta_1",
+    "tipo": "Outras",
+    "titulo": "Mapa Interativo (CSS Hover + :target)",
+    "pergunta": "<style>.map-container{position:relative;max-width:400px;margin:15px auto;border:2px solid #6b7280}.map-container img{display:block;width:100%;height:auto}.map-hotspot{position:absolute;border-radius:50%;cursor:pointer;background-color:rgba(255,255,0,.4);transition:background-color .2s}.map-hotspot:hover{background-color:rgba(255,255,0,.7)}.hs-floresta{top:20%;left:15%;width:20%;height:25%}.hs-montanha{top:10%;left:60%;width:25%;height:30%}.hs-rio{top:60%;left:10%;width:80%;height:15%;border-radius:10px}.map-info-popup{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:1020;padding:15px}.map-info-popup:target{display:flex}.map-info-content{background:white;padding:20px;border-radius:5px;max-width:300px;text-align:center;position:relative}.map-info-close{position:absolute;top:5px;right:10px;font-size:20px;text-decoration:none;color:#888}</style><p style='text-align:center;'>Explore o mapa da região clicando nas áreas destacadas:</p><div class=\"map-container\"><img src=\"/images/mapa_regiao_exemplo.png\" alt=\"Mapa da Região\"><a href=\"#info-floresta-c1\" class=\"map-hotspot hs-floresta\" title=\"Floresta Densa\"></a><a href=\"#info-montanha-c1\" class=\"map-hotspot hs-montanha\" title=\"Montanhas Rochosas\"></a><a href=\"#info-rio-c1\" class=\"map-hotspot hs-rio\" title=\"Rio Veloz\"></a></div><div id=\"info-floresta-c1\" class=\"map-info-popup\"><div class=\"map-info-content\"><a href=\"#\" class=\"map-info-close\">×</a><h5>Floresta Densa</h5><p>+5 Progresso por explorar, mas cuidado com animais selvagens!</p></div></div><div id=\"info-montanha-c1\" class=\"map-info-popup\"><div class=\"map-info-content\"><a href=\"#\" class=\"map-info-close\">×</a><h5>Montanhas Rochosas</h5><p>Chance de encontrar minério (+1 Recurso 'Pedra') ou sofrer um deslize (-1 Rodada).</p></div></div><div id=\"info-rio-c1\" class=\"map-info-popup\"><div class=\"map-info-content\"><a href=\"#\" class=\"map-info-close\">×</a><h5>Rio Veloz</h5><p>Água potável! (+1 Recurso 'Água'). Risco de correnteza.</p></div></div><p style='text-align:center; font-size:0.8em;'>Prossiga após explorar.</p>",
+    "opcoes": [ { "id": 1, "texto": "Continuar Jornada" } ], "respostaCorreta": [1], "dificuldade": "normal", "categorias": ["Carta_1"], "fontes": [], "vantagem": "Informações coletadas!", "desvantagem": "", "dica": "Clique nas áreas amarelas."
+  },
+  {
+    "id": "carta_2",
+    "tipo": "Pergunta",
+    "titulo": "Simulador de Descarte (Checkbox Hack)",
+    "pergunta": "<style>.drag-area-c2{border:2px dashed #9ca3af;padding:15px;margin-top:15px;background:#f3f4f6;min-height:80px;text-align:center}.drag-items-c2{display:flex;gap:10px;margin-bottom:15px;justify-content:center}.drag-item-c2{border:1px solid #6b7280;padding:5px 10px;background:white;border-radius:4px;cursor:pointer;user-select:none}.drag-item-c2 input[type='radio']{display:none}.drag-item-c2 input[type='radio']:checked+label{background-color:#60a5fa;color:white;border-color:#2563eb;box-shadow:0 0 5px #60a5fa}.drop-target-c2{border:2px solid #ca8a04;padding:20px;background:#fffbeb;color:#854d0e;font-weight:bold;position:relative}.feedback-c2{font-weight:normal;font-size:0.9em;margin-top:5px;display:none}#item-organico-c2:checked ~ .drag-area-c2 .feedback-organico-c2, #item-papel-c2:checked ~ .drag-area-c2 .feedback-papel-c2, #item-metal-c2:checked ~ .drag-area-c2 .feedback-metal-c2 {display:inline}#item-organico-c2:checked ~ .drag-area-c2 .drop-target-c2 {border-color:green}#item-papel-c2:checked ~ .drag-area-c2 .drop-target-c2 {border-color:red}#item-metal-c2:checked ~ .drag-area-c2 .drop-target-c2 {border-color:red}</style><p>Qual destes itens vai na <strong>COMPOSTEIRA</strong>?<br><i>(Clique no item para 'descartar')</i></p><div class=\"drag-items-c2\"><div class=\"drag-item-c2\"><input type=\"radio\" name=\"drag-item-c2\" id=\"item-organico-c2\" value=\"organico\"><label for=\"item-organico-c2\">🍎 Casca Maçã</label></div><div class=\"drag-item-c2\"><input type=\"radio\" name=\"drag-item-c2\" id=\"item-papel-c2\" value=\"papel\"><label for=\"item-papel-c2\">📰 Jornal</label></div><div class=\"drag-item-c2\"><input type=\"radio\" name=\"drag-item-c2\" id=\"item-metal-c2\" value=\"metal\"><label for=\"item-metal-c2\">🥫 Lata</label></div></div><div class=\"drag-area-c2\"><div class=\"drop-target-c2\">COMPOSTEIRA<br><span class=\"feedback-c2 feedback-organico-c2\" style='color:green'>Correto!</span><span class=\"feedback-c2 feedback-papel-c2\" style='color:red'>Incorreto!</span><span class=\"feedback-c2 feedback-metal-c2\" style='color:red'>Incorreto!</span></div></div>",
+    "opcoes": [ {"id": 1, "texto": "Casca de Maçã"}, {"id": 2, "texto": "Jornal"}, {"id": 3, "texto": "Lata"} ],
+    "respostaCorreta": 1, "dificuldade": "facil", "categorias": ["Carta_2"], "fontes": ["Compostagem"], "vantagem": "Correto!", "desvantagem": "Incorreto.", "dica": "O que se decompõe naturalmente?"
+  },
+  {
+    "id": "carta_3",
+    "tipo": "Vantagem",
+    "titulo": "Inventário Visual",
+    "pergunta": "<style>.resource-display-c3{display:flex;justify-content:space-around;gap:10px;background:#ecfdf5;border:1px solid #10b981;padding:15px;border-radius:5px;margin-top:10px}.resource-item-c3{text-align:center}.resource-icon-c3{font-size:2em;display:block;margin-bottom:5px}.resource-count-c3{font-weight:bold;font-size:1.2em;background:white;padding:2px 8px;border-radius:10px;border:1px solid #a7f3d0}</style><p style='text-align:center;'>Você encontrou um depósito abandonado com suprimentos!</p><div class=\"resource-display-c3\"><div class=\"resource-item-c3\"><span class=\"resource-icon-c3\">🛠️</span><span class=\"resource-count-c3\">+1</span> Kit Reparo</div><div class=\"resource-item-c3\"><span class=\"resource-icon-c3\">💰</span><span class=\"resource-count-c3\">+5</span> Moedas</div><div class=\"resource-item-c3\"><span class=\"resource-icon-c3\">🗺️</span><span class=\"resource-count-c3\">+1</span> Mapa</div></div><p style='text-align:center;font-size:0.8em;margin-top:10px'>(Adicione ao seu inventário)</p>",
+    "opcoes": [ { "id": 1, "texto": "Coletar Tudo!" } ], "respostaCorreta": [1], "dificuldade": "facil", "categorias": ["Carta_3"], "fontes": [], "vantagem": "Itens adicionados!", "desvantagem": "", "dica": "Sempre útil ter mais recursos."
+  },
+  {
+    "id": "carta_4",
+    "tipo": "Vantagem",
+    "titulo": "Germinação Rápida (SVG Animado)",
+    "pergunta": "<style>@keyframes growSeedling{0%{opacity:0;transform:translateY(20px) scale(0.5)}50%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:1;transform:translateY(0) scale(1)}}.seedling-svg{display:block;margin:15px auto;width:80px;height:100px}.seedling-path{fill:none;stroke:#16a34a;stroke-width:3;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;animation:drawPath 2s ease-in-out forwards;animation-delay:.2s}@keyframes drawPath{to{stroke-dashoffset:0}}</style><p style='text-align:center;'>Sua semente especial germinou incrivelmente rápido!</p><svg class=\"seedling-svg\" viewBox=\"0 0 40 50\">\n <path class=\"seedling-path\" d=\"M 20 45 Q 15 30 20 15\"/>\n <path class=\"seedling-path\" d=\"M 20 15 Q 25 20 30 10\" style=\"animation-delay: 0.8s;\"/>\n <path class=\"seedling-path\" d=\"M 20 15 Q 15 20 10 10\" style=\"animation-delay: 1.2s;\"/>\n</svg><p style='text-align:center;font-weight:bold;'>Ganhe +20 de Progresso!</p>",
+    "opcoes": [ { "id": 1, "texto": "Cultivar!" } ], "respostaCorreta": [1], "dificuldade": "facil", "categorias": ["Carta_4"], "fontes": [], "vantagem": "+20 Progresso!", "desvantagem": "", "dica": "O poder da natureza!"
+  },
+  {
+    "id": "carta_5",
+    "tipo": "Pergunta",
+    "titulo": "Relatório Anual (Form Falso)",
+    "pergunta": "<style>.fake-form-c5{border:1px solid #ccc;padding:15px;border-radius:5px;background:#fafafa}.fake-form-c5 label{display:block;margin:10px 0 5px 0;font-weight:bold;font-size:.9em}.fake-form-c5 input[type='range']{width:100%;cursor:not-allowed}.fake-form-c5 output{font-weight:bold;margin-left:10px;display:inline-block;min-width:30px;text-align:right;padding:2px 6px;background:white;border:1px solid #ddd;border-radius:3px}.fake-form-c5 .report-value{font-size:1.1em;color:#1d4ed8}</style><div class=\"fake-form-c5\">\n <h5 style='text-align:center;margin-bottom:15px;'>Relatório de Desempenho Ambiental</h5>\n <div><label for=\"range-reciclagem\">Taxa de Reciclagem:</label><input type=\"range\" id=\"range-reciclagem\" name=\"reciclagem\" min=\"0\" max=\"100\" value=\"75\" disabled><output for=\"reciclagem\">75%</output></div>\n <div><label for=\"range-agua\">Redução Consumo Água:</label><input type=\"range\" id=\"range-agua\" name=\"agua\" min=\"0\" max=\"100\" value=\"40\" disabled><output for=\"agua\">40%</output></div>\n <div><label for=\"range-energia\">Uso Energia Renovável:</label><input type=\"range\" id=\"range-energia\" name=\"energia\" min=\"0\" max=\"100\" value=\"90\" disabled><output for=\"energia\">90%</output></div>\n</div><br>Qual indicador teve o <strong>MENOR</strong> desempenho no relatório?",
+    "opcoes": [ {"id": 1, "texto": "Reciclagem (75%)"}, {"id": 2, "texto": "Redução Água (40%)"}, {"id": 3, "texto": "Energia Renovável (90%)"} ],
+    "respostaCorreta": 2, "dificuldade": "facil", "categorias": ["Carta_5"], "fontes": ["Relatório Fictício"], "vantagem": "Correto! A economia de água precisa melhorar.", "desvantagem": "Incorreto. Procure o menor percentual.", "dica": "Qual número é o menor?"
+  },
     
-      // 2. Simulação de "Arrastar e Soltar" (CSS Checkbox Hack)
-      {
-        "id": "func_dragdrop_sim_1",
-        "tipo": "Pergunta",
-        "titulo": "Organize os Resíduos",
-        "pergunta": "<style>\n.drag-area { border: 2px dashed #9ca3af; padding: 15px; margin-top: 15px; background: #f3f4f6; min-height: 80px; }\n.drag-items { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }\n.drag-item { border: 1px solid #6b7280; padding: 5px 10px; background: white; border-radius: 4px; cursor: pointer; user-select: none; }\n.drag-item input[type='radio'] { display: none; }\n/* Estilo quando 'selecionado' (radio checked) */\n.drag-item input[type='radio']:checked + label { background-color: #60a5fa; color: white; border-color: #2563eb; box-shadow: 0 0 5px #60a5fa; }\n.drop-target { border: 2px solid #16a34a; padding: 20px; text-align: center; background: #f0fdf4; color: #14532d; font-weight: bold; }\n/* Mostrar mensagem de sucesso SÓ se o item CORRETO for selecionado (exemplo com ID 'item-plastico') */\n#item-plastico:checked ~ .drag-area .drop-target::after { content: ' Plástico no lugar certo!'; color: green; }\n#item-vidro:checked ~ .drag-area .drop-target::after { content: ' Vidro NÃO vai aqui!'; color: red; }\n</style>\n<p>Qual destes itens deve ir para a Lixeira de <strong>PLÁSTICO</strong> (Vermelha)?<br><i>(Clique no item para 'pegá-lo' e veja o resultado na área de descarte)</i></p>\n<div class=\"drag-items\">\n  <div class=\"drag-item\">\n    <input type=\"radio\" name=\"drag-item\" id=\"item-plastico\" value=\"plastico\">\n    <label for=\"item-plastico\">🧴 Garrafa Plástica</label>\n  </div>\n  <div class=\"drag-item\">\n    <input type=\"radio\" name=\"drag-item\" id=\"item-vidro\" value=\"vidro\">\n    <label for=\"item-vidro\">🍾 Garrafa Vidro</label>\n  </div>\n</div>\n<div class=\"drag-area\">\n  <div class=\"drop-target\">Lixeira Vermelha (Plástico)</div>\n</div>",
-        "opcoes": [
-          { "id": 1, "texto": "Garrafa Plástica" },
-          { "id": 2, "texto": "Garrafa Vidro" }
-        ],
-        "respostaCorreta": 1, // Resposta da pergunta, não da interação CSS
-        "dificuldade": "facil",
-        "categorias": ["Teste_7"],
-        "fontes": ["Coleta Seletiva"],
-        "vantagem": "Correto!",
-        "desvantagem": "Incorreto.",
-        "dica": "Clique nos itens para simular o descarte."
-      },
-    
-      // 3. Contador Visual de Recursos (HTML + CSS Básico)
-      {
-        "id": "func_resource_counter_1",
-        "tipo": "Vantagem",
-        "titulo": "Coleta Eficiente",
-        "pergunta": "<style>\n.resource-display { display: flex; justify-content: space-around; gap: 15px; background: #fff7ed; border: 1px solid #fb923c; padding: 15px; border-radius: 5px; margin-top: 10px; }\n.resource-item { text-align: center; }\n.resource-icon { font-size: 2em; display: block; margin-bottom: 5px; }\n.resource-count { font-weight: bold; font-size: 1.2em; background: white; padding: 2px 8px; border-radius: 10px; border: 1px solid #fed7aa; }\n</style>\n<p style='text-align:center;'>Sua eficiência na coleta rendeu bons frutos!</p>\n<div class=\"resource-display\">\n  <div class=\"resource-item\">\n    <span class=\"resource-icon\">💧</span>\n    <span class=\"resource-count\">+3</span> Água Limpa\n  </div>\n  <div class=\"resource-item\">\n    <span class=\"resource-icon\">🌱</span>\n    <span class=\"resource-count\">+5</span> Sementes\n  </div>\n</div>\n<p style='text-align:center; font-size:0.8em; margin-top: 10px;'>(Adicione estes recursos ao seu inventário no jogo)</p>",
-        "opcoes": [ { "id": 1, "texto": "Coletar Recursos" } ],
-        "respostaCorreta": [1],
-        "dificuldade": "facil",
-        "categorias": ["Teste_8"],
-        "fontes": [],
-        "vantagem": "Recursos adicionados ao inventário!",
-        "desvantagem": "",
-        "dica": "Gerencie bem seus recursos."
-      },
-    
-      // 4. SVG Animado: Crescimento de Árvore
-      {
-        "id": "func_svg_anim_1",
-        "tipo": "Vantagem",
-        "titulo": "Crescimento Acelerado",
-        "pergunta": "<style>\n@keyframes growTreeTrunk { 0% { height: 0; } 100% { height: 40px; } }\n@keyframes growTreeLeaves { 0%, 50% { transform: scale(0); } 100% { transform: scale(1); } }\n.tree-svg { display: block; margin: 15px auto; width: 100px; height: 120px; }\n.trunk { animation: growTreeTrunk 1.5s ease-out forwards; }\n.leaves { animation: growTreeLeaves 1s ease-in forwards; animation-delay: 1.3s; transform-origin: bottom center; transform: scale(0); }\n</style>\n<p style='text-align:center;'>Sua ação de reflorestamento deu resultado rápido!</p>\n<svg class=\"tree-svg\" viewBox=\"0 0 50 60\">\n  <!-- Chão -->\n  <rect x=\"0\" y=\"55\" width=\"50\" height=\"5\" fill=\"#8c6b44\"/>\n  <!-- Tronco -->\n  <rect class=\"trunk\" x=\"22\" y=\"15\" width=\"6\" height=\"0\" fill=\"#a16207\" transform=\"translate(0, 40) scale(1, -1)\"/>\n  <!-- Copa (Folhas) -->\n  <ellipse class=\"leaves\" cx=\"25\" cy=\"15\" rx=\"18\" ry=\"12\" fill=\"#16a34a\"/>\n</svg>\n<p style='text-align:center; font-weight:bold;'>Ganhe +1 Estrela Fixa!</p>",
-        "opcoes": [ { "id": 1, "texto": "Ver a árvore crescer!" } ],
-        "respostaCorreta": [1],
-        "dificuldade": "facil",
-        "categorias": ["Teste_9"],
-        "fontes": [],
-        "vantagem": "Ganhou +1 Estrela Fixa!",
-        "desvantagem": "",
-        "dica": "Reflorestar é vital."
-      },
-    
-      // 5. Formulário Falso com Validação Visual CSS
-      {
-        "id": "func_form_css_1",
-        "tipo": "Pergunta",
-        "titulo": "Licença Ambiental (Simulada)",
-        "pergunta": "<style>\n.fake-form { border: 1px solid #ccc; padding: 15px; border-radius: 5px; background: #fafafa; }\n.fake-form label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }\n.fake-form input[type='text'] { width: calc(100% - 16px); padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px; }\n/* Validação CSS com :valid/:invalid (exemplo simples) */\n.fake-form input[type='text']:invalid { border-color: red; }\n.fake-form input[type='text']:valid { border-color: green; }\n.validation-message { font-size: 0.8em; margin-top: -5px; margin-bottom: 10px; visibility: hidden; }\n.fake-form input[type='text']:invalid + .validation-message { visibility: visible; color: red; }\n.fake-form input[type='text']:valid + .validation-message { visibility: visible; color: green; }\n</style>\n<div class=\"fake-form\">\n  <p>Para obter a licença, preencha o código de verificação (é uma palavra relacionada à água).</p>\n  <label for=\"licence-code\">Código (6 letras):</label>\n  <input type=\"text\" id=\"licence-code\" name=\"licence-code\" required pattern=\"[Aa][Gg][Uu][Aa][Mm][Aa]\" maxlength=\"6\">\n  <span class=\"validation-message\">Inválido!</span>\n</div>\n<br>Qual palavra é o código correto?",
-        "opcoes": [
-            {"id": 1, "texto": "FLORESTA"},
-            {"id": 2, "texto": "RECICLA"},
-            {"id": 3, "texto": "AGUAMA"} // Código correto baseado no pattern
-        ],
-        "respostaCorreta": 3,
-        "dificuldade": "normal",
-        "categorias": ["Teste_10\"],
-        "fontes": [],
-        "vantagem": "Correto! Licença concedida (simulada).",
-        "desvantagem": "Código incorreto.",
-        "dica": "Digite 'AGUAMA' no campo para ver a validação visual."
-      }
+  // --- Funcionalidades Mais Únicas (6-25) ---
+  {
+    "id": "carta_6",
+    "tipo": "Pergunta",
+    "titulo": "Tooltip CSS Avançado",
+    "pergunta": "<style>\n.tooltip-c6 { position: relative; display: inline-block; cursor: help; }\n.tooltip-c6::before { content: attr(data-tooltip); position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background-color: black; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.85em; white-space: nowrap; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; pointer-events: none; }\n.tooltip-c6::after { content: ''; position: absolute; bottom: 110% - 5px; left: 50%; transform: translateX(-50%) translateY(100%); border-width: 5px; border-style: solid; border-color: black transparent transparent transparent; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; pointer-events: none; }\n.tooltip-c6:hover::before, .tooltip-c6:hover::after { opacity: 1; visibility: visible; }\n</style>\nO que significa <strong class=\"tooltip-c6\" data-tooltip=\"Gases de Efeito Estufa\">GEE</strong>?",
+    "opcoes": [ {"id": 1, "texto": "Gestão Eficiente de Energia"}, {"id": 2, "texto": "Gases de Efeito Estufa"}, {"id": 3, "texto": "Grupo Ecológico Especial"} ],
+    "respostaCorreta": 2, "dificuldade": "facil", "categorias": ["Carta_6"], "fontes": [], "vantagem": "Correto!", "desvantagem": "Incorreto.", "dica": "Passe o mouse sobre GEE."
+  },
+  {
+    "id": "carta_7",
+    "tipo": "Outras",
+    "titulo": "Flip Card Duplo (:target)",
+    "pergunta": "<style>\n.flip-container-c7{display:flex;justify-content:space-around;gap:10px;margin:15px 0;}.flip-card-c7{perspective:1000px;width:100px;height:100px}.flip-inner-c7{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}.flip-card-c7 a{text-decoration:none;}.flip-card-c7 .flip-front-c7,.flip-card-c7 .flip-back-c7{position:absolute;width:100%;height:100%;backface-visibility:hidden;border:1px solid #ccc;border-radius:8px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:5px}.flip-front-c7{background-color:#e0f2fe;color:#075985;font-size:2em}.flip-back-c7{transform:rotateY(180deg);background-color:#dcfce7;color:#15803d}.flip-target-c7{display:none}/* Flip on target */#flip1:target ~ .flip-container-c7 .flipper1 .flip-inner-c7{transform:rotateY(180deg)}#flip2:target ~ .flip-container-c7 .flipper2 .flip-inner-c7{transform:rotateY(180deg)}</style><p style='text-align:center'>Escolha uma carta para virar:</p>\n<span id=\"flip1\" class=\"flip-target-c7\"></span><span id=\"flip2\" class=\"flip-target-c7\"></span> <!-- Targets -->\n<div class=\"flip-container-c7\">\n  <div class=\"flip-card-c7 flipper1\">\n    <a href=\"#flip1\">\n     <div class=\"flip-inner-c7\">\n      <div class=\"flip-front-c7\">?¹</div>\n      <div class=\"flip-back-c7\">🌱<br><small>+5 Progresso</small></div>\n     </div>\n    </a>\n  </div>\n  <div class=\"flip-card-c7 flipper2\">\n    <a href=\"#flip2\">\n     <div class=\"flip-inner-c7\">\n      <div class=\"flip-front-c7\">?²</div>\n      <div class=\"flip-back-c7\">💨<br><small>-1 Rodada</small></div>\n     </div>\n    </a>\n  </div>\n</div><p style='text-align:center;font-size:0.8em'>Clique em uma, veja o resultado e confirme abaixo.</p>",
+    "opcoes": [ {"id": 1, "texto": "Escolhi a Carta 1 (+5 Progresso)"}, {"id": 2, "texto": "Escolhi a Carta 2 (-1 Rodada)"} ],
+    "respostaCorreta": [1, 2], "dificuldade": "facil", "categorias": ["Carta_7"], "fontes": [], "vantagem": "Sorte ou azar?", "desvantagem": "Sorte ou azar?", "dica": "Clique nos '?' para ver o que acontece."
+  },
+  {
+    "id": "carta_8",
+    "tipo": "Outras",
+    "titulo": "Cofre Ecológico (Combinação :target)",
+    "pergunta": "<style>.safe-c8{width:200px;height:200px;background:#9ca3af;border:5px solid #4b5563;border-radius:10px;margin:15px auto;position:relative;display:flex;flex-direction:column;justify-content:space-evenly;align-items:center}.safe-dial-c8{width:80px;height:80px;background:#e5e7eb;border:3px solid #4b5563;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:1.5em;font-weight:bold;position:relative}.safe-dial-c8::after{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:10px solid #4b5563}.safe-buttons-c8{display:flex;gap:8px}.safe-buttons-c8 a{padding:8px;background:white;border:1px solid #6b7280;border-radius:4px;text-decoration:none;font-weight:bold;color:#374151}.safe-status-c8{min-height:20px;margin-top:5px;font-size:0.9em;font-weight:bold}.safe-popup-c8{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:none;justify-content:center;align-items:center;z-index:1015}.safe-popup-c8:target{display:flex}.safe-content-c8{background:gold;padding:30px;border-radius:10px;text-align:center;border:3px solid darkorange}.safe-close-c8{position:absolute;top:5px;right:10px;font-size:20px;color:#333;text-decoration:none}/* Combinação: 1->3->2 */#s1:target ~ #s1c3:target ~ #s1c3r2:target ~ .safe-status-c8{color:green;content:'ABERTO!'}#s1:target ~ #s1c3:target ~ #s1c3r2:target{background:lightgreen}.safe-target{display:none}</style><p style='text-align:center'>Decifre a combinação do Cofre Ecológico (1-3-2):</p><div class='safe-c8'><div class='safe-dial-c8'>?</div><div class='safe-buttons-c8'><a href='#s1'>1</a><a href='#s3'>2</a><a href='#s2'>3</a></div><div class='safe-status-c8'>Fechado</div></div><span id='s1' class='safe-target'></span><span id='s1c3' class='safe-target'></span><span id='s1c3r2' class='safe-target'></span> <!-- Alvos complexos --> <a href='#safe-open-popup' id='safe-open-link' class='safe-target'></a> <!-- Link escondido ativado por CSS se aberto --> <div id='safe-open-popup' class='safe-popup-c8'><div class='safe-content-c8'><a href='#' class='safe-close-c8'>×</a><h4>Tesouro!</h4><p style='font-size:2.5em'>💎</p><p>+1 Estrela Fixa!</p></div></div><p style='text-align:center; font-size:0.8em;'>Clique nos números na ordem certa. Se acertar, o status muda e um popup aparece (clique no status para abri-lo ou use o botão confirmar).</p>",
+    "opcoes": [ {"id": 1, "texto": "Confirmar Abertura (se conseguiu)"} ],
+    "respostaCorreta": [1], // A validação é visual
+    "dificuldade": "dificil", "categorias": ["Carta_8"], "fontes": [], "vantagem": "Cofre aberto! Ganhou +1 Estrela Fixa!", "desvantagem": "Combinação incorreta.", "dica": "A sequência é 1, depois 3, depois 2."
+  },
+  {
+    "id": "carta_9",
+    "tipo": "Pergunta",
+    "titulo": "Nível do Mar (Visualização + Input Falso)",
+    "pergunta": "<style>.sea-level-c9{width:80%;height:100px;background:linear-gradient(to top, #3b82f6 30%, #a5f3fc 30%);margin:15px auto;border:2px solid #0ea5e9;position:relative;overflow:hidden}.sea-level-c9::after{content:'~30cm previsto até 2050';position:absolute;bottom:5px;left:5px;font-size:0.7em;color:white;background:rgba(0,0,0,0.5);padding:2px 4px;border-radius:3px}.sea-marker-c9{position:absolute;left:50%;bottom:30%;/*Nível atual*/width:80%;height:2px;background:red;transform:translate(-50%, 50%)}.fake-input-c9{display:block;margin:10px auto;width:80%;padding:8px;text-align:center;border:1px solid #ccc;border-radius:4px}</style><p>O gráfico simula o aumento do nível do mar. Qual a principal causa desse fenômeno?</p><div class=\"sea-level-c9\"><div class=\"sea-marker-c9\"></div></div><input type=\"text\" placeholder=\"Digite sua resposta aqui (ilustrativo)\" class=\"fake-input-c9\" disabled>",
+    "opcoes": [ {"id": 1, "texto": "Aumento da pesca"}, {"id": 2, "texto": "Derretimento de geleiras e expansão térmica"}, {"id": 3, "texto": "Atividade vulcânica submarina"} ],
+    "respostaCorreta": 2, "dificuldade": "normal", "categorias": ["Carta_9"], "fontes": ["IPCC"], "vantagem": "Correto! Aquecimento global é a causa.", "desvantagem": "Incorreto. Pense no efeito do aquecimento.", "dica": "Gelo derretido e água mais quente ocupam mais espaço."
+  },
+  {
+    "id": "carta_10",
+    "tipo": "Pergunta",
+    "titulo": "Termômetro da Febre Planetária",
+    "pergunta": "<style>.thermo-c10{width:40px;height:150px;background:#e5e7eb;border:2px solid #6b7280;border-radius:20px 20px 5px 5px;margin:15px auto;position:relative}.thermo-bulb-c10{width:50px;height:50px;background:#ef4444;border:2px solid #991b1b;border-radius:50%;position:absolute;bottom:-25px;left:50%;transform:translateX(-50%)}.thermo-mercury-c10{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:16px;height:75%;/*Nível da 'febre'*/background:#dc2626;border-radius:8px 8px 0 0}.temp-label-c10{position:absolute;top:-25px;left:50%;transform:translateX(-50%);font-weight:bold;font-size:0.9em;background:white;padding:0 5px}</style><p style='text-align:center;'>O termômetro indica a anomalia média de temperatura global (fictícia). Qual o status?</p><div class=\"thermo-c10\"><div class=\"temp-label-c10\">+1.5°C</div><div class=\"thermo-mercury-c10\"></div><div class=\"thermo-bulb-c10\"></div></div>",
+    "opcoes": [ {"id": 1, "texto": "Normal / Frio"}, {"id": 2, "texto": "Alerta Alto / Aquecido"} ],
+    "respostaCorreta": 2, "dificuldade": "facil", "categorias": ["Carta_10"], "fontes": [], "vantagem": "Correto! Situação preocupante.", "desvantagem": "Incorreto. O termômetro está bem alto.", "dica": "Vermelho geralmente indica calor ou alerta."
+  },
+  // ... (Continue com as ideias 11-25, usando HTML/CSS criativo)
+  {
+    "id": "carta_11",
+    "tipo": "Outras",
+    "titulo": "Receita: Suco Verde Detox",
+    "pergunta": "<style>.recipe-card{background:#f0fdf4;border:1px solid #15803d;padding:15px;border-radius:8px}.recipe-card h5{text-align:center;margin:0 0 15px 0;color:#065f46}.recipe-card strong{color:#15803d}.recipe-card ul, .recipe-card ol{margin-left:20px;padding-left:15px;font-size:.9em}.recipe-card img{float:right;width:80px;height:auto;border-radius:4px;margin-left:10px;border:1px solid #a7f3d0}</style><div class='recipe-card'><img src='/images/suco_verde.jpg' alt='Suco Verde'><h5 >Suco Verde Simples</h5><p><strong>Ingredientes:</strong></p><ul><li>1 folha de couve</li><li>1/2 maçã</li><li>Suco de 1/2 limão</li><li>150ml água gelada</li><li>Gengibre a gosto (opcional)</li></ul><p><strong>Modo de Preparo:</strong></p><ol><li>Lave bem os ingredientes.</li><li>Bata tudo no liquidificador.</li><li>Coar é opcional. Sirva gelado!</li></ol><div style='clear:both'></div></div><p style='text-align:center;font-size:0.8em;margin-top:10px'>Uma opção saudável e de baixo impacto!</p>",
+    "opcoes": [ { "id": 1, "texto": "Anotar a Receita!" } ], "respostaCorreta": [1], "dificuldade": "facil", "categorias": ["Carta_11"], "fontes": [], "vantagem": "Bom apetite (sustentável)!", "desvantagem": "", "dica": "Couve é a base verde."
+  },
+  {
+    "id": "carta_12",
+    "tipo": "Pergunta",
+    "titulo": "Painel de Controle Solar",
+    "pergunta": "<style>.panel-c12{background:#1f2937;color:white;padding:15px;border-radius:5px;max-width:300px;margin:auto}.panel-c12 h5{text-align:center;color:#9ca3af;margin:0 0 15px 0}.indicator-c12{display:flex;align-items:center;margin-bottom:10px}.indicator-light-c12{width:15px;height:15px;border-radius:50%;margin-right:10px;border:1px solid rgba(255,255,255,0.3)}.light-green{background:#4ade80;box-shadow:0 0 8px #4ade80}.light-red{background:#f87171;box-shadow:0 0 8px #f87171}.light-off{background:#4b5563}</style><p style='text-align:center'>Status do sistema de energia solar:</p><div class='panel-c12'><h5>PAINEL SOLAR CENTRAL</h5><div class='indicator-c12'><span class='indicator-light-c12 light-green'></span><span>Geração Ativa</span></div><div class='indicator-c12'><span class='indicator-light-c12 light-off'></span><span>Bateria Carregando</span></div><div class='indicator-c12'><span class='indicator-light-c12 light-red'></span><span>Falha no Inversor</span></div></div><br>Qual problema o painel indica?",
+    "opcoes": [ {"id": 1, "texto": "Geração OK, Bateria OK"}, {"id": 2, "texto": "Falha no Inversor"}, {"id": 3, "texto": "Bateria Não Carrega"} ],
+    "respostaCorreta": 2, "dificuldade": "facil", "categorias": ["Carta_12"], "fontes": [], "vantagem": "Correto!", "desvantagem": "Incorreto, veja a luz vermelha.", "dica": "Luzes vermelhas geralmente indicam problemas."
+  },
+  {
+    "id": "carta_13",
+    "tipo": "Vantagem",
+    "titulo": "Coleta Premiada (:target)",
+    "pergunta": "<style>@keyframes fall{0%{transform:translateY(-100px);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes catchPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}.catch-game-c13{height:150px;border:2px dashed #fbbf24;background:#fffbeb;position:relative;overflow:hidden;margin:15px auto;max-width:300px}.trash-icon-c13{font-size:2em;position:absolute;top:-40px;left:calc(50% - 20px);animation:fall 3s linear infinite}.catch-button-c13 a{display:inline-block;padding:8px 15px;background:#fb923c;color:white;border-radius:5px;text-decoration:none;margin-top:100px;position:relative;z-index:10}.catch-button-c13 a:active{animation:catchPulse .3s ease}.catch-popup-c13{/* Estilo popup :target */ position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.7); display:none; justify-content:center; align-items:center; z-index:1016;}.catch-popup-c13:target{display:flex}.catch-content-c13{/* Estilo popup */ background:lightgreen;color:darkgreen;padding:20px;border-radius:5px;text-align:center;}.catch-close-c13{/* Estilo fechar */ position:absolute;top:5px;right:10px;color:#333;text-decoration:none;font-size:20px}</style><p style='text-align:center'>Lixo caindo! Clique em 'Pegar' no momento certo (quando o lixo estiver baixo) para um bônus!</p><div class='catch-game-c13'><span class='trash-icon-c13'>🗑️</span><div class='catch-button-c13' style='text-align:center;'><a href='#catch-success'>Pegar!</a></div></div><div id='catch-success' class='catch-popup-c13'><div class='catch-content-c13'><a href='#' class='catch-close-c13'>×</a><h4>Pegou!</h4><p>+1 Pulo pela agilidade!</p></div></div>",
+    "opcoes": [ {"id": 1, "texto": "Tentar Pegar"} ], "respostaCorreta": [1], "dificuldade": "normal", "categorias": ["Carta_13"], "fontes": [], "vantagem": "Verifique se conseguiu o bônus!", "desvantagem": "", "dica": "O timing é crucial (simulado)."
+  },
+  {
+    "id": "carta_14",
+    "tipo": "Pergunta",
+    "titulo": "Identifique a Pegada",
+    "pergunta": "Qual animal deixou esta pegada na lama?<br><img src='/images/pegadas_animais.png' alt='Pegadas diversas' style='max-width:300px; margin:15px auto; display:block; border:1px solid #ccc;'>",
+    "opcoes": [ {"id": 1, "texto": "Capivara (Dedos com membranas)"}, {"id": 2, "texto": "Onça (Sem marcas de garras)"}, {"id": 3, "texto": "Lobo Guará (Similar a cachorro grande)"}, {"id": 4, "texto": "Tamanduá (Garras longas marcadas)"} ],
+    "respostaCorreta": 3, // Supondo que a pegada em destaque seja do lobo
+    "dificuldade": "normal", "categorias": ["Carta_14"], "fontes": ["Guia de Pegadas"], "vantagem": "Correto!", "desvantagem": "Incorreto, observe os detalhes da pegada em destaque.", "dica": "Conte os dedos e procure por marcas de garras."
+  },
+  {
+    "id": "carta_15",
+    "tipo": "Ordem",
+    "titulo": "Cadeia Alimentar Aquática",
+    "pergunta": "Ordene a cadeia alimentar marinha (do produtor ao topo):<br><div style='display:flex; justify-content:space-around; align-items:center; margin-top:15px; font-size:1.5em;'><span>☀️</span> → <span style='border:1px dashed grey; padding: 5px; margin: 0 5px;'>?</span> → <span style='border:1px dashed grey; padding: 5px; margin: 0 5px;'>?</span> → <span style='border:1px dashed grey; padding: 5px; margin: 0 5px;'>?</span></div>",
+    "opcoes": [ {"id": 1, "texto": "🐟 Peixe Pequeno"}, {"id": 2, "texto": "🦈 Tubarão"}, {"id": 3, "texto": "🌿 Fitoplâncton"} ],
+    "respostaCorreta": [3, 1, 2], // Fitoplâncton -> Peixe Pequeno -> Tubarão
+    "dificuldade": "facil", "categorias": ["Carta_15"], "fontes": ["Ecologia Marinha"], "vantagem": "Cadeia alimentar correta!", "desvantagem": "A ordem está incorreta.", "dica": "Quem come quem no mar, começando pelos menores?"
+  },
+  // ... Continue com as ideias 16-25 de forma similar ...
+  // 16. Votação com Barras (HTML/CSS)
+  {
+    "id": "carta_16",
+    "tipo": "Outras",
+    "titulo": "Resultado da Votação",
+    "pergunta": "<style>.poll-results{border:1px solid #ccc;padding:15px;border-radius:5px}.poll-option{margin-bottom:10px}.poll-label{display:block;font-size:.9em;margin-bottom:3px}.poll-bar-bg{background:#e5e7eb;height:20px;border-radius:10px;overflow:hidden}.poll-bar-fill{height:100%;background:#3b82f6;border-radius:10px;text-align:right;padding-right:5px;color:white;font-size:.8em;line-height:20px;white-space:nowrap}</style><p>A comunidade votou sobre a criação do parque eólico:</p><div class='poll-results'> <div class='poll-option'><span class='poll-label'>Sim (Pró-Parque):</span><div class='poll-bar-bg'><div class='poll-bar-fill' style='width: 70%; background-color: #22c55e;'>70%</div></div></div> <div class='poll-option'><span class='poll-label'>Não (Contra):</span><div class='poll-bar-bg'><div class='poll-bar-fill' style='width: 30%; background-color: #ef4444;'>30%</div></div></div></div><br><p>A proposta foi <strong>APROVADA</strong>! Todos os jogadores avançam 1 casa.</p>",
+    "opcoes": [ {"id": 1, "texto": "Comemorar (ou lamentar)"} ],
+    "respostaCorreta": [1], "dificuldade": "facil", "categorias": ["Carta_16"], "fontes": [], "vantagem": "A comunidade decidiu! Avance 1 casa.", "desvantagem": "", "dica": ""
+  },
+  // 17. Bolsa de Valores Verde (Gráfico Falso)
+  {
+    "id": "carta_17",
+    "tipo": "Pergunta",
+    "titulo": "Bolsa Verde",
+    "pergunta": "<style>.stock-chart{display:flex;gap:20px;justify-content:center;margin-top:15px}.stock{text-align:center}.stock-graph{width:80px;height:50px;border:1px solid #ccc;position:relative;background:white}.stock-line{position:absolute;bottom:0;left:0;width:100%;height:100%;fill:none;stroke-width:2}.line-up{stroke:green}.line-down{stroke:red}.stock-label{font-size:.9em;margin-top:5px}</style><p>Qual 'ação' está em alta?</p><div class='stock-chart'><div class='stock'><svg class='stock-graph' viewBox='0 0 80 50'><polyline class='stock-line line-up' points='0,40 20,30 40,35 60,15 80,10'/></svg><span class='stock-label'>Energia Limpa</span></div><div class='stock'><svg class='stock-graph' viewBox='0 0 80 50'><polyline class='stock-line line-down' points='0,10 20,15 40,30 60,25 80,40'/></svg><span class='stock-label'>Comb. Fóssil</span></div></div>",
+    "opcoes": [ {"id": 1, "texto": "Energia Limpa"}, {"id": 2, "texto": "Comb. Fóssil"} ],
+    "respostaCorreta": 1, "dificuldade": "facil", "categorias": ["Carta_17"], "fontes": [], "vantagem": "Correto! Investir no verde compensa.", "desvantagem": "Incorreto. Veja qual linha sobe.", "dica": "A linha verde está subindo."
+  },
+  // 18. "Colorir" Desenho (Checkbox Hack)
+  {
+    "id": "carta_18",
+    "tipo": "Outras",
+    "titulo": "Pinte a Borboleta",
+    "pergunta": "<style>.color-container{text-align:center}.butterfly-svg{width:150px;height:auto;margin:10px auto;display:block}.wing-left,.wing-right,.body-bf{fill:#eee;stroke:#333;stroke-width:1;transition:fill .3s}/*Coloring*/#color-blue:checked ~ .butterfly-svg .wing-left{fill:#60a5fa}#color-yellow:checked ~ .butterfly-svg .wing-right{fill:#facc15}#color-brown:checked ~ .butterfly-svg .body-bf{fill:#a16207}.color-options label{margin:0 5px;padding:5px;border:1px solid #ccc;cursor:pointer;border-radius:4px}.color-options input{display:none}.color-options input:checked+label{border-width:2px;font-weight:bold}</style><p>Use as cores para pintar a borboleta (clique nas cores):</p><svg class='butterfly-svg' viewBox='0 0 100 80'><path class='wing-left' d='M 50 40 C 10 80, 10 0, 50 40 Z' /><path class='wing-right' d='M 50 40 C 90 80, 90 0, 50 40 Z' /><ellipse class='body-bf' cx='50' cy='40' rx='5' ry='25'/> </svg><div class='color-options'><input type='checkbox' id='color-blue'/><label for='color-blue' style='border-color:#60a5fa'>Azul (Asa Esq)</label><input type='checkbox' id='color-yellow'/><label for='color-yellow' style='border-color:#facc15'>Amarelo (Asa Dir)</label><input type='checkbox' id='color-brown'/><label for='color-brown' style='border-color:#a16207'>Marrom (Corpo)</label></div>",
+    "opcoes": [ {"id": 1, "texto": "Finalizar Pintura"} ], "respostaCorreta": [1], "dificuldade": "facil", "categorias": ["Carta_18"], "fontes": [], "vantagem": "Belo trabalho artístico!", "desvantagem": "", "dica": "Clique nas cores para ver o efeito."
+  },
+  // 19. Relógio Biológico Animado
+  {
+    "id": "carta_19",
+    "tipo": "Pergunta",
+    "titulo": "Ciclo Circadiano",
+    "pergunta": "<style>@keyframes ticktock{to{transform:rotate(360deg)}}.clock-c19{width:100px;height:100px;border:4px solid #4b5563;border-radius:50%;margin:20px auto;position:relative}.hour-hand-c19,.minute-hand-c19{position:absolute;background:black;border-radius:2px;transform-origin:bottom center}.hour-hand-c19{width:4px;height:30px;top:20px;left:calc(50% - 2px);animation:ticktock 43200s linear infinite}/*12h*/.minute-hand-c19{width:2px;height:40px;top:10px;left:calc(50% - 1px);animation:ticktock 3600s linear infinite}/*60min*/</style><p>O relógio representa o ciclo natural dia/noite. Qual hormônio está mais associado ao sono e é liberado no escuro?</p><div class='clock-c19'><div class='hour-hand-c19'></div><div class='minute-hand-c19'></div></div>",
+    "opcoes": [ {"id": 1, "texto": "Cortisol"}, {"id": 2, "texto": "Adrenalina"}, {"id": 3, "texto": "Melatonina"}, {"id": 4, "texto": "Insulina"} ],
+    "respostaCorreta": 3, "dificuldade": "normal", "categorias": ["Carta_19"], "fontes": ["Biologia"], "vantagem": "Correto!", "desvantagem": "Incorreto.", "dica": "É conhecido como o 'hormônio do sono'."
+  },
+  // 20. Carta de Legado / Fim de Jogo (Exemplo)
+  {
+    "id": "carta_20",
+    "tipo": "Outras",
+    "titulo": "Legado Sustentável",
+    "pergunta": "<style>.legacy-cert{border:10px solid transparent;border-image:url(/images/borda_certificado.png) 30 stretch;padding:25px;margin:15px auto;max-width:350px;background:#fffef0;text-align:center}.legacy-cert h4{color:#854d0e;border-bottom:1px solid #ca8a04;padding-bottom:5px}.legacy-stats{list-style:none;padding:0;margin:15px 0;font-size:.9em}.legacy-stats li{margin-bottom:5px}</style><div class='legacy-cert'><h4>Certificado de Guardião(ã)</h4><p>Pelas suas ações exemplares durante o jogo:</p><ul class='legacy-stats'><li>🏆 Pontuação Final: <strong>XXX</strong></li><li>⭐ Estrelas Fixas: <strong>YYY</strong></li><li>🌳 Impacto Positivo: <strong>ZZZ</strong></li></ul><p>Você deixou um legado verde!</p></div>",
+    "opcoes": [ {"id": 1, "texto": "Parabéns!"} ],
+    "respostaCorreta": [1], "dificuldade": "facil", "categorias": ["Carta_20"], "fontes": [], "vantagem": "Parabéns pelo seu desempenho!", "desvantagem": "", "dica": "O fim de uma jornada, o começo de outra."
+  },
+  // 21. Mensagem em Braille (Simulada)
+  {
+    "id": "carta_21",
+    "tipo": "Pergunta",
+    "titulo": "Toque Ambiental (Braille)",
+    "pergunta": "A mensagem abaixo está em Braille. Qual palavra ela forma?<br><br><code style='font-size: 2em; display: block; text-align: center; letter-spacing: 10px; margin: 15px 0; font-family: sans-serif; /* Fontes Braille podem precisar ser carregadas */'>⠗⠑⠉⠊⠉⠇⠑</code><br><br><small>(Dica: R=⠗ E=⠑ C=⠉ I=⠊ L=⠇)</small>",
+    "opcoes": [ {"id": 1, "texto": "AGUA"}, {"id": 2, "texto": "SOLO"}, {"id": 3, "texto": "RECICLE"} ],
+    "respostaCorreta": 3, "dificuldade": "normal", "categorias": ["Carta_21"], "fontes": ["Alfabeto Braille"], "vantagem": "Correto!", "desvantagem": "Decodificação incorreta.", "dica": "Use a colinha para traduzir."
+  },
+  // 22. Efeito Máquina de Escrever (CSS)
+  {
+    "id": "carta_22",
+    "tipo": "Vantagem",
+    "titulo": "Mensagem Importante",
+    "pergunta": "<style>@keyframes typing{from{width:0}}@keyframes blink-caret{from,to{border-color:transparent}50%{border-color:orange}}.typewriter-c22{overflow:hidden;border-right:.15em solid orange;white-space:nowrap;margin:15px auto;letter-spacing:.1em;animation:typing 3.5s steps(30, end) forwards, blink-caret .75s step-end infinite;width:0;max-width:fit-content;font-family:monospace;font-size:1.1em;padding:5px;background:#333;color:lightgreen}</style><p style='text-align:center'>Uma mensagem urgente chegou:</p><div class='typewriter-c22'>REDUZA, REUTILIZE, RECICLE!</div><p style='text-align:center; margin-top:10px;'>Ganhe <strong>+1 Pulo</strong> por lembrar!</p>",
+    "opcoes": [ {"id": 1, "texto": "Mensagem recebida!"} ], "respostaCorreta": [1], "dificuldade": "facil", "categorias": ["Carta_22"], "fontes": [], "vantagem": "Ganhou +1 Pulo!", "desvantagem": "", "dica": "Os 3 R's famosos."
+  },
+  // 23. Gráfico de Pizza (CSS conic-gradient)
+  {
+    "id": "carta_23",
+    "tipo": "Pergunta",
+    "titulo": "Matriz Energética (Pizza)",
+    "pergunta": "<style>.pie-chart-c23{width:150px;height:150px;border-radius:50%;margin:15px auto;background:conic-gradient(#22c55e 0% 40%, /* Verde - Renovaveis */ #facc15 40% 75%, /* Amarelo - Nuclear */ #ef4444 75% 100% /* Vermelho - Fóssil */);border:2px solid #ccc}.pie-legend-c23{list-style:none;padding:0;font-size:.9em;text-align:center;margin-top:10px}.pie-legend-c23 li::before{content:'■';display:inline-block;margin-right:5px;font-size:1.2em}.legend-green::before{color:#22c55e}.legend-yellow::before{color:#facc15}.legend-red::before{color:#ef4444}</style><p>O gráfico representa a matriz energética (fictícia) de uma região. Qual fonte predomina?</p><div class='pie-chart-c23'></div><ul class='pie-legend-c23'><li class='legend-green'>Renováveis (40%)</li><li class='legend-yellow'>Nuclear (35%)</li><li class='legend-red'>Comb. Fósseis (25%)</li></ul>",
+    "opcoes": [ {"id": 1, "texto": "Renováveis"}, {"id": 2, "texto": "Nuclear"}, {"id": 3, "texto": "Comb. Fósseis"} ],
+    "respostaCorreta": 1, "dificuldade": "facil", "categorias": ["Carta_23"], "fontes": [], "vantagem": "Correto! A maior fatia é verde.", "desvantagem": "Incorreto, veja qual cor ocupa mais espaço.", "dica": "Compare o tamanho das 'fatias'."
+  },
+  // 24. Simulador Estações (CSS Animation)
+  {
+    "id": "carta_24",
+    "tipo": "Outras",
+    "titulo": "Ciclo das Estações",
+    "pergunta": "<style>@keyframes cycleSeasons{0%,100%{background-color:#a7f3d0;/*Primavera*/}25%{background-color:#fef08a;/*Verão*/}50%{background-color:#fed7aa;/*Outono*/}75%{background-color:#e0f2fe;/*Inverno*/}}.season-display-c24{width:100px;height:100px;border-radius:50%;margin:20px auto;display:flex;justify-content:center;align-items:center;font-size:3em;border:3px solid #6b7280;animation:cycleSeasons 10s linear infinite}</style><p style='text-align:center'>Observe a passagem das estações...</p><div class='season-display-c24'>🌍</div><p style='text-align:center;font-size:0.9em'>Isso afeta ciclos naturais e a agricultura.</p>",
+    "opcoes": [ {"id": 1, "texto": "Observar o ciclo"} ], "respostaCorreta": [1], "dificuldade": "facil", "categorias": ["Carta_24"], "fontes": [], "vantagem": "A natureza segue seu ritmo.", "desvantagem": "", "dica": ""
+  },
+  // 25. Quebra-Cabeça Simples (Grid Background)
+  {
+    "id": "carta_25",
+    "tipo": "Pergunta",
+    "titulo": "Peça Perdida",
+    "pergunta": "<style>.puzzle-grid-c25{display:grid;grid-template-columns:repeat(2, 80px);grid-template-rows:repeat(2, 80px);gap:2px;margin:15px auto;width:fit-content;border:2px solid #333}.puzzle-piece-c25{background-image:url('/images/paisagem_completa.jpg');background-size:162px 162px;/* Dobro do tamanho grid+gap */ border:1px solid #ccc}.piece1{background-position:0 0}.piece2{background-position:-82px 0}.piece3{background-color:#eee;/* Peça Faltando */ background-image:none;border-style:dashed}.piece4{background-position:-82px -82px}</style><p>Qual peça (descrição) completa a imagem da paisagem?</p><div class='puzzle-grid-c25'><div class='puzzle-piece-c25 piece1'></div><div class='puzzle-piece-c25 piece2'></div><div class='puzzle-piece-c25 piece3'>?</div><div class='puzzle-piece-c25 piece4'></div></div>",
+    "opcoes": [ {"id": 1, "texto": "Céu com nuvens"}, {"id": 2, "texto": "Rio com pedras"}, {"id": 3, "texto": "Base da montanha com árvores"}, {"id": 4, "texto": "Topo da montanha com neve"} ],
+    "respostaCorreta": 3, // Assumindo que a peça 3 é a base esquerda da montanha
+    "dificuldade": "normal", "categorias": ["Carta_25"], "fontes": [], "vantagem": "Correto! Imagem completa.", "desvantagem": "Essa peça não se encaixa ali.", "dica": "Observe as bordas das peças vizinhas."
+  }
 ];
 
 export default manejo;
