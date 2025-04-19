@@ -2012,8 +2012,104 @@ const manejo = [
         "vantagem": "Correto! A intensidade visual representa barulho alto.",
         "desvantagem": "Incorreto. Uma situação calma teria 'ondas' menores.",
         "dica": "A cor vermelha e a animação indicam intensidade."
+    },
+    // 1. Decodificador Rotacional CSS (:target simulado)
+    {
+      "id": "teste_1",
+      "tipo": "Pergunta",
+      "titulo": "Decodificador Sustentável",
+      "pergunta": "<style>\n.decoder-wheel { position: relative; width: 200px; height: 200px; margin: 20px auto; }\n.decoder-outer { width: 100%; height: 100%; border: 5px solid #6b7280; border-radius: 50%; position: relative; background: #e5e7eb; }\n.decoder-inner { position: absolute; top: 25px; left: 25px; width: 150px; height: 150px; border: 3px solid #4b5563; border-radius: 50%; background: #f3f4f6; display: flex; justify-content: center; align-items: center; font-size: 2em; font-weight: bold; color: #1f2937; }\n.decoder-letter { position: absolute; width: 40px; height: 40px; text-align: center; line-height: 40px; font-weight: bold; cursor: pointer; border-radius: 50%; background: white; border: 1px solid #ccc; transition: background-color 0.2s; user-select: none; }\n.decoder-letter:hover { background-color: #d1d5db; }\n/* Posicionamento das Letras */\n.letter-a { top: 5px; left: 50%; transform: translateX(-50%); }\n.letter-b { top: 35px; right: 15px; transform: rotate(45deg); }\n.letter-c { top: 50%; right: 5px; transform: translateY(-50%) rotate(90deg); }\n.letter-d { bottom: 35px; right: 15px; transform: rotate(135deg); }\n.letter-e { bottom: 5px; left: 50%; transform: translateX(-50%) rotate(180deg); }\n/* Resultado com :target */\n#decode-result-area { min-height: 30px; margin-top: 10px; font-weight:bold; color: green; }\n#decode-a:target ~ #decode-result-area::before { content: 'Resultado para A: 💧'; }\n#decode-b:target ~ #decode-result-area::before { content: 'Resultado para B: 🌳'; }\n#decode-c:target ~ #decode-result-area::before { content: 'Resultado para C: ☀️'; }\n#decode-d:target ~ #decode-result-area::before { content: 'Resultado para D: 💨'; }\n#decode-e:target ~ #decode-result-area::before { content: 'Resultado para E: ♻️'; }\n/* Esconde os alvos vazios */\n.decode-target { display: none; }\n</style>\n<p style='text-align:center;'>Use o Decodificador! Clique em uma letra externa (A-E) para ver o símbolo correspondente no centro.</p>\n<div class=\"decoder-wheel\">\n  <div class=\"decoder-outer\">\n    <a href=\"#decode-a\"><div class=\"decoder-letter letter-a\">A</div></a>\n    <a href=\"#decode-b\"><div class=\"decoder-letter letter-b\">B</div></a>\n    <a href=\"#decode-c\"><div class=\"decoder-letter letter-c\">C</div></a>\n    <a href=\"#decode-d\"><div class=\"decoder-letter letter-d\">D</div></a>\n    <a href=\"#decode-e\"><div class=\"decoder-letter letter-e\">E</div></a>\n    <div class=\"decoder-inner\">\n        <!-- Alvos para :target (escondidos) -->\n        <span id=\"decode-a\" class=\"decode-target\"></span>\n        <span id=\"decode-b\" class=\"decode-target\"></span>\n        <span id=\"decode-c\" class=\"decode-target\"></span>\n        <span id=\"decode-d\" class=\"decode-target\"></span>\n        <span id=\"decode-e\" class=\"decode-target\"></span>\n        <!-- Área onde o resultado aparece via CSS ::before -->\n        <div id=\"decode-result-area\"></div>\n    </div>\n  </div>\n</div>\n<br>Qual letra corresponde ao símbolo de <strong>Reciclagem (♻️)</strong>?",
+      "opcoes": [
+          {"id": 1, "texto": "A"},
+          {"id": 2, "texto": "B"},
+          {"id": 3, "texto": "C"},
+          {"id": 4, "texto": "D"},
+          {"id": 5, "texto": "E"}
+      ],
+      "respostaCorreta": 5,
+      "dificuldade": "normal",
+      "categorias": ["Teste_1"],
+      "fontes": [],
+      "vantagem": "Código decifrado!",
+      "desvantagem": "Letra errada. Clique nas letras para ver a correspondência.",
+      "dica": "Teste cada letra clicando nela."
+    },
+  
+    // 2. Combinação de Recursos (Visual com <details>)
+    {
+      "id": "teste_2",
+      "tipo": "Outras",
+      "titulo": "Oficina de Criação Sustentável",
+      "pergunta": "<style>\n.crafting-bench { border: 2px dashed #a16207; background: #fef3c7; padding: 15px; border-radius: 8px; }\n.crafting-section { margin-bottom: 15px; }\n.crafting-section h5 { margin: 0 0 10px 0; text-align: center; color: #a16207; border-bottom: 1px solid #fde047; padding-bottom: 5px; }\n.ingredient-list { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }\n.ingredient { cursor: pointer; border: 1px solid #d1d5db; padding: 5px 8px; border-radius: 4px; background: white; font-size: 0.9em; user-select: none; }\n/* Usando :focus-within ou similar seria melhor, mas <details> simula */\ndetails.ingredient-selected summary { border-color: #16a34a; background-color: #d1fae5; font-weight: bold; }\ndetails summary { list-style: none; /* Remove default marker */ display: inline-block; /* Fit content */ }\ndetails summary::-webkit-details-marker { display: none; /* Chrome/Safari */ }\n.craft-result { margin-top: 15px; padding: 10px; background: #f0fdf4; border: 1px solid #16a34a; border-radius: 4px; text-align: center; }\n</style>\n<div class=\"crafting-bench\">\n  <div class=\"crafting-section\">\n    <h5>Ingredientes Disponíveis (Clique para 'Selecionar')</h5>\n    <div class=\"ingredient-list\">\n      <details class=\"ingredient-selected\"> <summary class=\"ingredient\">💧 Água Limpa</summary> </details>\n      <details> <summary class=\"ingredient\">🌱 Sementes</summary> </details>\n      <details class=\"ingredient-selected\"> <summary class=\"ingredient\">☀️ Luz Solar</summary> </details>\n      <details> <summary class=\"ingredient\">🧱 Tijolos Reciclados</summary> </details>\n    </div>\n  </div>\n  <div class=\"crafting-section\">\n    <h5>Receita Possível:</h5>\n    <p style='text-align:center; font-size:0.9em;'>Água Limpa + Sementes + Luz Solar = ???</p>\n  </div>\n  <details style='margin-top: 15px;'>\n    <summary style='cursor: pointer; text-align:center; font-weight: bold; background: #6ee7b7; padding: 8px; border-radius: 4px;'>Combinar Ingredientes Selecionados</summary>\n    <div class=\"craft-result\">\n      <p>✨ Você criou: <strong>Horta Comunitária!</strong> (+15 Progresso)</p>\n    </div>\n  </details>\n</div>\n<p style='text-align:center; font-size:0.8em; margin-top: 10px;'>Confirme a criação abaixo (o efeito real depende dos ingredientes corretos - neste caso, são os pré-selecionados).</p>",
+      "opcoes": [
+          {"id": 1, "texto": "Confirmar Criação"},
+          {"id": 2, "texto": "Não criar nada agora"}
+      ],
+      "respostaCorreta": [1], // Confirma a tentativa de craft
+      "dificuldade": "normal",
+      "categorias": ["Teste_2"],
+      "fontes": [],
+      "vantagem": "Horta criada! +15 Progresso!", // Efeito aplicado no jogo se os ingredientes corretos fossem selecionados
+      "desvantagem": "Criação cancelada.",
+      "dica": "Clique nos ingredientes e depois em 'Combinar' para ver o resultado."
+    },
+  
+    // 3. Mini Aventura com Escolhas (Linked :target)
+    {
+      "id": "teste_3",
+      "tipo": "Outras",
+      "titulo": "Explorando a Caverna",
+      "pergunta": "<style>\n.adventure-popup { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(51, 65, 85, 0.85); display:none; justify-content:center; align-items:center; z-index:1005; padding:20px; }\n.adventure-popup:target { display:flex; }\n.adventure-content { background:#1f2937; color: #e5e7eb; padding:25px; border-radius:8px; max-width:350px; text-align:center; position:relative; border: 2px solid #4b5563; }\n.adventure-content h5 { margin:0 0 15px 0; color: #9ca3af; }\n.adventure-content p { margin-bottom: 15px; font-size:0.95em; line-height:1.5; }\n.adventure-content a { color: #60a5fa; text-decoration: underline; margin: 0 10px; }\n.adventure-close { position:absolute; top:10px; right:15px; font-size:24px; color:#9ca3af; text-decoration:none; }\n.adventure-close:hover { color: white; }\n.start-adventure { display:inline-block; padding: 10px 15px; background:#4f46e5; color:white; border-radius:5px; text-decoration:none; font-weight:bold; }\n</style>\n<p style='text-align:center;'>Você encontra a entrada de uma caverna misteriosa...</p>\n<p style='text-align:center;'><a href=\"#cave-start\" class='start-adventure'>Entrar na Caverna</a></p>\n\n<!-- Cena 1: Entrada -->\n<div id=\"cave-start\" class=\"adventure-popup\">\n  <div class=\"adventure-content\">\n    <a href=\"#\" class=\"adventure-close\">×</a>\n    <h5>Entrada da Caverna</h5>\n    <p>Está escuro. Você ouve o som de água pingando. Há dois túneis à frente.</p>\n    <a href=\"#cave-left\">Ir pela Esquerda</a>\n    <a href=\"#cave-right\">Ir pela Direita</a>\n  </div>\n</div>\n\n<!-- Cena 2: Esquerda -->\n<div id=\"cave-left\" class=\"adventure-popup\">\n  <div class=\"adventure-content\">\n    <a href=\"#\" class=\"adventure-close\">×</a>\n    <h5>Túnel da Esquerda</h5>\n    <p>Você encontra um veio de cristal brilhante! Parece valioso.</p>\n    <p><strong>Efeito: +1 Estrela Bônus</strong></p>\n    <a href=\"#\">Sair da Caverna</a>\n  </div>\n</div>\n\n<!-- Cena 3: Direita -->\n<div id=\"cave-right\" class=\"adventure-popup\">\n  <div class=\"adventure-content\">\n    <a href=\"#\" class=\"adventure-close\">×</a>\n    <h5>Túnel da Direita</h5>\n    <p>O chão cede um pouco! Você quase cai, mas se segura. Perdeu tempo.</p>\n    <p><strong>Efeito: Fique 1 Rodada Preso</strong></p>\n    <a href=\"#\">Sair da Caverna</a>\n  </div>\n</div>\n<p style='text-align:center; font-size:0.8em;'>Escolha seu caminho e clique na opção abaixo para confirmar o resultado.</p>",
+      "opcoes": [
+          {"id": 1, "texto": "Resultado da Exploração (Esquerda: +1 Estrela)"},
+          {"id": 2, "texto": "Resultado da Exploração (Direita: -1 Rodada)"}
+      ],
+      "respostaCorreta": [1, 2], // O jogador escolhe o resultado baseado no que viu
+      "dificuldade": "normal",
+      "categorias": ["Teste_3"],
+      "fontes": [],
+      "vantagem": "Aventura concluída!", // Se escolheu 1 (efeito aplicado no jogo)
+      "desvantagem": "Aventura concluída!", // Se escolheu 2 (efeito aplicado no jogo)
+      "dica": "Qual caminho parece mais promissor?"
+    },
+  
+    // 4. Cenário Animado (CSS Keyframes)
+    {
+      "id": "teste_4",
+      "tipo": "Pergunta",
+      "titulo": "Impacto da Poluição (Animado)",
+      "pergunta": "<style>\n@keyframes polluteRiver { 0% { background-color: #a5f3fc; /* Azul claro */ } 50% { background-color: #a3e635; /* Verde musgo */ } 100% { background-color: #a16207; /* Marrom escuro */ } }\n@keyframes fishDies { 0%, 40% { opacity: 1; transform: rotate(0deg); } 60% { transform: rotate(90deg); } 100% { opacity: 0.3; transform: rotate(180deg) translateY(10px); } }\n.animated-scenario { width: 250px; height: 100px; border: 2px solid #374151; margin: 15px auto; background-color: #a5f3fc; /* Azul inicial */ border-radius: 4px; position: relative; overflow: hidden; animation: polluteRiver 6s linear forwards; }\n.fish { font-size: 1.8em; position: absolute; top: 40%; left: 20%; animation: fishDies 6s linear forwards; animation-delay: 1s; }\n.pipe { position: absolute; top: 10px; right: -10px; width: 30px; height: 20px; background: #78716c; border-radius: 3px 0 0 3px; }\n.pipe::after { content: ''; position: absolute; top: 5px; left: -15px; width: 15px; height: 10px; background: #a16207; /* Marrom escuro */ animation: polluteRiver 6s linear forwards; border-radius: 2px; }\n</style>\n<p style='text-align:center;'>Observe a animação do rio sendo poluído:</p>\n<div class=\"animated-scenario\">\n  <div class=\"pipe\"></div>\n  <span class=\"fish\">🐠</span>\n</div>\n<br>Qual a consequência <strong>visual</strong> final da poluição mostrada?",
+      "opcoes": [
+          {"id": 1, "texto": "O rio fica mais azul e limpo."},
+          {"id": 2, "texto": "O peixe nada mais rápido."},
+          {"id": 3, "texto": "O rio fica marrom e o peixe parece morrer/sofrer."}
+      ],
+      "respostaCorreta": 3,
+      "dificuldade": "facil",
+      "categorias": ["Teste_4"],
+      "fontes": [],
+      "vantagem": "Correto! A poluição tem efeitos visíveis e drásticos.",
+      "desvantagem": "Observe a cor final da água e o que acontece com o peixe.",
+      "dica": "A animação mostra uma degradação."
+    },
+  
+    // 5. Checklist Interativo (Checkbox Hack + CSS Sibling Selector)
+    {
+      "id": "teste_5",
+      "tipo": "Outras", // A interação principal é visual/informativa
+      "titulo": "Checklist Casa Ecológica",
+      "pergunta": "<style>\n.checklist-container { background: #f0f9ff; border: 1px solid #a5f3fc; padding: 15px; border-radius: 5px; }\n.checklist-item { margin-bottom: 10px; }\n.checklist-item input[type='checkbox'] { display: none; /* Esconde checkbox real */ }\n.checklist-item label { cursor: pointer; display: flex; align-items: center; font-size: 0.95em; }\n.checklist-item label::before { content: ''; display: inline-block; width: 18px; height: 18px; border: 2px solid #0ea5e9; border-radius: 3px; margin-right: 10px; background-color: white; transition: background-color 0.2s, border-color 0.2s; }\n.checklist-item input[type='checkbox']:checked + label::before { background-color: #0ea5e9; border-color: #0284c7; }\n.checklist-item input[type='checkbox']:checked + label::after { content: '✔'; color: white; position: absolute; left: 19px; /* Ajustar posição */ top: 1px; font-size: 14px; font-weight: bold; }\n.checklist-consequence { display: none; /* Escondido por padrão */ margin-left: 30px; margin-top: 5px; font-size: 0.85em; color: #0ea5e9; border-left: 2px solid #a5f3fc; padding-left: 8px; }\n/* Mostra consequência específica quando o checkbox correspondente é marcado */\n#check1:checked ~ #consequence1, \n#check2:checked ~ #consequence2, \n#check3:checked ~ #consequence3, \n#check4:checked ~ #consequence4 { display: block; }\n</style>\n<div class=\"checklist-container\">\n  <p style='font-weight: bold; margin-bottom: 10px;'>Marque as ações que você já implementou em casa:</p>\n  <div class=\"checklist-item\">\n    <input type=\"checkbox\" id=\"check1\"/>\n    <label for=\"check1\">Lâmpadas LED</label>\n    <p id=\"consequence1\" class=\"checklist-consequence\">Ótimo! Economiza muita energia.</p>\n  </div>\n  <div class=\"checklist-item\">\n    <input type=\"checkbox\" id=\"check2\"/>\n    <label for=\"check2\">Coleta Seletiva</label>\n    <p id=\"consequence2\" class=\"checklist-consequence\">Essencial para reduzir o lixo em aterros.</p>\n  </div>\n  <div class=\"checklist-item\">\n    <input type=\"checkbox\" id=\"check3\"/>\n    <label for=\"check3\">Reúso de Água</label>\n    <p id=\"consequence3\" class=\"checklist-consequence\">Excelente forma de conservar água.</p>\n  </div>\n  <div class=\"checklist-item\">\n    <input type=\"checkbox\" id=\"check4\"/>\n    <label for=\"check4\">Composteira</label>\n    <p id=\"consequence4\" class=\"checklist-consequence\">Transforma lixo orgânico em adubo rico.</p>\n  </div>\n</div>\n<p style='text-align:center; font-size: 0.8em; margin-top: 10px;'>Clique nas ações e depois confirme abaixo (sem efeito mecânico direto no jogo, apenas informativo).</p>",
+      "opcoes": [
+        { "id": 1, "texto": "Fechar Checklist" }
+      ],
+      "respostaCorreta": [1],
+      "dificuldade": "facil",
+      "categorias": ["Teste_5"],
+      "fontes": [],
+      "vantagem": "Ótimo revisar suas práticas!",
+      "desvantagem": "",
+      "dica": "Clique nos itens para ver comentários."
     }
-
 ];
 
 export default manejo;
