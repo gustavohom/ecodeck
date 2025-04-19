@@ -79,8 +79,10 @@ const predefinedColors = [
     "#a6cee3","#fb9a99","#fdbf6f","#ffed6f","#ccebc5","#ff4444",
 ];
 const probabilitySettings = [
-    { value: 0, color: "#ffffff", label: "0%" }, { value: 0.4, color: "#4ade80", label: "40%" },
-    { value: 0.6, color: "#facc15", label: "60%" }, { value: 0.8, color: "#f87171", label: "80%" },
+    { value: 0, color: "#ffffff", label: "0%" }, // 0% chance de EXCLUIR especiais
+    { value: 0.4, color: "#4ade80", label: "40%" },// 40% chance de EXCLUIR especiais
+    { value: 0.6, color: "#facc15", label: "60%" },// 60% chance de EXCLUIR especiais
+    { value: 0.8, color: "#f87171", label: "80%" },// 80% chance de EXCLUIR especiais
 ];
 // Tipos considerados "perguntas" para o filtro
 const tiposPergunta: Carta['tipo'][] = ["Pergunta", "MultiplaEscolha", "Ordem", "ContraTempo", "RelacionarColunas", "PontoCerto", "CompletarFrase"];
@@ -134,7 +136,7 @@ function isClickInZone(clickCoords: { x: number; y: number } | null, zone: ZonaC
 
 // --- Componente TelaInicial ---
 interface TelaInicialProps {
-    onStartGame: (initialState?: Partial<GameState>) => void; // Única prop para iniciar/continuar
+    onStartGame: (initialState?: Partial<GameState>) => void;
     categoriasDisponiveis: string[];
     initialCategoriasSelecionadas: string[];
     initialPlayers: Player[];
@@ -213,16 +215,16 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         let gameStateToStart: Partial<GameState>;
         if (continueGame && typeof window !== "undefined") {
             const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
-             try {
+            try {
                 const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
                 if (savedState && savedState.jogoIniciado) {
-                     const currentCustomDecks = JSON.parse(localStorage.getItem("customDecks") || '[]') as CustomDeck[];
-                     const usedDeckIdsFromSave = savedState.usedDeckIds || [];
-                     const finalCustomDecks = currentCustomDecks.map(deck => ({ ...deck, used: usedDeckIdsFromSave.includes(deck.id) }));
-                     gameStateToStart = { ...savedState, customDecks: finalCustomDecks, jogoIniciado: true, };
-                     gameStateToStart.categoriasSelecionadas = categoriasSelecionadas;
-                     gameStateToStart.ocultarCarta = ocultarCarta;
-                     gameStateToStart.probabilityIndex = probabilityIndex;
+                    const currentCustomDecks = JSON.parse(localStorage.getItem("customDecks") || '[]') as CustomDeck[];
+                    const usedDeckIdsFromSave = savedState.usedDeckIds || [];
+                    const finalCustomDecks = currentCustomDecks.map(deck => ({ ...deck, used: usedDeckIdsFromSave.includes(deck.id) }));
+                    gameStateToStart = { ...savedState, customDecks: finalCustomDecks, jogoIniciado: true, };
+                    gameStateToStart.categoriasSelecionadas = categoriasSelecionadas;
+                    gameStateToStart.ocultarCarta = ocultarCarta;
+                    gameStateToStart.probabilityIndex = probabilityIndex;
                 } else { return handleStartGame(false); }
             } catch (e) { console.error("Erro ao carregar jogo salvo:", e); return handleStartGame(false); }
         } else {
@@ -252,23 +254,23 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             <CardContent className="space-y-6">
                 {/* Seleção de Categorias */}
                 <div className="space-y-2">
-                     <h3 className="text-lg font-semibold text-gray-800">Categorias</h3>
-                     <Input type="text" placeholder="Pesquisar Categoria..." value={termoBusca} onChange={(e) => setTermoBusca(e.target.value)} className="w-full p-2 border rounded"/>
-                     <ScrollArea className="h-40 border rounded-md p-3 bg-gray-50">
-                         {categoriasFiltradas.length > 0 ? (categoriasFiltradas.map((categoria) => (<div key={categoria} className="flex items-center space-x-2 mb-1 hover:bg-gray-100 p-1 rounded"><input type="checkbox" id={`cat-${categoria}`} checked={categoriasSelecionadas.includes(categoria)} onChange={() => {setCategoriasSelecionadas((prev) => prev.includes(categoria) ? prev.filter((c) => c !== categoria) : [...prev, categoria]);}} className="form-checkbox h-4 w-4 text-green-600"/><label htmlFor={`cat-${categoria}`} className="text-sm cursor-pointer flex-1">{categoria}</label></div>))) : (<p className="text-sm text-gray-500 italic">Nenhuma categoria encontrada.</p>)}
-                     </ScrollArea>
-                     <div className="flex space-x-2 mt-2">
-                         <Button onClick={() => setCategoriasSelecionadas(todasCategorias)} variant="outline" size="sm" className="flex-1">Todas</Button>
-                         <Button onClick={() => setCategoriasSelecionadas([])} variant="outline" size="sm" className="flex-1">Nenhuma</Button>
-                     </div>
+                    <h3 className="text-lg font-semibold text-gray-800">Categorias</h3>
+                    <Input type="text" placeholder="Pesquisar Categoria..." value={termoBusca} onChange={(e) => setTermoBusca(e.target.value)} className="w-full p-2 border rounded"/>
+                    <ScrollArea className="h-40 border rounded-md p-3 bg-gray-50">
+                        {categoriasFiltradas.length > 0 ? (categoriasFiltradas.map((categoria) => (<div key={categoria} className="flex items-center space-x-2 mb-1 hover:bg-gray-100 p-1 rounded"><input type="checkbox" id={`cat-${categoria}`} checked={categoriasSelecionadas.includes(categoria)} onChange={() => {setCategoriasSelecionadas((prev) => prev.includes(categoria) ? prev.filter((c) => c !== categoria) : [...prev, categoria]);}} className="form-checkbox h-4 w-4 text-green-600"/><label htmlFor={`cat-${categoria}`} className="text-sm cursor-pointer flex-1">{categoria}</label></div>))) : (<p className="text-sm text-gray-500 italic">Nenhuma categoria encontrada.</p>)}
+                    </ScrollArea>
+                    <div className="flex space-x-2 mt-2">
+                        <Button onClick={() => setCategoriasSelecionadas(todasCategorias)} variant="outline" size="sm" className="flex-1">Todas</Button>
+                        <Button onClick={() => setCategoriasSelecionadas([])} variant="outline" size="sm" className="flex-1">Nenhuma</Button>
+                    </div>
                 </div>
                 {/* Configuração de Jogadores */}
                 <div className="space-y-3">
-                     <h3 className="text-lg font-semibold text-gray-800">Jogadores</h3>
-                     <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
-                         {playerInputs.map((player, index) => (<div key={player.id} className="border p-3 rounded-md shadow-sm bg-white relative"><div className="flex items-center space-x-2"><Input type="text" placeholder={`Jogador ${index + 1}`} value={player.name} maxLength={12} onChange={(e) => handlePlayerChange(index, "name", e.target.value)} className="flex-grow"/><Button variant="outline" size="icon" className="w-8 h-8 flex-shrink-0" onClick={() => toggleColorPicker(index)} style={{ backgroundColor: player.color }} aria-label="Selecionar cor"/><Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0 text-red-500 hover:bg-red-100" onClick={() => deletePlayer(index)} aria-label="Remover jogador"><Trash className="h-4 w-4" /></Button></div>{player.showColorPicker && (<div className="absolute z-20 mt-2 right-12 w-48 bg-white border rounded-md shadow-lg p-2 grid grid-cols-6 gap-1">{predefinedColors.map((color, idx) => (<button key={idx} aria-label={`Selecionar cor ${color}`} style={{ backgroundColor: color }} className={`w-6 h-6 rounded border ${player.color === color ? 'ring-2 ring-offset-1 ring-black' : 'border-gray-300'}`} onClick={() => {handlePlayerChange(index, "color", color); toggleColorPicker(index);}}/>))}</div>)}</div>))}
-                     </div>
-                     {playerInputs.length < 8 && (<Button onClick={addPlayerInput} variant="secondary" className="w-full">+ Adicionar Jogador</Button>)}
+                    <h3 className="text-lg font-semibold text-gray-800">Jogadores</h3>
+                    <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
+                        {playerInputs.map((player, index) => (<div key={player.id} className="border p-3 rounded-md shadow-sm bg-white relative"><div className="flex items-center space-x-2"><Input type="text" placeholder={`Jogador ${index + 1}`} value={player.name} maxLength={12} onChange={(e) => handlePlayerChange(index, "name", e.target.value)} className="flex-grow"/><Button variant="outline" size="icon" className="w-8 h-8 flex-shrink-0" onClick={() => toggleColorPicker(index)} style={{ backgroundColor: player.color }} aria-label="Selecionar cor"/><Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0 text-red-500 hover:bg-red-100" onClick={() => deletePlayer(index)} aria-label="Remover jogador"><Trash className="h-4 w-4" /></Button></div>{player.showColorPicker && (<div className="absolute z-20 mt-2 right-12 w-48 bg-white border rounded-md shadow-lg p-2 grid grid-cols-6 gap-1">{predefinedColors.map((color, idx) => (<button key={idx} aria-label={`Selecionar cor ${color}`} style={{ backgroundColor: color }} className={`w-6 h-6 rounded border ${player.color === color ? 'ring-2 ring-offset-1 ring-black' : 'border-gray-300'}`} onClick={() => {handlePlayerChange(index, "color", color); toggleColorPicker(index);}}/>))}</div>)}</div>))}
+                    </div>
+                    {playerInputs.length < 8 && (<Button onClick={addPlayerInput} variant="secondary" className="w-full">+ Adicionar Jogador</Button>)}
                 </div>
                  {/* Baralhos Personalizados */}
                 <div className="space-y-2">
@@ -283,7 +285,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                 <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Opções</h3>
                     <Button onClick={() => setOcultarCarta(!ocultarCarta)} variant="outline" className="w-full flex items-center justify-center space-x-2">{ocultarCarta ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}<span>{ocultarCarta ? "Ocultar Carta Ativado" : "Ocultar Carta Desativado"}</span></Button>
-                    <Button onClick={cycleProbability} className="w-full flex items-center justify-center space-x-2 text-white" style={{ backgroundColor: probabilitySettings[probabilityIndex].color }}><span>% Cartas Especiais:</span><span className="font-bold">{probabilitySettings[probabilityIndex].label}</span></Button>
+                    <Button onClick={cycleProbability} className="w-full flex items-center justify-center space-x-2 text-white" style={{ backgroundColor: probabilitySettings[probabilityIndex].color }}><span>% Excluir Especiais:</span><span className="font-bold">{probabilitySettings[probabilityIndex].label}</span></Button> {/* Label Ajustado */}
                 </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-3 pt-6 border-t">
@@ -335,14 +337,15 @@ const EcoChallenge: React.FC = () => {
                  try {
                      const { customDecks, ...stateToSave } = updatedState;
                      stateToSave.usedDeckIds = customDecks.filter(d => d.used).map(d => d.id);
-                     localStorage.setItem("estadoEcoChallenge", JSON.stringify({...stateToSave, mostrarSomentePerguntas: mostrarSomentePerguntas})); // Salva mostrarSomentePerguntas
+                     // Salva o estado de 'mostrarSomentePerguntas'
+                     localStorage.setItem("estadoEcoChallenge", JSON.stringify({...stateToSave, mostrarSomentePerguntas: mostrarSomentePerguntas}));
                  } catch (e) { console.error("Erro ao salvar estado:", e); }
             }
             return updatedState;
         });
-    }, [mostrarSomentePerguntas]);
+    }, [mostrarSomentePerguntas]); // Inclui como dependência
 
-     const updateCurrentPlayer = useCallback((partialPlayerData: Partial<Player>) => {
+    const updateCurrentPlayer = useCallback((partialPlayerData: Partial<Player>) => {
         if (!gameState || gameState.currentPlayerId === null) return;
         const updatedPlayers = gameState.players.map(p =>
             p.id === gameState.currentPlayerId ? { ...p, ...partialPlayerData } : p
@@ -354,17 +357,16 @@ const EcoChallenge: React.FC = () => {
     useEffect(() => {
         if (typeof window !== "undefined") {
             const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
-             try {
-                // Adiciona tipo opcional para mostrarSomentePerguntas ao carregar
+            try {
                 const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState & {mostrarSomentePerguntas?: boolean} : null;
                 if (savedState && savedState.jogoIniciado) {
-                     const savedCustomDecksRaw = localStorage.getItem("customDecks");
-                     const currentCustomDecks = savedCustomDecksRaw ? JSON.parse(savedCustomDecksRaw) as CustomDeck[] : [];
-                     const usedDeckIdsFromSave = savedState.usedDeckIds || [];
-                     const finalCustomDecks = currentCustomDecks.map(deck => ({ ...deck, used: usedDeckIdsFromSave.includes(deck.id) }));
-                     setGameState({ ...savedState, customDecks: finalCustomDecks });
-                     setMostrarSomentePerguntas(savedState.mostrarSomentePerguntas ?? false); // Restaura do save
-                     return;
+                    const savedCustomDecksRaw = localStorage.getItem("customDecks");
+                    const currentCustomDecks = savedCustomDecksRaw ? JSON.parse(savedCustomDecksRaw) as CustomDeck[] : [];
+                    const usedDeckIdsFromSave = savedState.usedDeckIds || [];
+                    const finalCustomDecks = currentCustomDecks.map(deck => ({ ...deck, used: usedDeckIdsFromSave.includes(deck.id) }));
+                    setGameState({ ...savedState, customDecks: finalCustomDecks });
+                    setMostrarSomentePerguntas(savedState.mostrarSomentePerguntas ?? false); // Restaura do save
+                    return;
                 }
             } catch (e) { console.error("Erro ao carregar estado:", e); localStorage.removeItem("estadoEcoChallenge"); }
         }
@@ -374,8 +376,13 @@ const EcoChallenge: React.FC = () => {
     const selecionarCartaAleatoria = useCallback(() => {
         if (!gameState) return;
         const { categoriasSelecionadas, probabilityIndex, customDecks } = gameState;
-        const p = probabilitySettings[probabilityIndex].value;
-        const incluirCartasEspeciais = p === 0 || Math.random() >= p;
+        const probabilidadeExcluirEspecial = probabilitySettings[probabilityIndex].value; // 0, 0.4, 0.6, 0.8
+
+        // Determina se as cartas especiais devem ser *incluídas* nesta rodada
+        // Se probabilidadeExcluirEspecial é 0, sempre inclui.
+        // Se for > 0, rola um dado: se o resultado for MAIOR ou IGUAL à probabilidade de excluir, INCLUI.
+        const incluirCartasEspeciais = probabilidadeExcluirEspecial === 0 || Math.random() >= probabilidadeExcluirEspecial;
+        // Ex: Se probabilidadeExcluirEspecial = 0.4 (40%), incluirCartasEspeciais será true 60% das vezes.
 
         let baralhoCompleto = [...cartasOriginais];
         customDecks.forEach(deck => { if (deck.used) { baralhoCompleto = [...baralhoCompleto, ...deck.cards]; } });
@@ -385,8 +392,8 @@ const EcoChallenge: React.FC = () => {
             if (!categoriaValida) return false;
             const isTipoPergunta = tiposPergunta.includes(c.tipo);
             const isTipoEspecial = tiposEspeciais.includes(c.tipo);
-            if (mostrarSomentePerguntas && !isTipoPergunta) return false;
-            if (!incluirCartasEspeciais && isTipoEspecial) return false;
+            if (mostrarSomentePerguntas && !isTipoPergunta) return false; // Filtro UI: Só perguntas
+            if (!incluirCartasEspeciais && isTipoEspecial) return false; // Filtro Probabilidade: Exclui especiais
             return true;
         });
 
@@ -399,6 +406,7 @@ const EcoChallenge: React.FC = () => {
         const novaCarta = cartasFiltradas[idxAleat];
         setCartaAtual(novaCarta);
 
+        // Resetar estados
         setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setMostrarFontes(false);
         setOpcoesEliminadas([]); setCartaRevelada(!gameState.ocultarCarta); setRolledNumber(null); setIsDieModalOpen(false);
         setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null);
@@ -407,7 +415,7 @@ const EcoChallenge: React.FC = () => {
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
         if (novaCarta.tipo === "ContraTempo") { setTempoRestante(novaCarta.tempoLimite); }
 
-    }, [gameState, mostrarSomentePerguntas]);
+    }, [gameState, mostrarSomentePerguntas]); // Adicionado mostrarSomentePerguntas
 
     // --- Efeitos ---
     useEffect(() => {
@@ -415,22 +423,34 @@ const EcoChallenge: React.FC = () => {
     }, [gameState?.jogoIniciado, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]);
 
     useEffect(() => {
-         if (cartaAtual?.tipo === "ContraTempo" && tempoRestante !== null && tempoRestante > 0 && !respondido && gameState?.jogoIniciado && cartaRevelada) {
+        if (cartaAtual?.tipo === "ContraTempo" && tempoRestante !== null && tempoRestante > 0 && !respondido && gameState?.jogoIniciado && cartaRevelada) {
             timerIntervalRef.current = setInterval(() => {
                 setTempoRestante((prev) => {
                     if (prev === null || prev <= 1) {
                         clearInterval(timerIntervalRef.current!);
                         setRespondido(true); setMensagem(`Tempo esgotado! ${cartaAtual.desvantagem || 'Tente novamente.'}`);
-                        const localCurrentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
-                        if (localCurrentPlayer) {
-                            updateCurrentPlayer({ respostasErradas: localCurrentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(localCurrentPlayer.progresso - 10, 0), });
-                        } return 0;
+                        // Acessa diretamente o estado atual para evitar dependência stale
+                        setGameState(currentGameState => {
+                            if (!currentGameState) return null;
+                            const localCurrentPlayer = currentGameState.players.find(p => p.id === currentGameState.currentPlayerId);
+                            if (localCurrentPlayer) {
+                                const updatedPlayers = currentGameState.players.map(p =>
+                                    p.id === currentGameState.currentPlayerId
+                                        ? { ...p, respostasErradas: p.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(p.progresso - 10, 0) }
+                                        : p
+                                );
+                                return { ...currentGameState, players: updatedPlayers };
+                            }
+                            return currentGameState;
+                        });
+                        return 0;
                     } return prev - 1;
                 });
             }, 1000);
         } else if (timerIntervalRef.current && (respondido || tempoRestante === 0)) { clearInterval(timerIntervalRef.current); }
         return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
-    }, [cartaAtual, tempoRestante, respondido, gameState, cartaRevelada, updateCurrentPlayer]);
+    }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId]); // Removido updateCurrentPlayer, ajustado acesso ao estado
+
 
     // --- Handlers de Interação ---
     const handleSelecao = (id: number) => { if (!respondido) setSelecionado(id); };
@@ -444,10 +464,14 @@ const EcoChallenge: React.FC = () => {
 
     // --- Verificação da Resposta ---
     const verificarResposta = () => {
-        if (!cartaAtual || !currentPlayer || respondido) return;
+        if (!cartaAtual || !gameState || !gameState.players || gameState.currentPlayerId === null || respondido) return;
+        const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
+        if(!currentPlayer) return;
+
         let cor = false; let pontosGanhos = 20; let pontosPerdidos = 10;
         let darPuloDificil = cartaAtual.dificuldade === "dificil"; let mensagemResultado = "";
         if (cartaAtual.tipo === "ContraTempo" && timerIntervalRef.current) { clearInterval(timerIntervalRef.current); }
+
         switch (cartaAtual.tipo) {
             case "Pergunta": case "ContraTempo": if (cartaAtual.tipo === "ContraTempo" && (tempoRestante === null || tempoRestante <= 0)) { cor = false; } else { cor = selecionado === cartaAtual.respostaCorreta; } break;
             case "MultiplaEscolha": cor = Array.isArray(cartaAtual.respostaCorreta) && selecoesMultiplas.length === cartaAtual.respostaCorreta.length && selecoesMultiplas.sort().toString() === cartaAtual.respostaCorreta.sort().toString(); if (cor) pontosGanhos = 25; break;
@@ -455,8 +479,8 @@ const EcoChallenge: React.FC = () => {
             case "RelacionarColunas": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = paresFormados.length === cartaAtual.respostaCorreta.length && paresFormados.map(p => `${p.aId}-${p.bId}`).sort().join(',') === cartaAtual.respostaCorreta.map(p => `${p.aId}-${p.bId}`).sort().join(','); if (cor) pontosGanhos = 30; darPuloDificil = true; break;
             case "PontoCerto": if (!coordenadasClique || !Array.isArray(cartaAtual.zonasClicaveis)) { cor = false; break; } const zonaCorreta = cartaAtual.zonasClicaveis.find(z => z.id === cartaAtual.respostaCorreta); cor = zonaCorreta ? isClickInZone(coordenadasClique, zonaCorreta) : false; if (cor) pontosGanhos = 25; darPuloDificil = true; break;
             case "CompletarFrase": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = fragmentosSelecionados.length === cartaAtual.respostaCorreta.length && fragmentosSelecionados.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 25; darPuloDificil = true; break;
-            case "Vantagem": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `Vantagem: ${cartaAtual.pergunta}. ${cartaAtual.vantagem || ''}`; break;
-            case "Desvantagem": cor = false; mensagemResultado = `Desvantagem: ${cartaAtual.pergunta}. ${cartaAtual.desvantagem || ''}`; break;
+            case "Vantagem": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `Vantagem: ${cartaAtual.pergunta}. ${cartaAtual.vantagem || ''}`; /* Aplicar efeito via updateCurrentPlayer se necessário */ break;
+            case "Desvantagem": cor = false; mensagemResultado = `Desvantagem: ${cartaAtual.pergunta}. ${cartaAtual.desvantagem || ''}`; /* Aplicar efeito via updateCurrentPlayer se necessário */ break;
             case "Outras": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `${cartaAtual.titulo}: ${cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...')}`; break;
             default: const _exhaustiveCheck: never = cartaAtual; console.error("Tipo não tratado:", _exhaustiveCheck); return;
         }
@@ -478,30 +502,31 @@ const EcoChallenge: React.FC = () => {
     };
 
     // --- Funções Auxiliares de Jogo ---
-    const resetarContadoresJogador = () => { if (!currentPlayer || !window.confirm(`Resetar ${currentPlayer.name}?`)) return; updateCurrentPlayer({ respostasCertas: 0, respostasErradas: 0, progresso: 0, pulosDisponiveis: 0, respostasSeguidas: 0, rodadasPreso: 0, contadorDeEstrelas: 0, fixedStars: 0 }); setMensagem(`${currentPlayer.name} resetado.`); };
-    const toggleDica = () => { if (!currentPlayer || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (dicaUsada) { setMensagem("Dica já utilizada."); return; } if (!cartaAtual.dica) { setMensagem("Carta sem dica."); return; } if (currentPlayer.respostasSeguidas >= 2) { setMostrarDica(true); setDicaUsada(true); updateCurrentPlayer({ respostasSeguidas: currentPlayer.respostasSeguidas - 2 }); setMensagem("Dica revelada! (-2 sequências)"); } else { setMensagem("São necessárias 2 respostas corretas seguidas."); } };
+    const resetarContadoresJogador = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !window.confirm(`Resetar ${cp.name}?`)) return; updateCurrentPlayer({ respostasCertas: 0, respostasErradas: 0, progresso: 0, pulosDisponiveis: 0, respostasSeguidas: 0, rodadasPreso: 0, contadorDeEstrelas: 0, fixedStars: 0 }); setMensagem(`${cp.name} resetado.`); };
+    const toggleDica = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (dicaUsada) { setMensagem("Dica já utilizada."); return; } if (!cartaAtual.dica) { setMensagem("Carta sem dica."); return; } if (cp.respostasSeguidas >= 2) { setMostrarDica(true); setDicaUsada(true); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Dica revelada! (-2 sequências)"); } else { setMensagem("São necessárias 2 respostas corretas seguidas."); } };
     const toggleFontes = () => { if (!cartaAtual || (gameState?.ocultarCarta && !cartaRevelada)) return; if (cartaAtual.fontes && cartaAtual.fontes.length > 0) { setMostrarFontes(!mostrarFontes); } else { setMensagem("Nenhuma fonte disponível."); } };
-    const pularPergunta = () => { if (!currentPlayer || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (!tiposPergunta.includes(cartaAtual.tipo)) { setMensagem("Não pode pular este tipo."); return; } if (currentPlayer.pulosDisponiveis > 0) { updateCurrentPlayer({ pulosDisponiveis: currentPlayer.pulosDisponiveis - 1 }); setMensagem("Carta pulada!"); setTimeout(selecionarCartaAleatoria, 500); } else { setMensagem("Sem pulos disponíveis."); } };
+    const pularPergunta = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (!tiposPergunta.includes(cartaAtual.tipo)) { setMensagem("Não pode pular este tipo."); return; } if (cp.pulosDisponiveis > 0) { updateCurrentPlayer({ pulosDisponiveis: cp.pulosDisponiveis - 1 }); setMensagem("Carta pulada!"); setTimeout(selecionarCartaAleatoria, 500); } else { setMensagem("Sem pulos disponíveis."); } };
     const eliminarRespostaErrada = () => {
-        if (!currentPlayer || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return;
+        const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId);
+        if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return;
         const tiposEliminaveis: Carta['tipo'][] = ["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"];
         if (!tiposEliminaveis.includes(cartaAtual.tipo) || !('opcoes' in cartaAtual) || cartaAtual.opcoes.length <= 2) { setMensagem("Não é possível eliminar opções para este tipo de carta ou já há poucas opções."); return; }
-        if (currentPlayer.respostasSeguidas < 2) { setMensagem("São necessárias 2 respostas corretas seguidas."); return; }
+        if (cp.respostasSeguidas < 2) { setMensagem("São necessárias 2 respostas corretas seguidas."); return; }
         let respostaCorretaNumeros: number[] = [];
         if (cartaAtual.tipo === "Pergunta" || cartaAtual.tipo === "ContraTempo") { respostaCorretaNumeros = [cartaAtual.respostaCorreta]; }
         else if (cartaAtual.tipo === "MultiplaEscolha" || cartaAtual.tipo === "Outras") { if (Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.every(item => typeof item === 'number')) { respostaCorretaNumeros = cartaAtual.respostaCorreta as number[]; } else { console.error("Formato inesperado:", cartaAtual); setMensagem("Erro interno."); return; } }
         else { console.error("Tipo inesperado:", cartaAtual.tipo); return; }
         const opcoesErradasDisponiveis = cartaAtual.opcoes.filter(op => !respostaCorretaNumeros.includes(op.id) && !opcoesEliminadas.includes(op.id));
-        if (opcoesErradasDisponiveis.length > 0) { const idxAleat = Math.floor(Math.random() * opcoesErradasDisponiveis.length); const opcaoEliminada = opcoesErradasDisponiveis[idxAleat].id; setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]); updateCurrentPlayer({ respostasSeguidas: currentPlayer.respostasSeguidas - 2 }); setMensagem("Uma opção incorreta foi eliminada! (-2 sequências)"); }
+        if (opcoesErradasDisponiveis.length > 0) { const idxAleat = Math.floor(Math.random() * opcoesErradasDisponiveis.length); const opcaoEliminada = opcoesErradasDisponiveis[idxAleat].id; setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Uma opção incorreta foi eliminada! (-2 sequências)"); }
         else { setMensagem("Não há mais opções incorretas para eliminar."); }
     };
     const voltarTelaInicial = () => { if (window.confirm("Voltar para a Tela Inicial? Progresso salvo.")) { setGameState(null); setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); } };
-    const diminuirAcertos = () => { if (!currentPlayer) return; updateCurrentPlayer({ respostasCertas: Math.max(0, currentPlayer.respostasCertas - 1) }); setMensagem("Acerto removido."); };
-    const diminuirErros = () => { if (!currentPlayer) return; updateCurrentPlayer({ respostasErradas: Math.max(0, currentPlayer.respostasErradas - 1) }); setMensagem("Erro removido."); };
-    const incrementarContadorDeEstrelas = () => { if (!currentPlayer) return; updateCurrentPlayer({ contadorDeEstrelas: currentPlayer.contadorDeEstrelas + 1 }); setMensagem("Estrela bônus adicionada."); };
-    const diminuirContadorDeEstrelas = () => { if (!currentPlayer) return; updateCurrentPlayer({ contadorDeEstrelas: Math.max(0, currentPlayer.contadorDeEstrelas - 1) }); setMensagem("Estrela bônus removida."); };
-    const incrementarRodadasPreso = () => { if (!currentPlayer) return; updateCurrentPlayer({ rodadasPreso: currentPlayer.rodadasPreso + 1 }); setMensagem("Rodada preso adicionada."); };
-    const diminuirRodadasPreso = () => { if (!currentPlayer) return; updateCurrentPlayer({ rodadasPreso: Math.max(0, currentPlayer.rodadasPreso - 1) }); setMensagem("Rodada preso removida."); };
+    const diminuirAcertos = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ respostasCertas: Math.max(0, cp.respostasCertas - 1) }); setMensagem("Acerto removido."); };
+    const diminuirErros = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ respostasErradas: Math.max(0, cp.respostasErradas - 1) }); setMensagem("Erro removido."); };
+    const incrementarContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: cp.contadorDeEstrelas + 1 }); setMensagem("Estrela bônus adicionada."); };
+    const diminuirContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: Math.max(0, cp.contadorDeEstrelas - 1) }); setMensagem("Estrela bônus removida."); };
+    const incrementarRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: cp.rodadasPreso + 1 }); setMensagem("Rodada preso adicionada."); };
+    const diminuirRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: Math.max(0, cp.rodadasPreso - 1) }); setMensagem("Rodada preso removida."); };
     const rolarDado = () => { if (isRolling) return; setIsRolling(true); setIsDieModalOpen(true); setRolledNumber(null); let rollCount = 0; const maxRolls = 15; const rollInterval = setInterval(() => { setRollingNumber(Math.floor(Math.random() * 6) + 1); rollCount++; if (rollCount >= maxRolls) { clearInterval(rollInterval); const finalNumber = Math.floor(Math.random() * 6) + 1; setRolledNumber(finalNumber); setRollingNumber(null); setIsRolling(false); } }, 80); };
     const handleLongPressStart = (action: () => void) => { longPressTimeout.current = setTimeout(() => { action(); }, 800); };
     const handleLongPressEnd = () => { if (longPressTimeout.current) { clearTimeout(longPressTimeout.current); longPressTimeout.current = null; } };
@@ -528,13 +553,13 @@ const EcoChallenge: React.FC = () => {
                 <CardHeader className="pb-3">
                     <div className="flex justify-between items-start mb-2 gap-2">
                         <div className="flex items-center space-x-2">
-                             <Button onClick={() => setMostrarSomentePerguntas(!mostrarSomentePerguntas)} size="sm" variant={mostrarSomentePerguntas ? "secondary" : "outline"} title={mostrarSomentePerguntas ? "Mostrar todas" : "Só perguntas"} className="flex-shrink-0"> <Filter className="h-4 w-4" /> </Button>
-                             <div className="flex-1">
+                            <Button onClick={() => setMostrarSomentePerguntas(!mostrarSomentePerguntas)} size="sm" variant={mostrarSomentePerguntas ? "secondary" : "outline"} title={mostrarSomentePerguntas ? "Mostrar todas" : "Só perguntas"} className="flex-shrink-0"> <Filter className="h-4 w-4" /> </Button>
+                            <div className="flex-1">
                                 <CardTitle className="text-lg md:text-xl font-bold leading-tight">{ocultarCarta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo}</CardTitle>
                                 {(!ocultarCarta || cartaRevelada) && cartaAtual.categorias && (<p className="text-xs text-gray-500 mt-1">{cartaAtual.categorias.join(", ")}</p>)}
-                             </div>
+                            </div>
                         </div>
-                         {(!ocultarCarta || cartaRevelada) && (<Badge variant={cartaAtual.dificuldade === "facil" ? "secondary" : cartaAtual.dificuldade === "normal" ? "default" : "destructive"} className="capitalize flex-shrink-0 h-6">{cartaAtual.dificuldade}</Badge>)}
+                        {(!ocultarCarta || cartaRevelada) && (<Badge variant={cartaAtual.dificuldade === "facil" ? "secondary" : cartaAtual.dificuldade === "normal" ? "default" : "destructive"} className="capitalize flex-shrink-0 h-6">{cartaAtual.dificuldade}</Badge>)}
                     </div>
                     {cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && !respondido && cartaRevelada && ( <div className="mt-2"><Progress value={(tempoRestante / cartaAtual.tempoLimite) * 100} className="h-2 [&>*]:bg-yellow-500" /><p className="text-center text-sm font-semibold text-yellow-700 mt-1"><Timer className="inline h-4 w-4 mr-1" /> Tempo: {tempoRestante}s</p></div> )}
                     {(!ocultarCarta || cartaRevelada) ? (
@@ -567,13 +592,14 @@ const EcoChallenge: React.FC = () => {
                         <Button onClick={resetarContadoresJogador} size="sm" variant="outline" className="h-8 px-2"> <RotateCcw className="h-4 w-4" /> </Button>
                         <Button onClick={voltarTelaInicial} size="sm" variant="outline" className="h-8 px-2"> <Home className="h-4 w-4" /> </Button>
                     </div>
+                    {/* Botões de Ajuste Manual - Tamanho Ajustado */}
                     <div className="flex flex-wrap justify-center gap-1 w-full mb-3">
-                        <Button onClick={diminuirAcertos} size="sm" variant="outline" className="h-7 px-1.5" title="Diminuir Acertos"><ThumbsUp className="h-3.5 w-3.5 text-green-500 transform scale-x-[-1]" /></Button>
-                        <Button onClick={diminuirErros} size="sm" variant="outline" className="h-7 px-1.5" title="Diminuir Erros"><ThumbsDown className="h-3.5 w-3.5 text-red-500 transform scale-x-[-1]" /></Button>
-                        <Button onClick={diminuirContadorDeEstrelas} size="sm" variant="outline" className="h-7 px-1.5" title="Diminuir Estrela Bônus"><Star className="h-3.5 w-3.5 text-red-500" /></Button>
-                        <Button onClick={incrementarContadorDeEstrelas} size="sm" variant="outline" className="h-7 px-1.5" title="Aumentar Estrela Bônus"><Star className="h-3.5 w-3.5 text-yellow-500" /></Button>
-                        <Button onClick={diminuirRodadasPreso} size="sm" variant="outline" className="h-7 px-1.5" title="Diminuir Rodada Preso"><ChevronUp className="h-4 w-4 text-red-500 transform rotate-180" /></Button>
-                        <Button onClick={incrementarRodadasPreso} size="sm" variant="outline" className="h-7 px-1.5" title="Aumentar Rodada Preso"><ChevronUp className="h-4 w-4 text-purple-500" /></Button>
+                        <Button onClick={diminuirAcertos} variant="outline" className="h-8 px-2" title="Diminuir Acertos"><ThumbsUp className="h-4 w-4 text-green-500 transform scale-x-[-1]" /></Button>
+                        <Button onClick={diminuirErros} variant="outline" className="h-8 px-2" title="Diminuir Erros"><ThumbsDown className="h-4 w-4 text-red-500 transform scale-x-[-1]" /></Button>
+                        <Button onClick={diminuirContadorDeEstrelas} variant="outline" className="h-8 px-2" title="Diminuir Estrela Bônus"><Star className="h-4 w-4 text-red-500" /></Button>
+                        <Button onClick={incrementarContadorDeEstrelas} variant="outline" className="h-8 px-2" title="Aumentar Estrela Bônus"><Star className="h-4 w-4 text-yellow-500" /></Button>
+                        <Button onClick={diminuirRodadasPreso} variant="outline" className="h-8 px-2" title="Diminuir Rodada Preso"><ChevronUp className="h-4 w-4 text-red-500 transform rotate-180" /></Button>
+                        <Button onClick={incrementarRodadasPreso} variant="outline" className="h-8 px-2" title="Aumentar Rodada Preso"><ChevronUp className="h-4 w-4 text-purple-500" /></Button>
                     </div>
                     <div className="w-full mb-3">
                         {ocultarCarta && !cartaRevelada ? ( <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white"><Eye className="mr-2 h-4 w-4"/> Revelar Carta</Button>
@@ -642,9 +668,9 @@ const EcoChallenge: React.FC = () => {
                     const isSelected = ordemSelecoes.includes(op.id); const selectionIndex = isSelected ? ordemSelecoes.indexOf(op.id) + 1 : null;
                     const correctIndex = Array.isArray(cOrdem.respostaCorreta) ? cOrdem.respostaCorreta.indexOf(op.id) + 1 : null;
                     const isCorrectOrder = respondido && isSelected && selectionIndex === correctIndex; const isWrongOrder = respondido && isSelected && selectionIndex !== correctIndex;
-                    const isCorrectOptionOverall = respondido && correctIndex !== null;
+                    const isCorrectOptionOverall = respondido && correctIndex !== null && correctIndex > 0; // Verifica se a opção pertence à ordem correta
                     let btnClass = "";
-                    if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "opacity-70 border-gray-300"; else btnClass = "opacity-50"; }
+                    if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "opacity-70 border-gray-300"; else btnClass = "opacity-50"; } // Não faz parte da ordem
                     else if (isSelected) { btnClass = "bg-blue-100 border-blue-500"; }
                     return ( <Button key={op.id} onClick={() => handleSelecaoOrdem(op.id)} variant={isSelected ? "secondary" : "outline"} className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass )} disabled={respondido}> {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)} <span className="flex-1">{op.texto}</span> {respondido && isCorrectOptionOverall && (<span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${ isCorrectOrder ? 'bg-green-500 text-white' : isWrongOrder ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}`}>{correctIndex}</span>)} {isWrongOrder && selectionIndex !== null && <span className="text-xs text-red-600 ml-1">(Sua: {selectionIndex})</span>} </Button> );
                 });
