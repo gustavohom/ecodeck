@@ -15,12 +15,35 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input"; // Usar Input do shadcn
 import { cn } from "@/lib/utils"; // Utilitário para classes condicionais (se você usa shadcn)
 
+
 // Importar Decks (ajuste os caminhos conforme sua estrutura)
 import manejoPlantadas from "./deck/cards_manejo_plantada";
 import manejoNativas from "./deck/cards_manejo_nativa";
 import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
 import estrelasAliens from "./dlc/cards_estrelas_aliens";
 import testCards from "./.test/test_card";
+
+
+// Primeiro, carregue os arrays brutos
+const manejoPlantadas_raw = manejoPlantadas;
+const manejoNativas_raw = manejoNativas;
+const ecologiaFlorestal_raw = ecologiaFlorestal;
+const estrelasAliens_raw = estrelasAliens;
+const testCards_raw = testCards;
+
+// Agora, combine e faça a asserção de tipo, garantindo IDs únicos
+const cartasOriginais: Carta[] = [
+    ...(manejoPlantadas_raw as Carta[]),     // <--- Asserção aqui
+    ...(manejoNativas_raw as Carta[]),       // <--- Asserção aqui
+    ...(ecologiaFlorestal_raw as Carta[]),  // <--- Asserção aqui
+    ...(estrelasAliens_raw as Carta[]),     // <--- Asserção aqui
+    ...(testCards_raw as Carta[]),          // <--- Asserção aqui
+].map((card, index) => ({
+    // Garante que cada carta tenha um ID único, mesmo que venha sem um
+    ...card,
+    id: card.id || `orig_${index}_${Math.random().toString(16).slice(2)}` // ID mais robusto
+}));
+
 
 // --- Tipos de Dados ---
 
