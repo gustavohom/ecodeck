@@ -163,8 +163,8 @@ const manejo = [
     "id": "ex_pc_1",
     "tipo": "PontoCerto",
     "titulo": "Exemplo: Ponto Certo",
-    "pergunta": "Clique no símbolo universal da reciclagem na imagem abaixo.",
-    "imagemURL": "/images/simbolos_variados.png", // <-- SUBSTITUA PELO CAMINHO REAL
+    "pergunta": "Clique no símbolo univeimages/simbolos_variados.pngrsal da reciclagem na imagem abaixo.",
+    "imagemURL": "https://static.escolakids.uol.com.br/2019/09/arvore.jpg", // <-- SUBSTITUA PELO CAMINHO REAL
     "zonasClicaveis": [
       // Coordenadas e dimensões como fração da imagem (0 a 1)
       { "id": 1, "x": 0.1, "y": 0.1, "largura": 0.3, "altura": 0.3, "descricao": "Símbolo Reciclagem" }, // Correta
@@ -228,7 +228,7 @@ const manejo = [
     "id": "ex_img_zoom_1",
     "tipo": "Pergunta",
     "titulo": "Exemplo: Imagem com Zoom (Intenção)",
-    "pergunta": "Observe o diagrama de uma célula vegetal (tente dar zoom para ver detalhes). Qual organela é responsável pela fotossíntese?<br><img src=\"/images/celula_vegetal_diagrama.png\" alt=\"Diagrama de célula vegetal\" class=\"img-fluid my-2 rounded border img-zoomable cursor-zoom-in\">", // <-- SUBSTITUA CAMINHO
+    "pergunta": "Observe o diagrama de uma célula vegetal (tente dar zoom para ver detalhes). Qual organela é responsável pela fotossíntese?<br><img src=\"https://static.escolakids.uol.com.br/2019/09/arvore.jpg\" alt=\"Diagrama de célula vegetal\" class=\"img-fluid my-2 rounded border img-zoomable cursor-zoom-in\">", // <-- SUBSTITUA CAMINHO
     "opcoes": [
       { "id": 1, "texto": "Mitocôndria" },
       { "id": 2, "texto": "Núcleo" },
@@ -247,7 +247,7 @@ const manejo = [
     "id": "ex_img_clicavel_1",
     "tipo": "Pergunta", // Poderia ser Outras, depende da interação desejada
     "titulo": "Exemplo: Imagem Clicável (Intenção)",
-    "pergunta": "A imagem mostra diferentes tipos de lixeiras da coleta seletiva. Qual cor representa o VIDRO? (Imagine clicar na lixeira correta)<br><img src=\"/images/lixeiras_coleta.png\" alt=\"Lixeiras coloridas da coleta seletiva\" class=\"img-fluid my-2 rounded border img-clickable cursor-pointer\">", // <-- SUBSTITUA CAMINHO
+    "pergunta": "A imagem mostra diferentes tipos de lixeiras da coleta seletiva. Qual cor representa o VIDRO? (Imagine clicar na lixeira correta)<br><img src=\"https://static.escolakids.uol.com.br/2019/09/arvore.jpg\" alt=\"Lixeiras coloridas da coleta seletiva\" class=\"img-fluid my-2 rounded border img-clickable cursor-pointer\">", // <-- SUBSTITUA CAMINHO
     "opcoes": [
       { "id": 1, "texto": "Azul" },
       { "id": 2, "texto": "Amarelo" },
