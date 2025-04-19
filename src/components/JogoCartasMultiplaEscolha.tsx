@@ -651,7 +651,7 @@ const EcoChallenge: React.FC = () => {
                             />
                         </ScrollArea>
                     ) : (
-                        <div className="h-40 md:h-56 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200"> {/* Altura aumentada */}
+                        <div className="h-58 md:h-74 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200"> {/* Altura aumentada */}
                             <EyeOff className="h-8 w-8 text-gray-500" />
                             <p className="text-sm text-gray-600">Carta Oculta</p>
                             {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>}
