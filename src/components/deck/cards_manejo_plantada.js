@@ -163,8 +163,8 @@ const manejo = [
     "id": "ex_pc_1",
     "tipo": "PontoCerto",
     "titulo": "Exemplo: Ponto Certo",
-    "pergunta": "Clique no símbolo universal da reciclagem na imagem abaixo.",
-    "imagemURL": "/images/simbolos_variados.png", // <-- SUBSTITUA PELO CAMINHO REAL
+    "pergunta": "Clique no símbolo univeimages/simbolos_variados.pngrsal da reciclagem na imagem abaixo.",
+    "imagemURL": "https://static.escolakids.uol.com.br/2019/09/arvore.jpg", // <-- SUBSTITUA PELO CAMINHO REAL
     "zonasClicaveis": [
       // Coordenadas e dimensões como fração da imagem (0 a 1)
       { "id": 1, "x": 0.1, "y": 0.1, "largura": 0.3, "altura": 0.3, "descricao": "Símbolo Reciclagem" }, // Correta
