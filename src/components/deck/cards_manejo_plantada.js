@@ -463,6 +463,25 @@ const manejo = [
     "dica": "Pense em qual tecnologia é primariamente executada no servidor web, não no navegador do usuário."
   },
   {
+    "id": "html_popup_target_1",
+    "tipo": "Pergunta",
+    "titulo": "HTML: Imagem Popup (CSS :target)",
+    "pergunta": "Observe a imagem (clique para ampliar). Que tipo de interface ela mostra?<br><br>\n\n<!-- CSS para o Popup (incorporado na pergunta) -->\n<style>\n  .popup-overlay {\n    position: fixed;\n    top: 0;\n    left: 0;\n    width: 100%;\n    height: 100%;\n    background-color: rgba(0, 0, 0, 0.75); /* Fundo escuro semi-transparente */\n    display: none; /* Escondido por padrão */\n    justify-content: center;\n    align-items: center;\n    z-index: 1000; /* Para ficar sobre outros elementos */\n    padding: 20px; /* Espaçamento interno */\n    box-sizing: border-box;\n  }\n  .popup-overlay:target {\n    display: flex; /* Mostra quando é o alvo */\n  }\n  .popup-content {\n    position: relative;\n    background-color: #fff;\n    padding: 20px;\n    border-radius: 8px;\n    max-width: 90%;\n    max-height: 90%;\n    overflow: auto; /* Barra de rolagem se a imagem for muito grande */\n  }\n  .popup-content img {\n    display: block;\n    max-width: 100%;\n    max-height: 80vh; /* Limita altura da imagem */\n    height: auto;\n    margin: 0 auto 15px auto; /* Centraliza e dá espaço abaixo */\n  }\n  .popup-close {\n    position: absolute;\n    top: 10px;\n    right: 15px;\n    font-size: 24px;\n    font-weight: bold;\n    color: #555;\n    text-decoration: none;\n    line-height: 1;\n  }\n  .popup-close:hover {\n    color: #000;\n  }\n  .image-thumbnail-link img {\n    cursor: zoom-in;\n    border: 1px solid #ccc;\n    padding: 3px;\n    border-radius: 4px;\n    background: white;\n    max-width: 180px; /* Tamanho da miniatura */\n    height: auto;\n    display: block;\n    margin: 10px auto;\n  }\n</style>\n\n<!-- Link que ativa o Popup -->\n<a href=\"#rockapps-popup\" class=\"image-thumbnail-link\">\n  <img \n    src=\"https://rockapps.com.br/wp-content/uploads/2020/09/teste.jpg\" \n    alt=\"Clique para ampliar - Teste RockApps\"\n  />\n</a>\n\n<!-- O Popup (escondido por padrão) -->\n<div id=\"rockapps-popup\" class=\"popup-overlay\">\n  <div class=\"popup-content\">\n    <a href=\"#\" class=\"popup-close\" title=\"Fechar\">×</a>\n    <img \n      src=\"https://rockapps.com.br/wp-content/uploads/2020/09/teste.jpg\" \n      alt=\"Imagem Ampliada - Teste RockApps\"\n    />\n    <p style=\"text-align: center; font-size: 0.9em; color: #666;\">Teste RockApps</p>\n  </div>\n</div>\n\n<br><strong>Pergunta:</strong> A imagem parece ser um teste de qual tipo de aplicativo?",
+    "opcoes": [
+      { "id": 1, "texto": "Aplicativo de Clima" },
+      { "id": 2, "texto": "Aplicativo Bancário/Financeiro" },
+      { "id": 3, "texto": "Aplicativo de Rede Social" },
+      { "id": 4, "texto": "Aplicativo de Jogo" }
+    ],
+    "respostaCorreta": 2,
+    "dificuldade": "facil",
+    "categorias": ["HTML_PopupTarget"],
+    "fontes": ["Imagem Fornecida"],
+    "vantagem": "Correto! Parece uma interface financeira.",
+    "desvantagem": "Incorreto, observe os elementos da interface.",
+    "dica": "Gráficos, valores e talvez opções de investimento sugerem um tipo específico."
+  },
+  {
     "id": "html_zoom_details_1",
     "tipo": "Pergunta",
     "titulo": "HTML: Zoom Simples com <details>",
