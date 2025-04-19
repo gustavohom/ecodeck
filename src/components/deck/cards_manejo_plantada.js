@@ -1487,7 +1487,250 @@ const manejo = [
     "vantagem": "Plantação iniciada! Tomara que dê bons frutos.", // Se escolher 1 (Efeito -5 Progresso no verificarResposta)
     "desvantagem": "Decidiu não plantar.", // Se escolher 2
     "dica": "Paciência e cuidado podem gerar grandes recompensas."
-  }
+  },
+    // 1. Bifurcação no Caminho (Escolha com HTML/CSS)
+  {
+    "id": "tabuleiro_bifurcacao_1",
+    "tipo": "Outras",
+    "titulo": "Bifurcação: Rota Cênica ou Atalho Industrial?",
+    "pergunta": "<style>\n.path-choice-container { display: flex; justify-content: space-around; gap: 15px; margin: 15px 0; }\n.path-option { border: 2px solid #ccc; border-radius: 8px; padding: 10px; width: 45%; text-align: center; background: white; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }\n.path-option:hover { transform: scale(1.03); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }\n.path-option strong { display: block; margin-bottom: 5px; }\n.path-icon { font-size: 2em; margin-bottom: 5px; }\n.path-consequence { font-size: 0.8em; color: #555; margin-top: 8px; }\n</style>\n<p style='text-align:center;'>Você chegou a uma bifurcação. Qual caminho seguir?</p>\n<div class=\"path-choice-container\">\n  <div class=\"path-option\" onclick=\"document.getElementById('opt-1').click();\" style=\"border-color: #22c55e;\">\n    <span class=\"path-icon\">🏞️</span>\n    <strong>Rota Cênica</strong>\n    <span class=\"path-consequence\">(+5 Progresso, +1 Rodada Preso - mais demorado)</span>\n  </div>\n  <div class=\"path-option\" onclick=\"document.getElementById('opt-2').click();\" style=\"border-color: #78716c;\">\n    <span class=\"path-icon\">🏭</span>\n    <strong>Atalho Industrial</strong>\n    <span class=\"path-consequence\">(-5 Progresso, avança 2 casas extras)</span>\n  </div>\n</div>\n<p style='text-align:center; font-size:0.9em;'>Clique na opção desejada ou escolha abaixo.</p>",
+    "opcoes": [
+      { "id": 1, "texto": "Escolher Rota Cênica" },
+      { "id": 2, "texto": "Escolher Atalho Industrial" }
+    ],
+    "respostaCorreta": [1, 2], // Ambas válidas
+    "dificuldade": "normal",
+    "categorias": ["Tabuleiro_EscolhaCaminho"],
+    "fontes": [],
+    "vantagem": "Caminho escolhido! Aplique as consequências.", // Efeito aplicado no jogo
+    "desvantagem": "Caminho escolhido! Aplique as consequências.",
+    "dica": "Qual o seu objetivo: progresso ou avanço rápido?"
+  },
+
+  // 2. Ponte Quebrada (Necessita Recurso - Simulado)
+  {
+    "id": "tabuleiro_ponte_1",
+    "tipo": "Desvantagem", // Bloqueia se não tiver recurso
+    "titulo": "Ponte Quebrada!",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 2px dashed #b91c1c; border-radius: 5px; background: #fee2e2;'>\n  <p>A ponte à frente está quebrada!</p>\n  <p style='font-size: 2em; margin: 10px 0;'>🌉💥</p>\n  <p>Você precisa de <strong>1 'Kit de Reparo'</strong> (recurso do jogo) para consertá-la e prosseguir.</p>\n  <p><strong>Se tiver o kit:</strong> Perca o kit e avance normalmente.</p>\n  <p><strong>Se NÃO tiver:</strong> Volte 3 casas.</p>\n  <p style='font-size:0.8em'>(O Mestre do Jogo verifica seu inventário)</p>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Verificar inventário..." } ],
+    "respostaCorreta": [],
+    "dificuldade": "normal",
+    "categorias": ["Tabuleiro_BloqueioRecurso"],
+    "fontes": [],
+    "vantagem": "Você usou o Kit de Reparo e consertou a ponte!", // Mensagem se tiver o kit
+    "desvantagem": "Sem Kit de Reparo! Volte 3 casas.", // Mensagem se não tiver
+    "dica": "Esteja sempre preparado com recursos!"
+  },
+
+  // 3. Teletransporte Ecológico (Movimento Especial)
+  {
+    "id": "tabuleiro_teleporte_1",
+    "tipo": "Vantagem",
+    "titulo": "Portal da Reciclagem",
+    "pergunta": "<div style='text-align:center; padding:10px; border: 2px solid #8b5cf6; border-radius: 50%; width: 200px; height: 200px; margin: auto; display: flex; flex-direction: column; justify-content: center; background: radial-gradient(circle, #ede9fe, #d8b4fe);'>\n  <p style='font-size: 2.5em; margin-bottom: 5px;'>♻️</p>\n  <p style='font-weight: bold; color: #5b21b6;'>Portal Mágico!</p>\n  <p style='font-size: 0.9em;'>Descarte corretamente e viaje instantaneamente!</p>\n  <strong>Avance para a próxima casa 'Ponto de Coleta' do tabuleiro.</strong>\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Viajar!" } ],
+    "respostaCorreta": [1],
+    "dificuldade": "facil",
+    "categorias": ["Tabuleiro_Teleporte"],
+    "fontes": [],
+    "vantagem": "Você foi transportado para o Ponto de Coleta!", // Efeito no jogo
+    "desvantagem": "",
+    "dica": "A reciclagem abre caminhos!"
+  },
+
+  // --- CARTAS DE TAREFA E INTERAÇÃO COM CASAS ---
+
+  // 4. Tarefa: Coleta de Lixo na Casa Atual
+  {
+    "id": "tabuleiro_tarefa_coleta_1",
+    "tipo": "Pergunta", // Uma pergunta simples para simular a tarefa
+    "titulo": "Tarefa: Limpeza Local",
+    "pergunta": "<div style='text-align:center; padding: 10px; border: 1px solid #fb923c; background: #fff7ed; border-radius: 5px;'>\n  <p>Você parou em uma casa que precisa de limpeza!</p>\n  <p style='font-size: 2em; margin: 10px 0;'>🗑️🧹</p>\n  <p>Para concluir a tarefa e ganhar a recompensa (+10 Progresso), responda:</p>\n  <strong>Qual o tempo médio de decomposição de uma bituca de cigarro?</strong>\n</div>",
+    "opcoes": [
+      { "id": 1, "texto": "1 a 6 meses" },
+      { "id": 2, "texto": "1 a 2 anos" },
+      { "id": 3, "texto": "5 a 10 anos" },
+      { "id": 4, "texto": "Mais de 100 anos" }
+    ],
+    "respostaCorreta": 3,
+    "dificuldade": "normal",
+    "categorias": ["Tabuleiro_TarefaCasa"],
+    "fontes": ["Tempo de Decomposição"],
+    "vantagem": "Correto! Tarefa concluída, +10 Progresso!",
+    "desvantagem": "Incorreto. A bituca demora bastante. Tarefa não concluída.",
+    "dica": "Filtros de cigarro contêm plástico."
+  },
+
+  // 5. Casa de Conhecimento (Quiz com <details>)
+  {
+    "id": "tabuleiro_casa_quiz_1",
+    "tipo": "Pergunta",
+    "titulo": "Casa do Saber Ambiental",
+    "pergunta": "Você caiu na Casa do Saber! Responda corretamente para ganhar um benefício.<br><br>\n<details style='margin: 10px 0;'>\n  <summary style='cursor: pointer; font-weight: bold; color: #1d4ed8;'>Ver Pergunta</summary>\n  <p style='margin-top: 10px; padding: 10px; background: #eff6ff; border-left: 3px solid #60a5fa;'>\n    Qual o nome do processo pelo qual plantas e algas usam luz solar, água e CO₂ para criar seu próprio alimento?\n  </p>\n</details>",
+    "opcoes": [
+      { "id": 1, "texto": "Respiração Celular" },
+      { "id": 2, "texto": "Fotossíntese" },
+      { "id": 3, "texto": "Decomposição" },
+      { "id": 4, "texto": "Quimiossíntese" }
+    ],
+    "respostaCorreta": 2,
+    "dificuldade": "facil",
+    "categorias": ["Tabuleiro_CasaEspecial"],
+    "fontes": ["Biologia Básica"],
+    "vantagem": "Correto! Ganhe +1 Pulo pelo seu conhecimento!",
+    "desvantagem": "Incorreto. Continue estudando!",
+    "dica": "Começa com 'Foto' e tem a ver com luz."
+  },
+
+  // 6. Casa 'Mercado' (Link para Loja - Simulado)
+  {
+    "id": "tabuleiro_casa_mercado_1",
+    "tipo": "Outras",
+    "titulo": "Visita ao Mercado Sustentável",
+    "pergunta": "<div style='text-align:center;'>\n <p>Você chegou ao Mercado! Quer dar uma olhada nas ofertas?</p>\n <p style='font-size: 2em; margin: 10px 0;'>🛒</p>\n <p><a href='#shop-popup' style='display: inline-block; padding: 8px 15px; background: #16a34a; color: white; text-decoration: none; border-radius: 5px;'>Ver Ofertas (Abrir Loja)</a></p>\n \n <style>\n .shop-popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1002; }\n .shop-popup-overlay:target { display: flex; }\n .shop-popup-content { background: #f0fdf4; padding: 20px; border-radius: 8px; max-width: 400px; border: 2px solid #15803d; position: relative; }\n .shop-popup-content h5 { text-align:center; margin: 0 0 15px 0; color: #14532d; }\n .shop-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px dashed #a7f3d0; }\n .shop-item span { font-size: 0.9em; }\n .shop-close { position: absolute; top: 5px; right: 10px; font-size: 24px; color: #166534; text-decoration: none; }\n </style>\n \n <div id='shop-popup' class='shop-popup-overlay'>\n  <div class='shop-popup-content'>\n   <a href='#' class='shop-close' title='Fechar'>×</a>\n   <h5>Ofertas Especiais</h5>\n   <div class='shop-item'><span>Kit de Reparo 🛠️</span> <strong>Custo: 1 Estrela</strong></div>\n   <div class='shop-item'><span>Semente Mágica 🌱 (+5 Progresso)</span> <strong>Custo: 1 Estrela</strong></div>\n   <div class='shop-item'><span>Garrafa Reutilizável 💧 (Evita próxima Desvantagem de Lixo)</span> <strong>Custo: 2 Estrelas</strong></div>\n   <p style='font-size: 0.8em; text-align: center; margin-top: 15px;'>Use o botão 'Próxima Carta' para comprar (se tiver estrelas).</p>\n  </div>\n </div>\n</div>",
+    "opcoes": [
+      // O jogador usaria as opções normais do jogo para "comprar" após ver o popup
+      { "id": 201, "texto": "Comprar Kit Reparo (Custo: 1 Estrela)" },
+      { "id": 202, "texto": "Comprar Semente Mágica (Custo: 1 Estrela)" },
+      { "id": 203, "texto": "Comprar Garrafa (Custo: 2 Estrelas)" },
+      { "id": 204, "texto": "Sair do Mercado" }
+    ],
+    "respostaCorreta": [201, 202, 203], // IDs das compras
+    "dificuldade": "normal",
+    "categorias": ["Tabuleiro_CasaEspecial"],
+    "fontes": [],
+    "vantagem": "Item comprado!", // Se escolher 201, 202 ou 203 (efeito aplicado no verificarResposta)
+    "desvantagem": "Obrigado pela visita!", // Se escolher 204
+    "dica": "Invista em itens úteis!"
+  },
+
+  // --- CARTAS DE SORTE/AZAR ---
+
+  // 7. Roda da Fortuna Ambiental (CSS :target)
+  {
+    "id": "criativa_roda_fortuna_1",
+    "tipo": "Vantagem", // A base é sorte, geralmente positiva
+    "titulo": "Roda da Fortuna Verde",
+    "pergunta": "<style>\n@keyframes spin { 100% { transform: rotate(1800deg); } } \n.wheel-container { text-align: center; margin: 15px 0; }\n.wheel { width: 150px; height: 150px; border-radius: 50%; border: 5px solid #65a30d; background: conic-gradient(#bef264 0% 25%, #a3e635 25% 50%, #84cc16 50% 75%, #65a30d 75% 100%); position: relative; margin: auto; animation: spin 3s ease-out forwards; /* Simula giro */ }\n.wheel-pointer { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 20px solid #dc2626; position: absolute; top: -25px; left: 50%; transform: translateX(-50%); }\n.wheel-result { font-weight: bold; margin-top: 15px; font-size: 1.1em; animation: fadeInResult 1s 3s forwards; opacity: 0; }\n@keyframes fadeInResult { to { opacity: 1; } }\n</style>\n<p style='text-align:center;'>Gire a Roda da Fortuna Ambiental!</p>\n<div class='wheel-container'>\n <div class='wheel'><div class='wheel-pointer'></div></div>\n <p class='wheel-result'>Resultado: +1 Pulo!</p> <!-- Prêmio desta instância -->\n</div>",
+    "opcoes": [ { "id": 1, "texto": "Girar a Roda!" } ],
+    "respostaCorreta": [1],
+    "dificuldade": "facil",
+    "categorias": ["Criativa_SorteAzar"],
+    "fontes": [],
+    "vantagem": "Você ganhou +1 Pulo!", // Efeito real aplicado
+    "desvantagem": "",
+    "dica": "Veja onde a sorte te leva."
+  },
+
+  // 8. Carta 'Imprevisto' com opções ocultas (<details>)
+  {
+    "id": "criativa_imprevisto_1",
+    "tipo": "Outras",
+    "titulo": "Imprevisto na Trilha",
+    "pergunta": "<p style='text-align:center;'>Um imprevisto aconteceu! Escolha uma opção para lidar com a situação (clique para revelar as consequências):</p>\n<div style='margin-top: 15px; display: flex; justify-content: space-around;'>\n <details style='width: 45%; border: 1px solid #ccc; border-radius: 4px; background: white;'>\n   <summary style='padding: 10px; cursor: pointer; font-weight: bold;'>Opção A: Agir Rápido</summary>\n   <p style='padding: 10px; border-top: 1px solid #eee; font-size: 0.9em;'>Resolve rápido, mas pode ter pequeno impacto negativo (-5 Progresso).</p>\n </details>\n <details style='width: 45%; border: 1px solid #ccc; border-radius: 4px; background: white;'>\n   <summary style='padding: 10px; cursor: pointer; font-weight: bold;'>Opção B: Analisar Melhor</summary>\n   <p style='padding: 10px; border-top: 1px solid #eee; font-size: 0.9em;'>Leva mais tempo (fique 1 rodada preso), mas evita impacto negativo.</p>\n </details>\n</div>",
+    "opcoes": [
+      { "id": 1, "texto": "Escolher A: Agir Rápido (-5 Progresso)" },
+      { "id": 2, "texto": "Escolher B: Analisar Melhor (-1 Rodada)" }
+    ],
+    "respostaCorreta": [1, 2],
+    "dificuldade": "normal",
+    "categorias": ["Criativa_EscolhaOculta"],
+    "fontes": [],
+    "vantagem": "Decisão tomada e consequência aplicada!", // Se escolheu 1
+    "desvantagem": "Decisão tomada e consequência aplicada!", // Se escolheu 2
+    "dica": "Clique nas opções para ver o que acontece."
+  },
+
+  // --- MAIS 17 CARTAS VARIADAS ---
+
+  // 9. Enigma Visual (PontoCerto)
+  { "id": "criativa_pc_enigma_1", "tipo": "PontoCerto", "titulo": "Símbolo Oculto", "pergunta": "Há um símbolo de 'energia limpa' escondido sutilmente nesta paisagem industrial. Clique nele!", "imagemURL": "/images/paisagem_industrial_com_simbolo.png", "zonasClicaveis": [ { "id": 1, "x": 0.75, "y": 0.15, "largura": 0.08, "altura": 0.12, "descricao": "Símbolo Eólico Pequeno" } ], "respostaCorreta": 1, "opcoes": [], "dificuldade": "dificil", "categorias": ["Criativa_PontoCerto"], "fontes": [], "vantagem": "Olho de águia! Encontrou.", "desvantagem": "Não está ali. Procure bem!", "dica": "Pode estar em uma chaminé ou telhado..." },
+
+  // 10. "Arrume a Frase" (Ordem)
+  { "id": "criativa_ordem_frase_1", "tipo": "Ordem", "titulo": "Arrume o Slogan", "pergunta": "Coloque as palavras na ordem correta para formar um slogan sustentável:", "opcoes": [ { "id": 1, "texto": "PLANETA" }, { "id": 2, "texto": "UM" }, { "id": 3, "texto": "SALVAR" }, { "id": 4, "texto": "NÃO HÁ" }, { "id": 5, "texto": "B" } ], "respostaCorreta": [4, 1, 5, 3, 2], // NÃO HÁ PLANETA B SALVAR UM (?? - ajustar lógica ou palavras) - Exemplo: [4, 5, 1, 3, 2] -> NÃO HÁ PLANETA B SALVAR UM -> Ajuste: [4,5,1,2] -> Não Há Planeta B
+    "respostaCorreta": [4, 5, 1], // Ajuste para "NÃO HÁ PLANETA B"
+    "opcoes": [ { "id": 1, "texto": "PLANETA" }, { "id": 2, "texto": "UM FUTURO" }, { "id": 3, "texto": "SALVAR" }, { "id": 4, "texto": "NÃO HÁ" }, { "id": 5, "texto": "B" } ],
+    "respostaCorreta": [4, 5, 1], // NÃO HÁ PLANETA B
+    "dificuldade": "facil", "categorias": ["Criativa_Ordem"], "fontes": [], "vantagem": "Slogan correto!", "desvantagem": "Palavras fora do lugar.", "dica": "É uma frase famosa sobre alternativas." },
+
+  // 11. Escolha de Dieta (Outras)
+  { "id": "criativa_dieta_1", "tipo": "Outras", "titulo": "Escolha sua Refeição", "pergunta": "Qual refeição tem, geralmente, o <strong>menor impacto ambiental</strong> (em termos de emissões e uso de terra)?", "opcoes": [ { "id": 1, "texto": "Prato com Carne Vermelha (-10 Progresso)" }, { "id": 2, "texto": "Prato com Frango (-3 Progresso)" }, { "id": 3, "texto": "Prato Vegetariano/Vegano (+5 Progresso)" } ], "respostaCorreta": [1, 2, 3], "dificuldade": "facil", "categorias": ["Criativa_EscolhaImpacto"], "fontes": ["Impacto Alimentar"], "vantagem": "Escolha alimentar feita!", "desvantagem": "", "dica": "Produção animal tem maior pegada." },
+
+  // 12. Identifique a Espécie Invasora (Pergunta com Imagem)
+  { "id": "criativa_invasora_1", "tipo": "Pergunta", "titulo": "Espécie Invasora?", "pergunta": "Qual destes peixes é considerado uma espécie invasora prejudicial em muitos ecossistemas brasileiros?<br><img src='/images/peixes_variados.png' alt='Peixes' style='max-width:250px; margin:10px auto; display:block;'>", "opcoes": [ { "id": 1, "texto": "Tucunaré (Nativo Amazônia)" }, { "id": 2, "texto": "Tilápia (Exótica/Invasora)" }, { "id": 3, "texto": "Dourado (Nativo Bacia Paraná)" }, { "id": 4, "texto": "Pirarucu (Nativo Amazônia)" } ], "respostaCorreta": 2, "dificuldade": "normal", "categorias": ["Criativa_EspeciesInvasoras"], "fontes": ["Biologia Aquática"], "vantagem": "Correto! A tilápia, apesar de cultivada, causa problemas solta.", "desvantagem": "Incorreto. Este peixe é nativo ou menos problemático.", "dica": "Qual deles foi introduzido da África?" },
+
+  // 13. Carta de Legislação (Vantagem/Desvantagem Condicional)
+  { "id": "criativa_lei_1", "tipo": "Outras", "titulo": "Nova Lei Ambiental", "pergunta": "<p>Uma nova lei de proteção de mananciais foi aprovada!</p> <ul><li>Se você tiver <strong>mais Acertos do que Erros</strong>: Ganhe +15 Progresso.</li><li>Se tiver <strong>mais Erros do que Acertos</strong>: Perca 1 Pulo (se tiver).</li></ul>", "opcoes": [ { "id": 1, "texto": "Verificar meu histórico..." } ], "respostaCorreta": [1], "dificuldade": "normal", "categorias": ["Criativa_LeiCondicional"], "fontes": [], "vantagem": "Lei aplicada! (+15 Progresso)", // Mensagem se condição OK
+    "desvantagem": "Lei aplicada! (-1 Pulo ou sem efeito)", // Mensagem se condição NOK
+    "dica": "Boas ações são recompensadas pela lei!" },
+
+  // 14. Reparo Coletivo (Simulado)
+  { "id": "criativa_reparo_coletivo_1", "tipo": "Outras", "titulo": "Mutirão: Consertar Bem Comum", "pergunta": "<p>A praça local precisa de reparos (bancos quebrados, lixeiras danificadas).</p><p style='font-size: 1.8em; text-align:center; margin:10px;'>🛠️🌳</p><p>Se <strong>pelo menos 2 jogadores</strong> (incluindo você) concordarem em 'gastar' 5 de Progresso cada um neste turno, a praça é consertada e <strong>todos</strong> os participantes do mutirão ganham +1 Estrela Bônus na próxima rodada.</p>", "opcoes": [ { "id": 1, "texto": "Eu topo participar! (-5 Progresso)" }, { "id": 2, "texto": "Não posso ajudar agora." } ], "respostaCorreta": [1, 2], "dificuldade": "normal", "categorias": ["Criativa_Mutirao"], "fontes": [], "vantagem": "Você se ofereceu! Veja se outros topam.", "desvantagem": "Você decidiu não participar do mutirão.", "dica": "A união faz a força (e conserta a praça)." },
+
+  // 15. "Qual o Intruso?" (Pergunta com Lista HTML)
+  { "id": "criativa_intruso_1", "tipo": "Pergunta", "titulo": "Qual o Intruso?", "pergunta": "Todos os itens abaixo são fontes de energia renovável, <strong>EXCETO UM</strong>. Qual é o intruso?<ul><li>Solar</li><li>Eólica</li><li>Hidrelétrica</li><li>Biomassa</li><li>Gás Natural</li><li>Geotérmica</li></ul>", "opcoes": [ { "id": 1, "texto": "Solar" }, { "id": 2, "texto": "Eólica" }, { "id": 3, "texto": "Hidrelétrica" }, { "id": 4, "texto": "Biomassa" }, { "id": 5, "texto": "Gás Natural" }, { "id": 6, "texto": "Geotérmica" } ], "respostaCorreta": 5, "dificuldade": "facil", "categorias": ["Criativa_Intruso"], "fontes": ["Fontes de Energia"], "vantagem": "Correto! Gás natural é fóssil.", "desvantagem": "Incorreto. Esta é uma fonte renovável.", "dica": "Qual deles vem do subsolo e levou milhões de anos para se formar?" },
+
+  // 16. Carta de Reflexão (Sem Efeito Mecânico Direto)
+  { "id": "criativa_reflexao_1", "tipo": "Outras", "titulo": "Momento de Reflexão", "pergunta": "<div style='padding: 15px; font-style: italic; text-align: center; background-color: #fef9c3; border: 1px solid #fde047; border-radius: 5px;'>\"O maior perigo para o nosso planeta é a crença de que outra pessoa o salvará.\"<br>- Robert Swan</div><br><p style='text-align:center;'>Pense sobre isso em sua jornada.</p>", "opcoes": [ { "id": 1, "texto": "Refletir..." } ], "respostaCorreta": [1], "dificuldade": "facil", "categorias": ["Criativa_Reflexao"], "fontes": ["Citações"], "vantagem": "Momento importante para pensar.", "desvantagem": "", "dica": "" },
+
+  // 17. "Complete o Ditado" (CompletarFrase)
+  { "id": "criativa_cf_ditado_1", "tipo": "CompletarFrase", "titulo": "Ditado Popular Verde", "pergunta": "Complete o ditado popular adaptado:", "fraseIncompleta": "\"Água mole em pedra dura, tanto bate até que __1__... <br>...e o __2__ agradece!\"", "fragmentos": [ { "id": 1, "texto": "fura" }, { "id": 2, "texto": "rio" }, { "id": 3, "texto": "seca" }, { "id": 4, "texto": "mar" }, { "id": 5, "texto": "solo" } ], "respostaCorreta": [1, 5], // fura, solo
+    "dificuldade": "facil", "categorias": ["Criativa_CompletarFrase"], "fontes": [], "vantagem": "Ditado completo!", "desvantagem": "Não é bem assim o ditado (adaptado).", "dica": "A primeira parte é o ditado original. O que se beneficia da infiltração?" },
+
+  // 18. Escolha de Investimento P&D (Pesquisa e Desenvolvimento)
+    { "id": "criativa_invest_pd_1", "tipo": "Outras", "titulo": "Investir em P&D Verde", "pergunta": "Sua fundação pode investir em uma de duas áreas de pesquisa. Qual escolher?", "opcoes": [ {"id": 1, "texto": "Baterias mais eficientes (Ajuda transporte elétrico) (-1 Estrela, + chance futura Vantagem)"}, {"id": 2, "texto": "Técnicas de agricultura vertical (Ajuda alimentação urbana) (-1 Estrela, + chance futura Vantagem)"}], "respostaCorreta": [1, 2], "dificuldade": "normal", "categorias": ["Criativa_InvestimentoPD"], "fontes": [], "vantagem": "Investimento direcionado! Que traga bons resultados.", "desvantagem": "", "dica": "Ambos são importantes, qual te parece mais estratégico?"},
+
+    // 19. Carta "O que você faria?" - Cenário Aberto
+    { "id": "criativa_cenario_1", "tipo": "Outras", "titulo": "Cenário: Falta de Água", "pergunta": "<p>A sua comunidade enfrenta uma severa falta de água devido à seca.</p><p style='font-size: 2em; text-align:center; margin:10px;'>🚱</p><p><strong>Descreva brevemente (para os outros jogadores) uma ação concreta que você tomaria para ajudar.</strong></p><p style='font-size:0.8em'>(Não há resposta certa/errada mecânica, mas a discussão pode gerar bônus pelo Mestre)</p>", "opcoes": [ {"id": 1, "texto": "Compartilhar minha ideia"} ], "respostaCorreta": [1], "dificuldade": "normal", "categorias": ["Criativa_CenarioAberto"], "fontes": [], "vantagem": "Obrigado por compartilhar sua iniciativa!", "desvantagem": "", "dica": "Pense em reúso, economia, conscientização..." },
+
+    // 20. Tabuleiro de Jogo da Velha Ecológico (Simulado)
+    { "id": "criativa_jogo_velha_1", "tipo": "Pergunta", "titulo": "# Ecológico", "pergunta": "No jogo da velha abaixo, qual símbolo representa uma ação MAIS sustentável para se 'vencer' (fazer 3 em linha)?<br><br>\n<style>\n.tic-tac-toe { display: grid; grid-template-columns: repeat(3, 50px); grid-template-rows: repeat(3, 50px); gap: 5px; justify-content: center; margin: 15px auto; }\n.tic-tac-toe div { border: 2px solid #6b7280; display: flex; justify-content: center; align-items: center; font-size: 24px; background: white; }\n</style>\n<div class=\"tic-tac-toe\">\n  <div>🚲</div> <div>🌳</div> <div><span style='color:red'>🚗</span></div>\n  <div><span style='color:red'>🏭</span></div> <div>♻️</div> <div>☀️</div>\n  <div><span style='color:red'>🗑️</span></div> <div>💧</div> <div>🌱</div>\n</div>", "opcoes": [ {"id": 1, "texto": "Carro (🚗)"}, {"id": 2, "texto": "Reciclagem (♻️)"}, {"id": 3, "texto": "Fábrica (🏭)"}, {"id": 4, "texto": "Lixo (🗑️)"} ], "respostaCorreta": 2, "dificuldade": "facil", "categorias": ["Criativa_JogoSimulado"], "fontes": [], "vantagem": "Correto! Reciclar é uma jogada vencedora.", "desvantagem": "Incorreto. Esse símbolo representa algo menos sustentável.", "dica": "Procure pelos símbolos verdes ou que representam a natureza/renovação." },
+
+    // 21. Carta de Mímica/Desenho (Tarefa Interativa)
+    { "id": "criativa_mimica_1", "tipo": "Outras", "titulo": "Mímica Verde!", "pergunta": "<p style='text-align:center'>É hora de interagir!</p><p style='font-size: 2em; text-align:center; margin:10px;'>🎭✏️</p><p>Você deve fazer uma <strong>mímica</strong> ou <strong>desenhar</strong> para os outros jogadores adivinharem o seguinte termo ambiental:</p><p style='font-size: 1.2em; font-weight: bold; text-align:center; background: #eee; padding: 8px; margin: 10px auto; width: fit-content;'>\"ENERGIA SOLAR\"</p><p style='font-size:0.8em'>(Se alguém acertar em 1 minuto, você e quem acertou ganham +10 Progresso. O Mestre controla o tempo e a pontuação)</p>", "opcoes": [ {"id": 1, "texto": "Começar a Mímica/Desenho!"} ], "respostaCorreta": [1], "dificuldade": "normal", "categorias": ["Criativa_Interativa"], "fontes": [], "vantagem": "Prepare-se para atuar/desenhar!", "desvantagem": "", "dica": "Use gestos para o sol e eletricidade!" },
+
+    // 22. Carta "Escolha Seu Destino" (Aleatório Simulado com :target)
+    { "id": "criativa_destino_1", "tipo": "Outras", "titulo": "Encruzilhada do Destino", "pergunta": "<style>\n.destiny-choice a { display: inline-block; padding: 15px; margin: 10px; border: 2px solid #8b5cf6; border-radius: 50%; font-size: 2em; text-decoration: none; background: white; transition: background 0.3s; }\n.destiny-choice a:hover { background: #ede9fe; }\n.destiny-popup { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; z-index:1003; }\n.destiny-popup:target { display:flex; }\n.destiny-content { background:white; padding:20px; border-radius:5px; text-align:center; position:relative; }\n.destiny-close { position:absolute; top:5px; right:10px; font-size:24px; text-decoration:none; color:#888; }\n</style>\n<p style='text-align:center;'>O destino te oferece três caminhos misteriosos. Escolha um clicando no símbolo:</p>\n<div class='destiny-choice' style='text-align:center;'>\n  <a href='#destiny-1'>❓</a>\n  <a href='#destiny-2'>❓</a>\n  <a href='#destiny-3'>❓</a>\n</div>\n\n<div id='destiny-1' class='destiny-popup'><div class='destiny-content'><a href='#' class='destiny-close'>×</a><h4>Caminho da Água</h4><p style='font-size:3em'>💧</p><p>Você encontrou uma nascente! <strong>+10 Progresso.</strong></p></div></div>\n<div id='destiny-2' class='destiny-popup'><div class='destiny-content'><a href='#' class='destiny-close'>×</a><h4>Caminho da Terra</h4><p style='font-size:3em'>🌳</p><p>Boas práticas de manejo! <strong>+1 Pulo.</strong></p></div></div>\n<div id='destiny-3' class='destiny-popup'><div class='destiny-content'><a href='#' class='destiny-close'>×</a><h4>Caminho do Vento</h4><p style='font-size:3em'>💨</p><p>Uma rajada te atrasou! <strong>-5 Progresso.</strong></p></div></div>\n<p style='text-align:center; font-size:0.8em;'>Após escolher, clique no botão abaixo para confirmar o efeito.</p>", "opcoes": [ {"id": 1, "texto": "Confirmar Destino Escolhido"} ], // Jogador clica no símbolo, depois confirma aqui
+    "respostaCorreta": [1], "dificuldade": "facil", "categorias": ["Criativa_EscolhaDestino"], "fontes": [], "vantagem": "Destino revelado!", "desvantagem": "", "dica": "Qual elemento te trará mais sorte?" },
+
+    // 24. Barra de Saúde do Planeta (Visualização)
+    {
+        "id": "criativa_healthbar_1",
+        "tipo": "Outras", // Informativo
+        "titulo": "Status Global",
+        "pergunta": "A saúde geral do planeta, baseada nas ações de todos, está assim:<br><br>\n<style>\n.planet-health-bar { width: 90%; height: 30px; background-color: #ef4444; /* Vermelho base */ margin: 15px auto; border-radius: 15px; border: 2px solid #b91c1c; overflow: hidden; position: relative; }\n.planet-health-fill { width: 40%; /* Nível atual da saúde */ height: 100%; background-color: #84cc16; /* Verde */ border-radius: 13px 0 0 13px; transition: width 0.5s ease-in-out; }\n.planet-health-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; text-shadow: 1px 1px 2px black; font-size: 0.9em; }\n</style>\n<div class=\"planet-health-bar\">\n  <div class=\"planet-health-fill\"></div>\n  <div class=\"planet-health-text\">Saúde do Planeta: 40%</div>\n</div>\n<p style='text-align:center; font-size:0.8em'>Melhorem suas ações para aumentar a barra!</p>",
+        "opcoes": [ { "id": 1, "texto": "Entendido" } ],
+        "respostaCorreta": [1],
+        "dificuldade": "facil",
+        "categorias": ["Criativa_HealthBar"],
+        "fontes": [],
+        "vantagem": "Continue jogando para melhorar a saúde do planeta!",
+        "desvantagem": "",
+        "dica": "A barra verde indica a saúde atual."
+    },
+
+    // 25. Mensagem Criptografada (Atbash Simples)
+    {
+        "id": "criativa_atbash_1",
+        "tipo": "Pergunta",
+        "titulo": "Código Secreto Atbash",
+        "pergunta": "Decifre a mensagem usando a cifra Atbash (A=Z, B=Y, C=X,...):<br><br><code style='font-family: monospace; font-size: 1.2em; display: block; text-align: center; letter-spacing: 3px; background: #eee; padding: 10px; border-radius: 4px;'>HVWFIGZ URIZ</code>",
+        "opcoes": [
+            { "id": 1, "texto": "PLANTE ARVORE" },
+            { "id": 2, "texto": "RECICLE LIXO" },
+            { "id": 3, "texto": "PRESERVE AGUA" },
+            { "id": 4, "texto": "REDUZA CONSUMO" }
+        ],
+        "respostaCorreta": 1, // HVWFIGZ URIZ -> PLANTAR ARVORE
+        "dificuldade": "normal",
+        "categorias": ["Criativa_Criptografia"],
+        "fontes": ["Cifra Atbash"],
+        "vantagem": "Código quebrado! Mensagem revelada.",
+        "desvantagem": "Tradução incorreta. Lembre-se: A vira Z, B vira Y...",
+        "dica": "É uma inversão direta do alfabeto."
+    }
+
 ];
 
 export default manejo;
