@@ -1731,6 +1731,287 @@ const manejo = [
         "vantagem": "Código quebrado! Mensagem revelada.",
         "desvantagem": "Tradução incorreta. Lembre-se: A vira Z, B vira Y...",
         "dica": "É uma inversão direta do alfabeto."
+    },
+      // --- LAYOUT E APRESENTAÇÃO ---
+      {
+        "id": "html_grid_layout_1",
+        "tipo": "Pergunta",
+        "titulo": "Análise de Impacto (Grid)",
+        "pergunta": "<style>\n.impact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }\n.impact-item { border: 1px solid #ccc; padding: 8px; border-radius: 4px; text-align: center; background-color: #f9f9f9; }\n.impact-item strong { display: block; margin-bottom: 5px; font-size: 1.1em; }\n.impact-value { font-size: 1.5em; font-weight: bold; }\n.impact-value.high { color: #dc2626; } /* Red */\n.impact-value.medium { color: #f97316; } /* Orange */\n.impact-value.low { color: #16a34a; } /* Green */\n</style>\n<p>Compare o impacto ambiental aproximado (emissões de CO₂eq por porção):</p>\n<div class=\"impact-grid\">\n  <div class=\"impact-item\"><strong>Carne Bovina</strong><span class=\"impact-value high\">🥩 ALTO</span></div>\n  <div class=\"impact-item\"><strong>Frango</strong><span class=\"impact-value medium\">🍗 MÉDIO</span></div>\n  <div class=\"impact-item\"><strong>Lentilhas</strong><span class=\"impact-value low\">🌱 BAIXO</span></div>\n  <div class=\"impact-item\"><strong>Arroz</strong><span class=\"impact-value low\">🍚 BAIXO</span></div>\n</div>\n<br>Qual alimento listado tem o <strong>MAIOR</strong> impacto?",
+        "opcoes": [
+            {"id": 1, "texto": "Carne Bovina"},
+            {"id": 2, "texto": "Frango"},
+            {"id": 3, "texto": "Lentilhas"},
+            {"id": 4, "texto": "Arroz"}
+        ],
+        "respostaCorreta": 1,
+        "dificuldade": "facil",
+        "categorias": ["_test_cri_iva_Grid"],
+        "fontes": ["Dados de Pegada de Carbono"],
+        "vantagem": "Correto! A pecuária bovina tem um impacto significativo.",
+        "desvantagem": "Incorreto. Compare os níveis de impacto.",
+        "dica": "Procure pela classificação 'ALTO'."
+    },
+    {
+        "id": "html_flex_columns_1",
+        "tipo": "Pergunta",
+        "titulo": "Prós e Contras (Flexbox)",
+        "pergunta": "<style>\n.pros-cons-container { display: flex; gap: 15px; margin-top: 10px; }\n.pros-cons-col { flex: 1; border: 1px solid; border-radius: 5px; padding: 10px; }\n.pros-col { border-color: #16a34a; background-color: #f0fdf4; }\n.cons-col { border-color: #dc2626; background-color: #fee2e2; }\n.pros-cons-col h5 { margin: 0 0 10px 0; text-align: center; }\n.pros-cons-col ul { list-style: none; padding-left: 0; font-size: 0.9em; margin: 0; }\n.pros-cons-col li { margin-bottom: 5px; padding-left: 1.2em; position: relative; }\n.pros-col li::before { content: '✓'; color: #16a34a; position: absolute; left: 0; font-weight: bold; }\n.cons-col li::before { content: '✗'; color: #dc2626; position: absolute; left: 0; font-weight: bold; }\n</style>\n<p>Analise os prós e contras da energia hidrelétrica:</p>\n<div class=\"pros-cons-container\">\n  <div class=\"pros-cons-col pros-col\">\n    <h5>Prós (+)</h5>\n    <ul><li>Energia Renovável</li><li>Baixa emissão de GEE</li><li>Custo operacional baixo</li></ul>\n  </div>\n  <div class=\"pros-cons-col cons-col\">\n    <h5>Contras (-)</h5>\n    <ul><li>Impacto social (deslocamentos)</li><li>Impacto ambiental (alagamentos)</li><li>Dependência de chuvas</li></ul>\n  </div>\n</div><br>Qual é um <strong>CONTRA</strong> significativo da energia hidrelétrica listado?",
+        "opcoes": [
+            {"id": 1, "texto": "Baixa emissão de GEE"},
+            {"id": 2, "texto": "Impacto social"},
+            {"id": 3, "texto": "Custo operacional baixo"}
+        ],
+        "respostaCorreta": 2,
+        "dificuldade": "facil",
+        "categorias": ["_test_cri_iva_Flexbox"],
+        "fontes": ["Fontes de Energia"],
+        "vantagem": "Correto! O impacto social é um grande desafio.",
+        "desvantagem": "Incorreto. Esse item está listado como um 'Pró'.",
+        "dica": "Procure na coluna com o 'X' vermelho."
+    },
+    {
+        "id": "html_gradient_bg_1",
+        "tipo": "Vantagem",
+        "titulo": "Amanhecer Sustentável",
+        "pergunta": "<div style='padding: 20px; border-radius: 8px; color: #333; text-align: center; background: linear-gradient(to bottom, #a7f3d0, #6ee7b7, #34d399);'>\n  <p style='font-size: 2.5em; margin-bottom: 10px;'>🌅</p>\n  <p style='font-weight: bold; font-size: 1.1em;'>Um novo dia começa com esperança e ações verdes!</p>\n  <p>Seu compromisso inspira! Ganhe <strong>+15 de Progresso</strong>.</p>\n</div>",
+        "opcoes": [ { "id": 1, "texto": "Começar bem o dia!" } ],
+        "respostaCorreta": [1],
+        "dificuldade": "facil",
+        "categorias": ["_test_cri_iva_Gradient"],
+        "fontes": [],
+        "vantagem": "Ganhou +15 Progresso!",
+        "desvantagem": "",
+        "dica": "Aproveite a energia positiva!"
+    },
+    {
+        "id": "html_blockquote_1",
+        "tipo": "Outras",
+        "titulo": "Voz da Experiência",
+        "pergunta": "<blockquote style='border-left: 4px solid #fbbf24; margin: 15px 0; padding: 10px 15px; background-color: #fffbeb; font-style: italic;'>\n  \"Não herdamos a terra de nossos ancestrais, nós a pegamos emprestada de nossos filhos.\"\n  <footer style='text-align: right; font-style: normal; font-size: 0.9em; margin-top: 8px;'>— Provérbio Nativo Americano</footer>\n</blockquote>\n<p>Esta citação enfatiza principalmente qual aspecto da sustentabilidade?</p>",
+        "opcoes": [
+            {"id": 1, "texto": "Lucro econômico a curto prazo"},
+            {"id": 2, "texto": "Responsabilidade intergeracional"},
+            {"id": 3, "texto": "Exploração máxima de recursos"}
+        ],
+        "respostaCorreta": 2,
+        "dificuldade": "facil",
+        "categorias": ["_test_cri_iva_Blockquote"],
+        "fontes": ["Citações Famosas"],
+        "vantagem": "Correto! Pensar nas futuras gerações é crucial.",
+        "desvantagem": "Incorreto. A citação fala sobre o futuro.",
+        "dica": "A quem pertence a terra no futuro, segundo o provérbio?"
+    },
+
+    // --- INTERATIVIDADE SIMULADA ---
+
+    {
+        "id": "html_tooltip_1",
+        "tipo": "Pergunta",
+        "titulo": "Glossário Rápido (Tooltip)",
+        "pergunta": "<style>\n.tooltip { position: relative; display: inline-block; border-bottom: 1px dotted black; cursor: help; }\n.tooltip .tooltiptext { visibility: hidden; width: 160px; background-color: #555; color: #fff; text-align: center; border-radius: 6px; padding: 5px 8px; position: absolute; z-index: 1; bottom: 125%; /* Position above */ left: 50%; margin-left: -80px; opacity: 0; transition: opacity 0.3s; font-size: 0.85em; }\n.tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }\n.tooltip .tooltiptext::after { content: \"\"; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #555 transparent transparent transparent; }\n</style>\nO que significa <span class=\"tooltip\">ESG<span class=\"tooltiptext\">Environmental, Social, and Governance (Ambiental, Social e Governança) - Fatores usados para medir a sustentabilidade e o impacto ético de um investimento.</span></span> no mundo corporativo?",
+        "opcoes": [
+            {"id": 1, "texto": "Energia Solar Garantida"},
+            {"id": 2, "texto": "Padrões de Sustentabilidade e Governança"},
+            {"id": 3, "texto": "Estratégia de Superávit Global"}
+        ],
+        "respostaCorreta": 2,
+        "dificuldade": "normal",
+        "categorias": ["_test_cri_iva_Tooltip"],
+        "fontes": ["Termos Corporativos"],
+        "vantagem": "Correto! ESG é um critério cada vez mais importante.",
+        "desvantagem": "Incorreto. Passe o mouse sobre ESG para ver a sigla.",
+        "dica": "Passe o mouse sobre a sigla 'ESG' na pergunta."
+    },
+    {
+        "id": "html_flipcard_1",
+        "tipo": "Vantagem",
+        "titulo": "Carta Surpresa (Flip)",
+        "pergunta": "<style>\n.flip-card-container { perspective: 1000px; width: 180px; height: 100px; margin: 15px auto; }\n.flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }\n.flip-card-container:hover .flip-card-inner { transform: rotateY(180deg); }\n.flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border: 1px solid #ccc; border-radius: 8px; display: flex; justify-content: center; align-items: center; text-align: center; padding: 10px; }\n.flip-card-front { background-color: #bbdefb; color: black; }\n.flip-card-back { background-color: #a5d6a7; color: #1b5e20; transform: rotateY(180deg); }\n</style>\n<p style='text-align:center;'>Passe o mouse sobre a carta para revelar sua sorte!</p>\n<div class=\"flip-card-container\">\n  <div class=\"flip-card-inner\">\n    <div class=\"flip-card-front\">\n      <p style='font-size: 1.5em;'>?</p>\n      <p style='font-size: 0.9em;'>Carta Misteriosa</p>\n    </div>\n    <div class=\"flip-card-back\">\n      <p>🍀 Sorte! Você encontrou um recurso raro! Ganhe <strong>+1 Estrela Bônus</strong>.</p>\n    </div>\n  </div>\n</div>",
+        "opcoes": [ { "id": 1, "texto": "Revelar a Sorte!" } ],
+        "respostaCorreta": [1],
+        "dificuldade": "facil",
+        "categorias": ["_test_cri_iva_FlipCard"],
+        "fontes": [],
+        "vantagem": "Ganhou +1 Estrela Bônus!", // Efeito real
+        "desvantagem": "",
+        "dica": "Passe o mouse (ou toque em mobile) na carta azul."
+    },
+    {
+        "id": "html_secret_reveal_1",
+        "tipo": "Outras",
+        "titulo": "Pista Secreta",
+        "pergunta": "<p>Você encontrou uma mensagem cifrada deixada por um antigo protetor da floresta.</p>\n<details style='margin: 10px auto; width: fit-content;'>\n  <summary style='cursor: pointer; border: 1px solid; padding: 5px 10px; border-radius: 4px; background: #fef3c7; color: #ca8a04;'>Revelar Mensagem</summary>\n  <p style='margin-top: 10px; padding: 10px; background: #fffbeb; border: 1px dashed #fde047;'>\n    <i>\"O verdadeiro tesouro não é ouro, mas a <strong>água limpa</strong> que flui livremente.\"</i>\n    <br><br><strong>Efeito:</strong> Se estiver em uma casa de RIO ou NASCENTE, ganhe +10 Progresso.\n  </p>\n</details>",
+        "opcoes": [ { "id": 1, "texto": "Entendido." } ],
+        "respostaCorreta": [1],
+        "dificuldade": "normal",
+        "categorias": ["_test_cri_iva_SecretReveal"],
+        "fontes": [],
+        "vantagem": "Mensagem revelada! Verifique sua posição no tabuleiro.", // Efeito condicional aplicado no jogo
+        "desvantagem": "",
+        "dica": "Clique para ler a mensagem."
+    },
+    {
+        "id": "html_checklist_1",
+        "tipo": "Pergunta",
+        "titulo": "Checklist de Ações",
+        "pergunta": "<style>\n.checklist { list-style: none; padding-left: 0; margin: 10px 0; }\n.checklist li { margin-bottom: 8px; position: relative; padding-left: 25px; }\n.checklist li::before { content: ''; display: inline-block; width: 16px; height: 16px; border: 2px solid #6ee7b7; border-radius: 3px; position: absolute; left: 0; top: 2px; background-color: white; }\n/* Marcar um item (exemplo) */\n.checklist li.checked::after { content: '✔'; color: #047857; position: absolute; left: 3px; top: 1px; font-size: 14px; font-weight: bold; }\n</style>\n<p>Qual ação deste checklist <strong>NÃO</strong> contribui diretamente para reduzir sua pegada de carbono?</p>\n<ul class=\"checklist\">\n  <li class=\"checked\">Reduzir consumo de carne</li>\n  <li class=\"checked\">Usar transporte público/bicicleta</li>\n  <li>Comprar produtos locais</li>\n  <li class=\"checked\">Economizar energia em casa</li>\n</ul>",
+        "opcoes": [
+            {"id": 1, "texto": "Reduzir consumo de carne"},
+            {"id": 2, "texto": "Usar transporte público/bicicleta"},
+            {"id": 3, "texto": "Comprar produtos locais"}, // Embora bom, o impacto direto no *carbono* é menor que os outros
+            {"id": 4, "texto": "Economizar energia"}
+        ],
+        "respostaCorreta": 3,
+        "dificuldade": "normal",
+        "categorias": ["_test_cri_iva_Checklist"],
+        "fontes": ["Pegada de Carbono"],
+        "vantagem": "Correto! Embora comprar local seja bom, os outros têm impacto mais direto nas emissões de carbono.",
+        "desvantagem": "Incorreto. Esta ação tem um impacto significativo na pegada de carbono.",
+        "dica": "Pense em emissões de transporte e produção de energia/alimentos."
+    },
+
+    // --- APRESENTAÇÃO VISUAL TEMÁTICA ---
+    {
+        "id": "html_torn_paper_1",
+        "tipo": "Desvantagem",
+        "titulo": "Notificação Urgente",
+        "pergunta": "<style>\n.torn-paper {\n  background-color: #fdf6e3; /* Cor de papel velho */\n  padding: 25px;\n  margin: 15px auto;\n  max-width: 300px;\n  border: 1px solid #ddd;\n  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);\n  position: relative;\n  /* Efeito \"rasgado\" (simplificado com pseudo-elementos) */\n}\n.torn-paper::before, .torn-paper::after {\n  content: ''; position: absolute; width: 100%; height: 10px; background-size: 20px 10px;\n}\n.torn-paper::before { top: -1px; background-image: linear-gradient(45deg, transparent 75%, #fdf6e3 75%), linear-gradient(-45deg, transparent 75%, #fdf6e3 75%); background-position: 0 0, 10px 0; }\n.torn-paper::after { bottom: -1px; transform: rotate(180deg); background-image: linear-gradient(45deg, transparent 75%, #fdf6e3 75%), linear-gradient(-45deg, transparent 75%, #fdf6e3 75%); background-position: 10px 0, 0 0; }\n</style>\n<div class=\"torn-paper\">\n  <h5 style='text-align:center; color: #b91c1c; margin:0 0 10px 0;'>AVISO DE MULTA</h5>\n  <p style='font-size:0.9em; text-align:center;'>Descarte inadequado de resíduos detectado! Pague a multa ou perca a próxima rodada.</p>\n  <p style='text-align:center; font-weight:bold; margin-top:15px;'>Opção: Perca 1 Estrela Bônus</p>\n</div>",
+        "opcoes": [ { "id": 1, "texto": "Pagar a Multa (-1 Estrela)" } ], // Ou lógica para perder rodada
+        "respostaCorreta": [1],
+        "dificuldade": "facil",
+        "categorias": ["_test_cri_iva_PapelRasgado"],
+        "fontes": [],
+        "vantagem": "Multa paga (se tinha estrela).",
+        "desvantagem": "Não tinha estrela para pagar (perde rodada - efeito no jogo).",
+        "dica": "O descarte correto é importante."
+    },
+    {
+        "id": "html_calendar_1",
+        "tipo": "Vantagem",
+        "titulo": "Dia da Terra!",
+        "pergunta": "<style>\n.calendar-day { width: 150px; border: 1px solid #ccc; margin: 15px auto; border-radius: 5px; overflow: hidden; box-shadow: 1px 1px 3px rgba(0,0,0,0.1); }\n.calendar-header { background-color: #16a34a; color: white; text-align: center; padding: 5px; font-weight: bold; }\n.calendar-date { font-size: 3em; text-align: center; padding: 15px 10px; background: white; font-weight: bold; }\n.calendar-event { font-size: 0.9em; text-align: center; padding: 8px; background: #d1fae5; color: #065f46; }\n</style>\n<div class=\"calendar-day\">\n  <div class=\"calendar-header\">Abril</div>\n  <div class=\"calendar-date\">22</div>\n  <div class=\"calendar-event\">🌍 Dia da Terra!</div>\n</div>\n<p style='text-align:center; margin-top: 10px;'>Em comemoração, todos os jogadores ganham +5 de Progresso!</p>",
+        "opcoes": [ { "id": 1, "texto": "Celebrar!" } ],
+        "respostaCorreta": [1],
+        "dificuldade": "facil",
+        "categorias": ["_test_cri_iva_Calendario"],
+        "fontes": ["Datas Comemorativas"],
+        "vantagem": "Todos ganharam +5 Progresso!", // Efeito em todos
+        "desvantagem": "",
+        "dica": "Uma data importante para o planeta."
+    },
+    {
+        "id": "html_comic_strip_1",
+        "tipo": "Outras",
+        "titulo": "A Gota Viajante",
+        "pergunta": "<style>\n.comic-panel { border: 2px solid #3b82f6; background: white; padding: 8px; margin: 5px auto; max-width: 300px; border-radius: 4px; }\n.comic-panel img { display: block; width: 80%; margin: 5px auto; height: auto; border: 1px solid #eee; }\n.comic-caption { font-size: 0.85em; text-align: center; margin-top: 5px; font-style: italic; color: #1e3a8a; }\n</style>\n<div style='border: 1px solid #ccc; padding: 10px; background: #eff6ff;'>\n <p style='text-align:center; font-weight:bold; margin-bottom: 10px;'>A Jornada da Gotinha:</p>\n <div class='comic-panel'>\n   <img src='/images/gota_no_rio.png' alt='Gota no rio'>\n   <p class='comic-caption'>1. No rio, tranquila...</p>\n </div>\n <div class='comic-panel'>\n   <img src='/images/gota_evaporando.png' alt='Gota evaporando'>\n   <p class='comic-caption'>2. O sol esquenta, hora de subir!</p>\n </div>\n <div class='comic-panel'>\n   <img src='/images/gota_na_nuvem.png' alt='Gota na nuvem'>\n   <p class='comic-caption'>3. Encontro amigas na nuvem...</p>\n </div>\n <div class='comic-panel'>\n   <img src='/images/gota_caindo.png' alt='Gota caindo'>\n   <p class='comic-caption'>4. Pesa demais! Hora de voltar!</p>\n </div>\n</div><br>Qual etapa crucial do ciclo falta entre a 3 e a 4?",
+        "opcoes": [ {"id": 1, "texto": "Congelamento"}, {"id": 2, "texto": "Condensação (formação da gota maior)"}, {"id": 3, "texto": "Infiltração no solo"} ],
+        "respostaCorreta": 2,
+        "dificuldade": "normal",
+        "categorias": ["_test_cri_iva_ComicStrip"],
+        "fontes": ["Ciclo da Água"],
+        "vantagem": "Correto! A condensação forma as gotas de chuva.",
+        "desvantagem": "Essa etapa ocorre em outro momento do ciclo.",
+        "dica": "O que acontece com o vapor na nuvem antes de chover?"
+    },
+     {
+        "id": "html_qrcode_1",
+        "tipo": "Outras",
+        "titulo": "Dica Extra (QR Code)",
+        "pergunta": "<p style='text-align:center;'>Escaneie o QR Code com seu celular (se possível) para uma dica valiosa sobre pegada hídrica!</p>\n<img src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.watercalculator.org/' alt='QR Code para Water Calculator' style='display: block; margin: 15px auto; border: 5px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.2);'>\n<p style='text-align:center; font-size: 0.8em;'>(Aponta para watercalculator.org)</p>\n<br><p style='text-align:center;'>Use a dica para responder: Qual item geralmente tem a <strong>maior</strong> pegada hídrica?</p>",
+        "opcoes": [ {"id": 1, "texto": "1kg de Arroz"}, {"id": 2, "texto": "1kg de Carne Bovina"}, {"id": 3, "texto": "1 Camiseta de Algodão"} ],
+        "respostaCorreta": 2,
+        "dificuldade": "normal",
+        "categorias": ["_test_cri_iva_QRCode"],
+        "fontes": ["Water Footprint Network"],
+        "vantagem": "Correto! A produção de carne bovina consome muita água.",
+        "desvantagem": "Incorreto. A dica no QR Code ajudaria!",
+        "dica": "A produção de carne envolve água para o animal e para cultivar seu alimento."
+    },
+    {
+        "id": "html_spot_diff_1",
+        "tipo": "Pergunta",
+        "titulo": "Jogo dos 7 Erros (1 Erro)",
+        "pergunta": "<style>\n.diff-container { display: flex; justify-content: space-around; gap: 10px; margin: 15px 0; padding: 5px; background: #f3f4f6; border-radius: 5px; }\n.diff-img { width: 48%; border: 1px solid #d1d5db; }\n</style>\n<p>Encontre a <strong>única</strong> diferença significativa entre as duas imagens de reciclagem:</p>\n<div class=\"diff-container\">\n <img src=\"/images/reciclagem_a.png\" alt=\"Cena A\" class=\"diff-img\">\n <img src=\"/images/reciclagem_b_com_erro.png\" alt=\"Cena B com erro\" class=\"diff-img\">\n</div>",
+        "opcoes": [
+            {"id": 1, "texto": "A cor da lixeira de metal"},
+            {"id": 2, "texto": "Uma garrafa plástica no lixo de papel"}, // A diferença
+            {"id": 3, "texto": "O tipo de árvore ao fundo"},
+            {"id": 4, "texto": "A presença de uma pessoa"}
+        ],
+        "respostaCorreta": 2,
+        "dificuldade": "facil",
+        "categorias": ["_test_cri_iva_SpotDifference"],
+        "fontes": [],
+        "vantagem": "Exato! Separar corretamente é essencial.",
+        "desvantagem": "Olhe com mais atenção para os detalhes das lixeiras.",
+        "dica": "Verifique o conteúdo de cada lixeira."
+    },
+     {
+        "id": "html_wordsearch_1",
+        "tipo": "Pergunta",
+        "titulo": "Caça-Palavras Verde",
+        "pergunta": "<style>\n.wordsearch-grid { font-family: monospace; line-height: 1.2; font-size: 1.1em; border-collapse: collapse; margin: 15px auto; user-select: none; }\n.wordsearch-grid td { border: 1px solid #eee; padding: 2px 4px; text-align: center; width: 20px; height: 20px; }\n.wordsearch-grid .found { background-color: #a7f3d0; font-weight: bold; } /* Exemplo de marcação */\n</style>\n<p>Encontre a palavra <strong>\"SOLAR\"</strong> (horizontal, vertical ou diagonal) no caça-palavras abaixo. Em qual linha ela <strong>começa</strong>?</p>\n<table class=\"wordsearch-grid\">\n  <tr><td>R</td><td>E</td><td>N</td><td>O</td><td>V</td><td>A</td><td>R</td></tr>\n  <tr><td>S</td><td>O</td><td>L</td><td>A</td><td>R</td><td>G</td><td>U</td></tr>\n  <tr><td>U</td><td>L</td><td>I</td><td>X</td><td>O</td><td>U</td><td>A</td></tr>\n  <tr><td>S</td><td>A</td><td>R</td><td>V</td><td>O</td><td>A</td><td>T</td></tr>\n  <tr><td>T</td><td>M</td><td>E</td><td>T</td><td>A</td><td>L</td><td>E</td></tr>\n  <tr><td>A</td><td>A</td><td>Z</td><td>U</td><td>L</td><td>M</td><td>R</td></tr>\n</table>",
+        "opcoes": [ {"id": 1, "texto": "Linha 1"}, {"id": 2, "texto": "Linha 2"}, {"id": 3, "texto": "Linha 4"}, {"id": 4, "texto": "Linha 6"} ],
+        "respostaCorreta": 2,
+        "dificuldade": "facil",
+        "categorias": ["_test_cri_iva_WordSearch"],
+        "fontes": [],
+        "vantagem": "Correto! Achou a energia limpa.",
+        "desvantagem": "Procure novamente, a palavra está lá!",
+        "dica": "Está na horizontal."
+    },
+    {
+        "id": "html_crossword_1",
+        "tipo": "Pergunta",
+        "titulo": "Cruzadinha Ecológica",
+        "pergunta": "Qual palavra de 6 letras completa a cruzadinha?<br><br><i>1. Vertical:</i> Processo de transformar lixo orgânico em adubo.<br><br>\n<code style='font-family: monospace; font-size: 1.4em; display: block; margin: 10px auto; width: fit-content;'>\n  _ _ <span style='border-bottom: 2px solid black;'>C</span> _ _ _ <br>\n     O<br>\n     M<br>\n     P<br>\n     O<br>\n     S<br>\n     T<br>\n     A<br>\n     G<br>\n     E<br>\n     M<br>\n</code>",
+        "opcoes": [ {"id": 1, "texto": "RECICLAGEM"}, {"id": 2, "texto": "POLUIÇÃO"}, {"id": 3, "texto": "COMPOSTAGEM"} ],
+        "respostaCorreta": 3,
+        "dificuldade": "facil",
+        "categorias": ["_test_cri_iva_Crossword"],
+        "fontes": [],
+        "vantagem": "Correto!",
+        "desvantagem": "Essa palavra não se encaixa.",
+        "dica": "Começa com C e termina com M."
+    },
+    {
+        "id": "html_repair_diagram_1",
+        "tipo": "CompletarFrase", // Usando este tipo para a interação
+        "titulo": "Repare o Ciclo",
+        "pergunta": "O diagrama mostra o ciclo do Nitrogênio simplificado. Qual processo, realizado por bactérias no solo, converte nitrito em nitrato, forma utilizável pelas plantas?<br><br>\n<div style='text-align:center;'>\n  N₂ (Atmosfera) → Fixação → Amônia (NH₃) → Nitrificação (1ª parte) → Nitrito (NO₂) → <strong>__1__</strong> → Nitrato (NO₃) → Plantas\n</div>",
+        "fraseIncompleta": "O processo é a __1__.", // A frase a ser completada é implícita
+        "fragmentos": [
+            { "id": 1, "texto": "Desnitrificação" },
+            { "id": 2, "texto": "Nitrificação (2ª parte)" },
+            { "id": 3, "texto": "Amonificação" }
+        ],
+        "respostaCorreta": [2], // Nitrificação (2ª parte)
+        "opcoes": [], // Não usado diretamente
+        "dificuldade": "dificil",
+        "categorias": ["_test_cri_iva_RepairDiagram"],
+        "fontes": ["Ciclo do Nitrogênio"],
+        "vantagem": "Correto! É a segunda etapa da nitrificação.",
+        "desvantagem": "Incorreto. Esse processo ocorre em outra parte do ciclo.",
+        "dica": "É a continuação da Nitrificação."
+    },
+    {
+        "id": "html_soundwave_1",
+        "tipo": "Pergunta",
+        "titulo": "Poluição Sonora",
+        "pergunta": "A 'onda sonora' abaixo representa o nível de ruído. Qual situação ela provavelmente descreve?<br><br>\n<style>\n@keyframes wavePulse { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }\n.sound-wave { display: flex; align-items: flex-end; justify-content: center; height: 60px; margin: 15px auto; width: 150px; }\n.sound-wave div { width: 8px; height: 100%; margin: 0 2px; background-color: #f87171; /* Vermelho indica alto ruído */ border-radius: 4px; animation: wavePulse 0.8s infinite ease-in-out; }\n.sound-wave div:nth-child(2) { animation-delay: 0.1s; height: 80%; }\n.sound-wave div:nth-child(3) { animation-delay: 0.2s; height: 90%; }\n.sound-wave div:nth-child(4) { animation-delay: 0.3s; height: 70%; }\n.sound-wave div:nth-child(5) { animation-delay: 0.4s; height: 85%; }\n</style>\n<div class=\"sound-wave\">\n  <div></div><div></div><div></div><div></div><div></div>\n</div>",
+        "opcoes": [
+            {"id": 1, "texto": "Biblioteca silenciosa"},
+            {"id": 2, "texto": "Parque tranquilo"},
+            {"id": 3, "texto": "Rua com tráfego intenso e buzinas"}
+        ],
+        "respostaCorreta": 3,
+        "dificuldade": "facil",
+        "categorias": ["_test_cri_iva_SoundWave"],
+        "fontes": [],
+        "vantagem": "Correto! A intensidade visual representa barulho alto.",
+        "desvantagem": "Incorreto. Uma situação calma teria 'ondas' menores.",
+        "dica": "A cor vermelha e a animação indicam intensidade."
     }
 
 ];
