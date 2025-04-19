@@ -712,12 +712,12 @@ const EcoChallenge: React.FC = () => {
                     </div>
                     {/* Botões de Ajuste Manual (Tamanho h-9 px-2.5 e ícones h-5) */}
                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
-                        <Button onClick={diminuirAcertos} variant="outline" className="h-9 px-2.5" title="Diminuir Acertos"><ThumbsUp className="h-5 w-5 text-green-500 transform scale-x-[-1]" /></Button>
-                        <Button onClick={diminuirErros} variant="outline" className="h-9 px-2.5" title="Diminuir Erros"><ThumbsDown className="h-5 w-5 text-red-500 transform scale-x-[-1]" /></Button>
-                        <Button onClick={diminuirContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Diminuir Estrela Bônus"><Star className="h-5 w-5 text-red-500" /></Button>
-                        <Button onClick={incrementarContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Aumentar Estrela Bônus"><Star className="h-5 w-5 text-yellow-500" /></Button>
-                        <Button onClick={diminuirRodadasPreso} variant="outline" className="h-9 px-2.5" title="Diminuir Rodada Preso"><ChevronUp className="h-5 w-5 text-red-500 transform rotate-180" /></Button>
-                        <Button onClick={incrementarRodadasPreso} variant="outline" className="h-9 px-2.5" title="Aumentar Rodada Preso"><ChevronUp className="h-5 w-5 text-purple-500" /></Button>
+                        <Button onClick={diminuirAcertos} variant="outline" className="h-9 px-2.5" title="Diminuir Acertos"><ThumbsUp className="h-6 w-6 text-green-500 transform scale-x-[-1]" /></Button>
+                        <Button onClick={diminuirErros} variant="outline" className="h-9 px-2.5" title="Diminuir Erros"><ThumbsDown className="h-6 w-6 text-red-500 transform scale-x-[-1]" /></Button>
+                        <Button onClick={diminuirContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Diminuir Estrela Bônus"><Star className="h-6 w-6 text-red-500" /></Button>
+                        <Button onClick={incrementarContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Aumentar Estrela Bônus"><Star className="h-6 w-6 text-yellow-500" /></Button>
+                        <Button onClick={diminuirRodadasPreso} variant="outline" className="h-9 px-2.5" title="Diminuir Rodada Preso"><ChevronUp className="h-6 w-6 text-red-500 transform rotate-180" /></Button>
+                        <Button onClick={incrementarRodadasPreso} variant="outline" className="h-9 px-2.5" title="Aumentar Rodada Preso"><ChevronUp className="h-6 w-6 text-purple-500" /></Button>
                     </div>
                     {/* Botão Principal */}
                     <div className="w-full mb-3">
