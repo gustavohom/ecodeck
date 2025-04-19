@@ -444,6 +444,25 @@ const manejo = [
     "dica": "Compare os números na coluna 'Consumo'."
   },
   {
+    "id": "html_img_click_rockapps",
+    "tipo": "Pergunta",
+    "titulo": "HTML: Imagem Clicável Exemplo",
+    "pergunta": "A imagem abaixo é um exemplo. <br><i>(Imagine que clicar nela revelaria mais informações)</i><br><br><img src=\"https://rockapps.com.br/wp-content/uploads/2020/09/teste.jpg\" alt=\"Imagem de Teste da RockApps\" class=\"img-fluid my-2 rounded border img-clickable cursor-pointer\" style=\"max-width: 250px; height: auto; display: block; margin: auto;\"><br><br>Qual tecnologia <strong>NÃO</strong> é comumente usada no desenvolvimento Front-End moderno?",
+    "opcoes": [
+      { "id": 1, "texto": "React" },
+      { "id": 2, "texto": "Vue.js" },
+      { "id": 3, "texto": "PHP (Lado Servidor)" },
+      { "id": 4, "texto": "CSS / Tailwind" }
+    ],
+    "respostaCorreta": 3,
+    "dificuldade": "facil",
+    "categorias": ["HTML_ImagemClicavelExemplo"],
+    "fontes": ["Conhecimento Geral WebDev"],
+    "vantagem": "Correto! PHP geralmente roda no servidor.",
+    "desvantagem": "Incorreto. Essa tecnologia é comum no front-end.",
+    "dica": "Pense em qual tecnologia é primariamente executada no servidor web, não no navegador do usuário."
+  },
+  {
     "id": "ex_img_clicavel_1",
     "tipo": "Pergunta", // Poderia ser Outras, depende da interação desejada
     "titulo": "Exemplo: Imagem Clicável (Intenção)",
