@@ -506,40 +506,106 @@ const EcoChallenge: React.FC = () => {
     const handleSelecionarFragmento = (id: number) => { if (respondido) return; setFragmentosSelecionados(prev => [...prev, id]); };
     const limparFragmentos = () => { if (!respondido) { setFragmentosSelecionados([]); } };
 
+    // --- Verificação da Resposta ---
     const verificarResposta = () => {
         if (!cartaAtual || !gameState || !gameState.players || gameState.currentPlayerId === null || respondido) return;
         const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
-        if(!currentPlayer) return;
-        let cor = false; let pontosGanhos = 20; let pontosPerdidos = 10;
-        let darPuloDificil = cartaAtual.dificuldade === "dificil"; let mensagemResultado = "";
+        if (!currentPlayer) return;
+
+        let cor = false;
+        let pontosGanhos = 20;
+        let pontosPerdidos = 10;
+        let darPuloDificil = cartaAtual.dificuldade === "dificil";
+        let mensagemFinal = ""; // Variável para a mensagem final
+        let aplicarEfeitoPadrao = false; // Flag para saber se aplicamos pontos/progresso
+
         if (cartaAtual.tipo === "ContraTempo" && timerIntervalRef.current) { clearInterval(timerIntervalRef.current); }
+
+        // Lógica de Verificação por Tipo
         switch (cartaAtual.tipo) {
-            case "Pergunta": case "ContraTempo": if (cartaAtual.tipo === "ContraTempo" && (tempoRestante === null || tempoRestante <= 0)) { cor = false; } else { cor = selecionado === cartaAtual.respostaCorreta; } break;
-            case "MultiplaEscolha": cor = Array.isArray(cartaAtual.respostaCorreta) && selecoesMultiplas.length === cartaAtual.respostaCorreta.length && selecoesMultiplas.sort().toString() === cartaAtual.respostaCorreta.sort().toString(); if (cor) pontosGanhos = 25; break;
-            case "Ordem": cor = Array.isArray(cartaAtual.respostaCorreta) && ordemSelecoes.length === cartaAtual.respostaCorreta.length && ordemSelecoes.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 30; darPuloDificil = true; break;
-            case "RelacionarColunas": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = paresFormados.length === cartaAtual.respostaCorreta.length && paresFormados.map(p => `${p.aId}-${p.bId}`).sort().join(',') === cartaAtual.respostaCorreta.map(p => `${p.aId}-${p.bId}`).sort().join(','); if (cor) pontosGanhos = 30; darPuloDificil = true; break;
-            case "PontoCerto": if (!coordenadasClique || !Array.isArray(cartaAtual.zonasClicaveis)) { cor = false; break; } const zonaCorreta = cartaAtual.zonasClicaveis.find(z => z.id === cartaAtual.respostaCorreta); cor = zonaCorreta ? isClickInZone(coordenadasClique, zonaCorreta) : false; if (cor) pontosGanhos = 25; darPuloDificil = true; break;
-            case "CompletarFrase": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = fragmentosSelecionados.length === cartaAtual.respostaCorreta.length && fragmentosSelecionados.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 25; darPuloDificil = true; break;
-            case "Vantagem": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `Vantagem: ${cartaAtual.pergunta}. ${cartaAtual.vantagem || ''}`; break;
-            case "Desvantagem": cor = false; mensagemResultado = `Desvantagem: ${cartaAtual.pergunta}. ${cartaAtual.desvantagem || ''}`; break;
-            case "Outras": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `${cartaAtual.titulo}: ${cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...')}`; break;
-            default: const _exhaustiveCheck: never = cartaAtual; console.error("Tipo não tratado:", _exhaustiveCheck); return;
+            case "Pergunta":
+            case "ContraTempo":
+                if (cartaAtual.tipo === "ContraTempo" && (tempoRestante === null || tempoRestante <= 0)) { cor = false; }
+                else { cor = selecionado === cartaAtual.respostaCorreta; }
+                aplicarEfeitoPadrao = true; // Aplicar pontos/progresso
+                break;
+            case "MultiplaEscolha":
+                cor = Array.isArray(cartaAtual.respostaCorreta) && selecoesMultiplas.length === cartaAtual.respostaCorreta.length && selecoesMultiplas.sort().toString() === cartaAtual.respostaCorreta.sort().toString();
+                if (cor) pontosGanhos = 25;
+                aplicarEfeitoPadrao = true;
+                break;
+            case "Ordem":
+                cor = Array.isArray(cartaAtual.respostaCorreta) && ordemSelecoes.length === cartaAtual.respostaCorreta.length && ordemSelecoes.toString() === cartaAtual.respostaCorreta.toString();
+                if (cor) pontosGanhos = 30; darPuloDificil = true;
+                aplicarEfeitoPadrao = true;
+                break;
+            case "RelacionarColunas":
+                if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; }
+                cor = paresFormados.length === cartaAtual.respostaCorreta.length && paresFormados.map(p => `${p.aId}-${p.bId}`).sort().join(',') === cartaAtual.respostaCorreta.map(p => `${p.aId}-${p.bId}`).sort().join(',');
+                if (cor) pontosGanhos = 30; darPuloDificil = true;
+                aplicarEfeitoPadrao = true;
+                break;
+            case "PontoCerto":
+                if (!coordenadasClique || !Array.isArray(cartaAtual.zonasClicaveis)) { cor = false; break; }
+                const zonaCorreta = cartaAtual.zonasClicaveis.find(z => z.id === cartaAtual.respostaCorreta);
+                cor = zonaCorreta ? isClickInZone(coordenadasClique, zonaCorreta) : false;
+                if (cor) pontosGanhos = 25; darPuloDificil = true;
+                aplicarEfeitoPadrao = true;
+                break;
+            case "CompletarFrase":
+                if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; }
+                cor = fragmentosSelecionados.length === cartaAtual.respostaCorreta.length && fragmentosSelecionados.toString() === cartaAtual.respostaCorreta.toString();
+                if (cor) pontosGanhos = 25; darPuloDificil = true;
+                aplicarEfeitoPadrao = true;
+                break;
+            // --- Tipos que NÃO aplicam efeito padrão de pontos/progresso ---
+            case "Vantagem":
+                cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado);
+                // Mensagem é APENAS a vantagem definida na carta
+                mensagemFinal = cor ? (cartaAtual.vantagem || "Vantagem aplicada!") : "Ação não confirmada."; // Mensagem se não clicou na opção
+                // Aplicar efeito específico da vantagem aqui, se houver
+                // Exemplo: if(cor) { updateCurrentPlayer({ pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + 1, 2) }); }
+                break;
+            case "Desvantagem":
+                cor = false; // Desvantagem nunca é "correta"
+                // Mensagem é APENAS a desvantagem definida na carta
+                mensagemFinal = cartaAtual.desvantagem || "Desvantagem aplicada.";
+                // Aplicar efeito específico da desvantagem aqui
+                // Exemplo: updateCurrentPlayer({ progresso: Math.max(currentPlayer.progresso - 15, 0) });
+                break;
+            case "Outras":
+                cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado);
+                // Mensagem é APENAS a vantagem ou desvantagem definida na carta
+                mensagemFinal = cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...');
+                // Aplicar efeitos específicos baseados na escolha aqui, se houver
+                // Exemplo: if(cor && selecionado === 1) { updateCurrentPlayer({ contadorDeEstrelas: currentPlayer.contadorDeEstrelas + 1 }); }
+                //          else if (!cor && selecionado === 2) { updateCurrentPlayer({ progresso: Math.max(currentPlayer.progresso - 20, 0) }); }
+                break;
+            default:
+                const _exhaustiveCheck: never = cartaAtual;
+                console.error("Tipo não tratado:", _exhaustiveCheck); return;
         }
+
         setRespondido(true);
-        if (tiposPergunta.includes(cartaAtual.tipo)) {
+
+        // --- Atualizar Estado do Jogador e Mensagem (Apenas se aplicarEfeitoPadrao for true) ---
+        if (aplicarEfeitoPadrao) {
             if (cor) {
                 const novoProgresso = currentPlayer.progresso + pontosGanhos; const completouBarra = novoProgresso >= 100;
                 const pulosGanhos = (completouBarra ? 1 : 0) + (darPuloDificil ? 1 : 0); const estrelasFixasGanhsa = completouBarra ? 1 : 0;
                 updateCurrentPlayer({ respostasCertas: currentPlayer.respostasCertas + 1, respostasSeguidas: currentPlayer.respostasSeguidas + 1, progresso: completouBarra ? 0 : novoProgresso, pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + pulosGanhos, 2), fixedStars: currentPlayer.fixedStars + estrelasFixasGanhsa, });
-                mensagemResultado = `Correto! ${cartaAtual.vantagem || ''}${completouBarra ? ' Barra completa!' : ''}`;
+                // Define a mensagem padrão de acerto para tipos de pergunta
+                mensagemFinal = `Correto! ${cartaAtual.vantagem || ''}${completouBarra ? ' Barra completa!' : ''}`;
             } else {
                 updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - pontosPerdidos, 0), });
                 let detalheErro = "";
                 if (cartaAtual.tipo === "Ordem" && Array.isArray(cartaAtual.respostaCorreta) && Array.isArray(cartaAtual.opcoes)) { const ordemCorretaTexto = cartaAtual.respostaCorreta.map(id => cartaAtual.opcoes.find(o => o.id === id)?.texto).join(" -> "); detalheErro = ` Ordem correta: ${ordemCorretaTexto}.`; }
-                mensagemResultado = `Incorreto. ${cartaAtual.desvantagem || ''}${detalheErro}`;
+                // Define a mensagem padrão de erro para tipos de pergunta
+                mensagemFinal = `Incorreto. ${cartaAtual.desvantagem || ''}${detalheErro}`;
             }
         }
-        setMensagem(mensagemResultado);
+        // Define a mensagem final no estado (seja padrão ou específica de Vantagem/Desvantagem/Outras)
+        setMensagem(mensagemFinal);
     };
 
     const resetarContadoresJogador = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !window.confirm(`Resetar ${cp.name}?`)) return; updateCurrentPlayer({ respostasCertas: 0, respostasErradas: 0, progresso: 0, pulosDisponiveis: 0, respostasSeguidas: 0, rodadasPreso: 0, contadorDeEstrelas: 0, fixedStars: 0 }); setMensagem(`${cp.name} resetado.`); };
