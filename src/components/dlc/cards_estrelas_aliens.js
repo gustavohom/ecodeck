@@ -1,5 +1,4 @@
-[
-  // --- Pergunta (Simples Escolha) ---
+const ecologia_forestal_cards = [
   {
     "id": "json_pergunta_1",
     "tipo": "Pergunta",
@@ -219,4 +218,6 @@
     "desvantagem": "A ordem dos fatores alterou o produto!",
     "dica": "O que as plantas absorvem vs. o que elas liberam?"
   }
-]
+];
+
+export default ecologia_forestal_cards;
