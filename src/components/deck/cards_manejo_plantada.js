@@ -243,6 +243,206 @@ const manejo = [
     "desvantagem": "Esta organela tem outra função.",
     "dica": "Procure pela estrutura verde dentro da célula."
   },
+  // 1. Formatação Básica (Negrito, Itálico, Quebra de Linha)
+  {
+    "id": "html_ex_1",
+    "tipo": "Pergunta",
+    "titulo": "HTML: Formatação",
+    "pergunta": "Qual destes é o <b>principal</b> objetivo da reciclagem?<br><i>Pense no ciclo de vida dos materiais.</i>",
+    "opcoes": [
+      { "id": 1, "texto": "Apenas economizar espaço em aterros." },
+      { "id": 2, "texto": "Reduzir a extração de novas matérias-primas." },
+      { "id": 3, "texto": "Gerar empregos (embora seja um benefício)." },
+      { "id": 4, "texto": "Tornar o lixo mais bonito." }
+    ],
+    "respostaCorreta": 2,
+    "dificuldade": "facil",
+    "categorias": ["HTML_FormatacaoBasica"],
+    "fontes": ["Conceitos de Reciclagem"],
+    "vantagem": "Exato! Preservar recursos é fundamental.",
+    "desvantagem": "O foco principal é outro.",
+    "dica": "O que evitamos ao reutilizar materiais?"
+  },
+
+  // 2. Imagem Simples Incorporada
+  {
+    "id": "html_ex_2",
+    "tipo": "Pergunta",
+    "titulo": "HTML: Imagem Simples",
+    "pergunta": "A imagem abaixo representa qual conceito ecológico?<br><img src=\"/images/pegada_ecologica.png\" alt=\"Símbolo da pegada ecológica\" style=\"display: block; margin: 10px auto; width: 100px; height: auto; border: 1px solid #ccc; padding: 5px;\" class=\"img-fluid rounded\">",
+    "opcoes": [
+      { "id": 1, "texto": "Ciclo da Água" },
+      { "id": 2, "texto": "Pegada Ecológica" },
+      { "id": 3, "texto": "Cadeia Alimentar" },
+      { "id": 4, "texto": "Bioma" }
+    ],
+    "respostaCorreta": 2,
+    "dificuldade": "facil",
+    "categorias": ["HTML_ImagemSimples"],
+    "fontes": ["WWF"],
+    "vantagem": "Correto! É a Pegada Ecológica.",
+    "desvantagem": "Não, este símbolo representa outra coisa.",
+    "dica": "Mede o impacto humano nos recursos naturais."
+  },
+
+  // 3. Lista Não Ordenada (<ul>)
+  {
+    "id": "html_ex_3",
+    "tipo": "MultiplaEscolha",
+    "titulo": "HTML: Lista Não Ordenada",
+    "pergunta": "Selecione os itens que <b>NÃO</b> devem ir para a composteira doméstica comum:<ul><li>Restos de frutas e vegetais</li><li>Carnes e laticínios</li><li>Borra de café e filtros de papel</li><li>Produtos de higiene pessoal usados</li><li>Cascas de ovos</li></ul>",
+    "opcoes": [
+      { "id": 1, "texto": "Restos de frutas e vegetais" },
+      { "id": 2, "texto": "Carnes e laticínios" },
+      { "id": 3, "texto": "Borra de café" },
+      { "id": 4, "texto": "Produtos de higiene pessoal" },
+      { "id": 5, "texto": "Cascas de ovos" }
+    ],
+    "respostaCorreta": [2, 4],
+    "dificuldade": "normal",
+    "categorias": ["HTML_ListaNaoOrdenada"],
+    "fontes": ["Manual de Compostagem"],
+    "vantagem": "Exato! Evitar esses itens previne odores e patógenos.",
+    "desvantagem": "Alguns desses podem ir para a composteira, outros não.",
+    "dica": "Pense no que pode atrair animais ou causar mau cheiro."
+  },
+
+  // 4. Lista Ordenada (<ol>)
+  {
+    "id": "html_ex_4",
+    "tipo": "Ordem",
+    "titulo": "HTML: Lista Ordenada",
+    "pergunta": "A sequência abaixo descreve (de forma simplificada) a formação de chuva ácida. Ordene as opções para completar a lógica:<br><ol><li>Liberação de óxidos (SO₂ e NOx) na atmosfera.</li><li>Reação com vapor d'água formando ácidos.</li><li>______</li><li>Precipitação ácida (chuva, neve).</li></ol>",
+    "opcoes": [
+      { "id": 1, "texto": "Transporte dos poluentes pelo vento." }
+    ],
+    "respostaCorreta": [1], // Só há uma opção para encaixar na ordem
+    "dificuldade": "facil",
+    "categorias": ["HTML_ListaOrdenada"],
+    "fontes": ["Química Ambiental"],
+    "vantagem": "Sequência lógica correta!",
+    "desvantagem": "A etapa que falta é o transporte.",
+    "dica": "O que acontece com os poluentes antes de reagirem e caírem?"
+  },
+
+  // 5. Link Externo (<a>)
+  {
+    "id": "html_ex_5",
+    "tipo": "Outras",
+    "titulo": "HTML: Link Externo",
+    "pergunta": "Os Objetivos de Desenvolvimento Sustentável (ODS) são uma agenda global. <a href=\"https://brasil.un.org/pt-br/sdgs\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: blue; text-decoration: underline;\">Clique aqui</a> para conhecer mais (abrirá em nova aba). <br><br>Quantos ODS existem?",
+    "opcoes": [
+      { "id": 1, "texto": "10" },
+      { "id": 2, "texto": "17" },
+      { "id": 3, "texto": "25" }
+    ],
+    "respostaCorreta": [2], // A resposta correta é 17
+    "dificuldade": "facil",
+    "categorias": ["HTML_LinkExterno"],
+    "fontes": ["ONU"],
+    "vantagem": "Correto! São 17 objetivos importantes.",
+    "desvantagem": "Incorreto. São 17 ODS.",
+    "dica": "Visite o link para ter certeza!"
+  },
+
+  // 6. Imagem Clicável (Intenção) - Usando a URL fornecida
+  {
+    "id": "html_ex_6",
+    "tipo": "Pergunta",
+    "titulo": "HTML: Imagem Clicável (Intenção)",
+    "pergunta": "Esta imagem mostra um teste. Imagine que você pudesse clicar nela para ver mais detalhes. <br><img src=\"https://rockapps.com.br/wp-content/uploads/2020/09/teste.jpg\" alt=\"Imagem de Teste RockApps\" class=\"img-fluid my-2 rounded border img-clickable cursor-pointer\" style=\"max-width: 200px; height: auto; display: block; margin: auto;\"><br>Qual elemento HTML é usado para exibir imagens?",
+    "opcoes": [
+      { "id": 1, "texto": "<link>" },
+      { "id": 2, "texto": "<pic>" },
+      { "id": 3, "texto": "<img>" },
+      { "id": 4, "texto": "<image>" }
+    ],
+    "respostaCorreta": 3,
+    "dificuldade": "facil",
+    "categorias": ["HTML_ImagemClicavel"],
+    "fontes": ["HTML Docs"],
+    "vantagem": "Correto! A tag <img> é a resposta.",
+    "desvantagem": "Essa tag serve para outra coisa.",
+    "dica": "É uma abreviação de 'image'."
+  },
+
+  // 7. Texto Estilizado (<strong>, style)
+  {
+    "id": "html_ex_7",
+    "tipo": "Vantagem",
+    "titulo": "HTML: Texto Estilizado",
+    "pergunta": "Parabéns! Você adotou um animal de um abrigo. <strong style=\"color: green;\">Ações como essa fazem a diferença!</strong>",
+    "opcoes": [
+      { "id": 1, "texto": "Receber Recompensa (+1 Pulo)" }
+    ],
+    "respostaCorreta": [1],
+    "dificuldade": "facil",
+    "categorias": ["HTML_EstiloTexto"],
+    "fontes": [],
+    "vantagem": "Ganhou 1 Pulo pela boa ação!",
+    "desvantagem": "",
+    "dica": ""
+  },
+
+  // 8. Parágrafos (<p>) e Quebras (<br>)
+  {
+    "id": "html_ex_8",
+    "tipo": "Desvantagem",
+    "titulo": "HTML: Parágrafos",
+    "pergunta": "<p>Oh não! Um cano estourou na sua casa enquanto você viajava.</p><p>Houve um grande desperdício de água.</p><br>Perca 20 pontos de progresso.",
+    "opcoes": [
+      { "id": 1, "texto": "Confirmar (-20 Progresso)" }
+    ],
+    "respostaCorreta": [],
+    "dificuldade": "facil",
+    "categorias": ["HTML_Paragrafos"],
+    "fontes": [],
+    "vantagem": "",
+    "desvantagem": "Perdeu 20 de Progresso devido ao vazamento.",
+    "dica": ""
+  },
+
+  // 9. Combinação (Imagem e Texto Formatado)
+  {
+    "id": "html_ex_9",
+    "tipo": "ContraTempo",
+    "titulo": "HTML: Combinado",
+    "pergunta": "Rápido! A imagem mostra um painel solar. Qual efeito ele utiliza para gerar eletricidade?<br><img src=\"/images/painel_solar.jpg\" alt=\"Painel Solar\" class=\"img-fluid my-2 rounded border\" style=\"max-width: 150px; display:block; margin:auto;\"><br><b>Pista:</b> Envolve fótons!",
+    "opcoes": [
+      { "id": 1, "texto": "Efeito Estufa" },
+      { "id": 2, "texto": "Efeito Joule" },
+      { "id": 3, "texto": "Efeito Fotoelétrico (Fotovoltaico)" },
+      { "id": 4, "texto": "Efeito Doppler" }
+    ],
+    "respostaCorreta": 3,
+    "tempoLimite": 18,
+    "dificuldade": "normal",
+    "categorias": ["HTML_Combinado"],
+    "fontes": ["Física Moderna", "Energia Solar"],
+    "vantagem": "Correto! É o efeito fotoelétrico.",
+    "desvantagem": "Não, o efeito é outro.",
+    "dica": "O nome 'Fotovoltaico' vem disso."
+  },
+
+  // 10. Tabela Simples (<table>)
+  {
+    "id": "html_ex_10",
+    "tipo": "Pergunta",
+    "titulo": "HTML: Tabela Simples",
+    "pergunta": "A tabela compara o consumo de água. Qual atividade gasta <strong>MAIS</strong> água?<br><table class=\"simple-table my-2\" style=\"width: 80%; margin: auto; border-collapse: collapse; text-align: left;\"><thead><tr style=\"border-bottom: 1px solid #ccc;\"><th style=\"padding: 4px;\">Atividade</th><th style=\"padding: 4px;\">Consumo (Litros)</th></tr></thead><tbody><tr><td style=\"padding: 4px;\">Lavar Louça (15min)</td><td style=\"padding: 4px;\">~117 L</td></tr><tr><td style=\"padding: 4px;\">Tomar Banho (5min)</td><td style=\"padding: 4px;\">~45 L</td></tr><tr><td style=\"padding: 4px;\">Escovar Dentes (torneira aberta)</td><td style=\"padding: 4px;\">~12 L</td></tr></tbody></table>",
+    "opcoes": [
+      { "id": 1, "texto": "Lavar Louça" },
+      { "id": 2, "texto": "Tomar Banho" },
+      { "id": 3, "texto": "Escovar Dentes" }
+    ],
+    "respostaCorreta": 1,
+    "dificuldade": "facil",
+    "categorias": ["HTML_TabelaSimples"],
+    "fontes": ["Dados de Consumo Médio"],
+    "vantagem": "Correto! Lavar louça pode gastar muita água.",
+    "desvantagem": "Observe os valores na tabela.",
+    "dica": "Compare os números na coluna 'Consumo'."
+  },
   {
     "id": "ex_img_clicavel_1",
     "tipo": "Pergunta", // Poderia ser Outras, depende da interação desejada
