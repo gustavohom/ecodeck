@@ -1,4 +1,5 @@
-[
+const manejo = [
+
   // --- Exemplos por Tipo de Carta ---
   {
     "id": "ex_pergunta_1",
@@ -261,4 +262,6 @@
     "desvantagem": "Cor incorreta para o vidro.",
     "dica": "Lembre das cores: papel, metal, vidro, plástico."
   }
-]
+];
+
+export default manejo;
