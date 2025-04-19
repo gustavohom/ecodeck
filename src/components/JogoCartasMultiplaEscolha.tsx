@@ -1204,32 +1204,66 @@ const EcoChallenge: React.FC = () => {
             setMensagem("Você não tem pulos disponíveis.");
         }
     };
-
+    
     const eliminarRespostaErrada = () => {
         if (!currentPlayer || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return;
-        const tiposEliminaveis = ["Pergunta", "MultiplaEscolha", "ContraTempo"]; // Ordem, etc não faz sentido eliminar
-        if (!tiposEliminaveis.includes(cartaAtual.tipo) || !('opcoes' in cartaAtual) || cartaAtual.opcoes.length <= 2) {
-            setMensagem("Não é possível eliminar opções para este tipo de carta.");
+
+        // 1. Tipos de carta onde a eliminação faz sentido E respostaCorreta é number ou number[]
+        const tiposEliminaveis: Carta['tipo'][] = ["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"]; // Adicione 'Outras' se aplicável
+
+        if (
+            !tiposEliminaveis.includes(cartaAtual.tipo) || // Verifica se o tipo é compatível
+            !('opcoes' in cartaAtual) || // Verifica se a carta tem 'opcoes'
+            cartaAtual.opcoes.length <= 2 // Não elimina se só restam 2 opções
+        ) {
+            setMensagem("Não é possível eliminar opções para este tipo de carta ou já há poucas opções.");
             return;
         }
 
-        if (currentPlayer.respostasSeguidas >= 2) {
-            const respostaCorretaArr = Array.isArray(cartaAtual.respostaCorreta) ? cartaAtual.respostaCorreta : [cartaAtual.respostaCorreta];
-            const opcoesErradasDisponiveis = cartaAtual.opcoes.filter(
-                op => !respostaCorretaArr.includes(op.id) && !opcoesEliminadas.includes(op.id)
-            );
+        // 2. Verifica se o jogador pode usar a habilidade
+        if (currentPlayer.respostasSeguidas < 2) {
+             setMensagem("São necessárias 2 respostas corretas seguidas para eliminar uma opção.");
+             return;
+        }
 
-            if (opcoesErradasDisponiveis.length > 0) {
-                const idxAleat = Math.floor(Math.random() * opcoesErradasDisponiveis.length);
-                const opcaoEliminada = opcoesErradasDisponiveis[idxAleat].id;
-                setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
-                updateCurrentPlayer({ respostasSeguidas: currentPlayer.respostasSeguidas - 2 });
-                setMensagem("Uma opção incorreta foi eliminada! (-2 sequências)");
-            } else {
-                setMensagem("Não há mais opções incorretas para eliminar.");
-            }
+        // --- CORREÇÃO PRINCIPAL AQUI ---
+        // 3. Garantir que respostaCorreta é number ou number[] para este tipo
+        let respostaCorretaNumeros: number[] = [];
+        if (cartaAtual.tipo === "Pergunta" || cartaAtual.tipo === "ContraTempo") {
+             // Para estes tipos, respostaCorreta é number
+             respostaCorretaNumeros = [cartaAtual.respostaCorreta];
+        } else if (cartaAtual.tipo === "MultiplaEscolha" || cartaAtual.tipo === "Outras") {
+            // Para estes tipos, respostaCorreta é number[] (ou pode ser, no caso de Outras)
+            // Verificamos se é um array de números antes de usar
+             if (Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.every(item => typeof item === 'number')) {
+                respostaCorretaNumeros = cartaAtual.respostaCorreta as number[]; // Assert type aqui é seguro
+             } else {
+                 console.error("Formato inesperado de respostaCorreta para carta MultiplaEscolha/Outras:", cartaAtual);
+                 setMensagem("Erro interno ao processar opções da carta.");
+                 return;
+             }
         } else {
-            setMensagem("São necessárias 2 respostas corretas seguidas para eliminar uma opção.");
+             // Segurança: Se chegar aqui com um tipo inesperado (apesar do filtro inicial)
+             console.error("Tipo de carta inesperado na função eliminarRespostaErrada:", cartaAtual.tipo);
+             return;
+         }
+
+        // 4. Filtrar opções erradas disponíveis
+        const opcoesErradasDisponiveis = cartaAtual.opcoes.filter(
+            op =>
+                !respostaCorretaNumeros.includes(op.id) && // Agora compara number com number[]
+                !opcoesEliminadas.includes(op.id)
+        );
+
+        // 5. Eliminar uma opção aleatória
+        if (opcoesErradasDisponiveis.length > 0) {
+            const idxAleat = Math.floor(Math.random() * opcoesErradasDisponiveis.length);
+            const opcaoEliminada = opcoesErradasDisponiveis[idxAleat].id;
+            setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]);
+            updateCurrentPlayer({ respostasSeguidas: currentPlayer.respostasSeguidas - 2 });
+            setMensagem("Uma opção incorreta foi eliminada! (-2 sequências)");
+        } else {
+            setMensagem("Não há mais opções incorretas para eliminar.");
         }
     };
 
