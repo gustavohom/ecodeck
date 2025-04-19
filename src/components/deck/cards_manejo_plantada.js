@@ -520,7 +520,7 @@ const manejo = [
     "vantagem": "Sorte grande! Você ganhou um prêmio!", // Mensagem genérica da vantagem
     "desvantagem": "",
     "dica": "A sorte favorece os sustentáveis!"
-  }
+  },
   {
     "id": "html_zoom_details_1",
     "tipo": "Pergunta",
