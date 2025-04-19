@@ -463,6 +463,25 @@ const manejo = [
     "dica": "Pense em qual tecnologia é primariamente executada no servidor web, não no navegador do usuário."
   },
   {
+    "id": "html_zoom_details_1",
+    "tipo": "Pergunta",
+    "titulo": "HTML: Zoom Simples com <details>",
+    "pergunta": "Observe a imagem abaixo. Qual componente principal de um computador ela representa?<br><br><!-- Início do Bloco <details> para Zoom -->\n<details style=\"margin: 15px auto; display: block; width: fit-content; max-width: 200px; border: 1px solid #ccc; border-radius: 5px; overflow: hidden;\">\n  <summary style=\"cursor: zoom-in; list-style: none; /* Remove marcador padrão */\">\n    <!-- Imagem Pequena Visível -->\n    <img \n      src=\"https://rockapps.com.br/wp-content/uploads/2020/09/teste.jpg\" \n      alt=\"Clique para ampliar - Exemplo\" \n      style=\"display: block; max-width: 100%; height: auto;\"\n    >\n    <span style=\"display: block; text-align: center; font-size: 0.8em; padding: 5px; background-color: #f0f0f0;\">Clique na imagem para ampliar</span>\n  </summary>\n  <!-- Conteúdo Oculto (Imagem Maior) -->\n  <div style=\"padding: 10px; background-color: #fff;\">\n    <img \n      src=\"https://rockapps.com.br/wp-content/uploads/2020/09/teste.jpg\" \n      alt=\"Imagem Ampliada - Exemplo\" \n      style=\"display: block; width: 100%; max-width: 600px; /* Limite o tamanho máximo */ height: auto; margin: auto;\"\n    >\n    <p style=\"text-align: center; font-size: 0.8em; margin-top: 10px;\">(Clique no cabeçalho acima para fechar)</p>\n  </div>\n</details>\n<!-- Fim do Bloco <details> -->\n<br><strong>Pergunta:</strong> O que é mostrado na imagem?",
+    "opcoes": [
+      { "id": 1, "texto": "Memória RAM" },
+      { "id": 2, "texto": "Placa de Vídeo (GPU)" },
+      { "id": 3, "texto": "Processador (CPU)" },
+      { "id": 4, "texto": "Placa-Mãe" }
+    ],
+    "respostaCorreta": 4,
+    "dificuldade": "facil",
+    "categorias": ["HTML_ZoomDetalhes"],
+    "fontes": ["Componentes de PC"],
+    "vantagem": "Correto! É a Placa-Mãe, onde tudo se conecta.",
+    "desvantagem": "Incorreto. Este componente tem outra aparência/função.",
+    "dica": "É a maior placa onde os outros componentes são encaixados."
+  },
+  {
     "id": "ex_img_clicavel_1",
     "tipo": "Pergunta", // Poderia ser Outras, depende da interação desejada
     "titulo": "Exemplo: Imagem Clicável (Intenção)",
