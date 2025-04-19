@@ -371,7 +371,7 @@ const manejo = [
     "id": "html_ex_7",
     "tipo": "Vantagem",
     "titulo": "HTML: Texto Estilizado",
-    "pergunta": "Parabéns! Você adotou um animal de um abrigo. <strong style=\"color: green;\">Ações como essa fazem a diferença!</strong>",
+    "pergunta": `Parabéns! Você adotou um animal de um abrigo. <strong style=\"color: green;\">Ações como essa fazem a diferença!</strong>`,
     "opcoes": [
       { "id": 1, "texto": "Receber Recompensa (+1 Pulo)" }
     ],
