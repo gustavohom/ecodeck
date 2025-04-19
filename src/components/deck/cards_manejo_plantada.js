@@ -247,7 +247,7 @@ const manejo = [
     "id": "ex_img_clicavel_1",
     "tipo": "Pergunta", // Poderia ser Outras, depende da interação desejada
     "titulo": "Exemplo: Imagem Clicável (Intenção)",
-    "pergunta": "A imagem mostra diferentes tipos de lixeiras da coleta seletiva. Qual cor representa o VIDRO? (Imagine clicar na lixeira correta)<br><img src=\"/images/lixeiras_coleta.png\" alt=\"Lixeiras coloridas da coleta seletiva\" class=\"img-fluid my-2 rounded border img-clickable cursor-pointer\">", // <-- SUBSTITUA CAMINHO
+    "pergunta": "A imagem mostra diferentes tipos de lixeiras da coleta seletiva. Qual cor representa o VIDRO? (Imagine clicar na lixeira correta)<br><img src=\"https://static.escolakids.uol.com.br/2019/09/arvore.jpg\" alt=\"Lixeiras coloridas da coleta seletiva\" class=\"img-fluid my-2 rounded border img-clickable cursor-pointer\">", // <-- SUBSTITUA CAMINHO
     "opcoes": [
       { "id": 1, "texto": "Azul" },
       { "id": 2, "texto": "Amarelo" },
