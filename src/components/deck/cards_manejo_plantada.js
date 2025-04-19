@@ -481,6 +481,46 @@ const manejo = [
     "desvantagem": "Incorreto, observe os elementos da interface.",
     "dica": "Gráficos, valores e talvez opções de investimento sugerem um tipo específico."
   },
+  // 1. Carta Loja de Trocas
+  {
+    "id": "shop_card_1",
+    "tipo": "Outras", // Usamos 'Outras' para que as opções padrão do React funcionem como botões de compra
+    "titulo": "Loja de Trocas Sustentáveis",
+    "pergunta": "<div style='text-align: center; padding: 10px; border: 2px dashed #66c2a5; border-radius: 8px; background-color: #f0f7f6;'>\n  <h4 style='margin-bottom: 15px; color: #166534;'>Bem-vindo(a) à Loja!</h4>\n  <p style='font-size: 0.9em; margin-bottom: 20px;'>Troque seus pontos de esforço (barra de progresso cheia ou estrelas bônus - conforme regra do jogo) por benefícios!</p>\n  \n  <div style='display: flex; justify-content: space-around; flex-wrap: wrap; gap: 15px;'>\n    \n    <!-- Item 1: Pulo -->\n    <div style='border: 1px solid #ccc; padding: 10px; border-radius: 5px; width: 120px; background-color: white;'>\n      <span style='font-size: 2em; display: block; text-align: center;'>⏭️</span> \n      <p style='font-weight: bold; margin-top: 5px; text-align: center;'>Pulo Extra</p>\n      <p style='font-size: 0.8em; text-align: center; color: #555;'>(+1 Pulo)</p>\n      <p style='font-size: 0.7em; text-align: center; color: #888;'>Custo: Esforço</p>\n    </div>\n    \n    <!-- Item 2: Estrela Bônus -->\n    <div style='border: 1px solid #ccc; padding: 10px; border-radius: 5px; width: 120px; background-color: white;'>\n      <span style='font-size: 2em; display: block; text-align: center;'>⭐</span> \n      <p style='font-weight: bold; margin-top: 5px; text-align: center;'>Estrela Bônus</p>\n      <p style='font-size: 0.8em; text-align: center; color: #555;'>(+1 Estrela)</p>\n       <p style='font-size: 0.7em; text-align: center; color: #888;'>Custo: Esforço</p>\n    </div>\n\n     <!-- Adicione mais itens aqui se desejar -->\n\n  </div>\n  <p style='font-size: 0.9em; margin-top: 20px;'>Escolha o item desejado clicando na opção correspondente abaixo:</p>\n</div>",
+    "opcoes": [
+      // As opções correspondem aos itens da loja. O React renderiza estes botões.
+      { "id": 101, "texto": "Comprar Pulo Extra (+1)" },
+      { "id": 102, "texto": "Comprar Estrela Bônus (+1)" },
+      { "id": 103, "texto": "Não comprar nada desta vez" } // Opção para sair
+    ],
+    // A resposta correta aqui define qual opção dá qual benefício na lógica 'verificarResposta'
+    "respostaCorreta": [101, 102], // IDs das opções que concedem algo
+    "dificuldade": "normal", // Dificuldade não se aplica muito aqui
+    "categorias": ["Mecânica_Loja"],
+    "fontes": [],
+    "vantagem": "Compra efetuada com sucesso!", // Mensagem para opção 101 ou 102
+    "desvantagem": "Ok, talvez na próxima!", // Mensagem para opção 103
+    "dica": "Use seus recursos com sabedoria!"
+  },
+
+  // 2. Carta Baú da Sorte (com CSS :target)
+  {
+    "id": "luck_chest_1",
+    "tipo": "Vantagem", // O ato de abrir já é uma vantagem (receberá o efeito padrão da vantagem)
+    "titulo": "Baú da Sorte!",
+    "pergunta": "<style>\n  .chest-overlay {\n    position: fixed; top: 0; left: 0; width: 100%; height: 100%;\n    background-color: rgba(0, 0, 0, 0.8); display: none; justify-content: center;\n    align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box;\n  }\n  .chest-overlay:target { display: flex; }\n  .chest-content {\n    position: relative; background-color: #fff; padding: 30px; border-radius: 10px;\n    max-width: 90%; max-height: 90%; overflow: auto; text-align: center;\n    background: linear-gradient(145deg, #ffffff, #e6e6e6);\n    box-shadow: 5px 5px 15px #bebebe, -5px -5px 15px #ffffff;\n    border: 3px solid #b48b59; /* Cor de madeira */\n  }\n  .chest-content img {\n    display: block; max-width: 150px; height: auto; margin: 0 auto 20px auto;\n  }\n  .chest-close {\n    position: absolute; top: 5px; right: 10px; font-size: 28px; font-weight: bold;\n    color: #8c6b44; text-decoration: none; line-height: 1;\n  }\n  .chest-close:hover { color: #5a442a; }\n  .chest-trigger img {\n    cursor: pointer; border: 2px solid #8c6b44; padding: 5px; border-radius: 8px;\n    background: #f5e5c3; max-width: 150px; height: auto; display: block; margin: 20px auto;\n    transition: transform 0.2s ease-in-out;\n  }\n  .chest-trigger:hover img { transform: scale(1.05); }\n</style>\n\n<p style='text-align:center; margin-bottom: 15px;'>Você encontrou um Baú da Sorte! O que será que tem dentro?</p>\n\n<!-- Link que ativa o Popup do Baú -->\n<a href=\"#chest-prize-1\" class=\"chest-trigger\">\n  <img \n    src=\"/images/chest_closed.png\" \n    alt=\"Clique para abrir o baú\"\n  />\n</a>\n\n<!-- O Popup do Baú (escondido por padrão) -->\n<div id=\"chest-prize-1\" class=\"chest-overlay\">\n  <div class=\"chest-content\">\n    <a href=\"#\" class=\"chest-close\" title=\"Fechar\">×</a>\n    <img \n      src=\"/images/chest_open_stars.png\" \n      alt=\"Baú Aberto com Estrelas\"\n    />\n    <h4 style='margin-bottom: 10px; color: #ca8a04;'>Prêmio Revelado!</h4>\n    <!-- *** O PRÊMIO ESPECÍFICO DESTA CARTA VAI AQUI *** -->\n    <p style='font-size: 1.1em; font-weight: bold;'>Você ganhou +2 Estrelas Bônus!</p> \n    <!-- ************************************************* -->\n  </div>\n</div>\n<p style='text-align:center; font-size: 0.9em; color: #555;'>Clique no baú para descobrir!</p>",
+    "opcoes": [
+      // A opção padrão confirma o recebimento da Vantagem base
+      { "id": 1, "texto": "Legal! (Confirmar)" }
+    ],
+    "respostaCorreta": [1],
+    "dificuldade": "facil",
+    "categorias": ["Mecânica_BauDaSorte"],
+    "fontes": [],
+    "vantagem": "Sorte grande! Você ganhou um prêmio!", // Mensagem genérica da vantagem
+    "desvantagem": "",
+    "dica": "A sorte favorece os sustentáveis!"
+  }
   {
     "id": "html_zoom_details_1",
     "tipo": "Pergunta",
