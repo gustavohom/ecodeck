@@ -228,7 +228,7 @@ const manejo = [
     "id": "ex_img_zoom_1",
     "tipo": "Pergunta",
     "titulo": "Exemplo: Imagem com Zoom (Intenção)",
-    "pergunta": "Observe o diagrama de uma célula vegetal (tente dar zoom para ver detalhes). Qual organela é responsável pela fotossíntese?<br><img src=\"/images/celula_vegetal_diagrama.png\" alt=\"Diagrama de célula vegetal\" class=\"img-fluid my-2 rounded border img-zoomable cursor-zoom-in\">", // <-- SUBSTITUA CAMINHO
+    "pergunta": "Observe o diagrama de uma célula vegetal (tente dar zoom para ver detalhes). Qual organela é responsável pela fotossíntese?<br><img src=\"https://static.escolakids.uol.com.br/2019/09/arvore.jpg\" alt=\"Diagrama de célula vegetal\" class=\"img-fluid my-2 rounded border img-zoomable cursor-zoom-in\">", // <-- SUBSTITUA CAMINHO
     "opcoes": [
       { "id": 1, "texto": "Mitocôndria" },
       { "id": 2, "texto": "Núcleo" },
