@@ -8,12 +8,12 @@ import {
     BookOpen, Home, SkipForward, Star, Award, MinusCircle, ChevronUp, Zap, Filter,
     Trash, EyeOff, Eye, Dice6, X as XIcon, Timer, Link2, MousePointerClick, Check, TextSelect
 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert"; // Alert importado corretamente
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils"; // Certifique-se que este utilitário existe
+import { cn } from "@/lib/utils";
 
 // Importar Decks
 import manejoPlantadas from "./deck/cards_manejo_plantada";
@@ -254,7 +254,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                         className="w-full flex items-center justify-center space-x-2"
                         style={{
                             backgroundColor: probabilitySettings[probabilityIndex].color,
-                            color: probabilitySettings[probabilityIndex].textColor
+                            color: probabilitySettings[probabilityIndex].textColor // Usa a cor de texto definida
                         }}
                     >
                         <span>% Excluir Especiais:</span>
@@ -269,6 +269,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         </Card>
     );
 };
+
 
 // --- Componente Principal EcoChallenge ---
 const EcoChallenge: React.FC = () => {
@@ -429,8 +430,8 @@ const EcoChallenge: React.FC = () => {
             case "RelacionarColunas": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = paresFormados.length === cartaAtual.respostaCorreta.length && paresFormados.map(p => `${p.aId}-${p.bId}`).sort().join(',') === cartaAtual.respostaCorreta.map(p => `${p.aId}-${p.bId}`).sort().join(','); if (cor) pontosGanhos = 30; darPuloDificil = true; break;
             case "PontoCerto": if (!coordenadasClique || !Array.isArray(cartaAtual.zonasClicaveis)) { cor = false; break; } const zonaCorreta = cartaAtual.zonasClicaveis.find(z => z.id === cartaAtual.respostaCorreta); cor = zonaCorreta ? isClickInZone(coordenadasClique, zonaCorreta) : false; if (cor) pontosGanhos = 25; darPuloDificil = true; break;
             case "CompletarFrase": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = fragmentosSelecionados.length === cartaAtual.respostaCorreta.length && fragmentosSelecionados.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 25; darPuloDificil = true; break;
-            case "Vantagem": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `Vantagem: ${cartaAtual.pergunta}. ${cartaAtual.vantagem || ''}`; break;
-            case "Desvantagem": cor = false; mensagemResultado = `Desvantagem: ${cartaAtual.pergunta}. ${cartaAtual.desvantagem || ''}`; break;
+            case "Vantagem": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `Vantagem: ${cartaAtual.pergunta}. ${cartaAtual.vantagem || ''}`; /* Efeito aqui */ break;
+            case "Desvantagem": cor = false; mensagemResultado = `Desvantagem: ${cartaAtual.pergunta}. ${cartaAtual.desvantagem || ''}`; /* Efeito aqui */ break;
             case "Outras": cor = selecionado !== null && Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(selecionado); mensagemResultado = `${cartaAtual.titulo}: ${cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...')}`; break;
             default: const _exhaustiveCheck: never = cartaAtual; console.error("Tipo não tratado:", _exhaustiveCheck); return;
         }
@@ -479,13 +480,14 @@ const EcoChallenge: React.FC = () => {
     const handleLongPressStart = (action: () => void) => { longPressTimeout.current = setTimeout(() => { action(); }, 800); };
     const handleLongPressEnd = () => { if (longPressTimeout.current) { clearTimeout(longPressTimeout.current); longPressTimeout.current = null; } };
 
+    // --- Renderização ---
     if (!gameState) {
-         const savedStateRaw = typeof window !== "undefined" ? localStorage.getItem("estadoEcoChallenge") : null;
-         let savedState = null; try { savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; } catch {}
-         const hasSaved = !!(savedState && savedState.jogoIniciado);
-         const initialPlayers = savedState?.players || []; const initialCategorias = savedState?.categoriasSelecionadas || [];
-         const initialOcultar = savedState?.ocultarCarta ?? true; const initialProbIndex = savedState?.probabilityIndex ?? 0;
-        return (<TelaInicial onStartGame={(initialState) => { if (initialState) { setGameState(initialState as GameState); } }} categoriasDisponiveis={Array.from(new Set(cartasOriginais.flatMap(c => c.categorias || []))).sort()} initialCategoriasSelecionadas={initialCategorias} initialPlayers={initialPlayers} initialOcultarCarta={initialOcultar} initialProbabilityIndex={initialProbIndex} hasSavedGame={hasSaved} />);
+        const savedStateRaw = typeof window !== "undefined" ? localStorage.getItem("estadoEcoChallenge") : null;
+        let savedState = null; try { savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; } catch {}
+        const hasSaved = !!(savedState && savedState.jogoIniciado);
+        const initialPlayers = savedState?.players || []; const initialCategorias = savedState?.categoriasSelecionadas || [];
+        const initialOcultar = savedState?.ocultarCarta ?? true; const initialProbIndex = savedState?.probabilityIndex ?? 0;
+       return (<TelaInicial onStartGame={(initialState) => { if (initialState) { setGameState(initialState as GameState); } }} categoriasDisponiveis={Array.from(new Set(cartasOriginais.flatMap(c => c.categorias || []))).sort()} initialCategoriasSelecionadas={initialCategorias} initialPlayers={initialPlayers} initialOcultarCarta={initialOcultar} initialProbabilityIndex={initialProbIndex} hasSavedGame={hasSaved} />);
     }
     const { players, currentPlayerId, ocultarCarta } = gameState;
     const currentPlayer = players.find(p => p.id === currentPlayerId);
@@ -494,16 +496,26 @@ const EcoChallenge: React.FC = () => {
     const obterEstiloCarta = () => { if (ocultarCarta && !cartaRevelada) return "border-gray-300 bg-gray-100"; switch (cartaAtual.tipo) { case "Vantagem": return "border-green-500 bg-green-50"; case "Desvantagem": return "border-red-500 bg-red-50"; case "Outras": return "border-blue-500 bg-blue-50"; case "ContraTempo": return "border-yellow-500 bg-yellow-50"; default: return "border-gray-300 bg-white"; } };
     const isVerificarDisabled = () => { if (respondido) return true; switch (cartaAtual.tipo) { case "Pergunta": case "ContraTempo": case "Vantagem": case "Desvantagem": case "Outras": return selecionado === null; case "MultiplaEscolha": return selecoesMultiplas.length === 0; case "Ordem": return ordemSelecoes.length !== (cartaAtual.opcoes?.length ?? 0); case "RelacionarColunas": return paresFormados.length !== (cartaAtual.respostaCorreta?.length ?? 0); case "PontoCerto": return coordenadasClique === null; case "CompletarFrase": return fragmentosSelecionados.length !== (cartaAtual.respostaCorreta?.length ?? 0); default: return true; } };
 
+    // Define a variante da Alert com base na mensagem
     const getAlertVariant = (): "default" | "destructive" => {
-        if (!mensagem) return "default"; const lowerMsg = mensagem.toLowerCase();
-        if (lowerMsg.includes('incorreto') || lowerMsg.includes('desvantagem') || lowerMsg.includes('tempo esgotado')) return "destructive";
-        if (lowerMsg.includes('correto') || lowerMsg.includes('vantagem')) return "default";
-        return "default";
+        if (!mensagem) return "default"; // Ou algum outro padrão se necessário
+        const lowerMsg = mensagem.toLowerCase();
+        if (lowerMsg.includes('incorreto') || lowerMsg.includes('desvantagem') || lowerMsg.includes('tempo esgotado')) {
+            return "destructive";
+        }
+        if (lowerMsg.includes('correto') || lowerMsg.includes('vantagem')) {
+            return "default";
+        }
+        return "default"; // Default para mensagens informativas (azul será aplicado via classe)
     };
-    const isInfoAlert = !mensagem.toLowerCase().includes('correto') && !mensagem.toLowerCase().includes('vantagem') && !mensagem.toLowerCase().includes('incorreto') && !mensagem.toLowerCase().includes('desvantagem') && !mensagem.toLowerCase().includes('tempo esgotado');
+
+    const isInfoAlert = !mensagem.toLowerCase().includes('correto') && !mensagem.toLowerCase().includes('vantagem') &&
+                        !mensagem.toLowerCase().includes('incorreto') && !mensagem.toLowerCase().includes('desvantagem') &&
+                        !mensagem.toLowerCase().includes('tempo esgotado');
 
     return (
         <div className="flex flex-col items-center p-2 md:p-4 min-h-screen bg-gradient-to-b from-green-50 to-blue-50 font-sans">
+            {/* Card Principal */}
             <Card
                 className={cn("w-full max-w-lg mx-auto mt-4 shadow-xl border-2 rounded-lg", obterEstiloCarta())}
                 style={players.length > 0 && currentPlayer && !(ocultarCarta && !cartaRevelada) ? { boxShadow: `0 0 15px 3px ${currentPlayer.color}` } : {}}
@@ -516,7 +528,10 @@ const EcoChallenge: React.FC = () => {
                                 size="sm"
                                 variant={mostrarSomentePerguntas ? "secondary" : "outline"}
                                 title={mostrarSomentePerguntas ? "Mostrar todas as cartas" : "Mostrar somente perguntas"}
-                                className={cn( "flex-shrink-0", mostrarSomentePerguntas && "ring-2 ring-offset-1 ring-blue-500 bg-blue-100 border-blue-300" )}
+                                className={cn(
+                                    "flex-shrink-0",
+                                    mostrarSomentePerguntas && "ring-2 ring-offset-1 ring-blue-500 bg-blue-100 border-blue-300" // Destaque reforçado
+                                )}
                             >
                                 <Filter className="h-4 w-4" />
                             </Button>
@@ -533,7 +548,10 @@ const EcoChallenge: React.FC = () => {
                         </div>
                         {(!ocultarCarta || cartaRevelada) && (
                             <Badge
-                                variant={ cartaAtual.dificuldade === "facil" ? "secondary" : cartaAtual.dificuldade === "normal" ? "default" : "destructive" }
+                                variant={
+                                    cartaAtual.dificuldade === "facil" ? "secondary" :
+                                    cartaAtual.dificuldade === "normal" ? "default" : "destructive"
+                                }
                                 className="capitalize flex-shrink-0 h-6"
                             >
                                 {cartaAtual.dificuldade}
@@ -550,14 +568,28 @@ const EcoChallenge: React.FC = () => {
                     )}
                     {(!ocultarCarta || cartaRevelada) ? (
                         <ScrollArea className="h-36 md:h-48 rounded-md border p-3 mt-2 bg-white/80">
-                            <div className="text-sm prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }}/>
+                            <div
+                                className="text-sm prose prose-sm max-w-none"
+                                dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }}
+                            />
                         </ScrollArea>
                     ) : (
                         <div className="h-36 md:h-48 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200">
                             <EyeOff className="h-8 w-8 text-gray-500" />
                             <p className="text-sm text-gray-600">Carta Oculta</p>
                             {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>}
-                            <Button onClick={rolarDado} variant="outline" size="sm" className="mt-2 bg-white" onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}>
+                            <Button
+                                onClick={rolarDado}
+                                variant="outline"
+                                size="sm"
+                                className="mt-2 bg-white"
+                                onMouseDown={() => handleLongPressStart(rolarDado)}
+                                onMouseUp={handleLongPressEnd}
+                                onMouseLeave={handleLongPressEnd}
+                                onTouchStart={() => handleLongPressStart(rolarDado)}
+                                onTouchEnd={handleLongPressEnd}
+                                onTouchCancel={handleLongPressEnd}
+                            >
                                 <Dice6 className="h-4 w-4 mr-1" /> Rolar Dado
                             </Button>
                         </div>
@@ -570,7 +602,7 @@ const EcoChallenge: React.FC = () => {
                             {renderizarConteudoResposta()}
                         </div>
                         {mostrarDica && cartaAtual.dica && (
-                            <Alert variant="default" className="mt-4 bg-blue-50 border-blue-300 text-blue-800">
+                            <Alert variant="default" className="mt-4 bg-blue-50 border-blue-300 text-blue-800"> {/* Azul para dica */}
                                 <HelpCircle className="h-4 w-4 text-blue-700" />
                                 <AlertDescription className="text-sm">
                                     <strong>Dica:</strong> {cartaAtual.dica}
@@ -592,16 +624,16 @@ const EcoChallenge: React.FC = () => {
                 )}
 
                 <CardFooter className="flex flex-col items-center pt-4 border-t bg-gray-50/50 rounded-b-lg">
-                    {/* Botões de Ação Primários (Tamanho ajustado h-9) */}
+                    {/* Botões de Ação Primários */}
                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
-                        <Button onClick={toggleFontes} variant="outline" disabled={!cartaAtual.fontes || cartaAtual.fontes.length === 0 || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <BookOpen className="h-4 w-4" /></Button>
-                        <Button onClick={pularPergunta} variant={currentPlayer.pulosDisponiveis > 0 ? "secondary" : "outline"} disabled={currentPlayer.pulosDisponiveis === 0 || !tiposPergunta.includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <SkipForward className="h-4 w-4" /> </Button>
-                        <Button onClick={toggleDica} variant={currentPlayer.respostasSeguidas >= 2 && !dicaUsada && !!cartaAtual.dica ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || dicaUsada || !cartaAtual.dica || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <HelpCircle className="h-4 w-4" /> </Button>
-                        <Button onClick={eliminarRespostaErrada} variant={currentPlayer.respostasSeguidas >= 2 ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || !["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"].includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <MinusCircle className="h-4 w-4" /> </Button>
-                        <Button onClick={resetarContadoresJogador} variant="outline" className="h-9 px-2.5"> <RotateCcw className="h-4 w-4" /> </Button>
-                        <Button onClick={voltarTelaInicial} variant="outline" className="h-9 px-2.5"> <Home className="h-4 w-4" /> </Button>
+                        <Button onClick={toggleFontes} size="sm" variant="outline" disabled={!cartaAtual.fontes || cartaAtual.fontes.length === 0 || (ocultarCarta && !cartaRevelada)} className="h-8 px-2"> <BookOpen className="h-4 w-4" /></Button>
+                        <Button onClick={pularPergunta} size="sm" variant={currentPlayer.pulosDisponiveis > 0 ? "secondary" : "outline"} disabled={currentPlayer.pulosDisponiveis === 0 || !tiposPergunta.includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-8 px-2"> <SkipForward className="h-4 w-4" /> </Button>
+                        <Button onClick={toggleDica} size="sm" variant={currentPlayer.respostasSeguidas >= 2 && !dicaUsada && !!cartaAtual.dica ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || dicaUsada || !cartaAtual.dica || respondido || (ocultarCarta && !cartaRevelada)} className="h-8 px-2"> <HelpCircle className="h-4 w-4" /> </Button>
+                        <Button onClick={eliminarRespostaErrada} size="sm" variant={currentPlayer.respostasSeguidas >= 2 ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || !["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"].includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-8 px-2"> <MinusCircle className="h-4 w-4" /> </Button>
+                        <Button onClick={resetarContadoresJogador} size="sm" variant="outline" className="h-8 px-2"> <RotateCcw className="h-4 w-4" /> </Button>
+                        <Button onClick={voltarTelaInicial} size="sm" variant="outline" className="h-8 px-2"> <Home className="h-4 w-4" /> </Button>
                     </div>
-                    {/* Botões de Ajuste Manual (Tamanho ajustado h-9 e ícones h-5) */}
+                    {/* Botões de Ajuste Manual - Tamanho Aumentado */}
                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
                         <Button onClick={diminuirAcertos} variant="outline" className="h-9 px-2.5" title="Diminuir Acertos"><ThumbsUp className="h-5 w-5 text-green-500 transform scale-x-[-1]" /></Button>
                         <Button onClick={diminuirErros} variant="outline" className="h-9 px-2.5" title="Diminuir Erros"><ThumbsDown className="h-5 w-5 text-red-500 transform scale-x-[-1]" /></Button>
@@ -613,13 +645,15 @@ const EcoChallenge: React.FC = () => {
                     {/* Botão Principal */}
                     <div className="w-full mb-3">
                         {ocultarCarta && !cartaRevelada ? (
-                            <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white"> <Eye className="mr-2 h-4 w-4"/> Revelar Carta </Button>
+                            <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                                <Eye className="mr-2 h-4 w-4"/> Revelar Carta
+                            </Button>
                         ) : !respondido ? (
                             <Button
-                                onClick={isVerificarDisabled() ? undefined : verificarResposta}
+                                onClick={isVerificarDisabled() ? undefined : verificarResposta} // Ação condicional
                                 className={cn("w-full bg-green-600 hover:bg-green-700 text-white", isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400")}
-                                disabled={isVerificarDisabled()} // Mantém controle visual
-                                onMouseDown={() => handleLongPressStart(rolarDado)} // Sempre escuta para long press
+                                disabled={isVerificarDisabled()}
+                                onMouseDown={() => handleLongPressStart(rolarDado)} // Long press sempre escuta
                                 onMouseUp={handleLongPressEnd}
                                 onMouseLeave={handleLongPressEnd}
                                 onTouchStart={() => handleLongPressStart(rolarDado)}
@@ -637,14 +671,13 @@ const EcoChallenge: React.FC = () => {
                     {/* Mensagem Feedback */}
                     {mensagem && (
                         <Alert
-                            variant={getAlertVariant()}
+                            variant={getAlertVariant()} // Usa a função para determinar a variante base
                             className={cn(
-                                'text-center text-sm font-semibold mb-3 w-full',
-                                // Aplica azul se variant="default" e for informativa
-                                getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800',
-                                // Cores padrão de shadcn para default (verde) e destructive (vermelho)
-                                getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800',
-                                getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800'
+                                'text-center text-sm font-semibold mb-3 w-full', // Garante largura total
+                                // Aplica cor azul se a variante for 'default' E a mensagem for informativa
+                                getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800'
+                                // Shadcn cuida das cores para variant="destructive" (vermelho)
+                                // Shadcn cuida das cores para variant="default" (verde por padrão, a menos que sobrescrito acima)
                             )}
                         >
                             <AlertDescription>{mensagem}</AlertDescription>
@@ -653,14 +686,14 @@ const EcoChallenge: React.FC = () => {
                     {/* Progresso e Stats */}
                     <div className="w-full">
                         <Progress value={currentPlayer.progresso} className="h-2.5 [&>*]:bg-orange-500" />
-                        <div className="flex justify-between items-center w-full mt-2 text-sm text-gray-700 flex-wrap gap-x-4 gap-y-1 font-semibold"> {/* Fonte Stats Aumentada */}
-                            <span className="flex items-center" title="Rodadas Preso"><ChevronUp className="h-4 w-4 text-purple-500 mr-1"/>{currentPlayer.rodadasPreso}</span>
-                            <span className="flex items-center" title="Estrelas Fixas"><Award className="h-4 w-4 text-yellow-600 mr-1"/>{currentPlayer.fixedStars}</span>
-                            <span className="flex items-center" title="Estrelas Bônus"><Star className="h-4 w-4 text-yellow-500 mr-1"/>{currentPlayer.contadorDeEstrelas}</span>
-                            <span className="flex items-center" title="Pulos Disponíveis"><SkipForward className="h-4 w-4 text-blue-500 mr-1"/>{currentPlayer.pulosDisponiveis}</span>
-                            <span className="flex items-center" title="Respostas Corretas"><ThumbsUp className="h-4 w-4 text-green-500 mr-1"/>{currentPlayer.respostasCertas}</span>
-                            <span className="flex items-center" title="Respostas Erradas"><ThumbsDown className="h-4 w-4 text-red-500 mr-1"/>{currentPlayer.respostasErradas}</span>
-                            <span className="flex items-center" title="Respostas Seguidas"><Zap className="h-4 w-4 text-orange-500 mr-1"/>{currentPlayer.respostasSeguidas}</span>
+                        <div className="flex justify-between items-center w-full mt-2 text-sm text-gray-700 flex-wrap gap-x-4 gap-y-1 font-medium"> {/* Aumentado tamanho fonte/gap */}
+                            <span className="flex items-center" title="Rodadas Preso"><ChevronUp className="h-4 w-4 text-purple-500 mr-0.5"/>{currentPlayer.rodadasPreso}</span>
+                            <span className="flex items-center" title="Estrelas Fixas"><Award className="h-4 w-4 text-yellow-600 mr-0.5"/>{currentPlayer.fixedStars}</span>
+                            <span className="flex items-center" title="Estrelas Bônus"><Star className="h-4 w-4 text-yellow-500 mr-0.5"/>{currentPlayer.contadorDeEstrelas}</span>
+                            <span className="flex items-center" title="Pulos Disponíveis"><SkipForward className="h-4 w-4 text-blue-500 mr-0.5"/>{currentPlayer.pulosDisponiveis}</span>
+                            <span className="flex items-center" title="Respostas Corretas"><ThumbsUp className="h-4 w-4 text-green-500 mr-0.5"/>{currentPlayer.respostasCertas}</span>
+                            <span className="flex items-center" title="Respostas Erradas"><ThumbsDown className="h-4 w-4 text-red-500 mr-0.5"/>{currentPlayer.respostasErradas}</span>
+                            <span className="flex items-center" title="Respostas Seguidas"><Zap className="h-4 w-4 text-orange-500 mr-0.5"/>{currentPlayer.respostasSeguidas}</span>
                         </div>
                     </div>
                 </CardFooter>
@@ -681,7 +714,7 @@ const EcoChallenge: React.FC = () => {
         </div>
     );
 
-    // --- Função de Renderização de Conteúdo da Resposta ---
+    // --- Função de Renderização de Conteúdo da Resposta (Interna e Refinada) ---
     function renderizarConteudoResposta() {
         if (!cartaAtual) return null;
         switch (cartaAtual.tipo) {
@@ -691,13 +724,10 @@ const EcoChallenge: React.FC = () => {
                     const isSelected = selecionado === op.id;
                     const isEliminated = opcoesEliminadas.includes(op.id);
                     const isWrongSelection = respondido && isSelected && !isCorrect;
-                    let btnClass = "border-gray-300 text-gray-900"; // Default com texto escuro
-                    if (respondido) {
-                        if (isCorrect) btnClass = "bg-green-100 border-green-400 hover:bg-green-200 text-green-900";
-                        else if (isSelected) btnClass = "bg-red-100 border-red-400 hover:bg-red-200 text-red-900";
-                        // else btnClass = "border-gray-300 text-gray-700"; // Mantem texto legível
-                    } else if (isSelected) { btnClass = "bg-blue-100 border-blue-400 text-blue-900"; }
-                    return ( <Button key={op.id} onClick={() => handleSelecao(op.id)} variant="outline" className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} </Button> );
+                    let btnClass = "";
+                    if (respondido) { if (isCorrect) btnClass = "bg-green-100 border-green-400 hover:bg-green-200 text-green-900"; else if (isSelected) btnClass = "bg-red-100 border-red-400 hover:bg-red-200 text-red-900"; else btnClass = "border-gray-300 text-gray-700"; } // Texto forte
+                    else if (isSelected) { btnClass = "bg-blue-100 border-blue-400"; }
+                    return ( <Button key={op.id} onClick={() => handleSelecao(op.id)} variant={isSelected || (respondido && isCorrect) ? "secondary" : "outline"} className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} </Button> );
                 });
              case "MultiplaEscolha":
                 return cartaAtual.opcoes.map((op) => {
@@ -706,10 +736,10 @@ const EcoChallenge: React.FC = () => {
                     const isEliminated = opcoesEliminadas.includes(op.id);
                     const isWrongSelection = respondido && isSelected && !isCorrect;
                     const missedCorrect = respondido && isCorrect && !isSelected;
-                    let btnClass = "border-gray-300 text-gray-900"; // Default
-                    if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; /*else btnClass = "border-gray-300 text-gray-700";*/ } // Texto legível
-                    else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
-                    return ( <Button key={op.id} onClick={() => handleSelecaoMultipla(op.id)} variant="outline" className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <div className={`w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center ${isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white'}`}>{isSelected && <Check className="w-3 h-3 text-white" />}</div> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600">✓</span>} </Button> );
+                    let btnClass = "";
+                    if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; else btnClass = "border-gray-300 text-gray-700"; } // Texto forte
+                    else if (isSelected) { btnClass = "bg-blue-100 border-blue-500"; }
+                    return ( <Button key={op.id} onClick={() => handleSelecaoMultipla(op.id)} variant={isSelected ? "secondary" : "outline"} className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <div className={`w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center ${isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white'}`}>{isSelected && <Check className="w-3 h-3 text-white" />}</div> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600">✓</span>} </Button> );
                 });
             case "Ordem":
                  const cOrdem = cartaAtual as CartaOrdem;
@@ -718,13 +748,13 @@ const EcoChallenge: React.FC = () => {
                     const correctIndex = Array.isArray(cOrdem.respostaCorreta) ? cOrdem.respostaCorreta.indexOf(op.id) + 1 : null;
                     const isCorrectOrder = respondido && isSelected && selectionIndex === correctIndex; const isWrongOrder = respondido && isSelected && selectionIndex !== correctIndex;
                     const isCorrectOptionOverall = respondido && correctIndex !== null && correctIndex > 0;
-                    let btnClass = "border-gray-300 text-gray-900"; // Default
-                    if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; } // Texto legível
-                    else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
-                    return ( <Button key={op.id} onClick={() => handleSelecaoOrdem(op.id)} variant="outline" className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass )} disabled={respondido}> {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)} <span className="flex-1">{op.texto}</span> {respondido && isCorrectOptionOverall && (<span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${ isCorrectOrder ? 'bg-green-500 text-white' : isWrongOrder ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}`}>{correctIndex}</span>)} {isWrongOrder && selectionIndex !== null && <span className="text-xs text-red-600 ml-1">(Sua: {selectionIndex})</span>} </Button> );
+                    let btnClass = "";
+                    if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; } // Texto forte
+                    else if (isSelected) { btnClass = "bg-blue-100 border-blue-500"; }
+                    return ( <Button key={op.id} onClick={() => handleSelecaoOrdem(op.id)} variant={isSelected ? "secondary" : "outline"} className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass )} disabled={respondido}> {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)} <span className="flex-1">{op.texto}</span> {respondido && isCorrectOptionOverall && (<span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${ isCorrectOrder ? 'bg-green-500 text-white' : isWrongOrder ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}`}>{correctIndex}</span>)} {isWrongOrder && selectionIndex !== null && <span className="text-xs text-red-600 ml-1">(Sua: {selectionIndex})</span>} </Button> );
                 });
             case "RelacionarColunas":
-                const cRel = cartaAtual as CartaRelacionarColunas; return (<div className="flex space-x-2 md:space-x-4"> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna A</p>{cRel.colunaA.map(itemA => { const isSelectedA = selecaoColunaA === itemA.id; const par = paresFormados.find(p => p.aId === itemA.id); const parCorreto = respondido ? cRel.respostaCorreta.find(rc => rc.aId === itemA.id) : undefined; const isCorrectPair = respondido && par && parCorreto && par.bId === parCorreto.bId; const isWrongPair = respondido && par && (!parCorreto || par.bId !== parCorreto.bId); let btnClass = "border-gray-300 text-gray-900"; if (isSelectedA) btnClass = "ring-2 ring-blue-500 border-blue-500"; if (par && !respondido) btnClass = "bg-gray-200 border-gray-400"; if (isCorrectPair) btnClass = "bg-green-100 border-green-400 text-green-900"; if (isWrongPair) btnClass = "bg-red-100 border-red-400 text-red-900"; return (<Button key={`A-${itemA.id}`} variant="outline" onClick={() => handleSelecionarColunaA(itemA.id)} disabled={respondido} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass)}><span className="flex-1">{itemA.texto}</span>{isCorrectPair && <CheckCircle2 className="ml-1 h-3.5 w-3.5 text-green-600 flex-shrink-0" />}{isWrongPair && <XCircle className="ml-1 h-3.5 w-3.5 text-red-600 flex-shrink-0" />}{isWrongPair && parCorreto && (<span className="text-[10px] ml-1 text-blue-600 hidden md:inline">({cRel.colunaB.find(iB => iB.id === parCorreto.bId)?.texto})</span>)}</Button>); })}</div> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna B</p>{cRel.colunaB.map(itemB => { const isPairedB = paresFormados.some(p => p.bId === itemB.id); const isDisabled = respondido || selecaoColunaA === null || isPairedB; let btnClass = "border-gray-300 hover:bg-gray-100 text-gray-900"; if (isPairedB) btnClass = "bg-gray-200 border-gray-400 text-gray-600"; return (<Button key={`B-${itemB.id}`} variant="outline" onClick={() => handleSelecionarColunaB(itemB.id)} disabled={isDisabled} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass, !isDisabled && selecaoColunaA !== null && "hover:border-blue-400" )}><span className="flex-1">{itemB.texto}</span></Button>); })}</div></div>);
+                const cRel = cartaAtual as CartaRelacionarColunas; return (<div className="flex space-x-2 md:space-x-4"> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna A</p>{cRel.colunaA.map(itemA => { const isSelectedA = selecaoColunaA === itemA.id; const par = paresFormados.find(p => p.aId === itemA.id); const parCorreto = respondido ? cRel.respostaCorreta.find(rc => rc.aId === itemA.id) : undefined; const isCorrectPair = respondido && par && parCorreto && par.bId === parCorreto.bId; const isWrongPair = respondido && par && (!parCorreto || par.bId !== parCorreto.bId); let btnClass = "border-gray-300"; if (isSelectedA) btnClass = "ring-2 ring-blue-500 border-blue-500"; if (par && !respondido) btnClass = "bg-gray-200 border-gray-400"; if (isCorrectPair) btnClass = "bg-green-100 border-green-400 text-green-900"; if (isWrongPair) btnClass = "bg-red-100 border-red-400 text-red-900"; return (<Button key={`A-${itemA.id}`} variant="outline" onClick={() => handleSelecionarColunaA(itemA.id)} disabled={respondido} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass)}><span className="flex-1">{itemA.texto}</span>{isCorrectPair && <CheckCircle2 className="ml-1 h-3.5 w-3.5 text-green-600 flex-shrink-0" />}{isWrongPair && <XCircle className="ml-1 h-3.5 w-3.5 text-red-600 flex-shrink-0" />}{isWrongPair && parCorreto && (<span className="text-[10px] ml-1 text-blue-600 hidden md:inline">({cRel.colunaB.find(iB => iB.id === parCorreto.bId)?.texto})</span>)}</Button>); })}</div> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna B</p>{cRel.colunaB.map(itemB => { const isPairedB = paresFormados.some(p => p.bId === itemB.id); const isDisabled = respondido || selecaoColunaA === null || isPairedB; let btnClass = "border-gray-300 hover:bg-gray-100"; if (isPairedB) btnClass = "bg-gray-200 border-gray-400"; return (<Button key={`B-${itemB.id}`} variant="outline" onClick={() => handleSelecionarColunaB(itemB.id)} disabled={isDisabled} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass, !isDisabled && selecaoColunaA !== null && "hover:border-blue-400" )}><span className="flex-1">{itemB.texto}</span></Button>); })}</div></div>);
             case "PontoCerto":
                  const cPonto = cartaAtual as CartaPontoCerto; return (<div className="relative w-full max-w-md mx-auto aspect-video overflow-hidden rounded border border-gray-300 cursor-crosshair" onClick={handleImagemClick} role="button" aria-label={`Imagem interativa: ${cPonto.titulo}`}><img src={cPonto.imagemURL} alt={`Imagem para: ${cPonto.titulo}`} className={`block w-full h-full object-contain ${respondido ? 'cursor-not-allowed' : ''}`}/>{coordenadasClique && (<div className={`absolute w-3 h-3 rounded-full border-2 pointer-events-none -translate-x-1/2 -translate-y-1/2 ${respondido ? (mensagem.toLowerCase().includes('correto') ? 'bg-green-500 border-white' : 'bg-red-500 border-white') : 'bg-blue-500 border-white'}`} style={{ left: `${coordenadasClique.x * 100}%`, top: `${coordenadasClique.y * 100}%` }}>{respondido && (mensagem.toLowerCase().includes('correto') ? <Check className="w-2 h-2 text-white" /> : <XIcon className="w-2 h-2 text-white" />)}</div>)}{respondido && !mensagem.toLowerCase().includes('correto') && (() => { const zCor = cPonto.zonasClicaveis.find(z => z.id === cPonto.respostaCorreta); return zCor ? (<div className="absolute border-2 border-dashed border-green-500 pointer-events-none" style={{ left: `${zCor.x * 100}%`, top: `${zCor.y * 100}%`, width: `${zCor.largura * 100}%`, height: `${zCor.altura * 100}%` }} title={zCor.descricao || "Área correta"}/>) : null; })()}</div>);
             case "CompletarFrase":
