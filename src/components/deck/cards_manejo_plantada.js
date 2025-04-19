@@ -1452,7 +1452,7 @@ const manejo = [
     "tipo": "CompletarFrase",
     "titulo": "Termo Ambiental Oculto",
     "pergunta": "Reorganize os fragmentos para formar um termo importante relacionado à variedade de vida na Terra:",
-    "fraseIncompleta": "O termo é: __1____2____3____4____5____6____7____8____9____10____11____12____13____14__", // 12 letras
+    "fraseIncompleta": "O termo é: __1____2____3____4____5____6____7____8____9____10____11____12____13____14__",
     "fragmentos": [
       { "id": 1, "texto": "D" }, { "id": 2, "texto": "I" }, { "id": 3, "texto": "V" },
       { "id": 4, "texto": "E" }, { "id": 5, "texto": "R" }, { "id": 6, "texto": "S" },
