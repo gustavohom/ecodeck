@@ -13,7 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils"; // Certifique-se que este utilitário existe
+import { cn } from "@/lib/utils"; // Assumindo que você tem este utilitário
 
 // Importar Decks
 import manejoPlantadas from "./deck/cards_manejo_plantada";
@@ -205,14 +205,36 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                 {/* Seleção de Categorias */}
                 <div className="space-y-2">
                     <h3 className="text-lg font-semibold text-gray-800">Categorias</h3>
-                    <Input type="text" placeholder="Pesquisar Categoria..." value={termoBusca} onChange={(e) => setTermoBusca(e.target.value)} className="w-full p-2 border rounded"/>
+                    <Input
+                        type="text"
+                        placeholder="Pesquisar Categoria..."
+                        value={termoBusca}
+                        onChange={(e) => setTermoBusca(e.target.value)}
+                        className="w-full p-2 border rounded"
+                    />
                     <ScrollArea className="h-40 border rounded-md p-3 bg-gray-50">
-                        {categoriasFiltradas.length > 0 ? (categoriasFiltradas.map((categoria) => (
-                            <div key={categoria} className="flex items-center space-x-2 mb-1 hover:bg-gray-100 p-1 rounded">
-                                <input type="checkbox" id={`cat-${categoria}`} checked={categoriasSelecionadas.includes(categoria)} onChange={() => {setCategoriasSelecionadas((prev) => prev.includes(categoria) ? prev.filter((c) => c !== categoria) : [...prev, categoria]);}} className="form-checkbox h-4 w-4 text-green-600"/>
-                                <label htmlFor={`cat-${categoria}`} className="text-sm cursor-pointer flex-1">{categoria}</label>
-                            </div>
-                        ))) : (<p className="text-sm text-gray-500 italic">Nenhuma categoria encontrada.</p>)}
+                        {categoriasFiltradas.length > 0 ? (
+                            categoriasFiltradas.map((categoria) => (
+                                <div key={categoria} className="flex items-center space-x-2 mb-1 hover:bg-gray-100 p-1 rounded">
+                                    <input
+                                        type="checkbox"
+                                        id={`cat-${categoria}`}
+                                        checked={categoriasSelecionadas.includes(categoria)}
+                                        onChange={() => {
+                                            setCategoriasSelecionadas((prev) =>
+                                                prev.includes(categoria)
+                                                    ? prev.filter((c) => c !== categoria)
+                                                    : [...prev, categoria]
+                                            );
+                                        }}
+                                        className="form-checkbox h-4 w-4 text-green-600"
+                                    />
+                                    <label htmlFor={`cat-${categoria}`} className="text-sm cursor-pointer flex-1">{categoria}</label>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-sm text-gray-500 italic">Nenhuma categoria encontrada.</p>
+                        )}
                     </ScrollArea>
                     <div className="flex space-x-2 mt-2">
                         <Button onClick={() => setCategoriasSelecionadas(todasCategorias)} variant="outline" size="sm" className="flex-1">Todas</Button>
@@ -226,29 +248,98 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                         {playerInputs.map((player, index) => (
                             <div key={player.id} className="border p-3 rounded-md shadow-sm bg-white relative">
                                 <div className="flex items-center space-x-2">
-                                    <Input type="text" placeholder={`Jogador ${index + 1}`} value={player.name} maxLength={12} onChange={(e) => handlePlayerChange(index, "name", e.target.value)} className="flex-grow"/>
-                                    <Button variant="outline" size="icon" className="w-8 h-8 flex-shrink-0" onClick={() => toggleColorPicker(index)} style={{ backgroundColor: player.color }} aria-label="Selecionar cor"/>
-                                    <Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0 text-red-500 hover:bg-red-100" onClick={() => deletePlayer(index)} aria-label="Remover jogador"><Trash className="h-4 w-4" /></Button>
+                                    <Input
+                                        type="text"
+                                        placeholder={`Jogador ${index + 1}`}
+                                        value={player.name}
+                                        maxLength={12}
+                                        onChange={(e) => handlePlayerChange(index, "name", e.target.value)}
+                                        className="flex-grow"
+                                    />
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="w-8 h-8 flex-shrink-0"
+                                        onClick={() => toggleColorPicker(index)}
+                                        style={{ backgroundColor: player.color }}
+                                        aria-label="Selecionar cor"
+                                    />
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="w-8 h-8 flex-shrink-0 text-red-500 hover:bg-red-100"
+                                        onClick={() => deletePlayer(index)}
+                                        aria-label="Remover jogador"
+                                    >
+                                        <Trash className="h-4 w-4" />
+                                    </Button>
                                 </div>
-                                {player.showColorPicker && (<div className="absolute z-20 mt-2 right-12 w-48 bg-white border rounded-md shadow-lg p-2 grid grid-cols-6 gap-1">{predefinedColors.map((color, idx) => (<button key={idx} aria-label={`Selecionar cor ${color}`} style={{ backgroundColor: color }} className={cn('w-6 h-6 rounded border', player.color === color ? 'ring-2 ring-offset-1 ring-black' : 'border-gray-300')} onClick={() => {handlePlayerChange(index, "color", color); toggleColorPicker(index);}}/>))}</div>)}
+                                {player.showColorPicker && (
+                                    <div className="absolute z-20 mt-2 right-12 w-48 bg-white border rounded-md shadow-lg p-2 grid grid-cols-6 gap-1">
+                                        {predefinedColors.map((color, idx) => (
+                                            <button
+                                                key={idx}
+                                                aria-label={`Selecionar cor ${color}`}
+                                                style={{ backgroundColor: color }}
+                                                className={cn('w-6 h-6 rounded border', player.color === color ? 'ring-2 ring-offset-1 ring-black' : 'border-gray-300')}
+                                                onClick={() => {handlePlayerChange(index, "color", color); toggleColorPicker(index);}}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
                     {playerInputs.length < 8 && (<Button onClick={addPlayerInput} variant="secondary" className="w-full">+ Adicionar Jogador</Button>)}
                 </div>
-                 {/* Baralhos Personalizados */}
-                 <div className="space-y-2">
+                {/* Baralhos Personalizados */}
+                <div className="space-y-2">
                     <h3 className="text-lg font-semibold text-gray-800">Baralhos Personalizados</h3>
                     {errorMessage && (<Alert variant="destructive"><AlertDescription>{errorMessage}</AlertDescription></Alert>)}
-                    <Input type="file" multiple accept=".js,.json" onChange={handleCustomDeckUpload} disabled={isLoading} className="text-sm"/>
+                    <Input
+                        type="file"
+                        multiple
+                        accept=".js,.json"
+                        onChange={handleCustomDeckUpload}
+                        disabled={isLoading}
+                        className="text-sm"
+                    />
                     {isLoading && <p className="text-sm text-blue-600">Carregando baralhos...</p>}
-                    {customDecks.length > 0 && (<ScrollArea className="h-32 border rounded-md p-2 bg-gray-50 space-y-2">{customDecks.map((deck) => (<div key={deck.id} className="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded"><span className="flex-1 text-sm truncate" title={`${deck.name} (${deck.cards.length} cartas)`}>{deck.name} ({deck.cards.length})</span><Button size="sm" variant={deck.used ? "default" : "outline"} onClick={() => toggleDeckUsage(deck.id)} className={cn('h-7 px-2 text-xs', deck.used ? 'bg-green-600 hover:bg-green-700' : '')}>{deck.used ? "Ativo" : "Usar"}</Button><Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:bg-red-100" onClick={() => removeDeck(deck.id)} aria-label={`Remover baralho ${deck.name}`}><Trash className="h-4 w-4" /></Button></div>))}</ScrollArea>)}
+                    {customDecks.length > 0 && (
+                        <ScrollArea className="h-32 border rounded-md p-2 bg-gray-50 space-y-2">
+                            {customDecks.map((deck) => (
+                                <div key={deck.id} className="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
+                                    <span className="flex-1 text-sm truncate" title={`${deck.name} (${deck.cards.length} cartas)`}>{deck.name} ({deck.cards.length})</span>
+                                    <Button
+                                        size="sm"
+                                        variant={deck.used ? "default" : "outline"}
+                                        onClick={() => toggleDeckUsage(deck.id)}
+                                        className={cn('h-7 px-2 text-xs', deck.used ? 'bg-green-600 hover:bg-green-700' : '')}
+                                    >
+                                        {deck.used ? "Ativo" : "Usar"}
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 w-7 p-0 text-red-500 hover:bg-red-100"
+                                        onClick={() => removeDeck(deck.id)}
+                                        aria-label={`Remover baralho ${deck.name}`}
+                                    >
+                                        <Trash className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
+                        </ScrollArea>
+                    )}
                     {customDecks.length === 0 && !isLoading && (<p className="text-sm text-gray-500 italic">Nenhum baralho personalizado.</p>)}
                 </div>
                 {/* Opções de Jogo */}
                 <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Opções</h3>
-                    <Button onClick={() => setOcultarCarta(!ocultarCarta)} variant="outline" className="w-full flex items-center justify-center space-x-2">{ocultarCarta ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}<span>{ocultarCarta ? "Ocultar Carta Ativado" : "Ocultar Carta Desativado"}</span></Button>
+                    <Button onClick={() => setOcultarCarta(!ocultarCarta)} variant="outline" className="w-full flex items-center justify-center space-x-2">
+                        {ocultarCarta ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        <span>{ocultarCarta ? "Ocultar Carta Ativado" : "Ocultar Carta Desativado"}</span>
+                    </Button>
                     <Button
                         onClick={cycleProbability}
                         className="w-full flex items-center justify-center space-x-2"
@@ -474,17 +565,18 @@ const EcoChallenge: React.FC = () => {
     const incrementarContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: cp.contadorDeEstrelas + 1 }); setMensagem("Estrela bônus adicionada."); };
     const diminuirContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: Math.max(0, cp.contadorDeEstrelas - 1) }); setMensagem("Estrela bônus removida."); };
     const incrementarRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: cp.rodadasPreso + 1 }); setMensagem("Rodada preso adicionada."); };
-    const diminuirRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: cp.rodadasPreso - 1 }); setMensagem("Rodada preso removida."); }; // Permite negativo
+    const diminuirRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: cp.rodadasPreso - 1 }); setMensagem("Rodada preso removida."); };
     const rolarDado = () => { if (isRolling) return; setIsRolling(true); setIsDieModalOpen(true); setRolledNumber(null); let rollCount = 0; const maxRolls = 15; const rollInterval = setInterval(() => { setRollingNumber(Math.floor(Math.random() * 6) + 1); rollCount++; if (rollCount >= maxRolls) { clearInterval(rollInterval); const finalNumber = Math.floor(Math.random() * 6) + 1; setRolledNumber(finalNumber); setRollingNumber(null); setIsRolling(false); } }, 80); };
     const handleLongPressStart = (action: () => void) => { longPressTimeout.current = setTimeout(() => { action(); }, 800); };
     const handleLongPressEnd = () => { if (longPressTimeout.current) { clearTimeout(longPressTimeout.current); longPressTimeout.current = null; } };
 
+    // --- Renderização ---
     if (!gameState) {
-         const savedStateRaw = typeof window !== "undefined" ? localStorage.getItem("estadoEcoChallenge") : null;
-         let savedState = null; try { savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; } catch {}
-         const hasSaved = !!(savedState && savedState.jogoIniciado);
-         const initialPlayers = savedState?.players || []; const initialCategorias = savedState?.categoriasSelecionadas || [];
-         const initialOcultar = savedState?.ocultarCarta ?? true; const initialProbIndex = savedState?.probabilityIndex ?? 0;
+        const savedStateRaw = typeof window !== "undefined" ? localStorage.getItem("estadoEcoChallenge") : null;
+        let savedState = null; try { savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; } catch {}
+        const hasSaved = !!(savedState && savedState.jogoIniciado);
+        const initialPlayers = savedState?.players || []; const initialCategorias = savedState?.categoriasSelecionadas || [];
+        const initialOcultar = savedState?.ocultarCarta ?? true; const initialProbIndex = savedState?.probabilityIndex ?? 0;
         return (<TelaInicial onStartGame={(initialState) => { if (initialState) { setGameState(initialState as GameState); } }} categoriasDisponiveis={Array.from(new Set(cartasOriginais.flatMap(c => c.categorias || []))).sort()} initialCategoriasSelecionadas={initialCategorias} initialPlayers={initialPlayers} initialOcultarCarta={initialOcultar} initialProbabilityIndex={initialProbIndex} hasSavedGame={hasSaved} />);
     }
     const { players, currentPlayerId, ocultarCarta } = gameState;
@@ -498,7 +590,7 @@ const EcoChallenge: React.FC = () => {
         if (!mensagem) return "default"; const lowerMsg = mensagem.toLowerCase();
         if (lowerMsg.includes('incorreto') || lowerMsg.includes('desvantagem') || lowerMsg.includes('tempo esgotado')) return "destructive";
         if (lowerMsg.includes('correto') || lowerMsg.includes('vantagem')) return "default";
-        return "default";
+        return "default"; // Default para mensagens informativas (azul será aplicado via classe)
     };
     const isInfoAlert = !mensagem.toLowerCase().includes('correto') && !mensagem.toLowerCase().includes('vantagem') && !mensagem.toLowerCase().includes('incorreto') && !mensagem.toLowerCase().includes('desvantagem') && !mensagem.toLowerCase().includes('tempo esgotado');
 
@@ -516,7 +608,10 @@ const EcoChallenge: React.FC = () => {
                                 size="sm"
                                 variant={mostrarSomentePerguntas ? "secondary" : "outline"}
                                 title={mostrarSomentePerguntas ? "Mostrar todas as cartas" : "Mostrar somente perguntas"}
-                                className={cn( "flex-shrink-0", mostrarSomentePerguntas && "ring-2 ring-offset-1 ring-blue-500 bg-blue-100 border-blue-300" )}
+                                className={cn(
+                                    "flex-shrink-0 h-9 w-9 p-0", // Tamanho consistente
+                                    mostrarSomentePerguntas && "ring-2 ring-offset-1 ring-blue-500 bg-blue-100 border-blue-300"
+                                )}
                             >
                                 <Filter className="h-4 w-4" />
                             </Button>
@@ -549,15 +644,29 @@ const EcoChallenge: React.FC = () => {
                         </div>
                     )}
                     {(!ocultarCarta || cartaRevelada) ? (
-                        <ScrollArea className="h-36 md:h-48 rounded-md border p-3 mt-2 bg-white/80">
-                            <div className="text-sm prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }}/>
+                        <ScrollArea className="h-40 md:h-56 rounded-md border p-3 mt-2 bg-white/80"> {/* Altura aumentada */}
+                            <div
+                                className="text-sm prose prose-sm max-w-none"
+                                dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }}
+                            />
                         </ScrollArea>
                     ) : (
-                        <div className="h-36 md:h-48 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200">
+                        <div className="h-40 md:h-56 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200"> {/* Altura aumentada */}
                             <EyeOff className="h-8 w-8 text-gray-500" />
                             <p className="text-sm text-gray-600">Carta Oculta</p>
                             {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>}
-                            <Button onClick={rolarDado} variant="outline" size="sm" className="mt-2 bg-white" onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}>
+                            <Button
+                                onClick={rolarDado}
+                                variant="outline"
+                                size="sm"
+                                className="mt-2 bg-white"
+                                onMouseDown={() => handleLongPressStart(rolarDado)}
+                                onMouseUp={handleLongPressEnd}
+                                onMouseLeave={handleLongPressEnd}
+                                onTouchStart={() => handleLongPressStart(rolarDado)}
+                                onTouchEnd={handleLongPressEnd}
+                                onTouchCancel={handleLongPressEnd}
+                            >
                                 <Dice6 className="h-4 w-4 mr-1" /> Rolar Dado
                             </Button>
                         </div>
@@ -592,7 +701,7 @@ const EcoChallenge: React.FC = () => {
                 )}
 
                 <CardFooter className="flex flex-col items-center pt-4 border-t bg-gray-50/50 rounded-b-lg">
-                    {/* Botões de Ação Primários (Tamanho ajustado h-9) */}
+                    {/* Botões de Ação Primários (Tamanho h-9 px-2.5) */}
                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
                         <Button onClick={toggleFontes} variant="outline" disabled={!cartaAtual.fontes || cartaAtual.fontes.length === 0 || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <BookOpen className="h-4 w-4" /></Button>
                         <Button onClick={pularPergunta} variant={currentPlayer.pulosDisponiveis > 0 ? "secondary" : "outline"} disabled={currentPlayer.pulosDisponiveis === 0 || !tiposPergunta.includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <SkipForward className="h-4 w-4" /> </Button>
@@ -601,7 +710,7 @@ const EcoChallenge: React.FC = () => {
                         <Button onClick={resetarContadoresJogador} variant="outline" className="h-9 px-2.5"> <RotateCcw className="h-4 w-4" /> </Button>
                         <Button onClick={voltarTelaInicial} variant="outline" className="h-9 px-2.5"> <Home className="h-4 w-4" /> </Button>
                     </div>
-                    {/* Botões de Ajuste Manual (Tamanho ajustado h-9 e ícones h-5) */}
+                    {/* Botões de Ajuste Manual (Tamanho h-9 px-2.5 e ícones h-5) */}
                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
                         <Button onClick={diminuirAcertos} variant="outline" className="h-9 px-2.5" title="Diminuir Acertos"><ThumbsUp className="h-5 w-5 text-green-500 transform scale-x-[-1]" /></Button>
                         <Button onClick={diminuirErros} variant="outline" className="h-9 px-2.5" title="Diminuir Erros"><ThumbsDown className="h-5 w-5 text-red-500 transform scale-x-[-1]" /></Button>
@@ -613,18 +722,25 @@ const EcoChallenge: React.FC = () => {
                     {/* Botão Principal */}
                     <div className="w-full mb-3">
                         {ocultarCarta && !cartaRevelada ? (
-                            <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white"> <Eye className="mr-2 h-4 w-4"/> Revelar Carta </Button>
+                            <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                                <Eye className="mr-2 h-4 w-4"/> Revelar Carta
+                            </Button>
                         ) : !respondido ? (
                             <Button
                                 onClick={isVerificarDisabled() ? undefined : verificarResposta}
-                                className={cn("w-full bg-green-600 hover:bg-green-700 text-white", isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400")}
-                                disabled={isVerificarDisabled()} // Mantém controle visual
-                                onMouseDown={() => handleLongPressStart(rolarDado)} // Sempre escuta para long press
+                                className={cn(
+                                    "w-full bg-green-600 hover:bg-green-700 text-white",
+                                    isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400"
+                                )}
+                                // disabled={isVerificarDisabled()} // Remover 'disabled' para permitir eventos de mouse/touch
+                                onMouseDown={() => handleLongPressStart(rolarDado)} // Long press sempre escuta
                                 onMouseUp={handleLongPressEnd}
                                 onMouseLeave={handleLongPressEnd}
                                 onTouchStart={() => handleLongPressStart(rolarDado)}
                                 onTouchEnd={handleLongPressEnd}
                                 onTouchCancel={handleLongPressEnd}
+                                aria-disabled={isVerificarDisabled()} // Usar aria-disabled para acessibilidade
+                                tabIndex={isVerificarDisabled() ? -1 : 0} // Controla foco
                             >
                                 <Check className="mr-2 h-4 w-4"/> Verificar
                             </Button>
@@ -640,11 +756,9 @@ const EcoChallenge: React.FC = () => {
                             variant={getAlertVariant()}
                             className={cn(
                                 'text-center text-sm font-semibold mb-3 w-full',
-                                // Aplica azul se variant="default" e for informativa
-                                getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800',
-                                // Cores padrão de shadcn para default (verde) e destructive (vermelho)
-                                getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800',
-                                getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800'
+                                getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800', // Azul para info
+                                getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800', // Verde para correto/vantagem
+                                getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800' // Vermelho para erro/desvantagem
                             )}
                         >
                             <AlertDescription>{mensagem}</AlertDescription>
@@ -653,7 +767,7 @@ const EcoChallenge: React.FC = () => {
                     {/* Progresso e Stats */}
                     <div className="w-full">
                         <Progress value={currentPlayer.progresso} className="h-2.5 [&>*]:bg-orange-500" />
-                        <div className="flex justify-between items-center w-full mt-2 text-sm text-gray-700 flex-wrap gap-x-4 gap-y-1 font-semibold"> {/* Fonte Stats Aumentada */}
+                        <div className="flex justify-between items-center w-full mt-2 text-sm text-gray-700 flex-wrap gap-x-4 gap-y-1 font-semibold"> {/* Stats maiores */}
                             <span className="flex items-center" title="Rodadas Preso"><ChevronUp className="h-4 w-4 text-purple-500 mr-1"/>{currentPlayer.rodadasPreso}</span>
                             <span className="flex items-center" title="Estrelas Fixas"><Award className="h-4 w-4 text-yellow-600 mr-1"/>{currentPlayer.fixedStars}</span>
                             <span className="flex items-center" title="Estrelas Bônus"><Star className="h-4 w-4 text-yellow-500 mr-1"/>{currentPlayer.contadorDeEstrelas}</span>
@@ -691,13 +805,13 @@ const EcoChallenge: React.FC = () => {
                     const isSelected = selecionado === op.id;
                     const isEliminated = opcoesEliminadas.includes(op.id);
                     const isWrongSelection = respondido && isSelected && !isCorrect;
-                    let btnClass = "border-gray-300 text-gray-900"; // Default com texto escuro
+                    let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default com texto escuro e legível
                     if (respondido) {
                         if (isCorrect) btnClass = "bg-green-100 border-green-400 hover:bg-green-200 text-green-900";
                         else if (isSelected) btnClass = "bg-red-100 border-red-400 hover:bg-red-200 text-red-900";
-                        // else btnClass = "border-gray-300 text-gray-700"; // Mantem texto legível
+                        else btnClass = "border-gray-300 text-gray-500"; // Não selecionada e incorreta (texto cinza)
                     } else if (isSelected) { btnClass = "bg-blue-100 border-blue-400 text-blue-900"; }
-                    return ( <Button key={op.id} onClick={() => handleSelecao(op.id)} variant="outline" className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} </Button> );
+                    return ( <Button key={op.id} onClick={() => handleSelecao(op.id)} variant={"outline"} className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} </Button> );
                 });
              case "MultiplaEscolha":
                 return cartaAtual.opcoes.map((op) => {
@@ -706,8 +820,8 @@ const EcoChallenge: React.FC = () => {
                     const isEliminated = opcoesEliminadas.includes(op.id);
                     const isWrongSelection = respondido && isSelected && !isCorrect;
                     const missedCorrect = respondido && isCorrect && !isSelected;
-                    let btnClass = "border-gray-300 text-gray-900"; // Default
-                    if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; /*else btnClass = "border-gray-300 text-gray-700";*/ } // Texto legível
+                    let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default
+                    if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; else btnClass = "border-gray-300 text-gray-500"; } // Errada não marcada (cinza)
                     else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
                     return ( <Button key={op.id} onClick={() => handleSelecaoMultipla(op.id)} variant="outline" className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <div className={`w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center ${isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white'}`}>{isSelected && <Check className="w-3 h-3 text-white" />}</div> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600">✓</span>} </Button> );
                 });
@@ -718,8 +832,8 @@ const EcoChallenge: React.FC = () => {
                     const correctIndex = Array.isArray(cOrdem.respostaCorreta) ? cOrdem.respostaCorreta.indexOf(op.id) + 1 : null;
                     const isCorrectOrder = respondido && isSelected && selectionIndex === correctIndex; const isWrongOrder = respondido && isSelected && selectionIndex !== correctIndex;
                     const isCorrectOptionOverall = respondido && correctIndex !== null && correctIndex > 0;
-                    let btnClass = "border-gray-300 text-gray-900"; // Default
-                    if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; } // Texto legível
+                    let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default
+                    if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; } // Não faz parte (cinza)
                     else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
                     return ( <Button key={op.id} onClick={() => handleSelecaoOrdem(op.id)} variant="outline" className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass )} disabled={respondido}> {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)} <span className="flex-1">{op.texto}</span> {respondido && isCorrectOptionOverall && (<span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${ isCorrectOrder ? 'bg-green-500 text-white' : isWrongOrder ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}`}>{correctIndex}</span>)} {isWrongOrder && selectionIndex !== null && <span className="text-xs text-red-600 ml-1">(Sua: {selectionIndex})</span>} </Button> );
                 });
