@@ -1452,7 +1452,7 @@ const manejo = [
     "tipo": "CompletarFrase",
     "titulo": "Termo Ambiental Oculto",
     "pergunta": "Reorganize os fragmentos para formar um termo importante relacionado à variedade de vida na Terra:",
-    "fraseIncompleta": "O termo é: __1____2____3____4____5____6____7____8____9____10____11____12__", // 12 letras
+    "fraseIncompleta": "O termo é: __1____2____3____4____5____6____7____8____9____10____11____12____13____14__", // 12 letras
     "fragmentos": [
       { "id": 1, "texto": "D" }, { "id": 2, "texto": "I" }, { "id": 3, "texto": "V" },
       { "id": 4, "texto": "E" }, { "id": 5, "texto": "R" }, { "id": 6, "texto": "S" },
@@ -1460,7 +1460,7 @@ const manejo = [
       { "id": 10, "texto": "D" }, { "id": 11, "texto": "E" }, { "id": 12, "texto": "B" },
       { "id": 13, "texto": "I" }, { "id": 14, "texto": "O" } // Letras extras para confundir
     ],
-    "respostaCorreta": [12, 2, 4, 3, 4, 5, 6, 7, 8, 9, 10, 4], // B I O D I V E R S I D A D E
+    "respostaCorreta": [12, 13, 14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // B I O D I V E R S I D A D E
     "opcoes": [],
     "dificuldade": "dificil",
     "categorias": ["Criat__QuebraCabeca"],
