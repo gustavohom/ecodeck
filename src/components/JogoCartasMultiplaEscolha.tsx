@@ -25,8 +25,8 @@ import testCards from "./.test/test_card";
 
 // Primeiro, carregue os arrays brutos
 const manejoPlantadas_raw = manejoPlantadas;
-const manejoNativas_raw = manejoNativas;
-const ecologiaFlorestal_raw = ecologiaFlorestal;
+//const manejoNativas_raw = manejoNativas;
+//const ecologiaFlorestal_raw = ecologiaFlorestal;
 const estrelasAliens_raw = estrelasAliens;
 const testCards_raw = testCards;
 
@@ -34,10 +34,10 @@ const testCards_raw = testCards;
 // Agora, combine e faça a asserção de tipo, garantindo IDs únicos
 const cartasOriginais: Carta[] = [
     ...(manejoPlantadas_raw as Carta[]),
-    ...(manejoNativas_raw as Carta[]),
-    ...(ecologiaFlorestal_raw as Carta[]),
+//    ...(manejoNativas_raw as Carta[]),
+//    ...(ecologiaFlorestal_raw as Carta[]),
     ...(estrelasAliens_raw as Carta[]),
-    ...(testCards_raw as Carta[]),
+//    ...(testCards_raw as Carta[]),
 ].map((card, index) => ({
     // Garante que cada carta tenha um ID único, mesmo que venha sem um
     ...card,
