@@ -644,14 +644,14 @@ const EcoChallenge: React.FC = () => {
                         </div>
                     )}
                     {(!ocultarCarta || cartaRevelada) ? (
-                        <ScrollArea className="h-58 md:h-74 rounded-md border p-3 mt-2 bg-white/80"> {/* Altura aumentada */}
+                        <ScrollArea className="h-48 md:h-64 rounded-md border p-3 mt-2 bg-white/80"> {/* Altura aumentada */}
                             <div
                                 className="text-sm prose prose-sm max-w-none"
                                 dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }}
                             />
                         </ScrollArea>
                     ) : (
-                        <div className="h-58 md:h-74 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200"> {/* Altura aumentada */}
+                        <div className="h-48 md:h-64 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200"> {/* Altura aumentada */}
                             <EyeOff className="h-8 w-8 text-gray-500" />
                             <p className="text-sm text-gray-600">Carta Oculta</p>
                             {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>}
