@@ -209,7 +209,7 @@ const manejo = [
     "id": "ex_img_simples_1",
     "tipo": "Pergunta",
     "titulo": "Exemplo: Imagem Simples",
-    "pergunta": "A imagem abaixo mostra um exemplo de qual tipo de poluição?<br><img src=\"/images/rio_poluido.jpg\" alt=\"Rio poluído com lixo\" class=\"img-fluid my-2 rounded border\">", // <-- SUBSTITUA CAMINHO
+    "pergunta": "A imagem abaixo mostra um exemplo de qual tipo de poluição?<br><img src=\"https://static.escolakids.uol.com.br/2019/09/arvore.jpg\" alt=\"Rio poluído com lixo\" class=\"img-fluid my-2 rounded border\">", // <-- SUBSTITUA CAMINHO
     "opcoes": [
       { "id": 1, "texto": "Poluição Sonora" },
       { "id": 2, "texto": "Poluição Visual" },
@@ -269,7 +269,7 @@ const manejo = [
     "id": "html_ex_2",
     "tipo": "Pergunta",
     "titulo": "HTML: Imagem Simples",
-    "pergunta": "A imagem abaixo representa qual conceito ecológico?<br><img src=\"/images/pegada_ecologica.png\" alt=\"Símbolo da pegada ecológica\" style=\"display: block; margin: 10px auto; width: 100px; height: auto; border: 1px solid #ccc; padding: 5px;\" class=\"img-fluid rounded\">",
+    "pergunta": "A imagem abaixo representa qual conceito ecológico?<br><img src=\"https://static.escolakids.uol.com.br/2019/09/arvore.jpg\" alt=\"Símbolo da pegada ecológica\" style=\"display: block; margin: 10px auto; width: 100px; height: auto; border: 1px solid #ccc; padding: 5px;\" class=\"img-fluid rounded\">",
     "opcoes": [
       { "id": 1, "texto": "Ciclo da Água" },
       { "id": 2, "texto": "Pegada Ecológica" },
@@ -371,7 +371,7 @@ const manejo = [
     "id": "html_ex_7",
     "tipo": "Vantagem",
     "titulo": "HTML: Texto Estilizado",
-    "pergunta": `Parabéns! Você adotou um animal de um abrigo. <strong style=\"color: green;\">Ações como essa fazem a diferença!</strong>`,
+    "pergunta": "Parabéns! Você adotou um animal de um abrigo. <strong style=\"color: green;\">Ações como essa fazem a diferença!</strong>",
     "opcoes": [
       { "id": 1, "texto": "Receber Recompensa (+1 Pulo)" }
     ],
@@ -407,7 +407,7 @@ const manejo = [
     "id": "html_ex_9",
     "tipo": "ContraTempo",
     "titulo": "HTML: Combinado",
-    "pergunta": "Rápido! A imagem mostra um painel solar. Qual efeito ele utiliza para gerar eletricidade?<br><img src=\"/images/painel_solar.jpg\" alt=\"Painel Solar\" class=\"img-fluid my-2 rounded border\" style=\"max-width: 150px; display:block; margin:auto;\"><br><b>Pista:</b> Envolve fótons!",
+    "pergunta": "Rápido! A imagem mostra um painel solar. Qual efeito ele utiliza para gerar eletricidade?<br><img src=\"https://static.escolakids.uol.com.br/2019/09/arvore.jpg\" alt=\"Painel Solar\" class=\"img-fluid my-2 rounded border\" style=\"max-width: 150px; display:block; margin:auto;\"><br><b>Pista:</b> Envolve fótons!",
     "opcoes": [
       { "id": 1, "texto": "Efeito Estufa" },
       { "id": 2, "texto": "Efeito Joule" },
