@@ -1,612 +1,264 @@
-const ecologia_forestal_cards = [
+[
+  // --- Exemplos por Tipo de Carta ---
   {
-    "id": "json_pergunta_1",
+    "id": "ex_pergunta_1",
     "tipo": "Pergunta",
-    "titulo": "Principal Gás Estufa",
-    "pergunta": "Qual é o principal gás de efeito estufa liberado pela queima de combustíveis fósseis?",
+    "titulo": "Exemplo: Pergunta Simples",
+    "pergunta": "Qual a cor primária resultante da mistura de azul e amarelo?",
     "opcoes": [
-      { "id": 1, "texto": "Oxigênio (O₂)" },
-      { "id": 2, "texto": "Nitrogênio (N₂)" },
-      { "id": 3, "texto": "Dióxido de Carbono (CO₂)" },
-      { "id": 4, "texto": "Hidrogênio (H₂)" }
+      { "id": 1, "texto": "Vermelho" },
+      { "id": 2, "texto": "Verde" },
+      { "id": 3, "texto": "Laranja" },
+      { "id": 4, "texto": "Roxo" }
     ],
-    "respostaCorreta": 3,
+    "respostaCorreta": 2,
     "dificuldade": "facil",
-    "categorias": ["1"],
-    "fontes": ["IPCC Report"],
-    "vantagem": "Correto! O CO₂ é um grande vilão.",
-    "desvantagem": "Incorreto. O principal é o CO₂.",
-    "dica": "Pense no gás que mais falamos sobre mudanças climáticas."
+    "categorias": ["Exemplo_Pergunta"],
+    "fontes": ["Teoria das Cores Básica"],
+    "vantagem": "Correto, é verde!",
+    "desvantagem": "Incorreto, a mistura dá verde.",
+    "dica": "Pense nas cores das folhas das árvores."
   },
-
-  // --- MultiplaEscolha ---
   {
-    "id": "json_multi_1",
+    "id": "ex_multi_1",
     "tipo": "MultiplaEscolha",
-    "titulo": "Energias Renováveis",
-    "pergunta": "Quais das seguintes são fontes de energia renovável?",
+    "titulo": "Exemplo: Múltipla Escolha",
+    "pergunta": "Selecione os itens que normalmente são recicláveis na coleta seletiva comum:",
     "opcoes": [
-      { "id": 1, "texto": "Energia Solar" },
-      { "id": 2, "texto": "Gás Natural" },
-      { "id": 3, "texto": "Energia Eólica" },
-      { "id": 4, "texto": "Carvão Mineral" },
-      { "id": 5, "texto": "Energia Geotérmica" }
+      { "id": 1, "texto": "Garrafa PET" },
+      { "id": 2, "texto": "Papelão limpo" },
+      { "id": 3, "texto": "Pilha comum" },
+      { "id": 4, "texto": "Lata de alumínio" },
+      { "id": 5, "texto": "Espelho quebrado" }
     ],
-    "respostaCorreta": [1, 3, 5],
+    "respostaCorreta": [1, 2, 4],
     "dificuldade": "normal",
-    "categorias": ["2"],
-    "fontes": ["Ministério de Minas e Energia"],
-    "vantagem": "Excelente! Você conhece as fontes limpas.",
-    "desvantagem": "Algumas dessas fontes não são renováveis.",
-    "dica": "Renovável significa que a fonte se regenera naturalmente."
+    "categorias": ["Exemplo_MultiplaEscolha"],
+    "fontes": ["Manual de Reciclagem"],
+    "vantagem": "Boa separação!",
+    "desvantagem": "Alguns itens aí não vão para a reciclagem comum.",
+    "dica": "Pilhas e espelhos geralmente têm descarte especial."
   },
-
-  // --- Ordem ---
   {
-    "id": "json_ordem_1",
+    "id": "ex_ordem_1",
     "tipo": "Ordem",
-    "titulo": "Os 5 R's da Sustentabilidade",
-    "pergunta": "Coloque os 5 R's da sustentabilidade na ordem geralmente recomendada (do mais ao menos prioritário):",
+    "titulo": "Exemplo: Ordem Cronológica",
+    "pergunta": "Ordene as etapas básicas do tratamento de água:",
     "opcoes": [
-      { "id": 1, "texto": "Reciclar" },
-      { "id": 2, "texto": "Repensar" },
-      { "id": 3, "texto": "Reutilizar" },
-      { "id": 4, "texto": "Recusar" },
-      { "id": 5, "texto": "Reduzir" }
+      { "id": 1, "texto": "Filtração" },
+      { "id": 2, "texto": "Decantação" },
+      { "id": 3, "texto": "Cloração/Desinfecção" },
+      { "id": 4, "texto": "Coagulação/Floculação" }
     ],
-    "respostaCorreta": [2, 4, 5, 3, 1], // Repensar, Recusar, Reduzir, Reutilizar, Reciclar
-    "dificuldade": "dificil",
-    "categorias": ["3"],
-    "fontes": ["Instituto Akatu"],
-    "vantagem": "Ordem perfeita! A prioridade é a chave.",
-    "desvantagem": "A ordem está um pouco fora de lugar.",
-    "dica": "O primeiro passo é questionar a necessidade."
+    "respostaCorreta": [4, 2, 1, 3],
+    "dificuldade": "normal",
+    "categorias": ["Exemplo_Ordem"],
+    "fontes": ["Saneamento Básico"],
+    "vantagem": "Processo correto!",
+    "desvantagem": "A ordem das etapas está trocada.",
+    "dica": "Primeiro agrupa a sujeira, depois ela desce..."
   },
-
-  // --- Vantagem ---
   {
-    "id": "json_vantagem_1",
+    "id": "ex_vantagem_1",
     "tipo": "Vantagem",
-    "titulo": "Compostagem Caseira",
-    "pergunta": "Você iniciou uma composteira em casa! Isso reduz o lixo orgânico e gera adubo.",
+    "titulo": "Exemplo: Vantagem",
+    "pergunta": "Você participou de um mutirão de limpeza na praia!",
     "opcoes": [
-      { "id": 1, "texto": "Ótimo! Ganhe 1 Pulo extra." }
+      { "id": 1, "texto": "Que legal! Avance 20 de Progresso." }
     ],
-    "respostaCorreta": [1], // O jogador apenas clica para confirmar
+    "respostaCorreta": [1],
     "dificuldade": "facil",
-    "categorias": ["4"],
+    "categorias": ["Exemplo_Vantagem"],
     "fontes": [],
-    "vantagem": "Recebeu 1 Pulo!", // Efeito a ser aplicado pelo jogo
+    "vantagem": "Ação recompensada com +20 Progresso!",
     "desvantagem": "",
     "dica": ""
   },
-
-  // --- Desvantagem ---
   {
-    "id": "json_desvantagem_1",
+    "id": "ex_desvantagem_1",
     "tipo": "Desvantagem",
-    "titulo": "Vazamento de Óleo",
-    "pergunta": "Um pequeno vazamento de óleo do seu carro não foi consertado e contaminou o solo.",
+    "titulo": "Exemplo: Desvantagem",
+    "pergunta": "Eita! Você esqueceu a luz acesa ao sair de casa por um dia inteiro.",
     "opcoes": [
-      { "id": 1, "texto": "Que pena! Perca 15 de Progresso." }
+      { "id": 1, "texto": "Ops! Fique uma rodada preso." }
     ],
-    "respostaCorreta": [], // Nenhuma opção é "correta", apenas confirmação
+    "respostaCorreta": [],
     "dificuldade": "facil",
-    "categorias": ["5"],
+    "categorias": ["Exemplo_Desvantagem"],
     "fontes": [],
     "vantagem": "",
-    "desvantagem": "Perdeu 15 de Progresso.", // Efeito a ser aplicado
+    "desvantagem": "Desperdício de energia! Fique 1 rodada preso.",
     "dica": ""
   },
-
-  // --- Outras ---
   {
-    "id": "json_outras_1",
+    "id": "ex_outras_1",
     "tipo": "Outras",
-    "titulo": "Evento Climático Extremo",
-    "pergunta": "Uma enchente atingiu a região. Você ajudou os vizinhos ou ficou em casa?",
+    "titulo": "Exemplo: Outras (Escolha)",
+    "pergunta": "Você encontra uma carteira perdida. O que você faz?",
     "opcoes": [
-      { "id": 1, "texto": "Ajudei os vizinhos (Ganhe 1 Estrela Bônus)" },
-      { "id": 2, "texto": "Fiquei em casa (Sem efeito)" }
+      { "id": 1, "texto": "Procuro o dono ou entrego às autoridades (+1 Estrela Fixa)" },
+      { "id": 2, "texto": "Pego o dinheiro e deixo a carteira (-20 Progresso)" }
     ],
-    "respostaCorreta": [1, 2], // Ambas são "válidas" no sentido de escolha
+    "respostaCorreta": [1], // Define qual é a ação "correta" ou esperada
     "dificuldade": "normal",
-    "categorias": ["6"],
+    "categorias": ["Exemplo_Outras"],
     "fontes": [],
-    "vantagem": "Ação comunitária recompensada!", // Se escolher 1
-    "desvantagem": "A segurança é importante.", // Se escolher 2
-    "dica": "Solidariedade fortalece a resiliência."
+    "vantagem": "Honestidade recompensada!", // Se escolher 1
+    "desvantagem": "Ação desonesta tem consequências.", // Se escolher 2
+    "dica": "Faça a coisa certa."
   },
-
-  // --- ContraTempo ---
   {
-    "id": "json_ct_1",
+    "id": "ex_ct_1",
     "tipo": "ContraTempo",
-    "titulo": "Coleta Seletiva Rápida",
-    "pergunta": "Em qual lixeira se descarta uma garrafa PET?",
+    "titulo": "Exemplo: Contra o Tempo",
+    "pergunta": "Rápido! Qual destes animais NÃO é um mamífero?",
     "opcoes": [
-      { "id": 1, "texto": "Azul (Papel)" },
-      { "id": 2, "texto": "Amarelo (Metal)" },
-      { "id": 3, "texto": "Verde (Vidro)" },
-      { "id": 4, "texto": "Vermelho (Plástico)" }
+      { "id": 1, "texto": "Baleia" },
+      { "id": 2, "texto": "Morcego" },
+      { "id": 3, "texto": "Pinguim" },
+      { "id": 4, "texto": "Ornitorrinco" }
     ],
-    "respostaCorreta": 4,
-    "tempoLimite": 10, // 10 segundos
+    "respostaCorreta": 3,
+    "tempoLimite": 12,
     "dificuldade": "facil",
-    "categorias": ["7"],
-    "fontes": ["CONAMA"],
-    "vantagem": "Rápido e correto na separação!",
-    "desvantagem": "Tempo esgotado ou lixeira errada!",
-    "dica": "Lembre-se das cores padrão da coleta seletiva."
+    "categorias": ["Exemplo_ContraTempo"],
+    "fontes": ["Biologia Animal"],
+    "vantagem": "Veloz e correto!",
+    "desvantagem": "Tempo esgotado ou resposta errada.",
+    "dica": "Pense em aves que não voam."
   },
-
-  // --- RelacionarColunas ---
   {
-    "id": "json_rc_1",
+    "id": "ex_rc_1",
     "tipo": "RelacionarColunas",
-    "titulo": "Biomas Brasileiros",
-    "pergunta": "Associe o Bioma à sua característica principal:",
+    "titulo": "Exemplo: Relacionar Colunas",
+    "pergunta": "Associe o resíduo ao seu tempo aproximado de decomposição:",
     "colunaA": [
-      { "id": 1, "texto": "Amazônia" },
-      { "id": 2, "texto": "Cerrado" },
-      { "id": 3, "texto": "Caatinga" },
-      { "id": 4, "texto": "Mata Atlântica" }
+      { "id": 1, "texto": "Papel" },
+      { "id": 2, "texto": "Lata de Alumínio" },
+      { "id": 3, "texto": "Garrafa Plástica" },
+      { "id": 4, "texto": "Vidro" }
     ],
     "colunaB": [
-      { "id": 10, "texto": "Savana com árvores tortuosas" },
-      { "id": 11, "texto": "Floresta tropical úmida e densa" },
-      { "id": 12, "texto": "Região semiárida com plantas adaptadas à seca" },
-      { "id": 13, "texto": "Floresta costeira com alta biodiversidade" }
+      { "id": 10, "texto": "Centenas de anos (200-500)" },
+      { "id": 11, "texto": "Tempo indeterminado (milhares de anos)" },
+      { "id": 12, "texto": "Meses (3-6 meses)" },
+      { "id": 13, "texto": "Muito longo (mais de 400 anos)" }
     ],
     "respostaCorreta": [
-      { "aId": 1, "bId": 11 },
+      { "aId": 1, "bId": 12 },
       { "aId": 2, "bId": 10 },
-      { "aId": 3, "bId": 12 },
-      { "aId": 4, "bId": 13 }
+      { "aId": 3, "bId": 13 },
+      { "aId": 4, "bId": 11 }
     ],
     "opcoes": [],
     "dificuldade": "normal",
-    "categorias": ["8"],
-    "fontes": ["IBGE"],
-    "vantagem": "Você conhece bem os biomas do Brasil!",
-    "desvantagem": "Algumas associações estão incorretas.",
-    "dica": "Pense nas paisagens típicas de cada região."
+    "categorias": ["Exemplo_RelacionarColunas"],
+    "fontes": ["Dados Ambientais"],
+    "vantagem": "Associações corretas!",
+    "desvantagem": "Tempos de decomposição misturados.",
+    "dica": "Alguns materiais duram muito mais que outros."
   },
-
-  // --- PontoCerto ---
   {
-    "id": "json_pc_1",
+    "id": "ex_pc_1",
     "tipo": "PontoCerto",
-    "titulo": "Partes da Árvore",
-    "pergunta": "Clique na Copa da árvore (parte superior com folhas e galhos).",
-    "imagemURL": "/images/diagrama_arvore.png", // <-- SUBSTITUA PELO CAMINHO REAL DA SUA IMAGEM
+    "titulo": "Exemplo: Ponto Certo",
+    "pergunta": "Clique no símbolo universal da reciclagem na imagem abaixo.",
+    "imagemURL": "/images/simbolos_variados.png", // <-- SUBSTITUA PELO CAMINHO REAL
     "zonasClicaveis": [
-      { "id": 1, "x": 0.1, "y": 0.05, "largura": 0.8, "altura": 0.45, "descricao": "Copa" }, // Correta
-      { "id": 2, "x": 0.4, "y": 0.5, "largura": 0.2, "altura": 0.4, "descricao": "Tronco" },
-      { "id": 3, "x": 0.2, "y": 0.9, "largura": 0.6, "altura": 0.1, "descricao": "Raízes (solo)" }
+      // Coordenadas e dimensões como fração da imagem (0 a 1)
+      { "id": 1, "x": 0.1, "y": 0.1, "largura": 0.3, "altura": 0.3, "descricao": "Símbolo Reciclagem" }, // Correta
+      { "id": 2, "x": 0.6, "y": 0.1, "largura": 0.3, "altura": 0.3, "descricao": "Símbolo Inflamável" },
+      { "id": 3, "x": 0.1, "y": 0.6, "largura": 0.3, "altura": 0.3, "descricao": "Símbolo Orgânico" },
+      { "id": 4, "x": 0.6, "y": 0.6, "largura": 0.3, "altura": 0.3, "descricao": "Símbolo Radioativo" }
     ],
     "respostaCorreta": 1,
     "opcoes": [],
     "dificuldade": "facil",
-    "categorias": ["9"],
-    "fontes": ["Livro de Biologia"],
-    "vantagem": "Exato! Bem na copa.",
-    "desvantagem": "O clique foi um pouco fora da copa.",
-    "dica": "É a parte mais alta e cheia de folhas."
+    "categorias": ["Exemplo_PontoCerto"],
+    "fontes": ["Sinalização Universal"],
+    "vantagem": "Clicou no símbolo certo!",
+    "desvantagem": "Este é outro símbolo.",
+    "dica": "São três setas formando um ciclo."
   },
-
-  // --- CompletarFrase ---
    {
-    "id": "json_cf_1",
+    "id": "ex_cf_1",
     "tipo": "CompletarFrase",
-    "titulo": "Fotossíntese",
-    "pergunta": "Complete a frase sobre a fotossíntese:",
-    "fraseIncompleta": "As plantas usam __1__, __2__ e luz solar para produzir __3__ (seu alimento) e liberar __4__.",
+    "titulo": "Exemplo: Completar Frase",
+    "pergunta": "Complete a frase sobre o ciclo da água:",
+    "fraseIncompleta": "A água __1__ dos rios e oceanos, forma __2__ através da condensação, e retorna à Terra como __3__.",
     "fragmentos": [
-      { "id": 1, "texto": "água" },
-      { "id": 2, "texto": "oxigênio (O₂)" },
-      { "id": 3, "texto": "dióxido de carbono (CO₂)" },
-      { "id": 4, "texto": "glicose" },
-      { "id": 5, "texto": "nitrogênio (N₂)" }
+      { "id": 1, "texto": "precipitação" },
+      { "id": 2, "texto": "evapora" },
+      { "id": 3, "texto": "nuvens" },
+      { "id": 4, "texto": "geleiras" },
+      { "id": 5, "texto": "infiltra" }
     ],
-    "respostaCorreta": [1, 3, 4, 2], // água, CO₂, glicose, O₂
+    "respostaCorreta": [2, 3, 1], // evapora, nuvens, precipitação
     "opcoes": [],
-    "dificuldade": "normal",
-    "categorias": ["10"],
-    "fontes": ["Livro de Ciências"],
-    "vantagem": "Frase completa e cientificamente correta!",
-    "desvantagem": "A ordem dos fatores alterou o produto!",
-    "dica": "O que as plantas absorvem vs. o que elas liberam?"
+    "dificuldade": "facil",
+    "categorias": ["Exemplo_CompletarFrase"],
+    "fontes": ["Ciclo Hidrológico"],
+    "vantagem": "Ciclo completo!",
+    "desvantagem": "As etapas do ciclo se confundiram.",
+    "dica": "Sobe como vapor, vira gota, cai."
   },
 
+  // --- Exemplos com Imagens HTML ---
   {
+    "id": "ex_img_simples_1",
     "tipo": "Pergunta",
-    "titulo": "Pergunta 1",
-    "pergunta": "<img src=\"/7.jpg\" alt=\"Pergunta 1\" class=\"img-media my-4\" />\nPergunta com imagem e facil",
-    "imageType": "clickable",
-    "imagem": "",
+    "titulo": "Exemplo: Imagem Simples",
+    "pergunta": "A imagem abaixo mostra um exemplo de qual tipo de poluição?<br><img src=\"/images/rio_poluido.jpg\" alt=\"Rio poluído com lixo\" class=\"img-fluid my-2 rounded border\">", // <-- SUBSTITUA CAMINHO
     "opcoes": [
-      {
-        "id": 1,
-        "texto": "errado"
-      },
-      {
-        "id": 2,
-        "texto": "errado"
-      },
-      {
-        "id": 3,
-        "texto": "certo"
-      },
-      {
-        "id": 4,
-        "texto": "errado"
-      }
+      { "id": 1, "texto": "Poluição Sonora" },
+      { "id": 2, "texto": "Poluição Visual" },
+      { "id": 3, "texto": "Poluição Hídrica" },
+      { "id": 4, "texto": "Poluição do Ar" }
     ],
     "respostaCorreta": 3,
     "dificuldade": "facil",
-    "categorias": [
-      "11"
-    ],
-    "fontes": [
-      "fonte 1",
-      "fonte 2",
-      "fonte 3"
-    ],
-    "vantagem": "Vant",
-    "desvantagem": "Desvant",
-    "dica": "Dica"
+    "categorias": ["Exemplo_ImagemSimples"],
+    "fontes": ["Foto Ilustrativa"],
+    "vantagem": "Correto, é a poluição da água.",
+    "desvantagem": "Observe a imagem com atenção.",
+    "dica": "O que está sendo afetado na foto?"
   },
   {
+    "id": "ex_img_zoom_1",
     "tipo": "Pergunta",
-    "titulo": "Pergunta 2",
-    "pergunta": "<img src=\"/7.jpg\" style=\"display: block; margin: 0 auto; width: 120px; height: auto;\" alt=\"Pergunta 2\" /><br>\nPergunta com carta hero normal",
-    "imageType": "clickable",
-    "imagem": "",
+    "titulo": "Exemplo: Imagem com Zoom (Intenção)",
+    "pergunta": "Observe o diagrama de uma célula vegetal (tente dar zoom para ver detalhes). Qual organela é responsável pela fotossíntese?<br><img src=\"/images/celula_vegetal_diagrama.png\" alt=\"Diagrama de célula vegetal\" class=\"img-fluid my-2 rounded border img-zoomable cursor-zoom-in\">", // <-- SUBSTITUA CAMINHO
     "opcoes": [
-      {
-        "id": 1,
-        "texto": "errado"
-      },
-      {
-        "id": 2,
-        "texto": "correto"
-      }
+      { "id": 1, "texto": "Mitocôndria" },
+      { "id": 2, "texto": "Núcleo" },
+      { "id": 3, "texto": "Vacúolo" },
+      { "id": 4, "texto": "Cloroplasto" }
     ],
-    "respostaCorreta": 2,
+    "respostaCorreta": 4,
     "dificuldade": "normal",
-    "categorias": [
-      "12"
-    ],
-    "fontes": [
-      "fonte 1",
-      "fonte 2",
-      "fonte 3"
-    ],
-    "vantagem": "vant",
-    "desvantagem": "desv",
-    "dica": "dica"
+    "categorias": ["Exemplo_ImagemZoom"],
+    "fontes": ["Biologia Celular"],
+    "vantagem": "Exato! São os cloroplastos.",
+    "desvantagem": "Esta organela tem outra função.",
+    "dica": "Procure pela estrutura verde dentro da célula."
   },
   {
-    "tipo": "MultiplaEscolha",
-    "titulo": "Multipla Escolha 3",
-    "pergunta": "Multipla escolha dificil",
-    "imageType": "clickable",
-    "imagem": "",
+    "id": "ex_img_clicavel_1",
+    "tipo": "Pergunta", // Poderia ser Outras, depende da interação desejada
+    "titulo": "Exemplo: Imagem Clicável (Intenção)",
+    "pergunta": "A imagem mostra diferentes tipos de lixeiras da coleta seletiva. Qual cor representa o VIDRO? (Imagine clicar na lixeira correta)<br><img src=\"/images/lixeiras_coleta.png\" alt=\"Lixeiras coloridas da coleta seletiva\" class=\"img-fluid my-2 rounded border img-clickable cursor-pointer\">", // <-- SUBSTITUA CAMINHO
     "opcoes": [
-      {
-        "id": 1,
-        "texto": "errada"
-      },
-      {
-        "id": 2,
-        "texto": "certa"
-      },
-      {
-        "id": 3,
-        "texto": "certa"
-      },
-      {
-        "id": 4,
-        "texto": "errada"
-      }
+      { "id": 1, "texto": "Azul" },
+      { "id": 2, "texto": "Amarelo" },
+      { "id": 3, "texto": "Verde" },
+      { "id": 4, "texto": "Vermelho" }
     ],
-    "respostaCorreta": [
-      2,
-      3
-    ],
-    "dificuldade": "dificil",
-    "categorias": [
-      "13"
-    ],
-    "fontes": [
-      "fonte 1",
-      "fonte 2",
-      "fonte 3"
-    ],
-    "vantagem": "vant",
-    "desvantagem": "desv",
-    "dica": "dica"
-  },
-  {
-    "tipo": "Ordem",
-    "titulo": "Ordem 4",
-    "pergunta": "carta ordem dificil",
-    "imageType": "clickable",
-    "imagem": "",
-    "opcoes": [
-      {
-        "id": 1,
-        "texto": "quatro",
-        "ordemTemp": "4"
-      },
-      {
-        "id": 2,
-        "texto": "dois",
-        "ordemTemp": "2"
-      },
-      {
-        "id": 3,
-        "texto": "um",
-        "ordemTemp": "1"
-      },
-      {
-        "id": 4,
-        "texto": "tres",
-        "ordemTemp": "3"
-      }
-    ],
-    "respostaCorreta": [
-      3,
-      2,
-      4,
-      1
-    ],
-    "dificuldade": "dificil",
-    "categorias": [
-      "14"
-    ],
-    "fontes": [
-      "fonte 1",
-      "fonte 2",
-      "fonte 3"
-    ],
-    "vantagem": "vant",
-    "desvantagem": "desv",
-    "dica": "dica"
-  },
-  {
-    "tipo": "Ordem",
-    "titulo": "carta ordem reaproveitada 5",
-    "pergunta": "<img src=\"/9.jpg\" alt=\"carta ordem\" class=\"img-media my-4\" />\nVeja se imagem deu certo",
-    "imageType": "clickable",
-    "imagem": "",
-    "opcoes": [
-      {
-        "id": 1,
-        "texto": "dois",
-        "ordemTemp": "2"
-      },
-      {
-        "id": 2,
-        "texto": "tres",
-        "ordemTemp": "3"
-      },
-      {
-        "id": 3,
-        "texto": "um",
-        "ordemTemp": "1"
-      },
-      {
-        "id": 4,
-        "texto": "quatro",
-        "ordemTemp": "4"
-      }
-    ],
-    "respostaCorreta": [
-      3,
-      1,
-      2,
-      4
-    ],
-    "dificuldade": "dificil",
-    "categorias": [
-      "15"
-    ],
-    "fontes": [],
-    "vantagem": "vat",
-    "desvantagem": "devat",
-    "dica": "dic"
-  },
-  {
-    "tipo": "Vantagem",
-    "titulo": "Vantagem simples 6",
-    "pergunta": "Uma unica alternativa",
-    "imageType": "clickable",
-    "imagem": "",
-    "opcoes": [
-      {
-        "id": 1,
-        "texto": "Certa"
-      }
-    ],
-    "respostaCorreta": [
-      1
-    ],
+    "respostaCorreta": 3,
     "dificuldade": "facil",
-    "categorias": [
-      "15"
-    ],
-    "fontes": [],
-    "vantagem": "",
-    "desvantagem": "",
-    "dica": ""
-  },
-  {
-    "tipo": "Vantagem",
-    "titulo": "Vantagem dupla 7",
-    "pergunta": "Duas vantagens",
-    "imageType": "clickable",
-    "imagem": "",
-    "opcoes": [
-      {
-        "id": 1,
-        "texto": "Certa"
-      },
-      {
-        "id": 2,
-        "texto": "Certa 2"
-      }
-    ],
-    "respostaCorreta": [
-      1,
-      2
-    ],
-    "dificuldade": "facil",
-    "categorias": [
-      "17"
-    ],
-    "fontes": [
-      "Fonte"
-    ],
-    "vantagem": "vant",
-    "desvantagem": "desv",
-    "dica": "dica"
-  },
-  {
-    "tipo": "Desvantagem",
-    "titulo": "Desvantagem Simples 8",
-    "pergunta": "",
-    "imageType": "clickable",
-    "imagem": "",
-    "opcoes": [
-      {
-        "id": 1,
-        "texto": "Errada 1"
-      },
-      {
-        "id": 2,
-        "texto": "Errada 2"
-      }
-    ],
-    "respostaCorreta": [],
-    "dificuldade": "facil",
-    "categorias": [
-      "18"
-    ],
-    "fontes": [
-      "Fonte"
-    ],
-    "vantagem": "vant",
-    "desvantagem": "desv",
-    "dica": "dica"
-  },
-  {
-    "tipo": "Outras",
-    "titulo": "Outras 9",
-    "pergunta": "Outras dificil",
-    "imageType": "clickable",
-    "imagem": "",
-    "opcoes": [
-      {
-        "id": 1,
-        "texto": "Certa"
-      },
-      {
-        "id": 2,
-        "texto": "Errada"
-      }
-    ],
-    "respostaCorreta": [
-      1
-    ],
-    "dificuldade": "dificil",
-    "categorias": [
-      "19"
-    ],
-    "fontes": [
-      "Fonte"
-    ],
-    "vantagem": "vant",
-    "desvantagem": "desv",
-    "dica": "dica"
-  },
-  {
-    "tipo": "Ordem",
-    "titulo": "carta ordem reaproveita integralmente 10",
-    "pergunta": "<img src=\"/9.jpg\" alt=\"carta ordem\" class=\"img-media my-4\" />\nVeja se imagem deu certo",
-    "imageType": "clickable",
-    "imagem": "",
-    "opcoes": [
-      {
-        "id": 1,
-        "texto": "dois",
-        "ordemTemp": "2"
-      },
-      {
-        "id": 2,
-        "texto": "tres",
-        "ordemTemp": "3"
-      },
-      {
-        "id": 3,
-        "texto": "um",
-        "ordemTemp": "1"
-      }
-    ],
-    "respostaCorreta": [
-      3,
-      1,
-      2
-    ],
-    "dificuldade": "dificil",
-    "categorias": [
-      "20"
-    ],
-    "fontes": [],
-    "vantagem": "vant",
-    "desvantagem": "desva",
-    "dica": "dica"
-  },
-
-  {
-    tipo: "Vantagem",
-    titulo: "As Estrelas",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (18).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
-      Saudações jogador(a). Somos as estrelas, os seres antigos e sábios que iluminam o cosmos. Por eras, mantivemos o equilíbrio e a harmonia do universo. Mas uma 
-      nova ameaça surgiu, os alienígenas com sua terrível máquina, a Stronberis. Precisamos de sua ajuda para proteger a galáxia e impedir que eles dominem tudo com 
-      suas tecnologias malignas. Contamos com você.`,
-    opcoes: [
-      { id: 1, texto: "Ganhe 1 estrela" },
-    ],
-    respostaCorreta: [1],
-    dificuldade: "facil",
-    categorias: ["21"],
-    fontes: ["Imagens: Fonte na descrição do jogo"],
-    vantagem: "",
-    desvantagem: "",
-    dica: "",
-  },
-  {
-    tipo: "Outras",
-    titulo: "Solaris",
-    pergunta: `<img src="/img/espancao_estrelas/estrelas (25).png" style="display: block; margin: 0 auto; width: 120px; height: auto;" alt="Descrição da imagem" /><br>
-    Você enfrentou desafios inigualáveis, superou todos os obstáculos e agora está diante do último passo. A vitória está ao seu alcance, mas lembre-se, o preço da vitória é 
-    alto. Está pronto para fazer o sacrifício final e conquistar o que é seu por direito? O cosmos espera pela sua decisão.`,
-    opcoes: [
-      { id: 1, texto: "Avance 15 casas do tabuleiro, mas para isso, você deve sacrificar todas as suas estrelas" },
-      { id: 2, texto: "Cada jogador, exceto você, perde metade de suas estrelas, e você volta 10 casas" },
-      { id: 3, texto: "Todos os jogadores, incluindo você, voltam 5 casas (os efeitos das casa não serão aplicados)" },
-    ],
-    respostaCorreta: [1, 2, 3],
-    dificuldade: "facil",
-    categorias: ["22"],
-    fontes: ["Imagens: Fonte na descrição do jogo"],
-    vantagem: "",
-    desvantagem: "",
-    dica: "",
+    "categorias": ["Exemplo_ImagemClicavel"],
+    "fontes": ["Padrão Coleta Seletiva"],
+    "vantagem": "Correto, vidro é na lixeira verde!",
+    "desvantagem": "Cor incorreta para o vidro.",
+    "dica": "Lembre das cores: papel, metal, vidro, plástico."
   }
-
-];
-
-export default ecologia_forestal_cards;
+]
