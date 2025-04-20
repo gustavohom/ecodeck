@@ -2523,7 +2523,7 @@ const manejo = [
     "vantagem": "Aventura na Caverna Ancestral concluída!", // Mensagem genérica
     "desvantagem": "Aventura na Caverna Ancestral concluída!", // Mensagem genérica
     "dica": "Pese os riscos e recompensas de cada escolha."
-}
+} 
 ];
 
 export default manejo;
