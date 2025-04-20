@@ -2523,7 +2523,331 @@ const manejo = [
     "vantagem": "Aventura na Caverna Ancestral concluída!", // Mensagem genérica
     "desvantagem": "Aventura na Caverna Ancestral concluída!", // Mensagem genérica
     "dica": "Pese os riscos e recompensas de cada escolha."
-} 
+},
+{
+    "id": "cave_longa_1",
+    "tipo": "Outras", // 'Outras' permite uma opção genérica de conclusão
+    "titulo": "A Caverna das Raízes Retorcidas",
+    "pergunta": "<style>\n/* Estilos .cave-* reutilizados e ajustados */\n.cave-popup { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(41, 37, 36, 0.9); /* Marrom escuro */ display:none; justify-content:center; align-items:center; z-index:1010; padding:15px; overflow-y: auto; /* Permite rolagem se conteúdo for grande */}\n.cave-popup:target { display:flex; }\n.cave-content { background:#78716c; /* Cinza pedra */ color: #f1f5f9; padding:25px; border-radius:8px; max-width:420px; /* Pouco maior */ text-align:center; position:relative; border: 3px solid #57534e; }\n.cave-content h5 { margin:0 0 15px 0; color: #e2e8f0; border-bottom: 1px solid #a1a1aa; padding-bottom: 8px; font-size: 1.2em; }\n.cave-content p { margin-bottom: 15px; font-size:1em; line-height:1.6; }\n.cave-content img { display: block; max-width: 180px; /* Imagem pouco maior */ height: auto; margin: 15px auto; border-radius: 5px; border: 1px solid #a1a1aa; background: #e5e7eb; }\n.cave-content a { color: #bfdbfe; text-decoration: underline; margin: 8px 12px; cursor: pointer; display: inline-block; font-weight: 500; }\n.cave-content a:hover { color: #60a5fa; }\n.cave-close { position:absolute; top:8px; right:12px; font-size:24px; color:#a1a1aa; text-decoration:none; }\n.cave-close:hover { color: white; }\n.cave-start-btn { display:inline-block; padding: 10px 15px; background:#166534; color:white; border-radius:5px; text-decoration:none; font-weight:bold; }\n.final-reward { font-weight: bold; font-size: 1.1em; color: #bbf7d0; /* Verde claro para recompensa */ margin-top:10px;}\n.final-penalty { font-weight: bold; font-size: 1.1em; color: #fecaca; /* Vermelho claro para penalidade */ margin-top:10px;}\n.final-neutral { font-weight: bold; font-size: 1.1em; color: #e5e7eb; /* Cinza claro para neutro */ margin-top:10px;}\n</style>\n<p style='text-align:center;'>A entrada da caverna é uma fenda escura entre raízes gigantes e retorcidas. Um cheiro de terra molhada e algo antigo emana de dentro.</p>\n<p style='text-align:center;'><a href=\"#caveL1-start\" class='cave-start-btn'>Avançar pela Escuridão</a></p>\n\n<!-- === Cenas da Caverna Longa === -->\n\n<!-- Entrada / Bifurcação 1 -->\n<div id=\"caveL1-start\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Encruzilhada das Raízes</h5>\n    <img src=\"/images/caverna/bifurcacao_raizes.png\" alt=\"Bifurcação com raízes\">\n    <p>Após alguns metros, a luz da entrada some. À <strong>esquerda</strong>, um caminho com musgo luminoso e gotas d'água. À <strong>direita</strong>, um túnel seco com ossos espalhados.</p>\n    <a href=\"#caveL1-left-musgo\">Seguir Musgo (Esquerda)</a> \n    <a href=\"#caveL1-right-ossos\">Seguir Ossos (Direita)</a>\n  </div>\n</div>\n\n<!-- === CAMINHO DA ESQUERDA === -->\n<div id=\"caveL1-left-musgo\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Trilha Luminescente</h5>\n    <img src=\"/images/caverna/musgo_luminoso.png\" alt=\"Musgo brilhante\">\n    <p>O musgo ilumina suavemente. Você encontra um veio brilhante na parede e um lago subterrâneo logo adiante.</p>\n    <a href=\"#caveL1-left-minerio\">Examinar Veio de Minério</a> \n    <a href=\"#caveL1-left-lago\">Aproximar-se do Lago</a>\n  </div>\n</div>\n\n<!-- Esquerda -> Minério (Fim A) -->\n<div id=\"caveL1-left-minerio\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Descoberta Mineral</h5>\n    <img src=\"/images/caverna/minerio_raro.png\" alt=\"Minério Raro\">\n    <p>É um minério raro usado em ferramentas avançadas!</p>\n    <p class=\"final-reward\">Resultado: +1 Recurso 'Metal Raro'</p>\n    <a href=\"#\">Sair com o Minério</a>\n  </div>\n</div>\n\n<!-- Esquerda -> Lago -->\n<div id=\"caveL1-left-lago\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Lago Subterrâneo</h5>\n    <img src=\"/images/caverna/lago_subterraneo.png\" alt=\"Lago Subterrâneo\">\n    <p>A água é cristalina, mas profunda. Algo brilha no fundo. Você pode tentar <strong>mergulhar</strong> ou <strong>contornar</strong> pela margem estreita.</p>\n    <a href=\"#caveL1-left-mergulhar\">Mergulhar pelo Brilho</a> \n    <a href=\"#caveL1-left-contornar\">Contornar pela Margem</a>\n  </div>\n</div>\n\n<!-- Esquerda -> Lago -> Mergulhar (Fim B) -->\n<div id=\"caveL1-left-mergulhar\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Tesouro Submerso</h5>\n    <img src=\"/images/caverna/artefato_submerso.png\" alt=\"Artefato Antigo\">\n    <p>Com esforço, você alcança o fundo e recupera um artefato antigo!</p>\n    <p class=\"final-reward\">Resultado: +1 Estrela Fixa</p>\n    <a href=\"#\">Sair com o Artefato</a>\n  </div>\n</div>\n\n<!-- Esquerda -> Lago -> Contornar (Fim C) -->\n<div id=\"caveL1-left-contornar\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Margem Segura</h5>\n    <p>Você contorna o lago com segurança e encontra a saída da caverna logo adiante, mas não encontrou nada de especial.</p>\n    <p class=\"final-neutral\">Resultado: Sem Bônus/Penalidade</p>\n    <a href=\"#\">Sair da Caverna</a>\n  </div>\n</div>\n\n<!-- === CAMINHO DA DIREITA === -->\n<div id=\"caveL1-right-ossos\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Vale dos Ossos</h5>\n    <img src=\"/images/caverna/ossos_espalhados.png\" alt=\"Ossos no chão\">\n    <p>Ossos de animais grandes estão por toda parte. Você ouve um som de algo pesado se arrastando à frente. Você pode <strong>investigar o som</strong> ou tentar <strong>escalar uma parede lateral</strong> para evitar o que quer que seja.</p>\n    <a href=\"#caveL1-right-som\">Investigar Som</a> \n    <a href=\"#caveL1-right-escalar\">Escalar Parede</a>\n  </div>\n</div>\n\n<!-- Direita -> Investigar Som -->\n<div id=\"caveL1-right-som\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Encontro com a Fera</h5>\n    <img src=\"/images/caverna/urso_caverna.png\" alt=\"Urso da Caverna\">\n    <p>É um enorme Urso da Caverna! Ele te vê e se prepara para atacar. Rápido! <strong>Atacar</strong> com o que tiver ou <strong>Fugir</strong>?</p>\n    <div class=\"boss-actions\">\n      <a href=\"#caveL1-right-atacar\">Atacar!</a> \n      <a href=\"#caveL1-right-fugir\">Fugir!</a>\n    </div>\n  </div>\n</div>\n\n<!-- Direita -> Som -> Atacar (Fim D) -->\n<div id=\"caveL1-right-atacar\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Vitória!</h5>\n    <p>Com coragem (e sorte!), você consegue afugentar o Urso! Ele deixa para trás restos de suas caças.</p>\n    <p class=\"final-reward\">Resultado: +1 Pulo (Coragem) e +5 Progresso</p>\n    <a href=\"#\">Sair Vitorioso</a>\n  </div>\n</div>\n\n<!-- Direita -> Som -> Fugir (Fim E) -->\n<div id=\"caveL1-right-fugir\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Fuga por Pouco</h5>\n    <p>Você corre desesperadamente e encontra uma saída estreita, mas deixou cair alguns suprimentos na pressa.</p>\n    <p class=\"final-penalty\">Resultado: -5 Progresso</p>\n    <a href=\"#\">Sair Correndo</a>\n  </div>\n</div>\n\n<!-- Direita -> Escalar Parede (Fim F) -->\n<div id=\"caveL1-right-escalar\" class=\"cave-popup\">\n  <div class=\"cave-content\">\n    <a href=\"#\" class=\"cave-close\">×</a> <h5>Escalada Arriscada</h5>\n    <img src=\"/images/caverna/parede_escalada.png\" alt=\"Parede da caverna\">\n    <p>A escalada é difícil. Você escorrega, mas consegue se segurar! Chega a uma plataforma elevada com vista para a saída.</p>\n    <p class=\"final-neutral\">Resultado: Cansativo, mas seguro. Sem Bônus/Penalidade.</p>\n    <a href=\"#\">Sair pela Plataforma</a>\n  </div>\n</div>\n\n<p style='text-align:center; font-size:0.8em; margin-top: 15px;'>Explore os caminhos e, quando chegar a um final, clique na opção abaixo.</p>",
+    "opcoes": [
+      // A única opção é confirmar a conclusão da exploração.
+      // A lógica do jogo precisaria saber qual foi o último popup (:target) ativo
+      // OU, mais simples, aplicar um efeito genérico/aleatório ou nenhum efeito.
+      // Para manter simples aqui, vamos assumir que essa carta não dá bônus/penalidade direta,
+      // mas o jogador vivencia a história.
+      { "id": 1, "texto": "Concluir Exploração da Caverna" }
+    ],
+    "respostaCorreta": [1], // Só há uma opção a confirmar
+    "dificuldade": "dificil", // Pela complexidade da exploração
+    "categorias": ["Teste_CavernaLonga"],
+    "fontes": [],
+    "vantagem": "Você sobreviveu à Caverna das Raízes Retorcidas!", // Mensagem genérica
+    "desvantagem": "", // Não há 'resposta errada' na confirmação
+    "dica": "Cada escolha leva a um destino diferente."
+}
+
+// --- MAIS CARTAS CRIATIVAS (6-25) ---
+// Implementando as outras ideias que listamos...
+
+// 6. Quebra-Cabeça Deslizante Simulado (CSS Grid + :target)
+{
+    "id": "carta_6",
+    "tipo": "Pergunta",
+    "titulo": "Organize a Paisagem",
+    "pergunta": "<style>\n.slide-puzzle-c6{display:grid;grid-template-columns:repeat(2, 80px);grid-template-rows:repeat(2, 80px);gap:3px;margin:15px auto;width:163px;height:163px;background:#ccc;border:2px solid #555;padding:1px;position:relative}.puzzle-tile-c6{background-image:url('/images/paisagem_completa.jpg');background-size:160px 160px;border:1px solid #aaa;cursor:pointer;transition:transform .3s ease}.pt1{background-position:0 0}.pt2{background-position:-80px 0}.pt3{background-position:0 -80px}/* Peça 'clicada' (:target) se move para o espaço vazio (simulado) */#move-p1:target ~ .slide-puzzle-c6 .tile1{transform:translateX(83px)}/* etc. - CSS complexo para simular movimento */</style><p>Reorganize as peças (clique para mover - simulação visual) para formar a paisagem. Qual peça vai no canto inferior esquerdo?</p><div class='slide-puzzle-c6'><!-- Links escondidos para :target --><a href='#move-p1' id='t1'></a><div class='puzzle-tile-c6 tile1'></div><a href='#move-p2' id='t2'></a><div class='puzzle-tile-c6 tile2'></div><a href='#move-p3' id='t3'></a><div class='puzzle-tile-c6 tile3'></div><div class='puzzle-tile-c6 empty'></div> <!-- Espaço vazio --></div>",
+    "opcoes": [ {"id": 1, "texto": "Peça do Céu (Superior Direito)"}, {"id": 2, "texto": "Peça da Montanha (Inferior Direito)"}, {"id": 3, "texto": "Peça da Floresta (Inferior Esquerdo)"} ], // Assumindo que peça 3 é a correta
+    "respostaCorreta": 3,
+	"dificuldade": "normal",
+	"categorias": ["Novacarta_6"],
+	"fontes": [],
+	"vantagem": "Correto!",
+	"desvantagem": "Incorreto.",
+	"dica": "A peça 3 no estado inicial é a resposta."
+},
+// 7. Medidor de Poluição Sonoro (Visual + Pergunta)
+{
+    "id": "carta_7",
+    "tipo": "Pergunta",
+    "titulo": "Nível de Ruído Urbano",
+    "pergunta": "<style>.noise-meter-c7{width:50px;height:120px;background:#e5e7eb;border:2px solid #6b7280;border-radius:5px;margin:15px auto;position:relative;padding:5px}.noise-level-c7{position:absolute;bottom:5px;left:5px;right:5px;background:linear-gradient(to top, #4ade80, #facc15, #f87171);border-radius:3px}.noise-indicator-c7{position:absolute;bottom:65%;/*Nível atual*/left:0;right:0;height:3px;background:black;box-shadow:0 0 3px white}</style><p>O medidor mostra o nível de poluição sonora atual. Em que faixa está?</p><div class='noise-meter-c7'><div class='noise-level-c7' style='height:65%'></div><div class='noise-indicator-c7'></div></div>",
+    "opcoes": [ {"id": 1, "texto": "Baixo (Verde)"}, {"id": 2, "texto": "Médio (Amarelo)"}, {"id": 3, "texto": "Alto (Laranja/Vermelho)"} ],
+    "respostaCorreta": 3,
+	"dificuldade": "facil",
+	"categorias": ["Novacarta_7"],
+	"fontes": [],
+	"vantagem": "Correto! Ruído excessivo.",
+	"desvantagem": "Incorreto, veja a cor.",
+	"dica": "A barra subiu até qual cor?"
+},
+// 8. Efeito Parallax Simples (Se ScrollArea permitir)
+{
+    "id": "carta_8",
+    "tipo": "Outras",
+    "titulo": "Visão da Montanha",
+    "pergunta": "<style>.parallax-c8{ min-height: 150px; /* Altura mínima */ background-image: url('/images/montanha_fundo.png'), url('/images/floresta_meio.png'), url('/images/pedras_frente.png'); background-attachment: fixed, fixed, scroll; background-position: center top, center center, center bottom; background-repeat: no-repeat, no-repeat, repeat-x; background-size: cover, contain, auto 50px; border: 1px solid #ccc; border-radius: 5px; padding: 20px; color: white; text-shadow: 1px 1px 3px black; text-align: center; } </style><div class='parallax-c8'><h4>A beleza da natureza em camadas.</h4><p>A preservação requer cuidado em todos os níveis.</p></div><p style='font-size:0.8em; text-align:center; margin-top:5px'>(Role a pergunta se possível para ver o efeito)</p>",
+    "opcoes": [ {"id": 1, "texto": "Apreciar a vista"} ],
+	"respostaCorreta": [1],
+	"dificuldade": "facil",
+	"categorias": ["Novacarta_8"],
+	"fontes": [],
+	"vantagem": "Bela paisagem!",
+	"desvantagem": "",
+	"dica": "O efeito funciona melhor se a caixa de pergunta tiver rolagem."
+},
+// 9. Carta "Notícia Urgente" com Layout de Jornal
+{
+    "id": "carta_9",
+    "tipo": "Pergunta",
+    "titulo": "Extra! Extra! Leia Sobre!",
+    "pergunta": "<style>.newspaper-c9{background:#fef9e7;border:1px solid #d4ac0d;padding:15px;font-family:serif;max-width:380px;margin:auto}.headline-c9{font-size:1.5em;font-weight:bold;text-align:center;border-bottom:2px solid #b7950b;padding-bottom:5px;margin-bottom:10px}.subhead-c9{font-weight:bold;margin-top:10px}.article-img-c9{float:right;width:120px;margin:0 0 10px 10px;border:1px solid #ccc}.article-text-c9{font-size:0.95em;text-align:justify;line-height:1.4}</style><div class='newspaper-c9'><div class='headline-c9'>Seca Ameaça Reservatórios!</div><img class='article-img-c9' src='/images/reservatorio_seco.jpg' alt='Reservatório baixo'><p class='subhead-c9'>Nível crítico exige ação imediata.</p><p class='article-text-c9'>Autoridades alertam para a necessidade urgente de reduzir o consumo de água em 30% nas próximas semanas devido à falta de chuvas e ao nível historicamente baixo dos reservatórios que abastecem a região. Medidas de racionamento podem ser implementadas.</p><div style='clear:both'></div></div><br>Qual a principal medida sugerida na notícia?",
+    "opcoes": [ {"id": 1, "texto": "Construir mais reservatórios"}, {"id": 2, "texto": "Reduzir o consumo de água"}, {"id": 3, "texto": "Esperar chover"} ],
+    "respostaCorreta": 2,
+	"dificuldade": "facil",
+	"categorias": ["Novacarta_9"],
+	"fontes": [],
+	"vantagem": "Correto! Economizar é crucial.",
+	"desvantagem": "Leia a notícia com atenção.",
+	"dica": "O texto pede para fazer algo com a água."
+},
+// 10. "Monte seu Kit" Interativo (Checkbox Hack)
+{
+    "id": "carta_10",
+    "tipo": "Outras",
+    "titulo": "Kit Sobrevivência Ecológica",
+    "pergunta": "<style>.kit-builder-c10{border:1px solid #ccc;padding:15px;border-radius:5px}.kit-item-c10{margin-bottom:8px}.kit-item-c10 input[type='checkbox']{display:none}.kit-item-c10 label{cursor:pointer;display:flex;align-items:center}.kit-item-c10 label::before{content:'⬜';margin-right:8px;font-size:1.2em}.kit-item-c10 input:checked+label::before{content:'✅'}.kit-visual-c10{margin-top:15px;padding:10px;background:#eee;border-radius:4px;min-height:40px;text-align:center;font-size:.9em}.kit-visual-c10 span{display:none;margin:0 5px;padding:3px 6px;background:white;border:1px solid grey;border-radius:3px}/* Mostrar item se checkbox marcado */#kit1:checked ~ .kit-visual-c10 .item1, #kit2:checked ~ .kit-visual-c10 .item2, #kit3:checked ~ .kit-visual-c10 .item3 {display:inline-block}</style><p>Monte seu kit básico (marque os essenciais):</p><div class='kit-builder-c10'><div class='kit-item-c10'><input type=checkbox id=kit1><label for=kit1>💧 Garrafa d'Água</label></div><div class='kit-item-c10'><input type=checkbox id=kit2><label for=kit2>🍎 Comida Não Perecível</label></div><div class='kit-item-c10'><input type=checkbox id=kit3><label for=kit3>🔦 Lanterna</label></div><div class='kit-item-c10'><input type=checkbox id=kit4><label for=kit4>📱 Celular Extra</label></div><div class='kit-visual-c10'>Seu Kit: <span class=item1>Água</span><span class=item2>Comida</span><span class=item3>Lanterna</span></div></div>",
+    "opcoes": [ {"id": 1, "texto": "Kit Montado!"} ],
+	"respostaCorreta": [1], "dificuldade": "facil",
+	"categorias": ["Novacarta_10"],
+	"fontes": [],
+	"vantagem": "Preparação é chave!",
+	"desvantagem": "",
+	"dica": "Clique nos itens para adicioná-los visualmente ao kit."
+},
+// 11. Código de Barras Falso
+{
+    "id": "carta_11",
+    "tipo": "Pergunta",
+    "titulo": "Produto Misterioso",
+    "pergunta": "<p>Você escaneou o código de barras de um produto. A descrição diz 'Origem: Floresta Tropical. Contém Óleo de Palma Não Sustentável'.</p><img src='https://barcode.tec-it.com/barcode.ashx?data=Produto+Não+Sustentável&code=Code128&imagetype=Png' alt='Código de Barras Falso' style='display:block; margin: 15px auto; height: 60px; width: auto;'><br><p>Comprar este produto é uma ação...</p>",
+    "opcoes": [ {"id": 1, "texto": "Sustentável"}, {"id": 2, "texto": "Neutra"}, {"id": 3, "texto": "Não sustentável"} ],
+    "respostaCorreta": 3,
+	"dificuldade": "facil",
+	"categorias": ["Novacarta_11"],
+	"fontes": [],
+	"vantagem": "Correto! Evitar óleo de palma não sustentável ajuda.",
+	"desvantagem": "Leia a descrição do produto.",
+	"dica": "Óleo de palma não sustentável causa desmatamento."
+},
+// 12. Comparador Lado a Lado Detalhado
+{
+    "id": "carta_12",
+    "tipo": "Pergunta",
+    "titulo": "Lâmpada: Qual Escolher?",
+    "pergunta": "<style>.compare-c12{display:flex;gap:10px;margin-top:10px}.compare-item-c12{flex:1;border:1px solid #ccc;padding:10px;border-radius:5px;background:white}.compare-item-c12 h6{margin:0 0 8px 0;text-align:center;border-bottom:1px solid #eee;padding-bottom:5px}.compare-item-c12 ul{list-style:none;padding:0;margin:0;font-size:.85em}.compare-item-c12 li{margin-bottom:4px}.compare-item-c12 .value{font-weight:bold;float:right}</style><p>Compare as lâmpadas:</p><div class='compare-c12'><div class='compare-item-c12'><h6>Incandescente</h6><ul><li>Consumo: <span class=value>60W</span></li><li>Vida Útil: <span class=value>~1000h</span></li><li>Custo Inicial: <span class=value>Baixo</span></li><li>Impacto: <span class=value>Alto</span></li></ul></div><div class='compare-item-c12'><h6>LED</h6><ul><li>Consumo: <span class=value>9W</span></li><li>Vida Útil: <span class=value>~15000h</span></li><li>Custo Inicial: <span class=value>Médio</span></li><li>Impacto: <span class=value>Baixo</span></li></ul></div></div><br>Qual é <strong>mais eficiente</strong> energeticamente?",
+    "opcoes": [ {"id": 1, "texto": "Incandescente"}, {"id": 2, "texto": "LED"} ],
+    "respostaCorreta": 2,
+	"dificuldade": "facil",
+	"categorias": ["Novacarta_12"],
+	"fontes": [],
+	"vantagem": "Correto! LED consome muito menos.",
+	"desvantagem": "Incorreto. Veja o 'Consumo'.",
+	"dica": "Menos Watts (W) = mais eficiente."
+},
+// 13. Ampulheta CSS
+{
+    "id": "carta_13",
+    "tipo": "Desvantagem",
+    "titulo": "Tempo se Esgotando!",
+    "pergunta": "<style>@keyframes hourglassTop{0%,100%{transform:scaleY(1)}50%{transform:scaleY(0)}}@keyframes hourglassBottom{0%{transform:scaleY(0)}50%{transform:scaleY(1)}100%{transform:scaleY(1)}}.hourglass-c13{width:40px;height:60px;border-left:2px solid #a16207;border-right:2px solid #a16207;margin:20px auto;position:relative}.hourglass-c13::before,.hourglass-c13::after{content:'';position:absolute;left:-10px;right:-10px;height:50%;background:#fef3c7;border:2px solid #a16207}.hourglass-c13::before{top:0;border-radius:50% 50% 0 0;border-bottom:none;transform-origin:bottom;animation:hourglassTop 4s linear infinite}.hourglass-c13::after{bottom:0;border-radius:0 0 50% 50%;border-top:none;transform-origin:top;animation:hourglassBottom 4s linear infinite}</style><p style='text-align:center'>O tempo para agir em uma tarefa importante está acabando!</p><div class='hourglass-c13'></div><p style='text-align:center;font-weight:bold'>Perca 1 Pulo por demorar demais.</p>",
+    "opcoes": [ {"id": 1, "texto": "Droga!"} ],
+	"respostaCorreta": [],
+	"dificuldade": "facil",
+	"categorias": ["Novacarta_13"],
+	"fontes": [],
+	"vantagem": "",
+	"desvantagem": "Perdeu 1 Pulo!",
+	"dica": "Agilidade é importante."
+},
+// 14. Mensagem na Garrafa (<details>)
+{
+    "id": "carta_14",
+    "tipo": "Outras",
+    "titulo": "Mensagem na Garrafa",
+    "pergunta": "<style>.bottle-container-c14{text-align:center;margin-top:15px}.bottle-container-c14 summary{cursor:pointer;display:inline-block;transition:transform .2s}.bottle-container-c14 summary:hover{transform:scale(1.1)}.bottle-icon-c14{font-size:4em;line-height:1}.message-c14{margin-top:-20px;padding:15px;background:#e0f2fe;border:1px dashed #7dd3fc;border-radius:5px;font-size:.9em;font-style:italic;position:relative;z-index:-1}</style><p style='text-align:center'>Você encontra uma garrafa boiando na margem...</p><div class='bottle-container-c14'><details><summary><span class='bottle-icon-c14'>🍾</span></summary><div class='message-c14'>\"Procure pela árvore mais antiga da floresta próxima. Sob suas raízes, um segredo espera.\"<br>- O Velho Pescador</div></details></div>",
+    "opcoes": [ {"id": 1, "texto": "Ler a mensagem"} ],
+	"respostaCorreta": [1], 
+	"dificuldade": "normal", 
+	"categorias": ["Novacarta_14"], 
+	"fontes": [], 
+	"vantagem": "Uma pista misteriosa!", 
+	"desvantagem": "", 
+	"dica": "Clique na garrafa."
+},
+// 15. Onde está o Bicho? (Wally Ecológico)
+{
+    "id": "carta_15",
+    "tipo": "Pergunta",
+    "titulo": "Camuflagem Perfeita",
+    "pergunta": "Um Bicho-Pau está escondido nesta imagem de folhagem. Em qual quadrante (aproximado) ele está?<br><img src='/images/folhagem_com_bichopau.png' alt='Folhagem densa' style='width:100%;max-width:350px;height:auto;margin:10px auto;display:block;border:1px solid green;'><br><small>(Quadrantes: Sup Esq, Sup Dir, Inf Esq, Inf Dir)</small>",
+    "opcoes": [ {"id": 1, "texto": "Superior Esquerdo"}, {"id": 2, "texto": "Superior Direito"}, {"id": 3, "texto": "Inferior Esquerdo"}, {"id": 4, "texto": "Inferior Direito"} ],
+    "respostaCorreta": 3, // Assumindo que ele esteja no Inf Esq
+    "dificuldade": "dificil", 
+	"categorias": ["Novacarta_15"], 
+	"fontes": [], 
+	"vantagem": "Incrível! Você o encontrou.", 
+	"desvantagem": "Ele se camufla muito bem!", 
+	"dica": "Procure por um 'graveto' que parece fora do lugar na parte de baixo."
+},
+// 16. Indicador de Vento (Animação CSS)
+{
+    "id": "carta_16",
+    "tipo": "Outras",
+    "titulo": "Direção do Vento",
+    "pergunta": "<style>@keyframes rotateWind{to{transform:rotate(360deg)}}.wind-indicator-c16{width:80px;height:80px;margin:15px auto;position:relative}.wind-arrow-c16{width:100%;height:10px;background:#67e8f9;position:absolute;top:calc(50% - 5px);left:0;transform-origin:center;animation:rotateWind 8s linear infinite}.wind-arrow-c16::before{content:'';position:absolute;right:-5px;top:-5px;width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:15px solid #67e8f9}.wind-center-c16{width:10px;height:10px;background:#0891b2;border-radius:50%;position:absolute;top:calc(50% - 5px);left:calc(50% - 5px)}</style><p style='text-align:center'>O vento está soprando forte hoje!</p><div class='wind-indicator-c16'><div class='wind-arrow-c16'></div><div class='wind-center-c16'></div></div><p style='text-align:center;font-size:0.8em'>Isso pode afetar viagens ou dispersão de sementes/poluentes.</p>",
+    "opcoes": [ {"id": 1, "texto": "Sentir a brisa"} ], 
+	"respostaCorreta": [1], 
+	"dificuldade": "facil", 
+	"categorias": ["Novacarta_16"], 
+	"fontes": [], 
+	"vantagem": "O vento leva e traz...", 
+	"desvantagem": "", 
+	"dica": "Observe a seta girando."
+},
+// 17. Simulador de pH com Cores
+{
+    "id": "carta_17",
+    "tipo": "Pergunta",
+    "titulo": "Teste de pH",
+    "pergunta": "<style>.ph-strip-c17{width:80%;height:25px;margin:15px auto;border:1px solid grey;border-radius:4px;background:linear-gradient(to right, red, orange, yellow, lime, green, cyan, blue, purple)}.ph-indicator-c17{width:4px;height:35px;background:black;position:relative;margin:auto}.ph-indicator-c17::after{content:attr(data-label);position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:3px;font-size:.8em;background:white;padding:1px 4px;border:1px solid grey;white-space:nowrap}</style><p>Onde na escala de pH se encaixa o <strong>suco de limão</strong>?</p><div class='ph-strip-c17'></div><div class='ph-indicator-c17' style='left: 15%;' data-label='Ácido Forte'></div> <!-- Indicador no Ácido -->",
+    "opcoes": [ {"id": 1, "texto": "Ácido (Vermelho/Laranja)"}, {"id": 2, "texto": "Neutro (Verde)"}, {"id": 3, "texto": "Básico/Alcalino (Azul/Roxo)"} ],
+    "respostaCorreta": 1, 
+	"dificuldade": "facil", 
+	"categorias": ["Novacarta_17"], 
+	"fontes": [], 
+	"vantagem": "Correto!", 
+	"desvantagem": "Incorreto.", 
+	"dica": "Limão é azedo, o que isso indica sobre o pH?"
+},
+// 18. "Despoluir" Visualmente (Checkbox Hack)
+{
+    "id": "carta_18",
+    "tipo": "Vantagem",
+    "titulo": "Limpeza do Rio",
+    "pergunta": "<style>.river-c18{width:250px;height:100px;background:#a5f3fc url('/images/peixes_limpos.png') no-repeat center center;background-size:contain;border:2px solid #0ea5e9;margin:15px auto;position:relative;overflow:hidden;border-radius:5px}.pollution-c18{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(161, 98, 7, 0.6);/*Marrom poluído*/transition:opacity .5s;opacity:1;pointer-events:none}.cleanup-actions-c18{text-align:center;margin-top:10px}.cleanup-actions-c18 label{margin:0 10px;font-size:.9em;cursor:pointer}.cleanup-actions-c18 input{display:none}/* Esconde poluição se ambos marcados */#clean1:checked ~ #clean2:checked ~ .river-c18 .pollution-c18{opacity:0}</style><p>O rio está poluído! Marque as ações para limpá-lo:</p><div class='cleanup-actions-c18'><input type=checkbox id=clean1><label for=clean1>🚮 Remover Lixo</label><input type=checkbox id=clean2><label for=clean2>🌳 Plantar Margens</label></div><div class='river-c18'><div class='pollution-c18'></div></div>",
+    "opcoes": [ {"id": 1, "texto": "Limpar o Rio!"} ], 
+	"respostaCorreta": [1], 
+	"dificuldade": "facil", 
+	"categorias": ["Novacarta_18"], 
+	"fontes": [], 
+	"vantagem": "Rio limpo! +10 Progresso.", 
+	"desvantagem": "", 
+	"dica": "Clique nas duas ações para ver o rio ficar limpo."
+},
+// 19. Carta Certificado Personalizável (HTML Básico)
+{
+    "id": "carta_19",
+    "tipo": "Vantagem",
+    "titulo": "Prêmio Guardião da Nascente",
+    "pergunta": "<div style='border: 5px double #2563eb; padding: 20px; background: #eff6ff; text-align: center; max-width: 350px; margin: auto; font-family: cursive;'>\n  <h4 style='color: #1e3a8a; margin-bottom: 10px;'>Certificado de Mérito</h4>\n  <p>Conferido a:</p>\n  <p style='font-size: 1.3em; font-weight: bold; border-bottom: 1px dashed #93c5fd; padding-bottom: 5px; margin-bottom: 15px;'>Jogador Atual</p> \n  <p>Pela proteção exemplar de uma nascente vital.</p>\n  <p style='margin-top: 20px;'>🏆 <strong>+1 Estrela Fixa</strong> 🏆</p>\n</div>",
+    "opcoes": [ {"id": 1, "texto": "Receber Prêmio"} ], 
+	"respostaCorreta": [1], 
+	"dificuldade": "facil", 
+	"categorias": ["Novacarta_19"], 
+	"fontes": [], 
+	"vantagem": "Ganhou +1 Estrela Fixa!", 
+	"desvantagem": "", 
+	"dica": "Seu esforço foi reconhecido."
+},
+// 20. Quebra-Cabeça Visual Simples (Grid)
+{
+    "id": "carta_20",
+    "tipo": "Pergunta",
+    "titulo": "Encaixe a Folha",
+    "pergunta": "<style>.puzzle-grid-c20{display:grid;grid-template-columns:repeat(2, 60px);grid-template-rows:repeat(2, 60px);gap:2px;margin:15px auto;width:fit-content;border:2px solid #15803d}.puzzle-piece-c20{background-image:url('/images/folha_completa.png');background-size:122px 122px;border:1px solid #a7f3d0}.p1{background-position:0 0}.p2{background-position:-62px 0}.p3{background-position:0 -62px}.p4{background-color:#f0fdf4;background-image:none;border-style:dashed}</style><p>Qual parte da folha está faltando?</p><div class='puzzle-grid-c20'><div class='puzzle-piece-c20 p1'></div><div class='puzzle-piece-c20 p2'></div><div class='puzzle-piece-c20 p3'></div><div class='puzzle-piece-c20 p4'>?</div></div>",
+    "opcoes": [ {"id": 1, "texto": "Ponta superior direita"}, {"id": 2, "texto": "Base inferior esquerda"}, {"id": 3, "texto": "Ponta inferior direita"} ],
+    "respostaCorreta": 3, // Assumindo que p4 é a ponta inferior direita
+    "dificuldade": "facil", 
+	"categorias": ["Novacarta_20"], 
+	"fontes": [], 
+	"vantagem": "Correto!", 
+	"desvantagem": "Incorreto.", 
+	"dica": "Observe a forma das outras peças."
+},
+// 21. Efeito de Chuva (CSS Animation)
+{
+    "id": "carta_21",
+    "tipo": "Outras",
+    "titulo": "Chuva Benéfica",
+    "pergunta": "<style>@keyframes rain{0%{transform:translateY(-100px)}100%{transform:translateY(200px)}}.rain-container-c21{height:100px;background:#dbeafe;border:1px solid #93c5fd;overflow:hidden;position:relative;margin:15px auto;max-width:250px;border-radius:5px}.raindrop-c21{position:absolute;bottom:100%;width:1px;height:15px;background:linear-gradient(to bottom, rgba(147,197,253,0) 0%, rgba(96,165,250,1) 100%);animation:rain 1s linear infinite}.drop1{left:10%;animation-delay:0s}.drop2{left:25%;animation-delay:.3s}.drop3{left:40%;animation-delay:.6s}.drop4{left:55%;animation-delay:.1s}.drop5{left:70%;animation-delay:.4s}.drop6{left:85%;animation-delay:.7s}</style><p style='text-align:center'>Uma chuva leve e constante rega as plantas!</p><div class='rain-container-c21'><div class='raindrop-c21 drop1'></div><div class='raindrop-c21 drop2'></div><div class='raindrop-c21 drop3'></div><div class='raindrop-c21 drop4'></div><div class='raindrop-c21 drop5'></div><div class='raindrop-c21 drop6'></div></div><p style='text-align:center;font-size:0.9em'>Todas as 'plantações' no tabuleiro avançam um estágio (se aplicável).</p>",
+    "opcoes": [ {"id": 1, "texto": "Aproveitar a chuva"} ], 
+	"respostaCorreta": [1], 
+	"dificuldade": "facil", 
+	"categorias": ["Novacarta_21"], 
+	"fontes": [], 
+	"vantagem": "A natureza agradece!", 
+	"desvantagem": "", 
+	"dica": ""
+},
+// 22. Carta de Código de Cores (Resistor Simulado)
+{
+    "id": "carta_22",
+    "tipo": "Pergunta",
+    "titulo": "Código de Cores Eletrônico",
+    "pergunta": "<style>.resistor-c22{height:20px;width:150px;background:#fef3c7;border:2px solid #ca8a04;border-radius:10px;margin:20px auto;display:flex;justify-content:space-evenly;align-items:center;position:relative}.resistor-c22::before,.resistor-c22::after{content:'';position:absolute;top:calc(50% - 1px);width:20px;height:2px;background:#a1a1aa}.resistor-c22::before{left:-20px}.resistor-c22::after{right:-20px}.band-c22{width:10px;height:100%}</style><p>Este 'resistor' representa um componente eletrônico. As faixas coloridas indicam seu valor. Se Marrom=1, Vermelho=2, Laranja=3, qual o valor representado por Marrom-Vermelho-Laranja?</p><div class='resistor-c22'><div class='band-c22' style='background:brown'></div><div class='band-c22' style='background:red'></div><div class='band-c22' style='background:orange'></div><div class='band-c22' style='background:gold'></div><!-- Tolerância --></div>",
+    "opcoes": [ {"id": 1, "texto": "123 Ohms"}, {"id": 2, "texto": "1.2 KOhms (12 x 10^1)"}, {"id": 3, "texto": "12 KOhms (12 x 10^3)"}, {"id": 4, "texto": "321 Ohms"} ],
+    "respostaCorreta": 3, // 1 (Marrom) 2 (Vermelho) x 10^3 (Laranja) = 12000 Ohms = 12 KOhms
+    "dificuldade": "dificil", 
+	"categorias": ["Novacarta_22"], 
+	"fontes": ["Código de Cores Resistor"], 
+	"vantagem": "Correto! Leitura precisa.", 
+	"desvantagem": "Incorreto. Reveja como as cores se traduzem em valor.", 
+	"dica": "As duas primeiras faixas são dígitos, a terceira é o multiplicador (número de zeros)."
+},
+// 23. Análise de Solo (Cores + Pergunta)
+{
+    "id": "carta_23",
+    "tipo": "Pergunta",
+    "titulo": "Análise de Solo",
+    "pergunta": "<p>Você coletou uma amostra de solo. A cor predominante pode indicar características:</p><ul style='list-style:none;padding:0;margin:10px 0 15px 0;text-align:center'><li style='margin-bottom:5px'><span style='display:inline-block;width:15px;height:15px;background:#6b21a8;border-radius:3px;margin-right:5px;vertical-align:middle'></span><strong>Roxo/Escuro:</strong> Rico em matéria orgânica, fértil.</li><li style='margin-bottom:5px'><span style='display:inline-block;width:15px;height:15px;background:#fef08a;border-radius:3px;margin-right:5px;vertical-align:middle'></span><strong>Amarelado/Claro:</strong> Pode indicar boa drenagem, mas pobre em nutrientes.</li><li style='margin-bottom:5px'><span style='display:inline-block;width:15px;height:15px;background:#f87171;border-radius:3px;margin-right:5px;vertical-align:middle'></span><strong>Avermelhado:</strong> Rico em ferro, comum em solos tropicais.</li></ul><p>Sua amostra é <strong>AVERMELHADA</strong>. O que isso provavelmente indica?</p>",
+    "opcoes": [ {"id": 1, "texto": "Solo muito fértil e orgânico"}, {"id": 2, "texto": "Solo pobre e arenoso"}, {"id": 3, "texto": "Solo com alto teor de ferro"} ],
+    "respostaCorreta": 3, 
+	"dificuldade": "facil", 
+	"categorias": ["Novacarta_23"], 
+	"fontes": ["Pedologia"], 
+	"vantagem": "Correto!", 
+	"desvantagem": "Incorreto, veja a descrição da cor vermelha.", 
+	"dica": "A cor vermelha vem de um metal oxidado."
+},
+// 24. Carta de Evento Climático (Visual)
+{
+    "id": "carta_24",
+    "tipo": "Desvantagem",
+    "titulo": "Onda de Calor Extremo!",
+    "pergunta": "<style>@keyframes heatwave{0%,100%{opacity:0.5}50%{opacity:0.9}} .heatwave-bg-c24{background:linear-gradient(to bottom, #fca5a5, #ef4444);padding:20px;border-radius:8px;text-align:center;color:white;margin:15px auto;max-width:300px;position:relative;overflow:hidden}.heatwave-bg-c24::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at center, rgba(255,235,59,0.4) 0%,rgba(255,235,59,0) 70%);animation:heatwave 3s ease-in-out infinite;opacity:0.5}</style><div class='heatwave-bg-c24'><p style='font-size:3em;margin-bottom:0;text-shadow:1px 1px 2px rgba(0,0,0,0.5);'>☀️🔥</p><p style='font-weight:bold;font-size:1.1em;margin-top:0;text-shadow:1px 1px 2px rgba(0,0,0,0.5);'>Onda de Calor Intensa!</p><p style='font-size:0.9em;text-shadow:1px 1px 2px rgba(0,0,0,0.5);'>O esforço é maior. Todos os jogadores perdem <strong>5 de Progresso</strong>.</p></div>",
+    "opcoes": [ {"id": 1, "texto": "Sentir o calor..."} ], 
+	"respostaCorreta": [], 
+	"dificuldade": "facil", 
+	"categorias": ["Novacarta_24"], 
+	"fontes": [], 
+	"vantagem": "", 
+	"desvantagem": "Todos perderam 5 de Progresso.", 
+	"dica": "O calor excessivo desgasta."
+},
+// 25. Labirinto Simples (HTML Tabela)
+{
+    "id": "carta_25",
+    "tipo": "Pergunta",
+    "titulo": "Labirinto da Compostagem",
+    "pergunta": "<style>.maze-c25{border-collapse:collapse;margin:15px auto}.maze-c25 td{width:30px;height:30px;border:1px solid #ccc;text-align:center;vertical-align:middle;font-size:1.2em}.wall{background-color:#6b7280}.start{background-color:#bbf7d0}.end{background-color:#facc15}</style><p>Ajude o resíduo orgânico (🍎) a chegar na composteira (♻️). Qual o caminho <strong>mais curto</strong> (Norte, Sul, Leste, Oeste)?</p><table class='maze-c25'><tr><td class='start'>🍎</td><td></td><td class='wall'></td><td></td></tr><tr><td class='wall'></td><td></td><td class='wall'></td><td></td></tr><tr><td></td><td></td><td></td><td class='wall'></td></tr><tr><td></td><td class='wall'></td><td></td><td class='end'>♻️</td></tr></table>",
+    "opcoes": [ {"id": 1, "texto": "Leste, Sul, Sul, Leste, Sul"}, {"id": 2, "texto": "Sul, Leste, Leste, Sul, Sul"}, {"id": 3, "texto": "Leste, Sul, Leste, Sul, Leste, Sul"} ],
+    "respostaCorreta": 3, // L, S, L, S, L, S
+    "dificuldade": "normal", 
+	"categorias": ["Novacarta_25"], 
+	"fontes": [], 
+	"vantagem": "Correto! Caminho encontrado.", 
+	"desvantagem": "Incorreto. Siga as passagens livres.", 
+	"dica": "Trace o caminho com o dedo ou mentalmente."
+}
 ];
 
 export default manejo;
