@@ -2544,7 +2544,7 @@ const manejo = [
     "vantagem": "Você sobreviveu à Caverna das Raízes Retorcidas!", // Mensagem genérica
     "desvantagem": "", // Não há 'resposta errada' na confirmação
     "dica": "Cada escolha leva a um destino diferente."
-}
+},
 
 // --- MAIS CARTAS CRIATIVAS (6-25) ---
 // Implementando as outras ideias que listamos...
