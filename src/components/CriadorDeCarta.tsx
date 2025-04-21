@@ -1,20 +1,20 @@
 // src/components/CriadorDeCarta.tsx
 
 import React, { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button"; // <-- Importado
-import { Input } from "@/components/ui/input";   // <-- Importado
-import { Textarea } from "@/components/ui/textarea"; // <-- Importado
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // <-- Importado (Usado para dropdowns)
-import { Checkbox } from "@/components/ui/checkbox"; // <-- Importado (Usado para travar categorias/fontes)
-import { ScrollArea } from "@/components/ui/scroll-area"; // <-- Importado
-import { Alert, AlertDescription } from "@/components/ui/alert"; // <-- Importado
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"; // <-- Importado
-import { Badge } from "@/components/ui/badge"; // <-- Importado
+import { Button } from "@/components/ui/button"; // Importado
+import { Input } from "@/components/ui/input";   // Importado
+import { Textarea } from "@/components/ui/textarea"; // Importado
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Importado
+import { Checkbox } from "@/components/ui/checkbox"; // Importado
+import { ScrollArea } from "@/components/ui/scroll-area"; // Importado
+import { Alert, AlertDescription } from "@/components/ui/alert"; // Importado
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"; // Importado
+import { Badge } from "@/components/ui/badge"; // Importado
 import { cn } from "@/lib/utils"; // Assumindo que você tem este utilitário
 
 // --- Tipos de Dados (COPIADOS/ATUALIZADOS de EcoChallenge.tsx) ---
 
-interface Opcao { id: number; texto: string; ordemTemp?: string; } // ordemTemp adicionado para UI
+interface Opcao { id: number; texto: string; ordemTemp?: string; }
 interface ItemRelacionar { id: number; texto: string; }
 interface ZonaClicavel { id: number; x: number; y: number; largura: number; altura: number; descricao?: string; }
 interface FragmentoCompletar { id: number; texto: string; }
@@ -129,7 +129,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
                             : tipo === 'Ordem' ? ` (Ordem Inválida)` : '';
 
                         return (
-                            <li key={op.id} className={cn("text-sm", isCorrect && "text-green-700 font-semibold")}>
+                            <li key={op.id} className={cn("mb-1 text-sm", isCorrect && "text-green-700 font-semibold")}>
                                 {op.texto}
                                 {isCorrect && tipo !== 'Vantagem' && tipo !== 'Ordem' && <span className="text-green-600 text-xs font-normal"> (Correta)</span>}
                                 {tipo === 'Ordem' && <span className="text-blue-600 text-xs font-normal">{orderInfo}</span>}
@@ -152,7 +152,10 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             </CardHeader>
             <CardContent className="pt-2 pb-3 space-y-2">
                 {renderedSpecifics}
-                <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1" dangerouslySetInnerHTML={{ __html: pergunta || "(Sem Pergunta/Descrição)" }} />
+                {/* Aumentei a altura mínima aqui */}
+                <ScrollArea className="h-auto max-h-60 rounded-md border p-3 mt-2 bg-white/80 min-h-[100px]">
+                     <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1" dangerouslySetInnerHTML={{ __html: pergunta || "(Sem Pergunta/Descrição)" }} />
+                </ScrollArea>
                 {renderedOptions}
             </CardContent>
             {(categorias.length > 0 || fontes.length > 0 || dica || vantagem || desvantagem) && (
@@ -197,7 +200,7 @@ const CriadorDeCarta: React.FC = () => {
     const [paresCorretosInput, setParesCorretosInput] = useState("");
     const [imagemURLPontoCerto, setImagemURLPontoCerto] = useState("");
     const [zonasClicaveis, setZonasClicaveis] = useState<ZonaClicavel[]>([]);
-    const [novaZona, setNovaZona] = useState<Partial<ZonaClicavel>>({x:0, y:0, largura: 0.1, altura: 0.1}); // Defaults
+    const [novaZona, setNovaZona] = useState<Partial<ZonaClicavel>>({x:0, y:0, largura: 0.1, altura: 0.1});
     const [respostaCorretaPontoCerto, setRespostaCorretaPontoCerto] = useState<number | null>(null);
     const [fraseIncompleta, setFraseIncompleta] = useState("");
     const [fragmentos, setFragmentos] = useState<FragmentoCompletar[]>([]);
@@ -208,7 +211,7 @@ const CriadorDeCarta: React.FC = () => {
     const [baralhosCarregados, setBaralhosCarregados] = useState<BaralhoCarregado[]>([]);
     const [manterCartasEditadas, setManterCartasEditadas] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null); // Renomeado de 'errors'
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const perguntaTextareaRef = useRef<HTMLTextAreaElement>(null);
 
     const parseJSDeckFileLocal = (content: string): Carta[] => {
@@ -234,7 +237,7 @@ const CriadorDeCarta: React.FC = () => {
             } catch (error: any) { loadErrors.push(`Erro ao ler ${file.name}: ${error.message}`); }
         }
         if (newBaralhos.length > 0) { setBaralhosCarregados((prev) => [...prev, ...newBaralhos]); }
-        if (loadErrors.length > 0) { setErrorMessage(loadErrors.join(" ")); } // Mostra erros
+        if (loadErrors.length > 0) { setErrorMessage(loadErrors.join(" ")); }
         setIsLoading(false); e.target.value = '';
      };
     const adicionarBaralho = (baralhoId: number) => {
@@ -264,13 +267,13 @@ const CriadorDeCarta: React.FC = () => {
     const handleRemoveColunaB = (id: number) => setColunaBItems(prev => prev.filter(i => i.id !== id));
     const handleAddZona = () => {
          const id = zonasClicaveis.length > 0 ? Math.max(...zonasClicaveis.map(z => z.id)) + 1 : 1;
-         const x = parseFloat(String(novaZona.x || 0).replace(',', '.')); // Aceita , ou .
+         const x = parseFloat(String(novaZona.x || 0).replace(',', '.'));
          const y = parseFloat(String(novaZona.y || 0).replace(',', '.'));
          const w = parseFloat(String(novaZona.largura || 0.1).replace(',', '.'));
          const h = parseFloat(String(novaZona.altura || 0.1).replace(',', '.'));
-         if (!isNaN(x) && !isNaN(y) && !isNaN(w) && !isNaN(h) && w > 0 && h > 0 && x>=0 && x<=1 && y>=0 && y<=1 && w+x<=1 && h+y<=1) { // Validação
+         if (!isNaN(x) && !isNaN(y) && !isNaN(w) && !isNaN(h) && w > 0 && h > 0 && x>=0 && x<=1 && y>=0 && y<=1 && w+x<=1 && h+y<=1) {
             setZonasClicaveis(prev => [...prev, { id, x, y, largura: w, altura: h, descricao: novaZona.descricao || "" }]);
-            setNovaZona({x:0, y:0, largura: 0.1, altura: 0.1}); // Limpa formulário
+            setNovaZona({x:0, y:0, largura: 0.1, altura: 0.1});
          } else { alert("Valores inválidos para a zona (X, Y, Largura, Altura devem ser números entre 0 e 1, e X+Largura <= 1, Y+Altura <= 1). Use ponto ou vírgula."); }
      };
     const handleRemoveZona = (id: number) => { setZonasClicaveis(prev => prev.filter(z => z.id !== id)); if (respostaCorretaPontoCerto === id) setRespostaCorretaPontoCerto(null); };
@@ -318,9 +321,9 @@ const CriadorDeCarta: React.FC = () => {
         if (!titulo.trim() || !tipo) { alert("Título e Tipo são obrigatórios."); return; }
         let finalRespostaCorreta: number | number[] | { aId: number; bId: number }[] = [];
         let cartaEspecificaProps: Partial<Carta> = {};
-        let camposNecessarios: Partial<Carta> = { opcoes: [] }; // Default para evitar erro
+        let camposNecessarios: Partial<Carta> = { opcoes: [] };
 
-        try { // Adiciona try-catch para erros de parsing/lógica
+        try {
             switch (tipo) {
                 case "Pergunta": case "ContraTempo":
                     if (respostaCorreta.length !== 1) throw new Error(`Tipo ${tipo} exige uma resposta correta.`);
@@ -341,9 +344,9 @@ const CriadorDeCarta: React.FC = () => {
                         else { posicoes.set(pos, op.id); maxPos = Math.max(maxPos, pos); }
                     });
                     if (!ordemValida || posicoes.size !== opcoes.length || maxPos !== opcoes.length) { throw new Error("Erro na ordem: posições devem ser únicas de 1 a N."); }
-                    for (let i = 1; i <= maxPos; i++) { ordemIds.push(posicoes.get(i)!); } // Cria array ordenado
+                    for (let i = 1; i <= maxPos; i++) { ordemIds.push(posicoes.get(i)!); }
                     finalRespostaCorreta = ordemIds;
-                    camposNecessarios = { opcoes: opcoes.map(({ordemTemp, ...rest}) => rest) }; // Salva sem ordemTemp
+                    camposNecessarios = { opcoes: opcoes.map(({ordemTemp, ...rest}) => rest) };
                     break;
                 case "RelacionarColunas":
                     try {
@@ -368,22 +371,16 @@ const CriadorDeCarta: React.FC = () => {
                     finalRespostaCorreta = ordemIdsFrag;
                     camposNecessarios = { fraseIncompleta, fragmentos, opcoes: [] };
                     break;
-                default:
-                    // Caso para garantir que 'tipo' seja tratado
-                    const check: never = tipo;
-                    throw new Error(`Tipo de carta desconhecido: ${check}`);
+                default: const check: never = tipo; throw new Error(`Tipo de carta desconhecido: ${check}`);
             }
-        } catch (error: any) {
-            alert(`Erro ao preparar carta: ${error.message}`);
-            return;
-        }
+        } catch (error: any) { alert(`Erro ao preparar carta: ${error.message}`); return; }
 
         const novaCarta: Carta = {
-            id: editIndex !== null ? cards[editIndex].id : `new_${Date.now()}_${Math.random().toString(16).slice(2)}`, // ID mais único
+            id: editIndex !== null ? cards[editIndex].id : `new_${Date.now()}_${Math.random().toString(16).slice(2)}`,
             tipo, titulo, pergunta, dificuldade, categorias, fontes,
             vantagem, desvantagem, dica,
             respostaCorreta: finalRespostaCorreta,
-            ...camposNecessarios, // Garante que 'opcoes', 'colunaA' etc. sejam incluídos
+            ...camposNecessarios,
             ...cartaEspecificaProps,
         } as Carta;
 
@@ -414,7 +411,7 @@ const CriadorDeCarta: React.FC = () => {
                  if (Array.isArray(carta.respostaCorreta)) {
                      const ordemCorreta = carta.respostaCorreta as number[];
                      setOpcoes(currentOpts => currentOpts.map(op => ({...op, ordemTemp: ordemCorreta.indexOf(op.id) >= 0 ? String(ordemCorreta.indexOf(op.id) + 1) : "" })));
-                     setRespostaCorreta(ordemCorreta); // Mantem apenas para referencia interna
+                     // Não setamos respostaCorreta aqui, pois a ordem está em ordemTemp
                  }
                  break;
             case "RelacionarColunas":
@@ -437,7 +434,7 @@ const CriadorDeCarta: React.FC = () => {
             if (rest.tipo !== "CompletarFrase") { delete (cardData as Partial<CartaCompletarFrase>).fraseIncompleta; delete (cardData as Partial<CartaCompletarFrase>).fragmentos; }
             if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo)) { delete (cardData as CartaPergunta).opcoes; }
             if (rest.tipo === "RelacionarColunas" || rest.tipo === "PontoCerto" || rest.tipo === "CompletarFrase") { cardData.opcoes = []; }
-            if (rest.tipo === "Ordem" && cardData.opcoes) { cardData.opcoes = cardData.opcoes.map(({ordemTemp, ...o}) => o); } // Remove ordemTemp
+            if (rest.tipo === "Ordem" && cardData.opcoes) { cardData.opcoes = cardData.opcoes.map(({ordemTemp, ...o}) => o); }
             return cardData;
         });
     };
@@ -445,17 +442,24 @@ const CriadorDeCarta: React.FC = () => {
     const downloadCode = (format: 'js' | 'json') => { const element = document.createElement("a"); const fileContent = generateCode(format); const fileType = format === 'js' ? 'text/javascript' : 'application/json'; const fileName = `${deckName || 'meu_baralho'}.${format}`; const file = new Blob([fileContent], { type: fileType }); element.href = URL.createObjectURL(file); element.download = fileName; document.body.appendChild(element); element.click(); document.body.removeChild(element); };
 
     return (
-        <div className="p-4 max-w-6xl mx-auto"> {/* Aumentado max-w */}
+        <div className="p-4 max-w-6xl mx-auto">
             <h1 className="text-3xl font-bold mb-6 text-center">Criador de Cartas Eco Challenge</h1>
 
             {/* Seção de Upload/Gerenciamento de Baralhos */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <Card>
-                    <CardHeader><CardTitle className="text-xl">Nome do Baralho & Download</CardTitle></CardHeader>
+                    <CardHeader>
+                        <CardTitle className="text-xl">Nome do Baralho & Download</CardTitle>
+                    </CardHeader>
                     <CardContent className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium mb-1">Nome (para arquivo .js)</label>
-                            <Input type="text" value={deckName} onChange={(e) => setDeckName(e.target.value.replace(/[^a-zA-Z0-9_]/g, '_'))} placeholder="meu_baralho"/>
+                            <Input
+                                type="text"
+                                value={deckName}
+                                onChange={(e) => setDeckName(e.target.value.replace(/[^a-zA-Z0-9_]/g, '_'))}
+                                placeholder="meu_baralho"
+                            />
                         </div>
                         <div className="flex space-x-4">
                             <Button onClick={() => downloadCode('js')} className="bg-blue-600 hover:bg-blue-700 text-white flex-1">Baixar .js</Button>
@@ -464,7 +468,9 @@ const CriadorDeCarta: React.FC = () => {
                     </CardContent>
                 </Card>
                  <Card>
-                    <CardHeader><CardTitle className="text-xl">Carregar/Gerenciar Baralhos</CardTitle></CardHeader>
+                    <CardHeader>
+                        <CardTitle className="text-xl">Carregar/Gerenciar Baralhos</CardTitle>
+                    </CardHeader>
                     <CardContent className="space-y-3">
                         <Input type="file" accept=".js,.json" onChange={handleFileUpload} multiple />
                         {isLoading && <p className="text-sm text-blue-600">Carregando...</p>}
@@ -475,7 +481,7 @@ const CriadorDeCarta: React.FC = () => {
                                     <Checkbox id="manterEditadas" checked={manterCartasEditadas} onCheckedChange={(checked) => setManterCartasEditadas(Boolean(checked))} />
                                     <label htmlFor="manterEditadas" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Manter editadas ao remover</label>
                                 </div>
-                                <ScrollArea className="h-40 border rounded-md p-2">
+                                <ScrollArea className="h-40 border rounded-md p-2"> {/* Aumentei altura */}
                                     <ul className="space-y-1">
                                         {baralhosCarregados.map((b) => (
                                             <li key={b.id} className="flex items-center justify-between p-1 even:bg-gray-50">
@@ -495,17 +501,16 @@ const CriadorDeCarta: React.FC = () => {
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
                  {/* Formulário de Criação/Edição */}
-                <Card className="lg:sticky lg:top-4 self-start"> {/* Torna o formulário fixo em telas grandes */}
+                <Card className="lg:sticky lg:top-4 self-start">
                     <CardHeader>
                          <CardTitle className="text-2xl">{editIndex !== null ? `Editando: ${cards[editIndex]?.titulo || `Carta ${editIndex + 1}`}` : "Criar Nova Carta"}</CardTitle>
                          <AlertDescription>Preencha os campos para {editIndex !== null ? 'atualizar' : 'criar'} uma carta.</AlertDescription>
                     </CardHeader>
                     <CardContent className="space-y-5">
-                         {/* Campos Comuns */}
+                        {/* Campos Comuns */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1">Tipo*</label>
-                                {/* Usando Select do Shadcn */}
                                 <Select value={tipo} onValueChange={(value) => setTipo(value as TipoCarta)}>
                                     <SelectTrigger><SelectValue placeholder="Selecione o tipo..." /></SelectTrigger>
                                     <SelectContent>
@@ -521,7 +526,7 @@ const CriadorDeCarta: React.FC = () => {
 
                         <div>
                             <label className="block text-sm font-medium mb-1">Pergunta/Descrição* (HTML permitido)</label>
-                             <Textarea ref={perguntaTextareaRef} value={pergunta} onChange={(e) => setPergunta(e.target.value)} className="h-36 font-mono text-sm" placeholder="Escreva a pergunta..."/>
+                             <Textarea ref={perguntaTextareaRef} value={pergunta} onChange={(e) => setPergunta(e.target.value)} className="h-36 font-mono text-sm" placeholder="Escreva a pergunta... Use HTML para formatar ou inserir popups."/>
                              <div className="flex gap-2 mt-1">
                                 <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('imagem')}>Inserir Popup Imagem</Button>
                                 <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('video')}>Inserir Popup Vídeo</Button>
@@ -530,129 +535,141 @@ const CriadorDeCarta: React.FC = () => {
 
                         {/* --- Campos Condicionais --- */}
                          {["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo) && (
-                            <div className="bg-gray-50 p-4 rounded space-y-4 border">
-                                <h3 className="text-lg font-semibold text-gray-800">Opções de Resposta</h3>
-                                <div className="flex space-x-2">
-                                    <Input type="text" value={novaOpcao} onChange={(e) => setNovaOpcao(e.target.value)} placeholder="Texto da nova opção" className="flex-1"/>
-                                    <Button type="button" onClick={handleAddOpcao}>Adicionar Opção</Button>
-                                </div>
-                                <ScrollArea className="max-h-48 pr-2">
-                                    <ul className="space-y-3">
-                                        {opcoes.map((o) => (
-                                            <li key={o.id} className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 border-t pt-2">
-                                                <span className="flex-1 text-sm py-1">{o.id}: {o.texto}</span>
-                                                {tipo === "Ordem" && (
-                                                    <div className="flex items-center space-x-1 my-1">
-                                                        <label htmlFor={`order-${o.id}`} className="text-xs">Pos:</label>
-                                                        <Input id={`order-${o.id}`} type="number" min="1" step="1" onChange={(e) => handleSetOrder(o.id, e.target.value)} value={o.ordemTemp ?? ""} className="border p-1 w-16 rounded text-sm h-8"/>
-                                                    </div>
-                                                )}
-                                                {(tipo === "Pergunta" || tipo === "MultiplaEscolha" || tipo === "Outras" || tipo === "ContraTempo") && tipo !== "Vantagem" && tipo !== "Desvantagem" && (
-                                                    <Button type="button" onClick={() => handleToggleRespostaCorreta(o.id)} variant={respostaCorreta.includes(o.id) ? "default" : "outline"} size="sm" className={cn("h-8", respostaCorreta.includes(o.id) && "bg-green-600 hover:bg-green-700")}>
-                                                        {respostaCorreta.includes(o.id) ? "Correta" : "Marcar"}
-                                                    </Button>
-                                                )}
-                                                <Button type="button" onClick={() => handleRemoveOpcao(o.id)} variant="destructive" size="sm" className="h-8">Remover</Button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </ScrollArea>
-                                {tipo === "Ordem" && <p className="text-xs text-gray-500 mt-2">Defina a posição correta (1, 2, 3...) para cada opção.</p>}
-                                {tipo === "Vantagem" && <p className="text-xs text-green-600 mt-2">Todas as opções serão consideradas corretas.</p>}
-                                {tipo === "Desvantagem" && <p className="text-xs text-red-600 mt-2">Nenhuma opção será considerada correta.</p>}
-                            </div>
+                            <Card className="bg-gray-50 border">
+                                <CardHeader className="pb-2"><CardTitle className="text-lg">Opções de Resposta</CardTitle></CardHeader>
+                                <CardContent className="space-y-3 pt-0">
+                                    <div className="flex space-x-2">
+                                        <Input type="text" value={novaOpcao} onChange={(e) => setNovaOpcao(e.target.value)} placeholder="Texto da nova opção" className="flex-1"/>
+                                        <Button type="button" onClick={handleAddOpcao}>Adicionar</Button>
+                                    </div>
+                                    <ScrollArea className="max-h-48 pr-2 border rounded bg-white">
+                                        <ul className="space-y-2 p-2">
+                                            {opcoes.map((o) => (
+                                                <li key={o.id} className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 border-b pb-2 last:border-b-0">
+                                                    <span className="flex-1 text-sm py-1">{o.id}: {o.texto}</span>
+                                                    {tipo === "Ordem" && (
+                                                        <div className="flex items-center space-x-1 my-1">
+                                                            <label htmlFor={`order-${o.id}`} className="text-xs">Pos:</label>
+                                                            <Input id={`order-${o.id}`} type="number" min="1" step="1" onChange={(e) => handleSetOrder(o.id, e.target.value)} value={o.ordemTemp ?? ""} className="border p-1 w-16 rounded text-sm h-8"/>
+                                                        </div>
+                                                    )}
+                                                    {(tipo === "Pergunta" || tipo === "MultiplaEscolha" || tipo === "Outras" || tipo === "ContraTempo") && tipo !== "Vantagem" && tipo !== "Desvantagem" && (
+                                                        <Button type="button" onClick={() => handleToggleRespostaCorreta(o.id)} variant={respostaCorreta.includes(o.id) ? "default" : "outline"} size="sm" className={cn("h-8", respostaCorreta.includes(o.id) && "bg-green-600 hover:bg-green-700")}>
+                                                            {respostaCorreta.includes(o.id) ? "Correta" : "Marcar"}
+                                                        </Button>
+                                                    )}
+                                                    <Button type="button" onClick={() => handleRemoveOpcao(o.id)} variant="destructive" size="sm" className="h-8">Remover</Button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </ScrollArea>
+                                    {tipo === "Ordem" && <p className="text-xs text-gray-500 mt-2">Defina a posição correta (1, 2, 3...) para cada opção.</p>}
+                                    {tipo === "Vantagem" && <p className="text-xs text-green-600 mt-2">Todas as opções serão consideradas corretas.</p>}
+                                    {tipo === "Desvantagem" && <p className="text-xs text-red-600 mt-2">Nenhuma opção será considerada correta.</p>}
+                                </CardContent>
+                            </Card>
                         )}
 
                         {tipo === "ContraTempo" && (
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Tempo Limite (segundos)</label>
-                                <Input type="number" value={tempoLimite} onChange={(e) => setTempoLimite(Math.max(5, parseInt(e.target.value, 10) || 5))} min="5" className="border p-2 rounded w-24"/>
-                            </div>
+                            <Card className="bg-yellow-50 border border-yellow-200">
+                                <CardHeader className="pb-2"><CardTitle className="text-lg text-yellow-800">Configuração Contra-Tempo</CardTitle></CardHeader>
+                                <CardContent>
+                                    <label className="block text-sm font-medium mb-1">Tempo Limite (segundos)</label>
+                                    <Input type="number" value={tempoLimite} onChange={(e) => setTempoLimite(Math.max(5, parseInt(e.target.value, 10) || 5))} min="5" className="border p-2 rounded w-24"/>
+                                </CardContent>
+                            </Card>
                         )}
 
                         {tipo === "RelacionarColunas" && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded border">
-                                <div> {/* Coluna A */}
-                                    <h3 className="text-lg font-semibold mb-2">Coluna A</h3>
-                                    <div className="flex space-x-2 mb-2">
-                                        <Input type="text" value={novaColunaA} onChange={e => setNovaColunaA(e.target.value)} placeholder="Texto item A" className="flex-1"/>
-                                        <Button type="button" onClick={handleAddColunaA}>Add A</Button>
+                            <Card className="bg-blue-50 border border-blue-200">
+                                <CardHeader className="pb-2"><CardTitle className="text-lg text-blue-800">Configuração Relacionar Colunas</CardTitle></CardHeader>
+                                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                    <div> {/* Coluna A */}
+                                        <h4 className="text-md font-semibold mb-2">Coluna A</h4>
+                                        <div className="flex space-x-2 mb-2">
+                                            <Input type="text" value={novaColunaA} onChange={e => setNovaColunaA(e.target.value)} placeholder="Texto item A" className="flex-1"/>
+                                            <Button type="button" onClick={handleAddColunaA} size="sm">Add A</Button>
+                                        </div>
+                                        <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="text-sm space-y-1">{colunaAItems.map(item => <li key={item.id} className="flex justify-between items-center"><span>{item.id}: {item.texto}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveColunaA(item.id)}>X</Button></li>)}</ul></ScrollArea>
                                     </div>
-                                    <ScrollArea className="h-24 border rounded p-1"><ul className="text-sm space-y-1">{colunaAItems.map(item => <li key={item.id} className="flex justify-between items-center"><span>{item.id}: {item.texto}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveColunaA(item.id)}>X</Button></li>)}</ul></ScrollArea>
-                                </div>
-                                <div> {/* Coluna B */}
-                                    <h3 className="text-lg font-semibold mb-2">Coluna B</h3>
-                                    <div className="flex space-x-2 mb-2">
-                                        <Input type="text" value={novaColunaB} onChange={e => setNovaColunaB(e.target.value)} placeholder="Texto item B" className="flex-1"/>
-                                        <Button type="button" onClick={handleAddColunaB}>Add B</Button>
+                                    <div> {/* Coluna B */}
+                                        <h4 className="text-md font-semibold mb-2">Coluna B</h4>
+                                        <div className="flex space-x-2 mb-2">
+                                            <Input type="text" value={novaColunaB} onChange={e => setNovaColunaB(e.target.value)} placeholder="Texto item B" className="flex-1"/>
+                                            <Button type="button" onClick={handleAddColunaB} size="sm">Add B</Button>
+                                        </div>
+                                        <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="text-sm space-y-1">{colunaBItems.map(item => <li key={item.id} className="flex justify-between items-center"><span>{item.id}: {item.texto}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveColunaB(item.id)}>X</Button></li>)}</ul></ScrollArea>
                                     </div>
-                                    <ScrollArea className="h-24 border rounded p-1"><ul className="text-sm space-y-1">{colunaBItems.map(item => <li key={item.id} className="flex justify-between items-center"><span>{item.id}: {item.texto}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveColunaB(item.id)}>X</Button></li>)}</ul></ScrollArea>
-                                </div>
-                                <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium mb-1">Pares Corretos (JSON: [{"aId": num, "bId": num}, ...])</label>
-                                    <Textarea value={paresCorretosInput} onChange={e => setParesCorretosInput(e.target.value)} className="h-20 font-mono text-xs" placeholder='[{"aId": 1, "bId": 101}, {"aId": 2, "bId": 102}]'/>
-                                </div>
-                            </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium mb-1">Pares Corretos (JSON: [{"aId": num, "bId": num}, ...])</label>
+                                        <Textarea value={paresCorretosInput} onChange={e => setParesCorretosInput(e.target.value)} className="h-20 font-mono text-xs" placeholder='[{"aId": 1, "bId": 101}, {"aId": 2, "bId": 102}]'/>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         )}
 
-                        {tipo === "PontoCerto" && (
-                            <div className="bg-gray-50 p-4 rounded space-y-4 border">
-                                <h3 className="text-lg font-semibold">Configuração Ponto Certo</h3>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">URL da Imagem Principal*</label>
-                                    <Input type="text" value={imagemURLPontoCerto} onChange={e => setImagemURLPontoCerto(e.target.value)} placeholder="/images/mapa_interativo.png" />
-                                </div>
-                                <div>
-                                    <h4 className="text-md font-semibold mb-2">Adicionar Zona Clicável</h4>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 border p-2 rounded items-end">
-                                        <Input type="number" placeholder="X (0-1)" value={novaZona.x ?? ""} onChange={e => handleNovaZonaChange('x', e.target.value)} className="text-sm h-9" step="0.01"/>
-                                        <Input type="number" placeholder="Y (0-1)" value={novaZona.y ?? ""} onChange={e => handleNovaZonaChange('y', e.target.value)} className="text-sm h-9" step="0.01"/>
-                                        <Input type="number" placeholder="Largura (0-1)" value={novaZona.largura ?? ""} onChange={e => handleNovaZonaChange('largura', e.target.value)} className="text-sm h-9" step="0.01"/>
-                                        <Input type="number" placeholder="Altura (0-1)" value={novaZona.altura ?? ""} onChange={e => handleNovaZonaChange('altura', e.target.value)} className="text-sm h-9" step="0.01"/>
-                                        <Input type="text" placeholder="Descrição (Opcional)" value={novaZona.descricao ?? ""} onChange={e => handleNovaZonaChange('descricao', e.target.value)} className="text-sm h-9 col-span-2 sm:col-span-3"/>
-                                        <Button type="button" onClick={handleAddZona} size="sm" className="h-9">Adicionar Zona</Button>
+                         {tipo === "PontoCerto" && (
+                             <Card className="bg-indigo-50 border border-indigo-200">
+                                <CardHeader className="pb-2"><CardTitle className="text-lg text-indigo-800">Configuração Ponto Certo</CardTitle></CardHeader>
+                                <CardContent className="space-y-4 pt-2">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">URL da Imagem Principal*</label>
+                                        <Input type="text" value={imagemURLPontoCerto} onChange={e => setImagemURLPontoCerto(e.target.value)} placeholder="/images/mapa_interativo.png" />
                                     </div>
-                                     <h4 className="text-md font-semibold mb-1 mt-3">Zonas Adicionadas</h4>
-                                     <ScrollArea className="h-32 border rounded p-1">
-                                         <ul className="text-sm space-y-1">
-                                            {zonasClicaveis.map(z => (
-                                                <li key={z.id} className="flex justify-between items-center odd:bg-white even:bg-gray-100 px-1 py-0.5">
-                                                    <span>ID:{z.id} ({z.x},{z.y} {z.largura}x{z.altura}) {z.descricao}</span>
-                                                    <div className="flex items-center gap-1">
-                                                        <Button type="button" variant={respostaCorretaPontoCerto === z.id ? "default" : "outline"} size="xs" className={cn("h-6 px-1.5", respostaCorretaPontoCerto === z.id && "bg-green-600")} onClick={() => handleSetRespostaPontoCerto(z.id)}>Correta</Button>
-                                                        <Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveZona(z.id)}>X</Button>
-                                                    </div>
-                                                </li>
-                                            ))}
-                                         </ul>
-                                     </ScrollArea>
-                                </div>
-                            </div>
+                                    <div>
+                                        <h4 className="text-md font-semibold mb-2">Adicionar Zona Clicável</h4>
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 border p-2 rounded items-end bg-white">
+                                            <Input type="number" placeholder="X (0-1)" value={novaZona.x ?? ""} onChange={e => handleNovaZonaChange('x', e.target.value)} className="text-sm h-9" step="0.01"/>
+                                            <Input type="number" placeholder="Y (0-1)" value={novaZona.y ?? ""} onChange={e => handleNovaZonaChange('y', e.target.value)} className="text-sm h-9" step="0.01"/>
+                                            <Input type="number" placeholder="Largura (0-1)" value={novaZona.largura ?? ""} onChange={e => handleNovaZonaChange('largura', e.target.value)} className="text-sm h-9" step="0.01"/>
+                                            <Input type="number" placeholder="Altura (0-1)" value={novaZona.altura ?? ""} onChange={e => handleNovaZonaChange('altura', e.target.value)} className="text-sm h-9" step="0.01"/>
+                                            <Input type="text" placeholder="Descrição (Opcional)" value={novaZona.descricao ?? ""} onChange={e => handleNovaZonaChange('descricao', e.target.value)} className="text-sm h-9 col-span-2 sm:col-span-3"/>
+                                            <Button type="button" onClick={handleAddZona} size="sm" className="h-9">Adicionar Zona</Button>
+                                        </div>
+                                         <h4 className="text-md font-semibold mb-1 mt-3">Zonas Adicionadas (Selecione a correta)</h4>
+                                         <ScrollArea className="h-32 border rounded p-1 bg-white">
+                                             <ul className="text-sm space-y-1">
+                                                {zonasClicaveis.map(z => (
+                                                    <li key={z.id} className="flex justify-between items-center odd:bg-gray-50 even:bg-white px-1 py-0.5">
+                                                        <span>ID:{z.id} ({z.x},{z.y} {z.largura}x{z.altura}) {z.descricao}</span>
+                                                        <div className="flex items-center gap-1">
+                                                            <Button type="button" variant={respostaCorretaPontoCerto === z.id ? "default" : "outline"} size="xs" className={cn("h-6 px-1.5", respostaCorretaPontoCerto === z.id && "bg-green-600")} onClick={() => handleSetRespostaPontoCerto(z.id)}>Correta</Button>
+                                                            <Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveZona(z.id)}>X</Button>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                             </ul>
+                                         </ScrollArea>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         )}
 
                         {tipo === "CompletarFrase" && (
-                            <div className="bg-gray-50 p-4 rounded space-y-4 border">
-                                <h3 className="text-lg font-semibold">Configuração Completar Frase</h3>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Frase Incompleta* (use __1__, __2__)</label>
-                                    <Textarea value={fraseIncompleta} onChange={e => setFraseIncompleta(e.target.value)} className="h-20 font-mono text-sm" placeholder="O __1__ é essencial para a __2__."/>
-                                </div>
-                                <div>
-                                    <h4 className="text-md font-semibold mb-2">Fragmentos</h4>
-                                    <div className="flex space-x-2 mb-2">
-                                        <Input type="text" value={novoFragmento} onChange={e => setNovoFragmento(e.target.value)} placeholder="Texto do fragmento" className="flex-1"/>
-                                        <Button type="button" onClick={handleAddFragmento}>Add Frag.</Button>
+                            <Card className="bg-pink-50 border border-pink-200">
+                                 <CardHeader className="pb-2"><CardTitle className="text-lg text-pink-800">Configuração Completar Frase</CardTitle></CardHeader>
+                                 <CardContent className="space-y-4 pt-2">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Frase Incompleta* (use __1__, __2__)</label>
+                                        <Textarea value={fraseIncompleta} onChange={e => setFraseIncompleta(e.target.value)} className="h-20 font-mono text-sm" placeholder="O __1__ é essencial para a __2__."/>
                                     </div>
-                                     <ScrollArea className="h-24 border rounded p-1"><ul className="text-sm space-y-1">{fragmentos.map(f => <li key={f.id} className="flex justify-between items-center"><span>{f.id}: {f.texto}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveFragmento(f.id)}>X</Button></li>)}</ul></ScrollArea>
-                                </div>
-                                <div>
-                                     <label className="block text-sm font-medium mb-1">Ordem Correta* (IDs separados por vírgula)</label>
-                                     <Input type="text" value={ordemFragmentos} onChange={e => setOrdemFragmentos(e.target.value)} placeholder="1, 3, 2" />
-                                </div>
-                            </div>
+                                    <div>
+                                        <h4 className="text-md font-semibold mb-2">Fragmentos</h4>
+                                        <div className="flex space-x-2 mb-2">
+                                            <Input type="text" value={novoFragmento} onChange={e => setNovoFragmento(e.target.value)} placeholder="Texto do fragmento" className="flex-1"/>
+                                            <Button type="button" onClick={handleAddFragmento}>Add Frag.</Button>
+                                        </div>
+                                         <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="text-sm space-y-1">{fragmentos.map(f => <li key={f.id} className="flex justify-between items-center"><span>{f.id}: {f.texto}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveFragmento(f.id)}>X</Button></li>)}</ul></ScrollArea>
+                                    </div>
+                                    <div>
+                                         <label className="block text-sm font-medium mb-1">Ordem Correta* (IDs separados por vírgula)</label>
+                                         <Input type="text" value={ordemFragmentos} onChange={e => setOrdemFragmentos(e.target.value)} placeholder="1, 3, 2" />
+                                    </div>
+                                </CardContent>
+                            </Card>
                         )}
 
-                        {/* Dificuldade (Comum a muitos tipos) */}
+                        {/* Dificuldade (Comum) */}
                         {["Pergunta", "MultiplaEscolha", "Ordem", "ContraTempo", "RelacionarColunas", "PontoCerto", "CompletarFrase", "Outras"].includes(tipo) && (
                              <div>
                                 <label className="block text-sm font-medium mb-1">Dificuldade</label>
@@ -667,34 +684,38 @@ const CriadorDeCarta: React.FC = () => {
 
                         {/* Categorias e Fontes (com trava) */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-gray-50 p-4 rounded space-y-3 border">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="text-lg font-semibold">Categorias</h3>
-                                    <div className="flex items-center space-x-2">
+                            <Card className="bg-gray-50 border">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-base font-semibold">Categorias</CardTitle>
+                                    <div className="flex items-center space-x-1">
                                         <label htmlFor="lockCat" className="text-xs">Travar</label>
                                         <Checkbox id="lockCat" checked={categoriasBloqueadas} onCheckedChange={checked => setCategoriasBloqueadas(Boolean(checked))} />
                                     </div>
-                                </div>
-                                <div className="flex space-x-2">
-                                    <Input type="text" value={novaCategoria} onChange={(e) => setNovaCategoria(e.target.value)} placeholder="Nova categoria" className="flex-1"/>
-                                    <Button type="button" onClick={handleAddCategoria}>Add</Button>
-                                </div>
-                                <ScrollArea className="h-24 border rounded p-1"><ul className="space-y-1 text-sm">{categorias.map((c, i) => <li key={i} className="flex justify-between items-center"><span>{c}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveCategoria(c)}>X</Button></li>)}</ul></ScrollArea>
-                            </div>
-                            <div className="bg-gray-50 p-4 rounded space-y-3 border">
-                                <div className="flex justify-between items-center">
-                                     <h3 className="text-lg font-semibold">Fontes</h3>
-                                      <div className="flex items-center space-x-2">
+                                </CardHeader>
+                                <CardContent className="space-y-2 pt-2">
+                                    <div className="flex space-x-2">
+                                        <Input type="text" value={novaCategoria} onChange={(e) => setNovaCategoria(e.target.value)} placeholder="Nova categoria" className="flex-1 h-9"/>
+                                        <Button type="button" onClick={handleAddCategoria} size="sm" className="h-9">Add</Button>
+                                    </div>
+                                    <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="space-y-1 text-sm">{categorias.map((c, i) => <li key={i} className="flex justify-between items-center"><span>{c}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveCategoria(c)}>X</Button></li>)}</ul></ScrollArea>
+                                </CardContent>
+                            </Card>
+                             <Card className="bg-gray-50 border">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                     <CardTitle className="text-base font-semibold">Fontes</CardTitle>
+                                      <div className="flex items-center space-x-1">
                                           <label htmlFor="lockFont" className="text-xs">Travar</label>
                                           <Checkbox id="lockFont" checked={fontesBloqueadas} onCheckedChange={checked => setFontesBloqueadas(Boolean(checked))} />
                                       </div>
-                                </div>
-                                <div className="flex space-x-2">
-                                    <Input type="text" value={novaFonte} onChange={(e) => setNovaFonte(e.target.value)} placeholder="Nova fonte" className="flex-1"/>
-                                    <Button type="button" onClick={handleAddFonte}>Add</Button>
-                                </div>
-                                <ScrollArea className="h-24 border rounded p-1"><ul className="space-y-1 text-sm">{fontes.map((f, i) => <li key={i} className="flex justify-between items-center"><span>{f}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveFonte(f)}>X</Button></li>)}</ul></ScrollArea>
-                            </div>
+                                </CardHeader>
+                                <CardContent className="space-y-2 pt-2">
+                                    <div className="flex space-x-2">
+                                        <Input type="text" value={novaFonte} onChange={(e) => setNovaFonte(e.target.value)} placeholder="Nova fonte" className="flex-1 h-9"/>
+                                        <Button type="button" onClick={handleAddFonte} size="sm" className="h-9">Add</Button>
+                                    </div>
+                                    <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="space-y-1 text-sm">{fontes.map((f, i) => <li key={i} className="flex justify-between items-center"><span>{f}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveFonte(f)}>X</Button></li>)}</ul></ScrollArea>
+                                </CardContent>
+                             </Card>
                         </div>
 
                         {/* Vantagem, Desvantagem, Dica */}
@@ -726,19 +747,20 @@ const CriadorDeCarta: React.FC = () => {
                         </CardHeader>
                         <CardContent>
                              {cards.length === 0 ? (<p className="text-gray-500 italic">Nenhuma carta criada ainda.</p>) : (
-                                <ScrollArea className="h-[60vh] pr-3"> {/* Altura definida para rolagem */}
+                                <ScrollArea className="h-[70vh] pr-3"> {/* Altura maior */}
                                     <div className="space-y-3">
                                         {cards.map((c, index) => (
-                                            <div key={`card-display-${c.id || index}`} className="flex items-start justify-between border rounded p-3 gap-2 bg-white hover:shadow-md transition-shadow">
-                                                <div className="flex-1 cursor-pointer" onClick={() => loadCardForEdit(index)}>
-                                                    <p className="text-xs font-semibold text-blue-700">{c.tipo} - {c.dificuldade}</p>
-                                                    <p className="font-medium truncate" title={c.titulo}>{c.titulo || `Carta ${index + 1}`}</p>
-                                                    {/* <p className="text-xs text-gray-600 line-clamp-2">{c.pergunta.replace(/<[^>]*>?/gm, '').substring(0, 80)}...</p> */}
-                                                </div>
-                                                <Button onClick={() => deleteCard(index)} size="sm" variant="ghost" className="text-red-500 hover:bg-red-100 h-7 w-7 p-0 flex-shrink-0">
-                                                    <Trash className="h-4 w-4"/>
-                                                </Button>
-                                            </div>
+                                            <Card key={`card-display-${c.id || index}`} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => loadCardForEdit(index)}>
+                                                <CardContent className="p-3 flex items-start justify-between gap-2">
+                                                    <div className="flex-1 overflow-hidden">
+                                                        <p className="text-xs font-semibold text-blue-700">{c.tipo} - {c.dificuldade}</p>
+                                                        <p className="font-medium truncate" title={c.titulo}>{c.titulo || `Carta ${index + 1}`}</p>
+                                                    </div>
+                                                    <Button onClick={(e) => {e.stopPropagation(); deleteCard(index)}} size="sm" variant="ghost" className="text-red-500 hover:bg-red-100 h-7 w-7 p-0 flex-shrink-0">
+                                                        <Trash className="h-4 w-4"/>
+                                                    </Button>
+                                                </CardContent>
+                                            </Card>
                                         ))}
                                     </div>
                                 </ScrollArea>
@@ -747,21 +769,19 @@ const CriadorDeCarta: React.FC = () => {
                      </Card>
 
                      {/* Preview Estático (se ativo) */}
-                     {showPreview && editIndex !== null && ( // Mostra preview só se algo estiver selecionado para edição
-                        <div className="mt-4">
-                             <h3 className="text-lg font-bold mb-2 text-center">Preview Estático da Carta em Edição</h3>
-                             <CardStaticView card={cards[editIndex]}/>
-                         </div>
-                     )}
-                      {showPreview && editIndex === null && ( // Mostra preview do que está sendo criado
-                        <div className="mt-4">
-                             <h3 className="text-lg font-bold mb-2 text-center">Preview Estático da Nova Carta</h3>
-                             <CardStaticView card={{
-                                 tipo, titulo, pergunta, opcoes, respostaCorreta: tipo === 'Pergunta' || tipo === 'ContraTempo' ? (respostaCorreta[0] ?? undefined) : respostaCorreta,
-                                 dificuldade, categorias, fontes, vantagem, desvantagem, dica, tempoLimite,
-                                 colunaA: colunaAItems, colunaB: colunaBItems, imagemURL: imagemURLPontoCerto, zonasClicaveis,
-                                 fraseIncompleta, fragmentos
-                             }}/>
+                     {showPreview && (editIndex !== null || tipo) && ( // Mostra se editando ou criando nova
+                        <div className="mt-4 lg:sticky lg:top-4"> {/* Fixa o preview em telas grandes */}
+                             <h3 className="text-lg font-bold mb-2 text-center">Preview Estático</h3>
+                             <CardStaticView card={
+                                 editIndex !== null
+                                 ? cards[editIndex]
+                                 : { // Monta preview da carta sendo criada
+                                     tipo, titulo, pergunta, opcoes, respostaCorreta: tipo === 'Pergunta' || tipo === 'ContraTempo' ? (respostaCorreta[0] ?? undefined) : respostaCorreta,
+                                     dificuldade, categorias, fontes, vantagem, desvantagem, dica, tempoLimite,
+                                     colunaA: colunaAItems, colunaB: colunaBItems, imagemURL: imagemURLPontoCerto, zonasClicaveis,
+                                     fraseIncompleta, fragmentos
+                                 }
+                             }/>
                          </div>
                      )}
                  </div>
