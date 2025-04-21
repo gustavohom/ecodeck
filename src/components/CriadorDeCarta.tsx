@@ -11,9 +11,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trash } from "lucide-react";
-import { cn } from "@/lib/utils"; // Assumindo que você tem este utilitário
+import { cn } from "@/lib/utils";
 
-// --- Tipos de Dados (COPIADOS/ATUALIZADOS de EcoChallenge.tsx) ---
+// --- Tipos de Dados ---
 
 interface Opcao { id: number; texto: string; ordemTemp?: string; }
 interface ItemRelacionar { id: number; texto: string; }
@@ -24,9 +24,10 @@ interface CartaBase {
     id: string | number; tipo: string; titulo: string; pergunta: string;
     dificuldade: "facil" | "normal" | "dificil"; categorias: string[]; fontes: string[];
     vantagem: string; desvantagem: string; dica: string;
-    opcoes?: Opcao[]; // Tornando opcional na base
+    opcoes?: Opcao[]; // <--- TORNADO OPCIONAL AQUI
 }
-interface CartaComOpcoes extends CartaBase { opcoes: Opcao[]; } // Tipo auxiliar para garantir 'opcoes'
+// Tipos específicos que OBRIGATORIAMENTE têm opções
+interface CartaComOpcoes extends CartaBase { opcoes: Opcao[]; }
 
 interface CartaPergunta extends CartaComOpcoes { tipo: "Pergunta"; respostaCorreta: number; }
 interface CartaMultiplaEscolha extends CartaComOpcoes { tipo: "MultiplaEscolha"; respostaCorreta: number[]; }
@@ -36,13 +37,21 @@ interface CartaDesvantagem extends CartaComOpcoes { tipo: "Desvantagem"; respost
 interface CartaOutras extends CartaComOpcoes { tipo: "Outras"; respostaCorreta: number[]; }
 interface CartaContraTempo extends CartaComOpcoes { tipo: "ContraTempo"; respostaCorreta: number; tempoLimite: number; }
 
-interface CartaRelacionarColunas extends CartaBase { tipo: "RelacionarColunas"; colunaA: ItemRelacionar[]; colunaB: ItemRelacionar[]; respostaCorreta: { aId: number; bId: number }[]; opcoes?: never; } // Garante que opcoes não seja usado
-interface CartaPontoCerto extends CartaBase { tipo: "PontoCerto"; imagemURL: string; zonasClicaveis: ZonaClicavel[]; respostaCorreta: number; opcoes?: never; }
-interface CartaCompletarFrase extends CartaBase { tipo: "CompletarFrase"; fraseIncompleta: string; fragmentos: FragmentoCompletar[]; respostaCorreta: number[]; opcoes?: never; }
+// Tipos sem 'opcoes' padrão (herdam 'opcoes?' da base)
+interface CartaRelacionarColunas extends CartaBase { tipo: "RelacionarColunas"; colunaA: ItemRelacionar[]; colunaB: ItemRelacionar[]; respostaCorreta: { aId: number; bId: number }[]; }
+interface CartaPontoCerto extends CartaBase { tipo: "PontoCerto"; imagemURL: string; zonasClicaveis: ZonaClicavel[]; respostaCorreta: number; }
+interface CartaCompletarFrase extends CartaBase { tipo: "CompletarFrase"; fraseIncompleta: string; fragmentos: FragmentoCompletar[]; respostaCorreta: number[]; }
 
+// União final
 type Carta =
     | CartaPergunta | CartaMultiplaEscolha | CartaOrdem | CartaVantagem | CartaDesvantagem | CartaOutras
     | CartaContraTempo | CartaRelacionarColunas | CartaPontoCerto | CartaCompletarFrase;
+
+// Tipo interno para o estado, incluindo metadados do editor
+type CartaInterna = Carta & {
+    origBaralhoId?: number;
+    edited?: boolean;
+};
 
 // --- Fim dos Tipos ---
 
@@ -59,7 +68,7 @@ interface BaralhoCarregado {
     id: number; nome: string; cartas: Carta[]; adicionado: boolean;
 }
 
-// --- Componente de Preview Estático (ATUALIZADO) ---
+// --- Componente de Preview Estático ---
 const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
     const {
         tipo = "Pergunta", titulo = "", pergunta = "", opcoes = [], respostaCorreta,
@@ -73,7 +82,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
         case "ContraTempo":
             const cardContraTempo = card as Partial<CartaContraTempo>;
             renderedSpecifics = <p className="text-xs text-orange-600">Tempo Limite: {cardContraTempo.tempoLimite || '?'}s</p>;
-            break; // Continua para renderizar opções no default
+            break;
         case "RelacionarColunas":
             const cardRelCol = card as Partial<CartaRelacionarColunas>;
             renderedSpecifics = (
@@ -121,10 +130,10 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
     }
 
-    // Renderizador de opções padrão (para tipos que usam 'opcoes')
+    // Renderizador de opções padrão
     if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo)) {
         const correctSet = new Set<number>();
-        const currentOptions = card.opcoes || []; // Usa array vazio se opcoes for undefined
+        const currentOptions = card.opcoes || [];
         if (tipo === "Vantagem") {
             currentOptions.forEach(o => correctSet.add(o.id));
         } else if (tipo !== "Desvantagem") {
@@ -151,7 +160,6 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             </ul>
         );
     }
-
 
     return (
         <Card className="max-w-md mx-auto my-4 shadow-md">
@@ -183,10 +191,11 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
 };
 
 
-// --- Componente Criador Principal (ATUALIZADO) ---
+// --- Componente Criador Principal ---
 const CriadorDeCarta: React.FC = () => {
     const [deckName, setDeckName] = useState("meu_baralho");
-    const [cards, setCards] = useState<(Carta & { origBaralhoId?: number, edited?: boolean })[]>([]);
+    // CORREÇÃO: Estado usa o tipo interno
+    const [cards, setCards] = useState<CartaInterna[]>([]);
     const [tipo, setTipo] = useState<TipoCarta>("Pergunta");
     const [titulo, setTitulo] = useState("");
     const [pergunta, setPergunta] = useState("");
@@ -255,7 +264,7 @@ const CriadorDeCarta: React.FC = () => {
     const adicionarBaralho = (baralhoId: number) => {
         setBaralhosCarregados((prev) => prev.map((b) => {
             if (b.id === baralhoId && !b.adicionado) {
-                const newCards = b.cartas.map((c) => ({ ...c, id: c.id || `${b.nome}_${Math.random().toString(16).slice(2)}`, origBaralhoId: b.id, edited: false }));
+                const newCards: CartaInterna[] = b.cartas.map((c) => ({ ...c, id: c.id || `${b.nome}_${Math.random().toString(16).slice(2)}`, origBaralhoId: b.id, edited: false }));
                 setCards((oldCards) => [...oldCards, ...newCards]); return { ...b, adicionado: true };
             } return b;
         }));
@@ -263,7 +272,8 @@ const CriadorDeCarta: React.FC = () => {
     const removerBaralho = (baralhoId: number) => {
          setBaralhosCarregados((prev) => prev.map((b) => {
             if (b.id === baralhoId && b.adicionado) {
-                setCards((oldCards) => oldCards.filter((c: Carta & { origBaralhoId?: number, edited?: boolean }) => {
+                // Usa o tipo CartaInterna aqui
+                setCards((oldCards) => oldCards.filter((c: CartaInterna) => {
                     if (c.origBaralhoId === baralhoId) { return c.edited && manterCartasEditadas; } return true;
                 })); return { ...b, adicionado: false };
             } return b;
@@ -332,20 +342,19 @@ const CriadorDeCarta: React.FC = () => {
     const handleAddOrUpdateCard = () => {
         if (!titulo.trim() || !tipo) { alert("Título e Tipo são obrigatórios."); return; }
         let finalRespostaCorreta: number | number[] | { aId: number; bId: number }[] = [];
-        let cartaEspecificaProps: Partial<Carta> = {};
-        let camposNecessarios: Partial<Carta> & { opcoes?: Opcao[] } = { opcoes: [] };
+        let cartaEspecificaProps: Partial<Carta> = {}; // Usar Partial<Carta> para flexibilidade
 
         try {
             switch (tipo) {
                 case "Pergunta": case "ContraTempo":
                     if (respostaCorreta.length !== 1) throw new Error(`Tipo ${tipo} exige uma resposta correta.`);
                     finalRespostaCorreta = respostaCorreta[0];
-                    camposNecessarios = { opcoes };
-                    if(tipo === 'ContraTempo') cartaEspecificaProps = { tempoLimite };
+                    cartaEspecificaProps = { opcoes };
+                    if(tipo === 'ContraTempo') cartaEspecificaProps.tempoLimite = tempoLimite;
                     break;
                 case "MultiplaEscolha": case "Outras": case "Vantagem": case "Desvantagem":
                     finalRespostaCorreta = (tipo === "Vantagem") ? opcoes.map(o => o.id) : (tipo === "Desvantagem" ? [] : respostaCorreta);
-                    camposNecessarios = { opcoes };
+                    cartaEspecificaProps = { opcoes };
                     break;
                 case "Ordem":
                     const posicoes = new Map<number, number>(); let maxPos = 0;
@@ -358,7 +367,7 @@ const CriadorDeCarta: React.FC = () => {
                     if (!ordemValida || posicoes.size !== opcoes.length || maxPos !== opcoes.length) { throw new Error("Erro na ordem: posições devem ser únicas de 1 a N."); }
                     for (let i = 1; i <= maxPos; i++) { ordemIds.push(posicoes.get(i)!); }
                     finalRespostaCorreta = ordemIds;
-                    camposNecessarios = { opcoes: opcoes.map(({ordemTemp, ...rest}) => rest) };
+                    cartaEspecificaProps = { opcoes: opcoes.map(({ordemTemp, ...rest}) => rest) };
                     break;
                 case "RelacionarColunas":
                     try {
@@ -366,14 +375,14 @@ const CriadorDeCarta: React.FC = () => {
                         if (!Array.isArray(pares) || !pares.every(p => typeof p === 'object' && 'aId' in p && 'bId' in p && typeof p.aId === 'number' && typeof p.bId === 'number')) throw new Error();
                         finalRespostaCorreta = pares;
                     } catch { throw new Error("Formato JSON inválido para Pares Corretos."); }
-                    camposNecessarios = { colunaA: colunaAItems, colunaB: colunaBItems, opcoes: [] };
+                    cartaEspecificaProps = { colunaA: colunaAItems, colunaB: colunaBItems, opcoes: [] }; // Inclui opcoes: []
                     break;
                 case "PontoCerto":
                     if (!imagemURLPontoCerto) throw new Error("URL da Imagem é obrigatória.");
                     if (zonasClicaveis.length === 0) throw new Error("Adicione pelo menos uma Zona Clicável.");
                     if (respostaCorretaPontoCerto === null || !zonasClicaveis.some(z => z.id === respostaCorretaPontoCerto)) throw new Error("Selecione uma Zona Correta válida.");
                     finalRespostaCorreta = respostaCorretaPontoCerto;
-                    camposNecessarios = { imagemURL: imagemURLPontoCerto, zonasClicaveis, opcoes: [] };
+                    cartaEspecificaProps = { imagemURL: imagemURLPontoCerto, zonasClicaveis, opcoes: [] }; // Inclui opcoes: []
                     break;
                 case "CompletarFrase":
                     if (!fraseIncompleta.trim()) throw new Error("Frase Incompleta é obrigatória.");
@@ -381,25 +390,34 @@ const CriadorDeCarta: React.FC = () => {
                     const ordemIdsFrag = ordemFragmentos.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
                     if (ordemIdsFrag.length === 0 || !ordemIdsFrag.every(id => fragmentos.some(f => f.id === id))) throw new Error("Ordem dos Fragmentos inválida ou IDs não encontrados.");
                     finalRespostaCorreta = ordemIdsFrag;
-                    camposNecessarios = { fraseIncompleta, fragmentos, opcoes: [] };
+                    cartaEspecificaProps = { fraseIncompleta, fragmentos, opcoes: [] }; // Inclui opcoes: []
                     break;
                 default: const check: never = tipo; throw new Error(`Tipo de carta desconhecido: ${check}`);
             }
         } catch (error: any) { alert(`Erro ao preparar carta: ${error.message}`); return; }
 
-        const novaCarta: Carta = {
+        // Junta tudo em novaCarta
+        const novaCarta: CartaInterna = {
             id: editIndex !== null ? cards[editIndex].id : `new_${Date.now()}_${Math.random().toString(16).slice(2)}`,
             tipo, titulo, pergunta, dificuldade, categorias, fontes,
             vantagem, desvantagem, dica,
             respostaCorreta: finalRespostaCorreta,
-            ...camposNecessarios,
-            ...cartaEspecificaProps,
-        } as Carta;
+            // Espalha as props específicas E as comuns que podem ou não existir (como opcoes)
+            ...(cartaEspecificaProps as any), // Usar 'as any' aqui simplifica, mas perde type safety momentaneamente
+            edited: true, // Marca como editada/nova
+            origBaralhoId: editIndex !== null ? cards[editIndex].origBaralhoId : undefined // Mantém ID do baralho original
+        };
+
+        // Limpeza final: remove 'opcoes' se não for um tipo que usa
+         if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(novaCarta.tipo)) {
+            delete novaCarta.opcoes;
+         }
+
 
         if (editIndex !== null) {
-            setCards((oldCards) => oldCards.map((c, i) => i === editIndex ? { ...novaCarta, origBaralhoId: c.origBaralhoId, edited: true } : c ));
+            setCards((oldCards) => oldCards.map((c, i) => i === editIndex ? novaCarta : c ));
         } else {
-            setCards((oldCards) => [...oldCards, { ...novaCarta, edited: true }]);
+            setCards((oldCards) => [...oldCards, novaCarta]);
         }
         resetCarta();
     };
@@ -422,9 +440,10 @@ const CriadorDeCarta: React.FC = () => {
                  setOpcoes((carta as CartaOrdem).opcoes?.map(op => ({...op})) || []);
                  if (Array.isArray(carta.respostaCorreta) && carta.opcoes) {
                      const ordemCorreta = carta.respostaCorreta as number[];
+                     // Pré-preenche ordemTemp baseado na resposta correta salva
                      setOpcoes(currentOpts => currentOpts.map(op => ({...op, ordemTemp: ordemCorreta.indexOf(op.id) >= 0 ? String(ordemCorreta.indexOf(op.id) + 1) : "" })));
                  }
-                 setRespostaCorreta([]);
+                 setRespostaCorreta([]); // Reseta seleção visual
                  break;
             case "RelacionarColunas":
                 const cRel = carta as CartaRelacionarColunas; setColunaAItems(cRel.colunaA ? [...cRel.colunaA] : []); setColunaBItems(cRel.colunaB ? [...cRel.colunaB] : []); setParesCorretosInput(Array.isArray(cRel.respostaCorreta) ? JSON.stringify(cRel.respostaCorreta, null, 2) : "[]"); break;
@@ -437,25 +456,29 @@ const CriadorDeCarta: React.FC = () => {
     const deleteCard = (index: number) => { if(window.confirm(`Excluir "${cards[index]?.titulo || `Carta ${index+1}`}"?`)){ setCards((old) => old.filter((_, i) => i !== index)); if (editIndex === index) { resetCarta(); } }};
     const cancelEdit = () => { resetCarta(); };
 
+    // --- Download ---
     const prepareForDownload = (): Partial<Carta>[] => {
-        return cards.map(({ origBaralhoId, edited, ...rest }: Carta & { origBaralhoId?: number, edited?: boolean }) => {
+        // Usa CartaInterna para tipar, mas remove props internas antes de retornar
+        return cards.map(({ origBaralhoId, edited, ...rest }: CartaInterna) => {
             const cardData: Partial<Carta> = { ...rest };
+             // Remove campos específicos que NÃO pertencem ao tipo atual
             if (rest.tipo !== "ContraTempo") delete (cardData as Partial<CartaContraTempo>).tempoLimite;
             if (rest.tipo !== "RelacionarColunas") { delete (cardData as Partial<CartaRelacionarColunas>).colunaA; delete (cardData as Partial<CartaRelacionarColunas>).colunaB; }
             if (rest.tipo !== "PontoCerto") { delete (cardData as Partial<CartaPontoCerto>).imagemURL; delete (cardData as Partial<CartaPontoCerto>).zonasClicaveis; }
             if (rest.tipo !== "CompletarFrase") { delete (cardData as Partial<CartaCompletarFrase>).fraseIncompleta; delete (cardData as Partial<CartaCompletarFrase>).fragmentos; }
 
-            // Usa delete apenas se 'opcoes' for opcional na base E o tipo não usar
+            // Remove 'opcoes' se não for um tipo que o utiliza (agora seguro pois é opcional na base)
             if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo)) {
                  delete cardData.opcoes;
             } else if (rest.tipo === "Ordem" && cardData.opcoes) {
+                 // Remove ordemTemp das opções para Ordem
                  cardData.opcoes = cardData.opcoes.map(({ ordemTemp, ...o }) => o);
+            } else if (cardData.opcoes === undefined) {
+                 // Garante que tipos que DEVEM ter opções, mas não têm, recebam array vazio
+                 if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo)){
+                    cardData.opcoes = [];
+                 }
             }
-
-            // Garante array vazio para tipos específicos, mesmo que 'opcoes' seja opcional
-             if ((rest.tipo === "RelacionarColunas" || rest.tipo === "PontoCerto" || rest.tipo === "CompletarFrase") && cardData.opcoes !== undefined) {
-                 cardData.opcoes = [];
-             }
 
             return cardData;
         });
@@ -567,8 +590,7 @@ const CriadorDeCarta: React.FC = () => {
                                                             <Input id={`order-${o.id}`} type="number" min="1" step="1" onChange={(e) => handleSetOrder(o.id, e.target.value)} value={o.ordemTemp ?? ""} className="border p-1 w-16 rounded text-sm h-8 shrink-0"/>
                                                         </div>
                                                     )}
-                                                    {/* Condição Corrigida */}
-                                                    {(tipo === "Pergunta" || tipo === "MultiplaEscolha" || tipo === "Outras" || tipo === "ContraTempo") && (
+                                                    {(tipo === "Pergunta" || tipo === "MultiplaEscolha" || tipo === "Outras" || tipo === "ContraTempo") && ( // Removido condição redundante
                                                         <Button type="button" onClick={() => handleToggleRespostaCorreta(o.id)} variant={respostaCorreta.includes(o.id) ? "default" : "outline"} size="sm" className={cn("h-8 shrink-0", respostaCorreta.includes(o.id) && "bg-green-600 hover:bg-green-700")}>
                                                             {respostaCorreta.includes(o.id) ? "Correta" : "Marcar"}
                                                         </Button>
@@ -617,7 +639,6 @@ const CriadorDeCarta: React.FC = () => {
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium mb-1">Pares Corretos (JSON)</label>
-                                        {/* Correção: Usar " para aspas internas */}
                                         <Textarea value={paresCorretosInput} onChange={e => setParesCorretosInput(e.target.value)} className="h-20 font-mono text-xs" placeholder='[{"aId": 1, "bId": 101}, {"aId": 2, "bId": 102}]'/>
                                     </div>
                                 </CardContent>
@@ -794,6 +815,7 @@ const CriadorDeCarta: React.FC = () => {
                                      : { // Monta preview da carta sendo criada
                                          tipo, titulo, pergunta, opcoes,
                                          respostaCorreta: (() => {
+                                             // Lógica de preview da resposta correta
                                              if (tipo === 'Pergunta' || tipo === 'ContraTempo') return respostaCorreta[0];
                                              if (tipo === 'PontoCerto') return respostaCorretaPontoCerto ?? undefined;
                                              if (tipo === 'RelacionarColunas') try { return JSON.parse(paresCorretosInput || '[]'); } catch { return []; }
