@@ -1,15 +1,15 @@
 // src/components/CriadorDeCarta.tsx
 
 import React, { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button"; // Importado
-import { Input } from "@/components/ui/input";   // Importado
-import { Textarea } from "@/components/ui/textarea"; // Importado
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Importado
-import { Checkbox } from "@/components/ui/checkbox"; // Importado
-import { ScrollArea } from "@/components/ui/scroll-area"; // Importado
-import { Alert, AlertDescription } from "@/components/ui/alert"; // Importado
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"; // Importado
-import { Badge } from "@/components/ui/badge"; // Importado
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils"; // Assumindo que você tem este utilitário
 
 // --- Tipos de Dados (COPIADOS/ATUALIZADOS de EcoChallenge.tsx) ---
@@ -152,7 +152,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             </CardHeader>
             <CardContent className="pt-2 pb-3 space-y-2">
                 {renderedSpecifics}
-                {/* Aumentei a altura mínima aqui */}
+                {/* ScrollArea para a pergunta */}
                 <ScrollArea className="h-auto max-h-60 rounded-md border p-3 mt-2 bg-white/80 min-h-[100px]">
                      <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1" dangerouslySetInnerHTML={{ __html: pergunta || "(Sem Pergunta/Descrição)" }} />
                 </ScrollArea>
@@ -411,8 +411,8 @@ const CriadorDeCarta: React.FC = () => {
                  if (Array.isArray(carta.respostaCorreta)) {
                      const ordemCorreta = carta.respostaCorreta as number[];
                      setOpcoes(currentOpts => currentOpts.map(op => ({...op, ordemTemp: ordemCorreta.indexOf(op.id) >= 0 ? String(ordemCorreta.indexOf(op.id) + 1) : "" })));
-                     // Não setamos respostaCorreta aqui, pois a ordem está em ordemTemp
                  }
+                 setRespostaCorreta([]); // Resetar seleção explícita
                  break;
             case "RelacionarColunas":
                 const cRel = carta as CartaRelacionarColunas; setColunaAItems(cRel.colunaA ? [...cRel.colunaA] : []); setColunaBItems(cRel.colunaB ? [...cRel.colunaB] : []); setParesCorretosInput(Array.isArray(cRel.respostaCorreta) ? JSON.stringify(cRel.respostaCorreta, null, 2) : "[]"); break;
@@ -434,32 +434,26 @@ const CriadorDeCarta: React.FC = () => {
             if (rest.tipo !== "CompletarFrase") { delete (cardData as Partial<CartaCompletarFrase>).fraseIncompleta; delete (cardData as Partial<CartaCompletarFrase>).fragmentos; }
             if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo)) { delete (cardData as CartaPergunta).opcoes; }
             if (rest.tipo === "RelacionarColunas" || rest.tipo === "PontoCerto" || rest.tipo === "CompletarFrase") { cardData.opcoes = []; }
-            if (rest.tipo === "Ordem" && cardData.opcoes) { cardData.opcoes = cardData.opcoes.map(({ordemTemp, ...o}) => o); }
+            if (rest.tipo === "Ordem" && cardData.opcoes) { cardData.opcoes = cardData.opcoes.map(({ordemTemp, ...o}) => o); } // Remove ordemTemp
             return cardData;
         });
     };
     const generateCode = (format: 'js' | 'json') => { const deckFinal = prepareForDownload(); if (format === 'json') { return JSON.stringify(deckFinal, null, 2); } else { const deck = JSON.stringify(deckFinal, null, 2); return `const ${deckName || 'meu_baralho'} = ${deck};\n\nexport default ${deckName || 'meu_baralho'};`; } };
     const downloadCode = (format: 'js' | 'json') => { const element = document.createElement("a"); const fileContent = generateCode(format); const fileType = format === 'js' ? 'text/javascript' : 'application/json'; const fileName = `${deckName || 'meu_baralho'}.${format}`; const file = new Blob([fileContent], { type: fileType }); element.href = URL.createObjectURL(file); element.download = fileName; document.body.appendChild(element); element.click(); document.body.removeChild(element); };
 
+    // --- JSX do Criador ---
     return (
-        <div className="p-4 max-w-6xl mx-auto">
+        <div className="p-4 max-w-6xl mx-auto"> {/* Layout principal */}
             <h1 className="text-3xl font-bold mb-6 text-center">Criador de Cartas Eco Challenge</h1>
 
-            {/* Seção de Upload/Gerenciamento de Baralhos */}
+            {/* Seção Superior: Nome, Upload, Gerenciamento */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <Card>
-                    <CardHeader>
-                        <CardTitle className="text-xl">Nome do Baralho & Download</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle className="text-xl">Nome do Baralho & Download</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium mb-1">Nome (para arquivo .js)</label>
-                            <Input
-                                type="text"
-                                value={deckName}
-                                onChange={(e) => setDeckName(e.target.value.replace(/[^a-zA-Z0-9_]/g, '_'))}
-                                placeholder="meu_baralho"
-                            />
+                            <Input type="text" value={deckName} onChange={(e) => setDeckName(e.target.value.replace(/[^a-zA-Z0-9_]/g, '_'))} placeholder="meu_baralho"/>
                         </div>
                         <div className="flex space-x-4">
                             <Button onClick={() => downloadCode('js')} className="bg-blue-600 hover:bg-blue-700 text-white flex-1">Baixar .js</Button>
@@ -468,9 +462,7 @@ const CriadorDeCarta: React.FC = () => {
                     </CardContent>
                 </Card>
                  <Card>
-                    <CardHeader>
-                        <CardTitle className="text-xl">Carregar/Gerenciar Baralhos</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle className="text-xl">Carregar/Gerenciar Baralhos</CardTitle></CardHeader>
                     <CardContent className="space-y-3">
                         <Input type="file" accept=".js,.json" onChange={handleFileUpload} multiple />
                         {isLoading && <p className="text-sm text-blue-600">Carregando...</p>}
@@ -481,7 +473,7 @@ const CriadorDeCarta: React.FC = () => {
                                     <Checkbox id="manterEditadas" checked={manterCartasEditadas} onCheckedChange={(checked) => setManterCartasEditadas(Boolean(checked))} />
                                     <label htmlFor="manterEditadas" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Manter editadas ao remover</label>
                                 </div>
-                                <ScrollArea className="h-40 border rounded-md p-2"> {/* Aumentei altura */}
+                                <ScrollArea className="h-40 border rounded-md p-2">
                                     <ul className="space-y-1">
                                         {baralhosCarregados.map((b) => (
                                             <li key={b.id} className="flex items-center justify-between p-1 even:bg-gray-50">
@@ -497,22 +489,22 @@ const CriadorDeCarta: React.FC = () => {
                 </Card>
             </div>
 
-             {/* Seção Principal: Criação/Edição e Lista de Cartas */}
+             {/* Seção Principal: Criação/Edição e Lista/Preview */}
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-                 {/* Formulário de Criação/Edição */}
-                <Card className="lg:sticky lg:top-4 self-start">
+                {/* Coluna Esquerda: Formulário */}
+                <Card className="lg:sticky lg:top-4 self-start max-h-[90vh] overflow-y-auto"> {/* Torna formulário fixo e rolável */}
                     <CardHeader>
                          <CardTitle className="text-2xl">{editIndex !== null ? `Editando: ${cards[editIndex]?.titulo || `Carta ${editIndex + 1}`}` : "Criar Nova Carta"}</CardTitle>
                          <AlertDescription>Preencha os campos para {editIndex !== null ? 'atualizar' : 'criar'} uma carta.</AlertDescription>
                     </CardHeader>
-                    <CardContent className="space-y-5">
-                        {/* Campos Comuns */}
+                    <CardContent className="space-y-5 pb-6"> {/* Aumenta padding bottom */}
+                         {/* Campos Comuns */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1">Tipo*</label>
                                 <Select value={tipo} onValueChange={(value) => setTipo(value as TipoCarta)}>
-                                    <SelectTrigger><SelectValue placeholder="Selecione o tipo..." /></SelectTrigger>
+                                    <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                                     <SelectContent>
                                         {CARD_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                                     </SelectContent>
@@ -525,21 +517,21 @@ const CriadorDeCarta: React.FC = () => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1">Pergunta/Descrição* (HTML permitido)</label>
-                             <Textarea ref={perguntaTextareaRef} value={pergunta} onChange={(e) => setPergunta(e.target.value)} className="h-36 font-mono text-sm" placeholder="Escreva a pergunta... Use HTML para formatar ou inserir popups."/>
+                            <label className="block text-sm font-medium mb-1">Pergunta/Descrição* (HTML)</label>
+                             <Textarea ref={perguntaTextareaRef} value={pergunta} onChange={(e) => setPergunta(e.target.value)} className="h-36 font-mono text-sm" placeholder="Escreva aqui..."/>
                              <div className="flex gap-2 mt-1">
-                                <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('imagem')}>Inserir Popup Imagem</Button>
-                                <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('video')}>Inserir Popup Vídeo</Button>
+                                <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('imagem')}>+ Popup Imagem</Button>
+                                <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('video')}>+ Popup Vídeo</Button>
                              </div>
                         </div>
 
                         {/* --- Campos Condicionais --- */}
                          {["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo) && (
                             <Card className="bg-gray-50 border">
-                                <CardHeader className="pb-2"><CardTitle className="text-lg">Opções de Resposta</CardTitle></CardHeader>
+                                <CardHeader className="pb-2 pt-3"><CardTitle className="text-lg">Opções</CardTitle></CardHeader>
                                 <CardContent className="space-y-3 pt-0">
                                     <div className="flex space-x-2">
-                                        <Input type="text" value={novaOpcao} onChange={(e) => setNovaOpcao(e.target.value)} placeholder="Texto da nova opção" className="flex-1"/>
+                                        <Input type="text" value={novaOpcao} onChange={(e) => setNovaOpcao(e.target.value)} placeholder="Texto da opção" className="flex-1"/>
                                         <Button type="button" onClick={handleAddOpcao}>Adicionar</Button>
                                     </div>
                                     <ScrollArea className="max-h-48 pr-2 border rounded bg-white">
@@ -549,18 +541,19 @@ const CriadorDeCarta: React.FC = () => {
                                                     <span className="flex-1 text-sm py-1">{o.id}: {o.texto}</span>
                                                     {tipo === "Ordem" && (
                                                         <div className="flex items-center space-x-1 my-1">
-                                                            <label htmlFor={`order-${o.id}`} className="text-xs">Pos:</label>
-                                                            <Input id={`order-${o.id}`} type="number" min="1" step="1" onChange={(e) => handleSetOrder(o.id, e.target.value)} value={o.ordemTemp ?? ""} className="border p-1 w-16 rounded text-sm h-8"/>
+                                                            <label htmlFor={`order-${o.id}`} className="text-xs shrink-0">Pos:</label>
+                                                            <Input id={`order-${o.id}`} type="number" min="1" step="1" onChange={(e) => handleSetOrder(o.id, e.target.value)} value={o.ordemTemp ?? ""} className="border p-1 w-16 rounded text-sm h-8 shrink-0"/>
                                                         </div>
                                                     )}
                                                     {(tipo === "Pergunta" || tipo === "MultiplaEscolha" || tipo === "Outras" || tipo === "ContraTempo") && tipo !== "Vantagem" && tipo !== "Desvantagem" && (
-                                                        <Button type="button" onClick={() => handleToggleRespostaCorreta(o.id)} variant={respostaCorreta.includes(o.id) ? "default" : "outline"} size="sm" className={cn("h-8", respostaCorreta.includes(o.id) && "bg-green-600 hover:bg-green-700")}>
+                                                        <Button type="button" onClick={() => handleToggleRespostaCorreta(o.id)} variant={respostaCorreta.includes(o.id) ? "default" : "outline"} size="sm" className={cn("h-8 shrink-0", respostaCorreta.includes(o.id) && "bg-green-600 hover:bg-green-700")}>
                                                             {respostaCorreta.includes(o.id) ? "Correta" : "Marcar"}
                                                         </Button>
                                                     )}
-                                                    <Button type="button" onClick={() => handleRemoveOpcao(o.id)} variant="destructive" size="sm" className="h-8">Remover</Button>
+                                                    <Button type="button" onClick={() => handleRemoveOpcao(o.id)} variant="destructive" size="sm" className="h-8 shrink-0">Remover</Button>
                                                 </li>
                                             ))}
+                                            {opcoes.length === 0 && <p className="text-xs text-center text-gray-500 py-2">Nenhuma opção adicionada.</p>}
                                         </ul>
                                     </ScrollArea>
                                     {tipo === "Ordem" && <p className="text-xs text-gray-500 mt-2">Defina a posição correta (1, 2, 3...) para cada opção.</p>}
@@ -572,17 +565,16 @@ const CriadorDeCarta: React.FC = () => {
 
                         {tipo === "ContraTempo" && (
                             <Card className="bg-yellow-50 border border-yellow-200">
-                                <CardHeader className="pb-2"><CardTitle className="text-lg text-yellow-800">Configuração Contra-Tempo</CardTitle></CardHeader>
-                                <CardContent>
+                                <CardContent className="pt-4">
                                     <label className="block text-sm font-medium mb-1">Tempo Limite (segundos)</label>
-                                    <Input type="number" value={tempoLimite} onChange={(e) => setTempoLimite(Math.max(5, parseInt(e.target.value, 10) || 5))} min="5" className="border p-2 rounded w-24"/>
+                                    <Input type="number" value={tempoLimite} onChange={(e) => setTempoLimite(Math.max(5, parseInt(e.target.value, 10) || 5))} min="5" className="w-24"/>
                                 </CardContent>
                             </Card>
                         )}
 
                         {tipo === "RelacionarColunas" && (
                             <Card className="bg-blue-50 border border-blue-200">
-                                <CardHeader className="pb-2"><CardTitle className="text-lg text-blue-800">Configuração Relacionar Colunas</CardTitle></CardHeader>
+                                <CardHeader className="pb-2 pt-3"><CardTitle className="text-lg">Relacionar Colunas</CardTitle></CardHeader>
                                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                                     <div> {/* Coluna A */}
                                         <h4 className="text-md font-semibold mb-2">Coluna A</h4>
@@ -601,32 +593,32 @@ const CriadorDeCarta: React.FC = () => {
                                         <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="text-sm space-y-1">{colunaBItems.map(item => <li key={item.id} className="flex justify-between items-center"><span>{item.id}: {item.texto}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveColunaB(item.id)}>X</Button></li>)}</ul></ScrollArea>
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium mb-1">Pares Corretos (JSON: [{"aId": num, "bId": num}, ...])</label>
+                                        <label className="block text-sm font-medium mb-1">Pares Corretos (JSON)</label>
                                         <Textarea value={paresCorretosInput} onChange={e => setParesCorretosInput(e.target.value)} className="h-20 font-mono text-xs" placeholder='[{"aId": 1, "bId": 101}, {"aId": 2, "bId": 102}]'/>
                                     </div>
                                 </CardContent>
                             </Card>
                         )}
 
-                         {tipo === "PontoCerto" && (
+                        {tipo === "PontoCerto" && (
                              <Card className="bg-indigo-50 border border-indigo-200">
-                                <CardHeader className="pb-2"><CardTitle className="text-lg text-indigo-800">Configuração Ponto Certo</CardTitle></CardHeader>
+                                <CardHeader className="pb-2 pt-3"><CardTitle className="text-lg">Ponto Certo</CardTitle></CardHeader>
                                 <CardContent className="space-y-4 pt-2">
                                     <div>
                                         <label className="block text-sm font-medium mb-1">URL da Imagem Principal*</label>
-                                        <Input type="text" value={imagemURLPontoCerto} onChange={e => setImagemURLPontoCerto(e.target.value)} placeholder="/images/mapa_interativo.png" />
+                                        <Input type="text" value={imagemURLPontoCerto} onChange={e => setImagemURLPontoCerto(e.target.value)} placeholder="/images/mapa.png" />
                                     </div>
                                     <div>
                                         <h4 className="text-md font-semibold mb-2">Adicionar Zona Clicável</h4>
                                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 border p-2 rounded items-end bg-white">
-                                            <Input type="number" placeholder="X (0-1)" value={novaZona.x ?? ""} onChange={e => handleNovaZonaChange('x', e.target.value)} className="text-sm h-9" step="0.01"/>
-                                            <Input type="number" placeholder="Y (0-1)" value={novaZona.y ?? ""} onChange={e => handleNovaZonaChange('y', e.target.value)} className="text-sm h-9" step="0.01"/>
-                                            <Input type="number" placeholder="Largura (0-1)" value={novaZona.largura ?? ""} onChange={e => handleNovaZonaChange('largura', e.target.value)} className="text-sm h-9" step="0.01"/>
-                                            <Input type="number" placeholder="Altura (0-1)" value={novaZona.altura ?? ""} onChange={e => handleNovaZonaChange('altura', e.target.value)} className="text-sm h-9" step="0.01"/>
-                                            <Input type="text" placeholder="Descrição (Opcional)" value={novaZona.descricao ?? ""} onChange={e => handleNovaZonaChange('descricao', e.target.value)} className="text-sm h-9 col-span-2 sm:col-span-3"/>
-                                            <Button type="button" onClick={handleAddZona} size="sm" className="h-9">Adicionar Zona</Button>
+                                            <Input type="number" placeholder="X (0-1)" value={novaZona.x ?? ""} onChange={e => handleNovaZonaChange('x', e.target.value)} className="text-sm h-9" step="0.01" min="0" max="1"/>
+                                            <Input type="number" placeholder="Y (0-1)" value={novaZona.y ?? ""} onChange={e => handleNovaZonaChange('y', e.target.value)} className="text-sm h-9" step="0.01" min="0" max="1"/>
+                                            <Input type="number" placeholder="Largura (0-1)" value={novaZona.largura ?? ""} onChange={e => handleNovaZonaChange('largura', e.target.value)} className="text-sm h-9" step="0.01" min="0.01" max="1"/>
+                                            <Input type="number" placeholder="Altura (0-1)" value={novaZona.altura ?? ""} onChange={e => handleNovaZonaChange('altura', e.target.value)} className="text-sm h-9" step="0.01" min="0.01" max="1"/>
+                                            <Input type="text" placeholder="Descrição (Opc)" value={novaZona.descricao ?? ""} onChange={e => handleNovaZonaChange('descricao', e.target.value)} className="text-sm h-9 col-span-2 sm:col-span-3"/>
+                                            <Button type="button" onClick={handleAddZona} size="sm" className="h-9">Add Zona</Button>
                                         </div>
-                                         <h4 className="text-md font-semibold mb-1 mt-3">Zonas Adicionadas (Selecione a correta)</h4>
+                                         <h4 className="text-md font-semibold mb-1 mt-3">Zonas (Selecione a correta)</h4>
                                          <ScrollArea className="h-32 border rounded p-1 bg-white">
                                              <ul className="text-sm space-y-1">
                                                 {zonasClicaveis.map(z => (
@@ -638,6 +630,7 @@ const CriadorDeCarta: React.FC = () => {
                                                         </div>
                                                     </li>
                                                 ))}
+                                                 {zonasClicaveis.length === 0 && <p className="text-xs text-center text-gray-500 py-2">Nenhuma zona adicionada.</p>}
                                              </ul>
                                          </ScrollArea>
                                     </div>
@@ -647,7 +640,7 @@ const CriadorDeCarta: React.FC = () => {
 
                         {tipo === "CompletarFrase" && (
                             <Card className="bg-pink-50 border border-pink-200">
-                                 <CardHeader className="pb-2"><CardTitle className="text-lg text-pink-800">Configuração Completar Frase</CardTitle></CardHeader>
+                                 <CardHeader className="pb-2 pt-3"><CardTitle className="text-lg">Completar Frase</CardTitle></CardHeader>
                                  <CardContent className="space-y-4 pt-2">
                                     <div>
                                         <label className="block text-sm font-medium mb-1">Frase Incompleta* (use __1__, __2__)</label>
@@ -669,27 +662,25 @@ const CriadorDeCarta: React.FC = () => {
                             </Card>
                         )}
 
-                        {/* Dificuldade (Comum) */}
-                        {["Pergunta", "MultiplaEscolha", "Ordem", "ContraTempo", "RelacionarColunas", "PontoCerto", "CompletarFrase", "Outras"].includes(tipo) && (
-                             <div>
-                                <label className="block text-sm font-medium mb-1">Dificuldade</label>
-                                <Select value={dificuldade} onValueChange={(value) => setDificuldade(value as Dificuldade)}>
-                                    <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                                    <SelectContent>
-                                        {DIFFICULTIES.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                             </div>
-                        )}
+                        {/* Dificuldade */}
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Dificuldade</label>
+                            <Select value={dificuldade} onValueChange={(value) => setDificuldade(value as Dificuldade)}>
+                                <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                                <SelectContent>
+                                    {DIFFICULTIES.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-                        {/* Categorias e Fontes (com trava) */}
+                        {/* Categorias e Fontes */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Card className="bg-gray-50 border">
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-3">
                                     <CardTitle className="text-base font-semibold">Categorias</CardTitle>
                                     <div className="flex items-center space-x-1">
-                                        <label htmlFor="lockCat" className="text-xs">Travar</label>
                                         <Checkbox id="lockCat" checked={categoriasBloqueadas} onCheckedChange={checked => setCategoriasBloqueadas(Boolean(checked))} />
+                                        <label htmlFor="lockCat" className="text-xs">Travar</label>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="space-y-2 pt-2">
@@ -701,11 +692,11 @@ const CriadorDeCarta: React.FC = () => {
                                 </CardContent>
                             </Card>
                              <Card className="bg-gray-50 border">
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-3">
                                      <CardTitle className="text-base font-semibold">Fontes</CardTitle>
                                       <div className="flex items-center space-x-1">
-                                          <label htmlFor="lockFont" className="text-xs">Travar</label>
                                           <Checkbox id="lockFont" checked={fontesBloqueadas} onCheckedChange={checked => setFontesBloqueadas(Boolean(checked))} />
+                                          <label htmlFor="lockFont" className="text-xs">Travar</label>
                                       </div>
                                 </CardHeader>
                                 <CardContent className="space-y-2 pt-2">
@@ -738,17 +729,17 @@ const CriadorDeCarta: React.FC = () => {
                     </CardContent>
                 </Card>
 
-                 {/* Lista/Preview das Cartas Criadas */}
-                 <div className="space-y-4">
+                {/* Coluna Direita: Lista de Cartas e Preview */}
+                <div className="space-y-4">
                      <Card>
                         <CardHeader>
-                            <CardTitle className="text-xl">Baralho Sendo Criado ({cards.length} Cartas)</CardTitle>
-                            <AlertDescription>Clique em uma carta abaixo para editá-la.</AlertDescription>
+                            <CardTitle className="text-xl">Baralho Atual ({cards.length} Cartas)</CardTitle>
+                            <AlertDescription>Clique em uma carta para editar.</AlertDescription>
                         </CardHeader>
                         <CardContent>
-                             {cards.length === 0 ? (<p className="text-gray-500 italic">Nenhuma carta criada ainda.</p>) : (
-                                <ScrollArea className="h-[70vh] pr-3"> {/* Altura maior */}
-                                    <div className="space-y-3">
+                             {cards.length === 0 ? (<p className="text-gray-500 italic">Nenhuma carta.</p>) : (
+                                <ScrollArea className="h-[40vh] pr-3"> {/* Altura menor */}
+                                    <div className="space-y-2">
                                         {cards.map((c, index) => (
                                             <Card key={`card-display-${c.id || index}`} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => loadCardForEdit(index)}>
                                                 <CardContent className="p-3 flex items-start justify-between gap-2">
@@ -768,21 +759,37 @@ const CriadorDeCarta: React.FC = () => {
                          </CardContent>
                      </Card>
 
-                     {/* Preview Estático (se ativo) */}
-                     {showPreview && (editIndex !== null || tipo) && ( // Mostra se editando ou criando nova
-                        <div className="mt-4 lg:sticky lg:top-4"> {/* Fixa o preview em telas grandes */}
-                             <h3 className="text-lg font-bold mb-2 text-center">Preview Estático</h3>
-                             <CardStaticView card={
-                                 editIndex !== null
-                                 ? cards[editIndex]
-                                 : { // Monta preview da carta sendo criada
-                                     tipo, titulo, pergunta, opcoes, respostaCorreta: tipo === 'Pergunta' || tipo === 'ContraTempo' ? (respostaCorreta[0] ?? undefined) : respostaCorreta,
-                                     dificuldade, categorias, fontes, vantagem, desvantagem, dica, tempoLimite,
-                                     colunaA: colunaAItems, colunaB: colunaBItems, imagemURL: imagemURLPontoCerto, zonasClicaveis,
-                                     fraseIncompleta, fragmentos
-                                 }
-                             }/>
-                         </div>
+                     {/* Preview Estático */}
+                     {showPreview && (
+                        <Card className="mt-4">
+                            <CardHeader><CardTitle className="text-lg text-center">Preview Estático</CardTitle></CardHeader>
+                            <CardContent>
+                                 <CardStaticView card={
+                                     editIndex !== null
+                                     ? cards[editIndex]
+                                     : { // Monta preview da carta sendo criada
+                                         tipo, titulo, pergunta, opcoes,
+                                         // Ajusta resposta correta para preview
+                                         respostaCorreta: (() => {
+                                             if (tipo === 'Pergunta' || tipo === 'ContraTempo') return respostaCorreta[0];
+                                             if (tipo === 'PontoCerto') return respostaCorretaPontoCerto ?? undefined;
+                                             if (tipo === 'RelacionarColunas') try { return JSON.parse(paresCorretosInput || '[]'); } catch { return []; }
+                                             if (tipo === 'CompletarFrase') return ordemFragmentos.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+                                             if (tipo === 'Ordem') {
+                                                const sorted = [...opcoes].sort((a, b) => (parseInt(a.ordemTemp || '999', 10) - parseInt(b.ordemTemp || '999', 10)));
+                                                return sorted.map(o => o.id);
+                                             }
+                                             if (tipo === 'Vantagem') return opcoes.map(o => o.id);
+                                             if (tipo === 'Desvantagem') return [];
+                                             return respostaCorreta;
+                                         })(),
+                                         dificuldade, categorias, fontes, vantagem, desvantagem, dica, tempoLimite,
+                                         colunaA: colunaAItems, colunaB: colunaBItems, imagemURL: imagemURLPontoCerto, zonasClicaveis,
+                                         fraseIncompleta, fragmentos
+                                     }
+                                 }/>
+                             </CardContent>
+                         </Card>
                      )}
                  </div>
              </div>
