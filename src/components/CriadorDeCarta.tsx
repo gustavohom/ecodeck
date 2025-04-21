@@ -10,8 +10,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trash } from "lucide-react"; // <-- ADICIONADO IMPORT DO TRASH
-import { cn } from "@/lib/utils";
+import { Trash } from "lucide-react"; // Importado
+import { cn } from "@/lib/utils"; // Assumindo que você tem este utilitário
 
 // --- Tipos de Dados (COPIADOS/ATUALIZADOS de EcoChallenge.tsx) ---
 
@@ -42,7 +42,7 @@ type Carta =
 
 // --- Fim dos Tipos ---
 
-const CARD_TYPES = [ // Atualizado com todos os tipos
+const CARD_TYPES = [
     "Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras",
     "ContraTempo", "RelacionarColunas", "PontoCerto", "CompletarFrase"
 ] as const;
@@ -56,28 +56,21 @@ interface BaralhoCarregado {
 }
 
 // --- Componente de Preview Estático (ATUALIZADO) ---
-// --- Componente de Preview Estático (ATUALIZADO) ---
 const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
-    // Remove campos específicos da desestruturação inicial
     const {
         tipo = "Pergunta", titulo = "", pergunta = "", opcoes = [], respostaCorreta,
         dificuldade = "facil", categorias = [], fontes = [], vantagem = "", desvantagem = "", dica = ""
-        // REMOVIDOS: tempoLimite, colunaA, colunaB, imagemURL, zonasClicaveis, fraseIncompleta, fragmentos
     } = card;
 
     let renderedSpecifics: React.ReactNode = null;
     let renderedOptions: React.ReactNode = null;
 
-    // Renderiza campos específicos do tipo
     switch (tipo) {
         case "ContraTempo":
-            // Acessa tempoLimite aqui, com cast para o tipo específico
             const cardContraTempo = card as Partial<CartaContraTempo>;
             renderedSpecifics = <p className="text-xs text-orange-600">Tempo Limite: {cardContraTempo.tempoLimite || '?'}s</p>;
-            // A renderização das opções (renderedOptions) será tratada pelo 'default' abaixo
             break;
         case "RelacionarColunas":
-            // Acessa colunas aqui, com cast
             const cardRelCol = card as Partial<CartaRelacionarColunas>;
             renderedSpecifics = (
                 <div className="flex gap-4 text-xs mt-2">
@@ -89,7 +82,6 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
              renderedOptions = <p className="text-xs mt-1">Pares Corretos: [{pairs}]</p>;
             break;
         case "PontoCerto":
-            // Acessa campos aqui, com cast
             const cardPontoCerto = card as Partial<CartaPontoCerto>;
             renderedSpecifics = (
                 <>
@@ -104,13 +96,12 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
                     )}
                 </>
             );
-            // Acessa respostaCorreta específico de PontoCerto
             renderedOptions = <p className="text-xs mt-1">Zona Correta ID: {typeof cardPontoCerto.respostaCorreta === 'number' ? cardPontoCerto.respostaCorreta : '(Inválido)'}</p>;
             break;
         case "CompletarFrase":
-             // Acessa campos aqui, com cast
             const cardCompFrase = card as Partial<CartaCompletarFrase>;
-            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: quot;{cardCompFrase.fraseIncompleta || '...'}quot;</p>;
+            // Correção AQUI: Usar " para as aspas internas
+            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: "{cardCompFrase.fraseIncompleta || '...'}"</p>;
             renderedOptions = (
                 <>
                  {cardCompFrase.fragmentos && cardCompFrase.fragmentos.length > 0 && (
@@ -121,19 +112,12 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
                         </ul>
                     </details>
                   )}
-                 {/* Acessa respostaCorreta específico de CompletarFrase */}
                  <p className="text-xs mt-1">Ordem Correta IDs: [{(Array.isArray(cardCompFrase.respostaCorreta) ? cardCompFrase.respostaCorreta.join(', ') : '(Inválida)')}]</p>
                 </>
             );
             break;
         // Tipos que usam as 'opcoes' padrão
-        case "Pergunta":
-        case "MultiplaEscolha":
-        case "Ordem":
-        case "Vantagem":
-        case "Desvantagem":
-        case "Outras":
-             // Lógica para renderizar opções padrão (já estava correta)
+        case "Pergunta": case "MultiplaEscolha": case "Ordem": case "Vantagem": case "Desvantagem": case "Outras":
             const correctSet = new Set<number>();
             if (tipo === "Vantagem") {
                 opcoes.forEach(o => correctSet.add(o.id));
@@ -146,7 +130,6 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
                 <ul className="mt-2 pl-5 list-decimal space-y-1">
                     {opcoes.map((op) => {
                         const isCorrect = correctSet.has(op.id);
-                        // Acessa respostaCorreta para o tipo Ordem aqui dentro
                         const orderInfo = tipo === 'Ordem' && Array.isArray(respostaCorreta) && (respostaCorreta as number[]).includes(op.id)
                             ? ` (Pos: ${(respostaCorreta as number[]).indexOf(op.id) + 1})`
                             : tipo === 'Ordem' ? ` (Ordem Inválida)` : '';
@@ -164,7 +147,6 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
     }
 
-    // Restante do JSX do CardStaticView permanece igual
     return (
         <Card className="max-w-md mx-auto my-4 shadow-md">
             <CardHeader className="pb-2">
@@ -193,7 +175,6 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
         </Card>
     );
 };
-
 
 // --- Componente Criador Principal (ATUALIZADO) ---
 const CriadorDeCarta: React.FC = () => {
@@ -237,6 +218,7 @@ const CriadorDeCarta: React.FC = () => {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const perguntaTextareaRef = useRef<HTMLTextAreaElement>(null);
 
+    // Funções de Carregar/Gerenciar Baralhos (sem mudanças significativas)
     const parseJSDeckFileLocal = (content: string): Carta[] => {
         const match = content.match(/export default\s+(\[[\s\S]*?\]);?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?\s*export default\s+\w+;?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?/m);
         if (!match || !match[1]) { throw new Error("Array não encontrado no arquivo JS."); }
@@ -274,7 +256,7 @@ const CriadorDeCarta: React.FC = () => {
     const removerBaralho = (baralhoId: number) => {
          setBaralhosCarregados((prev) => prev.map((b) => {
             if (b.id === baralhoId && b.adicionado) {
-                setCards((oldCards) => oldCards.filter((c) => {
+                setCards((oldCards) => oldCards.filter((c: Carta & { origBaralhoId?: number, edited?: boolean }) => { // Adiciona tipo explícito aqui
                     if (c.origBaralhoId === baralhoId) { return c.edited && manterCartasEditadas; } return true;
                 })); return { ...b, adicionado: false };
             } return b;
@@ -408,7 +390,7 @@ const CriadorDeCarta: React.FC = () => {
         } as Carta;
 
         if (editIndex !== null) {
-            setCards((oldCards) => oldCards.map((c, i) => i === editIndex ? { ...novaCarta, origBaralhoId: c.origBaralhoId, edited: true } : c ));
+            setCards((oldCards) => oldCards.map((c, i) => i === editIndex ? { ...novaCarta, origBaralhoId: (c as any).origBaralhoId, edited: true } : c )); // Mantem origBaralhoId
         } else {
             setCards((oldCards) => [...oldCards, { ...novaCarta, edited: true }]);
         }
@@ -449,7 +431,7 @@ const CriadorDeCarta: React.FC = () => {
     const cancelEdit = () => { resetCarta(); };
 
     const prepareForDownload = (): Partial<Carta>[] => {
-        return cards.map(({ origBaralhoId, edited, ...rest }) => {
+        return cards.map(({ origBaralhoId, edited, ...rest }: Carta & { origBaralhoId?: number, edited?: boolean }) => { // Adiciona tipo explícito
             const cardData: Partial<Carta> = { ...rest };
             if (rest.tipo !== "ContraTempo") delete (cardData as Partial<CartaContraTempo>).tempoLimite;
             if (rest.tipo !== "RelacionarColunas") { delete (cardData as Partial<CartaRelacionarColunas>).colunaA; delete (cardData as Partial<CartaRelacionarColunas>).colunaB; }
@@ -617,7 +599,7 @@ const CriadorDeCarta: React.FC = () => {
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium mb-1">Pares Corretos (JSON)</label>
-                                        {/* Correção: Usar " para aspas dentro do placeholder */}
+                                        {/* CORREÇÃO: Usar " para aspas internas */}
                                         <Textarea value={paresCorretosInput} onChange={e => setParesCorretosInput(e.target.value)} className="h-20 font-mono text-xs" placeholder='[{"aId": 1, "bId": 101}, {"aId": 2, "bId": 102}]'/>
                                     </div>
                                 </CardContent>
@@ -762,7 +744,7 @@ const CriadorDeCarta: React.FC = () => {
                         </CardHeader>
                         <CardContent>
                              {cards.length === 0 ? (<p className="text-gray-500 italic">Nenhuma carta.</p>) : (
-                                <ScrollArea className="h-[60vh] pr-3">
+                                <ScrollArea className="h-[60vh] pr-3"> {/* Altura maior */}
                                     <div className="space-y-2">
                                         {cards.map((c, index) => (
                                             <Card key={`card-display-${c.id || index}`} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => loadCardForEdit(index)}>
