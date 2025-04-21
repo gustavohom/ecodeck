@@ -330,15 +330,16 @@ const CriadorDeCarta: React.FC = () => {
     const inserirTemplatePopup = (tipoPopup: 'imagem' | 'video') => {
         const idUnico = `popup-${Date.now()}`;
         let urlPrincipal = '';
+        let urlThumb = ''; // <-- ADICIONAR ESTA LINHA
         let desc = '';
         let thumbHtml = '';
 
         if (tipoPopup === 'imagem') {
             if (!popupImageUrl.trim()) { alert("Insira a URL da Imagem."); return; }
             urlPrincipal = popupImageUrl;
-            urlThumb = popupImageUrl; // Usar a mesma URL para thumb
+            urlThumb = popupImageUrl; // Usa a mesma URL para thumb
             desc = 'Descrição da Imagem';
-            thumbHtml = `<img src=\"${urlThumb}\" alt=\"Clique para ampliar\"/>`;
+            thumbHtml = `<img src=\"${urlThumb}\" alt=\"Clique para ampliar\"/>`; // Agora urlThumb existe
         } else { // video
             if (!popupVideoUrl.trim()) { alert("Insira a URL do Vídeo (.mp4)."); return; }
             urlPrincipal = popupVideoUrl;
@@ -346,7 +347,7 @@ const CriadorDeCarta: React.FC = () => {
             thumbHtml = `<span>🎬 Clique para ver o vídeo</span>`;
         }
 
-        const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }\n.popup-overlay-${idUnico}:target { display: flex; }\n.popup-content-${idUnico} { position: relative; background-color: #fff; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; overflow: auto; }\n.popup-content-${idUnico} img, .popup-content-${idUnico} video { display: block; max-width: 100%; max-height: 80vh; height: auto; margin: 0 auto 15px auto; }\n.popup-close-${idUnico} { position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; color: #555; text-decoration: none; line-height: 1; }\n.popup-close-${idUnico}:hover { color: #000; }\n.thumb-link-${idUnico} { display: block; margin: 10px auto; width: fit-content; cursor: zoom-in; border: 1px solid #ccc; padding: 3px; border-radius: 4px; background: white; }\n.thumb-link-${idUnico} img, .thumb-link-${idUnico} span { max-width: 180px; height: auto; display: block; }\n.thumb-link-${idUnico} span{padding:10px; color:blue; text-decoration:underline}\n</style>\n`;
+        const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }\n.popup-overlay-${idUnico}:target { display: flex; }\n.popup-content-${idUnico} { position: relative; background-color: #fff; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; overflow: auto; }\n.popup-content-${idUnico} img, .popup-content-${idUnico} video { display: block; max-width: 100%; max-height: 80vh; height: auto; margin: 0 auto 15px auto; }\n.popup-close-${idUnico} { position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; color: #555; text-decoration: none; line-height: 1; }\n.popup-close-${idUnico}:hover { color: #000; }\n.thumb-link-${idUnico} { display: block; /* Alterado para block */ margin: 10px auto; /* Centraliza */ width: fit-content; /* Ajusta largura ao conteúdo */ cursor: zoom-in; border: 1px solid #ccc; padding: 3px; border-radius: 4px; background: white; }\n.thumb-link-${idUnico} img, .thumb-link-${idUnico} span { max-width: 180px; height: auto; display: block; }\n.thumb-link-${idUnico} span{padding:10px; color:blue; text-decoration:underline}\n</style>\n`;
         let templateElemento: string;
 
         if (tipoPopup === 'imagem') {
@@ -354,7 +355,7 @@ const CriadorDeCarta: React.FC = () => {
         } else { // video
             templateElemento = `<!-- Link/Thumb do Vídeo (Centralizado) -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\" style=\"border:none; background:none; padding:0;\">\n  ${thumbHtml}\n</a>\n\n<!-- Popup do Vídeo -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <video controls width=\"100%\" style=\"max-width: 700px; max-height: 70vh;\">\n      <source src=\"${urlPrincipal}\" type=\"video/mp4\">\n      Seu navegador não suporta vídeo.\n    </video>\n    <p style=\"text-align: center; font-size: 0.9em; color: #666;\">${desc}</p>\n  </div>\n</div>\n`;
         }
-        const htmlParaInserir = `\n<br><br>\n${templateCSS}${templateElemento}<br><br>\n`;
+        const htmlParaInserir = `\n<br>\n${templateCSS}${templateElemento}<br>\n`;
         const textarea = perguntaTextareaRef.current;
         if (textarea) {
             const start = textarea.selectionStart; const end = textarea.selectionEnd;
