@@ -56,68 +56,89 @@ interface BaralhoCarregado {
 }
 
 // --- Componente de Preview Estático (ATUALIZADO) ---
+// --- Componente de Preview Estático (ATUALIZADO) ---
 const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
+    // Remove campos específicos da desestruturação inicial
     const {
         tipo = "Pergunta", titulo = "", pergunta = "", opcoes = [], respostaCorreta,
-        dificuldade = "facil", categorias = [], fontes = [], vantagem = "", desvantagem = "", dica = "",
-        tempoLimite, colunaA, colunaB, imagemURL, zonasClicaveis, fraseIncompleta, fragmentos
+        dificuldade = "facil", categorias = [], fontes = [], vantagem = "", desvantagem = "", dica = ""
+        // REMOVIDOS: tempoLimite, colunaA, colunaB, imagemURL, zonasClicaveis, fraseIncompleta, fragmentos
     } = card;
 
     let renderedSpecifics: React.ReactNode = null;
     let renderedOptions: React.ReactNode = null;
 
+    // Renderiza campos específicos do tipo
     switch (tipo) {
         case "ContraTempo":
-            renderedSpecifics = <p className="text-xs text-orange-600">Tempo Limite: {tempoLimite || '?'}s</p>;
+            // Acessa tempoLimite aqui, com cast para o tipo específico
+            const cardContraTempo = card as Partial<CartaContraTempo>;
+            renderedSpecifics = <p className="text-xs text-orange-600">Tempo Limite: {cardContraTempo.tempoLimite || '?'}s</p>;
+            // A renderização das opções (renderedOptions) será tratada pelo 'default' abaixo
             break;
         case "RelacionarColunas":
+            // Acessa colunas aqui, com cast
+            const cardRelCol = card as Partial<CartaRelacionarColunas>;
             renderedSpecifics = (
                 <div className="flex gap-4 text-xs mt-2">
-                    <div className="flex-1"><strong>Coluna A:</strong><ul>{colunaA?.map(i => <li key={`a-${i.id}`}>{i.id}: {i.texto}</li>)}</ul></div>
-                    <div className="flex-1"><strong>Coluna B:</strong><ul>{colunaB?.map(i => <li key={`b-${i.id}`}>{i.id}: {i.texto}</li>)}</ul></div>
+                    <div className="flex-1"><strong>Coluna A:</strong><ul>{cardRelCol.colunaA?.map(i => <li key={`a-${i.id}`}>{i.id}: {i.texto}</li>)}</ul></div>
+                    <div className="flex-1"><strong>Coluna B:</strong><ul>{cardRelCol.colunaB?.map(i => <li key={`b-${i.id}`}>{i.id}: {i.texto}</li>)}</ul></div>
                 </div>
             );
-             const pairs = Array.isArray(respostaCorreta) ? (respostaCorreta as {aId: number, bId: number}[]).map(p => `${p.aId}-${p.bId}`).join(', ') : '(Inválida)';
+             const pairs = Array.isArray(cardRelCol.respostaCorreta) ? cardRelCol.respostaCorreta.map(p => `${p.aId}-${p.bId}`).join(', ') : '(Inválida)';
              renderedOptions = <p className="text-xs mt-1">Pares Corretos: [{pairs}]</p>;
             break;
         case "PontoCerto":
+            // Acessa campos aqui, com cast
+            const cardPontoCerto = card as Partial<CartaPontoCerto>;
             renderedSpecifics = (
                 <>
-                    <p className="text-xs">Imagem URL: <span className="font-mono bg-gray-100 px-1 rounded">{imagemURL || '(Nenhuma)'}</span></p>
-                    {zonasClicaveis && zonasClicaveis.length > 0 && (
+                    <p className="text-xs">Imagem URL: <span className="font-mono bg-gray-100 px-1 rounded">{cardPontoCerto.imagemURL || '(Nenhuma)'}</span></p>
+                    {cardPontoCerto.zonasClicaveis && cardPontoCerto.zonasClicaveis.length > 0 && (
                         <details className="text-xs mt-1">
-                            <summary className="cursor-pointer font-medium">Zonas Clicáveis ({zonasClicaveis.length})</summary>
+                            <summary className="cursor-pointer font-medium">Zonas Clicáveis ({cardPontoCerto.zonasClicaveis.length})</summary>
                             <ul className="pl-4 list-disc">
-                                {zonasClicaveis.map(z => <li key={z.id}>ID:{z.id} ({z.x},{z.y} - {z.largura}x{z.altura}) {z.descricao || ''}</li>)}
+                                {cardPontoCerto.zonasClicaveis.map(z => <li key={z.id}>ID:{z.id} ({z.x},{z.y} - {z.largura}x{z.altura}) {z.descricao || ''}</li>)}
                             </ul>
                         </details>
                     )}
                 </>
             );
-            renderedOptions = <p className="text-xs mt-1">Zona Correta ID: {typeof respostaCorreta === 'number' ? respostaCorreta : '(Inválido)'}</p>;
+            // Acessa respostaCorreta específico de PontoCerto
+            renderedOptions = <p className="text-xs mt-1">Zona Correta ID: {typeof cardPontoCerto.respostaCorreta === 'number' ? cardPontoCerto.respostaCorreta : '(Inválido)'}</p>;
             break;
         case "CompletarFrase":
-            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: &quot;{fraseIncompleta || '...'}&quot;</p>;
+             // Acessa campos aqui, com cast
+            const cardCompFrase = card as Partial<CartaCompletarFrase>;
+            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: "{cardCompFrase.fraseIncompleta || '...'}"</p>;
             renderedOptions = (
                 <>
-                 {fragmentos && fragmentos.length > 0 && (
+                 {cardCompFrase.fragmentos && cardCompFrase.fragmentos.length > 0 && (
                     <details className="text-xs mt-1">
-                        <summary className="cursor-pointer font-medium">Fragmentos ({fragmentos.length})</summary>
+                        <summary className="cursor-pointer font-medium">Fragmentos ({cardCompFrase.fragmentos.length})</summary>
                         <ul className="pl-4 list-disc">
-                            {fragmentos.map(f => <li key={f.id}>{f.id}: {f.texto}</li>)}
+                            {cardCompFrase.fragmentos.map(f => <li key={f.id}>{f.id}: {f.texto}</li>)}
                         </ul>
                     </details>
                   )}
-                 <p className="text-xs mt-1">Ordem Correta IDs: [{(Array.isArray(respostaCorreta) ? respostaCorreta.join(', ') : '(Inválida)')}]</p>
+                 {/* Acessa respostaCorreta específico de CompletarFrase */}
+                 <p className="text-xs mt-1">Ordem Correta IDs: [{(Array.isArray(cardCompFrase.respostaCorreta) ? cardCompFrase.respostaCorreta.join(', ') : '(Inválida)')}]</p>
                 </>
             );
             break;
-        default:
+        // Tipos que usam as 'opcoes' padrão
+        case "Pergunta":
+        case "MultiplaEscolha":
+        case "Ordem":
+        case "Vantagem":
+        case "Desvantagem":
+        case "Outras":
+             // Lógica para renderizar opções padrão (já estava correta)
             const correctSet = new Set<number>();
             if (tipo === "Vantagem") {
                 opcoes.forEach(o => correctSet.add(o.id));
             } else if (tipo !== "Desvantagem") {
-                if (Array.isArray(respostaCorreta)) { respostaCorreta.forEach(id => typeof id === 'number' && correctSet.add(id)); }
+                if (Array.isArray(respostaCorreta)) { (respostaCorreta as number[]).forEach(id => typeof id === 'number' && correctSet.add(id)); }
                 else if (typeof respostaCorreta === 'number') { correctSet.add(respostaCorreta); }
             }
 
@@ -125,6 +146,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
                 <ul className="mt-2 pl-5 list-decimal space-y-1">
                     {opcoes.map((op) => {
                         const isCorrect = correctSet.has(op.id);
+                        // Acessa respostaCorreta para o tipo Ordem aqui dentro
                         const orderInfo = tipo === 'Ordem' && Array.isArray(respostaCorreta) && (respostaCorreta as number[]).includes(op.id)
                             ? ` (Pos: ${(respostaCorreta as number[]).indexOf(op.id) + 1})`
                             : tipo === 'Ordem' ? ` (Ordem Inválida)` : '';
@@ -142,6 +164,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
     }
 
+    // Restante do JSX do CardStaticView permanece igual
     return (
         <Card className="max-w-md mx-auto my-4 shadow-md">
             <CardHeader className="pb-2">
@@ -153,7 +176,6 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             </CardHeader>
             <CardContent className="pt-2 pb-3 space-y-2">
                 {renderedSpecifics}
-                {/* ScrollArea para a pergunta */}
                 <ScrollArea className="h-auto max-h-60 rounded-md border p-3 mt-2 bg-white/80 min-h-[100px]">
                      <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1" dangerouslySetInnerHTML={{ __html: pergunta || "(Sem Pergunta/Descrição)" }} />
                 </ScrollArea>
