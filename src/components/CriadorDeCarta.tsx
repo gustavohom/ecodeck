@@ -10,8 +10,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trash } from "lucide-react";
-import { cn } from "@/lib/utils"; // Assumindo que você tem este utilitário
+import { Trash, Youtube, Image as ImageIcon, Video } from "lucide-react"; // Importar Ícones
+import { cn } from "@/lib/utils";
 
 // --- Tipos de Dados ---
 interface Opcao { id: number; texto: string; ordemTemp?: string; }
@@ -56,6 +56,7 @@ interface BaralhoCarregado { id: number; nome: string; cartas: Carta[]; adiciona
 
 // --- Componente de Preview Estático ---
 const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
+    // ... (Código do CardStaticView sem alterações da versão anterior) ...
     const {
         tipo = "Pergunta", titulo = "", pergunta = "", opcoes = [], respostaCorreta,
         dificuldade = "facil", categorias = [], fontes = [], vantagem = "", desvantagem = "", dica = ""
@@ -102,7 +103,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
         case "CompletarFrase":
             const cardCompFrase = card as Partial<CartaCompletarFrase>;
-            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: &quot;{cardCompFrase.fraseIncompleta || '...'}&quot;</p>;
+            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: "{cardCompFrase.fraseIncompleta || '...'}"</p>;
             renderedOptions = (
                 <>
                  {cardCompFrase.fragmentos && cardCompFrase.fragmentos.length > 0 && (
@@ -214,14 +215,39 @@ const CriadorDeCarta: React.FC = () => {
     const [novoFragmento, setNovoFragmento] = useState("");
     const [ordemFragmentos, setOrdemFragmentos] = useState("");
     const [editIndex, setEditIndex] = useState<number | null>(null);
-    const [popupImageUrlThumb, setPopupImageUrlThumb] = useState("");
-    const [popupImageUrlLarge, setPopupImageUrlLarge] = useState("");
+    const [popupImageUrl, setPopupImageUrl] = useState(""); // Unificado
     const [popupVideoUrl, setPopupVideoUrl] = useState("");
+    const [popupYouTubeUrl, setPopupYouTubeUrl] = useState(""); // Para YouTube
     const [baralhosCarregados, setBaralhosCarregados] = useState<BaralhoCarregado[]>([]);
     const [manterCartasEditadas, setManterCartasEditadas] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const perguntaTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+    // Refs para imagens de preview
+    const previewImageRefPontoCerto = useRef<HTMLImageElement>(null);
+    const [previewImageSize, setPreviewImageSize] = useState({ width: 0, height: 0 });
+
+    // Calcula o tamanho real da imagem de preview para o Ponto Certo
+    useEffect(() => {
+        if (tipo === 'PontoCerto' && previewImageRefPontoCerto.current) {
+            const updateSize = () => {
+                if (previewImageRefPontoCerto.current) {
+                    setPreviewImageSize({
+                        width: previewImageRefPontoCerto.current.offsetWidth,
+                        height: previewImageRefPontoCerto.current.offsetHeight,
+                    });
+                }
+            };
+            // Atualiza no mount e no resize
+            const img = previewImageRefPontoCerto.current;
+            img.onload = updateSize; // Garante que a imagem carregou
+            if (img.complete) updateSize(); // Se já estiver carregada
+            window.addEventListener('resize', updateSize);
+            return () => window.removeEventListener('resize', updateSize);
+        }
+    }, [tipo, imagemURLPontoCerto]); // Recalcula se a URL ou tipo mudar
+
 
     const parseJSDeckFileLocal = (content: string): Carta[] => {
         const match = content.match(/export default\s+(\[[\s\S]*?\]);?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?\s*export default\s+\w+;?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?/m);
@@ -296,32 +322,23 @@ const CriadorDeCarta: React.FC = () => {
     const handleAddFonte = () => { if (novaFonte.trim() !== "" && !fontes.includes(novaFonte)) { setFontes((old) => [...old, novaFonte]); setNovaFonte(""); } };
     const handleRemoveFonte = (f: string) => { setFontes((old) => old.filter((fon) => fon !== f)); };
 
-    // --- Função para Inserir HTML de Popup (ATUALIZADA com URLs) ---
+    // --- Funções para Inserir HTML de Popup ---
     const inserirTemplatePopup = (tipoPopup: 'imagem' | 'video') => {
         const idUnico = `popup-${Date.now()}`;
-        let urlThumb = '';
-        let urlPrincipal = '';
-        let desc = '';
+        const urlPrincipal = tipoPopup === 'imagem' ? popupImageUrl || '/images/placeholder_grande.png' : popupVideoUrl || '/videos/placeholder_video.mp4';
+        const urlThumb = tipoPopup === 'imagem' ? popupImageUrl || '/images/placeholder_thumb.png' : ''; // Usa a mesma url para thumb de imagem
+        const desc = tipoPopup === 'imagem' ? 'Descrição da Imagem' : 'Descrição do Vídeo';
 
-        if (tipoPopup === 'imagem') {
-            urlThumb = popupImageUrlThumb || '/images/placeholder_thumb.png';
-            urlPrincipal = popupImageUrlLarge || '/images/placeholder_grande.png';
-            desc = 'Descrição da Imagem';
-        } else {
-            urlPrincipal = popupVideoUrl || '/videos/placeholder_video.mp4';
-            desc = 'Descrição do Vídeo';
-        }
-
-        const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }\n.popup-overlay-${idUnico}:target { display: flex; }\n.popup-content-${idUnico} { position: relative; background-color: #fff; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; overflow: auto; }\n.popup-content-${idUnico} img, .popup-content-${idUnico} video { display: block; max-width: 100%; max-height: 80vh; height: auto; margin: 0 auto 15px auto; }\n.popup-close-${idUnico} { position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; color: #555; text-decoration: none; line-height: 1; }\n.popup-close-${idUnico}:hover { color: #000; }\n.thumb-link-${idUnico} { display: inline-block; cursor: zoom-in; border: 1px solid #ccc; padding: 3px; border-radius: 4px; background: white; }\n.thumb-link-${idUnico} img, .thumb-link-${idUnico} span { max-width: 180px; height: auto; display: block; }\n.thumb-link-${idUnico} span{padding:10px; color:blue; text-decoration:underline}\n</style>\n`;
+        const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }\n.popup-overlay-${idUnico}:target { display: flex; }\n.popup-content-${idUnico} { position: relative; background-color: #fff; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; overflow: auto; }\n.popup-content-${idUnico} img, .popup-content-${idUnico} video { display: block; max-width: 100%; max-height: 80vh; height: auto; margin: 0 auto 15px auto; }\n.popup-close-${idUnico} { position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; color: #555; text-decoration: none; line-height: 1; }\n.popup-close-${idUnico}:hover { color: #000; }\n.thumb-link-${idUnico} { display: block; /* Alterado para block */ margin: 10px auto; /* Centraliza */ width: fit-content; /* Ajusta largura ao conteúdo */ cursor: zoom-in; border: 1px solid #ccc; padding: 3px; border-radius: 4px; background: white; }\n.thumb-link-${idUnico} img, .thumb-link-${idUnico} span { max-width: 180px; height: auto; display: block; }\n.thumb-link-${idUnico} span{padding:10px; color:blue; text-decoration:underline}\n</style>\n`;
         let templateElemento: string;
 
         if (tipoPopup === 'imagem') {
-            templateElemento = `<!-- Link/Thumb da Imagem -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\">\n  <img src=\"${urlThumb}\" alt=\"Clique para ampliar\"/>\n</a>\n\n<!-- Popup da Imagem -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <img src=\"${urlPrincipal}\" alt=\"Imagem Ampliada\"/>\n    <p style=\"text-align: center; font-size: 0.9em; color: #666;\">${desc}</p>\n  </div>\n</div>\n`;
+            templateElemento = `<!-- Link/Thumb da Imagem (Centralizado) -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\">\n  <img src=\"${urlThumb}\" alt=\"Clique para ampliar\"/>\n</a>\n\n<!-- Popup da Imagem -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <img src=\"${urlPrincipal}\" alt=\"Imagem Ampliada\"/>\n    <p style=\"text-align: center; font-size: 0.9em; color: #666;\">${desc}</p>\n  </div>\n</div>\n`;
         } else { // Video
-            templateElemento = `<!-- Link/Thumb do Vídeo -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\">\n  <span>🎬 Clique para ver o vídeo</span>\n</a>\n\n<!-- Popup do Vídeo -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <video controls width=\"100%\" style=\"max-width: 700px; max-height: 70vh;\">\n      <source src=\"${urlPrincipal}\" type=\"video/mp4\">\n      Seu navegador não suporta vídeo.\n    </video>\n    <p style=\"text-align: center; font-size: 0.9em; color: #666;\">${desc}</p>\n  </div>\n</div>\n`;
+            templateElemento = `<!-- Link/Thumb do Vídeo (Centralizado) -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\" style=\"border:none; background:none; padding:0;\">\n  <span style=\"background:#ddd; padding: 10px 15px; border-radius:5px;\">🎬 Clique para ver o vídeo</span>\n</a>\n\n<!-- Popup do Vídeo -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <video controls width=\"100%\" style=\"max-width: 700px; max-height: 70vh;\">\n      <source src=\"${urlPrincipal}\" type=\"video/mp4\">\n      Seu navegador não suporta vídeo.\n    </video>\n    <p style=\"text-align: center; font-size: 0.9em; color: #666;\">${desc}</p>\n  </div>\n</div>\n`;
         }
-        // Adiciona quebras de linha antes e depois
-        const htmlParaInserir = `\n<br><br>\n${templateCSS}${templateElemento}<br><br>\n`;
+        // Adiciona <br> antes e depois
+        const htmlParaInserir = `\n<br>\n${templateCSS}${templateElemento}<br>\n`;
         const textarea = perguntaTextareaRef.current;
         if (textarea) {
             const start = textarea.selectionStart; const end = textarea.selectionEnd;
@@ -329,9 +346,54 @@ const CriadorDeCarta: React.FC = () => {
             const novoTexto = textoAtual.substring(0, start) + htmlParaInserir + textoAtual.substring(end);
             setPergunta(novoTexto);
             // Limpa os inputs de URL após inserir
-            if(tipoPopup === 'imagem') { setPopupImageUrlThumb(""); setPopupImageUrlLarge(""); } else { setPopupVideoUrl(""); }
+            if(tipoPopup === 'imagem') { setPopupImageUrl(""); } else { setPopupVideoUrl(""); }
         } else { setPergunta(prev => prev + htmlParaInserir); }
     };
+
+    // --- Função para Inserir Popup YouTube ---
+    const inserirTemplatePopupYouTube = () => {
+        if (!popupYouTubeUrl.trim()) {
+            alert("Por favor, insira a URL do vídeo do YouTube.");
+            return;
+        }
+        // Extrai o ID do vídeo da URL (funciona para vários formatos comuns)
+        let videoId = '';
+        const url = popupYouTubeUrl;
+        const patterns = [
+             /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, // Padrão watch?v=
+             /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/,             // Padrão youtu.be/
+             /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/     // Padrão embed/
+        ];
+        for (const pattern of patterns) {
+            const match = url.match(pattern);
+            if (match && match[1]) {
+                videoId = match[1];
+                break;
+            }
+        }
+
+        if (!videoId) {
+            alert("URL do YouTube inválida ou formato não reconhecido. Use o link completo do vídeo (watch?v=... ou youtu.be/... ou embed/...).");
+            return;
+        }
+
+        const idUnico = `popup-yt-${Date.now()}`;
+        const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+
+        const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }\n.popup-overlay-${idUnico}:target { display: flex; }\n.popup-content-${idUnico} { position: relative; background-color: #000; /* Fundo preto para player */ padding: 10px; border-radius: 8px; width: 90%; max-width: 800px; /* Tamanho maior para vídeo */ aspect-ratio: 16 / 9; }\n.popup-content-${idUnico} iframe { display: block; width: 100%; height: 100%; border: none; }\n.popup-close-${idUnico} { position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; background: white; border-radius: 50%; font-size: 20px; font-weight: bold; color: #333; text-decoration: none; line-height: 30px; text-align: center; box-shadow: 0 0 5px black; }\n.popup-close-${idUnico}:hover { color: #000; background: #eee; }\n.thumb-link-${idUnico} { display: block; /* Alterado para block */ margin: 10px auto; /* Centraliza */ width: fit-content; cursor: pointer; }\n.thumb-link-${idUnico} span { background:#eee; border: 1px solid #ccc; padding: 10px 15px; border-radius:5px; color: #c4302b; /* Cor YouTube */ font-weight: bold; display: flex; align-items: center; gap: 5px; }\n</style>\n`;
+        const templateElemento = `<!-- Link/Thumb YouTube -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\">\n  <span><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"#c4302b\" style=\"margin-right: 5px;\"><path d=\"M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z\"/></svg> Ver Vídeo YouTube</span>\n</a>\n\n<!-- Popup YouTube -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <iframe src=\"${embedUrl}\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" allowfullscreen></iframe>\n  </div>\n</div>\n`;
+
+        const htmlParaInserir = `\n<br>\n${templateCSS}${templateElemento}<br>\n`;
+        const textarea = perguntaTextareaRef.current;
+        if (textarea) {
+            const start = textarea.selectionStart; const end = textarea.selectionEnd;
+            const textoAtual = textarea.value;
+            const novoTexto = textoAtual.substring(0, start) + htmlParaInserir + textoAtual.substring(end);
+            setPergunta(novoTexto);
+            setPopupYouTubeUrl(""); // Limpa input
+        } else { setPergunta(prev => prev + htmlParaInserir); }
+    };
+
 
     const resetCarta = () => {
         setTipo("Pergunta"); setTitulo(""); setPergunta(""); setOpcoes([]); setNovaOpcao("");
@@ -343,10 +405,13 @@ const CriadorDeCarta: React.FC = () => {
         if (!categoriasBloqueadas) setCategorias([]);
         if (!fontesBloqueadas) setFontes([]);
         setEditIndex(null);
-        setPopupImageUrlThumb(""); setPopupImageUrlLarge(""); setPopupVideoUrl(""); // Limpa URLs
+        setPopupImageUrl(""); // Limpa URL de imagem
+        setPopupVideoUrl(""); // Limpa URL de vídeo
+        setPopupYouTubeUrl(""); // Limpa URL do YouTube
     };
 
     const handleAddOrUpdateCard = () => {
+        // ... (Lógica de validação e construção da carta como na resposta anterior) ...
         if (!titulo.trim() || !tipo) { alert("Título e Tipo são obrigatórios."); return; }
         let finalRespostaCorreta: number | number[] | { aId: number; bId: number }[] = [];
         let cartaEspecificaProps: any = {};
@@ -432,6 +497,7 @@ const CriadorDeCarta: React.FC = () => {
     };
 
     const loadCardForEdit = (index: number) => {
+        // ... (Lógica de loadCardForEdit como na resposta anterior) ...
         resetCarta();
         const carta = cards[index];
         setEditIndex(index); setTipo(carta.tipo as TipoCarta); setTitulo(carta.titulo); setPergunta(carta.pergunta);
@@ -473,18 +539,20 @@ const CriadorDeCarta: React.FC = () => {
     const cancelEdit = () => { resetCarta(); };
 
     const prepareForDownload = (): Partial<Carta>[] => {
-        return cards.map(({ origBaralhoId, edited, ...rest }: CartaInterna) => {
+        // ... (Lógica prepareForDownload como na resposta anterior) ...
+         return cards.map(({ origBaralhoId, edited, ...rest }: CartaInterna) => {
             const cardData: Partial<Carta> = { ...rest };
-            if (rest.tipo !== "ContraTempo") delete (cardData as Partial<CartaContraTempo>).tempoLimite;
+            if (rest.tipo !== "ContraTempo") delete cardData.tempoLimite;
             if (rest.tipo !== "RelacionarColunas") { delete (cardData as Partial<CartaRelacionarColunas>).colunaA; delete (cardData as Partial<CartaRelacionarColunas>).colunaB; }
             if (rest.tipo !== "PontoCerto") { delete (cardData as Partial<CartaPontoCerto>).imagemURL; delete (cardData as Partial<CartaPontoCerto>).zonasClicaveis; }
             if (rest.tipo !== "CompletarFrase") { delete (cardData as Partial<CartaCompletarFrase>).fraseIncompleta; delete (cardData as Partial<CartaCompletarFrase>).fragmentos; }
-            if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo) && cardData.opcoes !== undefined) {
+
+            if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo)) {
                  delete cardData.opcoes;
             } else if (rest.tipo === "Ordem" && cardData.opcoes) {
                  cardData.opcoes = cardData.opcoes.map(({ ordemTemp, ...o }) => o);
-            } else if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo) && cardData.opcoes === undefined) {
-                 cardData.opcoes = []; // Garante array vazio se deveria ter mas não tem
+            } else if (cardData.opcoes === undefined && ["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo)) {
+                 cardData.opcoes = []; // Garante array vazio
             }
             return cardData;
         });
@@ -546,7 +614,7 @@ const CriadorDeCarta: React.FC = () => {
              {/* Seção Principal: Layout 3 colunas */}
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                {/* Coluna Esquerda: Formulário */}
+                {/* Coluna Esquerda+Meio: Formulário */}
                 <Card className="lg:col-span-2 max-h-[90vh] overflow-y-auto self-start">
                     <CardHeader>
                          <CardTitle className="text-2xl">{editIndex !== null ? `Editando: ${cards[editIndex]?.titulo || `Carta ${editIndex + 1}`}` : "Criar Nova Carta"}</CardTitle>
@@ -573,24 +641,27 @@ const CriadorDeCarta: React.FC = () => {
                         <div>
                             <label className="block text-sm font-medium mb-1">Pergunta/Descrição* (HTML)</label>
                              <Textarea ref={perguntaTextareaRef} value={pergunta} onChange={(e) => setPergunta(e.target.value)} className="h-36 font-mono text-sm" placeholder="Escreva aqui..."/>
-                             {/* Inputs para URLs e Botões para inserir Popups */}
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 border p-2 rounded bg-gray-50">
-                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium">Popup Imagem:</label>
-                                    <div className="flex items-center gap-1">
-                                        <Input type="text" value={popupImageUrlThumb} onChange={e => setPopupImageUrlThumb(e.target.value)} placeholder="URL Thumb" className="text-xs h-8 flex-1"/>
-                                        <Input type="text" value={popupImageUrlLarge} onChange={e => setPopupImageUrlLarge(e.target.value)} placeholder="URL Grande" className="text-xs h-8 flex-1"/>
-                                        <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('imagem')} className="h-8 text-xs px-2 shrink-0">Add</Button>
+                             {/* Inputs e botões para inserir popups */}
+                             <Card className="mt-2 border-dashed">
+                                <CardHeader className="p-2"><CardTitle className="text-sm font-medium">Inserir Popup de Mídia</CardTitle></CardHeader>
+                                <CardContent className="p-2 space-y-2">
+                                    <div className="flex items-center gap-2">
+                                         <ImageIcon className="h-4 w-4 text-gray-500 shrink-0"/>
+                                         <Input type="text" value={popupImageUrl} onChange={e => setPopupImageUrl(e.target.value)} placeholder="URL Imagem (Thumb e Grande)" className="text-xs h-8 flex-1"/>
+                                         <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('imagem')} className="h-8 text-xs px-2 shrink-0">Add Img</Button>
                                     </div>
-                                 </div>
-                                 <div className="space-y-1">
-                                     <label className="text-xs font-medium">Popup Vídeo:</label>
-                                     <div className="flex items-center gap-1">
-                                        <Input type="text" value={popupVideoUrl} onChange={e => setPopupVideoUrl(e.target.value)} placeholder="URL Vídeo (.mp4)" className="text-xs h-8 flex-1"/>
-                                        <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('video')} className="h-8 text-xs px-2 shrink-0">Add</Button>
-                                    </div>
-                                 </div>
-                             </div>
+                                     <div className="flex items-center gap-2">
+                                         <Video className="h-4 w-4 text-gray-500 shrink-0"/>
+                                         <Input type="text" value={popupVideoUrl} onChange={e => setPopupVideoUrl(e.target.value)} placeholder="URL Vídeo (.mp4)" className="text-xs h-8 flex-1"/>
+                                         <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('video')} className="h-8 text-xs px-2 shrink-0">Add Vídeo</Button>
+                                     </div>
+                                      <div className="flex items-center gap-2">
+                                          <Youtube className="h-4 w-4 text-red-600 shrink-0"/>
+                                          <Input type="text" value={popupYouTubeUrl} onChange={e => setPopupYouTubeUrl(e.target.value)} placeholder="URL YouTube (Completa)" className="text-xs h-8 flex-1"/>
+                                          <Button type="button" size="sm" variant="outline" onClick={inserirTemplatePopupYouTube} className="h-8 text-xs px-2 shrink-0">Add YouTube</Button>
+                                      </div>
+                                </CardContent>
+                             </Card>
                         </div>
 
                         {/* --- Campos Condicionais --- */}
@@ -676,18 +747,33 @@ const CriadorDeCarta: React.FC = () => {
                                         <label className="block text-sm font-medium mb-1">URL da Imagem Principal*</label>
                                         <Input type="text" value={imagemURLPontoCerto} onChange={e => setImagemURLPontoCerto(e.target.value)} placeholder="/images/mapa.png" />
                                     </div>
+                                    {/* Preview da Imagem e Zonas */}
                                     {imagemURLPontoCerto && (
                                         <div className="relative border rounded overflow-hidden max-w-sm mx-auto aspect-video bg-gray-200 my-2">
-                                            <img src={imagemURLPontoCerto} alt="Preview Ponto Certo" className="block w-full h-full object-contain" onError={(e) => { e.currentTarget.src = '/images/placeholder_error.png'; e.currentTarget.classList.add('opacity-50');}}/>
+                                            <img ref={previewImageRefPontoCerto} src={imagemURLPontoCerto} alt="Preview Ponto Certo" className="block w-full h-full object-contain" onError={(e) => { e.currentTarget.src = '/images/placeholder_error.png'; e.currentTarget.classList.add('opacity-50');}}/>
+                                            {/* Renderiza zonas existentes */}
                                             {zonasClicaveis.map(z => (
                                                 <div key={`zone-vis-${z.id}`}
-                                                     className={cn( "absolute border-2 pointer-events-none", respostaCorretaPontoCerto === z.id ? "border-green-500 bg-green-500/30" : "border-red-500 bg-red-500/20" )}
+                                                     className={cn( "absolute border-2 pointer-events-none", respostaCorretaPontoCerto === z.id ? "border-green-500 bg-green-500/30" : "border-dashed border-red-500 bg-red-500/20" )} // Destaca correta, pontilha outras
                                                      style={{ left: `${z.x * 100}%`, top: `${z.y * 100}%`, width: `${z.largura * 100}%`, height: `${z.altura * 100}%` }}
                                                      title={`ID: ${z.id} - ${z.descricao || 'Zona'}`}
                                                 >
                                                     <span className="absolute -top-5 left-0 text-xs bg-black/50 text-white px-1 rounded">{z.id}</span>
                                                 </div>
                                             ))}
+                                             {/* Renderiza preview da NOVA zona sendo editada */}
+                                              {novaZona.x != null && novaZona.y != null && novaZona.largura != null && novaZona.altura != null && (
+                                                <div
+                                                    className="absolute border-2 border-blue-500 border-dotted pointer-events-none bg-blue-500/20"
+                                                    style={{
+                                                         left: `${(parseFloat(String(novaZona.x).replace(',','.')) || 0) * 100}%`,
+                                                         top: `${(parseFloat(String(novaZona.y).replace(',','.')) || 0) * 100}%`,
+                                                         width: `${(parseFloat(String(novaZona.largura).replace(',','.')) || 0.1) * 100}%`,
+                                                         height: `${(parseFloat(String(novaZona.altura).replace(',','.')) || 0.1) * 100}%`,
+                                                    }}
+                                                    title="Nova Zona (Preview)"
+                                                />
+                                              )}
                                         </div>
                                     )}
                                     <div>
@@ -755,8 +841,8 @@ const CriadorDeCarta: React.FC = () => {
                             </Select>
                         </div>
 
-                        {/* Categorias e Fontes (Layout Vertical) */}
-                        <div className="space-y-4 pt-2">
+                        {/* Categorias e Fontes */}
+                        <div className="space-y-4 pt-2"> {/* Layout Vertical */}
                             <Card className="bg-gray-50 border">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-3">
                                     <CardTitle className="text-base font-semibold">Categorias</CardTitle>
@@ -791,8 +877,8 @@ const CriadorDeCarta: React.FC = () => {
                              </Card>
                         </div>
 
-                        {/* Vantagem, Desvantagem, Dica (Layout Vertical) */}
-                        <div className="space-y-4 pt-2">
+                        {/* Vantagem, Desvantagem, Dica */}
+                        <div className="space-y-4 pt-2"> {/* Layout Vertical */}
                              <div><label className="block text-sm font-medium mb-1">Vantagem (Msg Acerto)</label><Input type="text" value={vantagem} onChange={(e) => setVantagem(e.target.value)} /></div>
                             <div><label className="block text-sm font-medium mb-1">Desvantagem (Msg Erro)</label><Input type="text" value={desvantagem} onChange={(e) => setDesvantagem(e.target.value)} /></div>
                             <div><label className="block text-sm font-medium mb-1">Dica</label><Input type="text" value={dica} onChange={(e) => setDica(e.target.value)} /></div>
@@ -811,14 +897,14 @@ const CriadorDeCarta: React.FC = () => {
 
                  {/* Coluna Direita: Lista de Cartas e Preview Fixo */}
                  <div className="space-y-4 lg:sticky lg:top-4 self-start"> {/* Preview fixo */}
-                     <Card>
+                    <Card>
                         <CardHeader>
                             <CardTitle className="text-xl">Baralho Atual ({cards.length} Cartas)</CardTitle>
                             <AlertDescription>Clique em uma carta abaixo para editá-la.</AlertDescription>
                         </CardHeader>
                         <CardContent>
                              {cards.length === 0 ? (<p className="text-gray-500 italic">Nenhuma carta.</p>) : (
-                                <ScrollArea className="h-[45vh] pr-3"> {/* Altura ajustada */}
+                                <ScrollArea className="h-[calc(50vh-6rem)] pr-3"> {/* Altura dinâmica */}
                                     <div className="space-y-2">
                                         {cards.map((c, index) => (
                                             <Card key={`card-display-${c.id || index}`} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => loadCardForEdit(index)}>
@@ -837,19 +923,18 @@ const CriadorDeCarta: React.FC = () => {
                                 </ScrollArea>
                              )}
                          </CardContent>
-                     </Card>
+                    </Card>
 
-                     {/* Preview Estático Fixo */}
+                    {/* Preview Estático Fixo */}
                      <Card className="mt-4">
                             <CardHeader><CardTitle className="text-lg text-center">Preview Estático</CardTitle></CardHeader>
                             <CardContent>
-                                 <CardStaticView card={
+                                 <CardStaticView card={ // Sempre mostra o preview do estado atual do formulário
                                      editIndex !== null
-                                     ? cards[editIndex]
-                                     : { // Monta preview da carta sendo criada
+                                     ? cards[editIndex] // Se editando, mostra a carta sendo editada
+                                     : { // Se criando, monta preview da nova carta
                                          tipo, titulo, pergunta, opcoes,
                                          respostaCorreta: (() => {
-                                             // Lógica de preview da resposta correta
                                              if (tipo === 'Pergunta' || tipo === 'ContraTempo') return respostaCorreta[0];
                                              if (tipo === 'PontoCerto') return respostaCorretaPontoCerto ?? undefined;
                                              if (tipo === 'RelacionarColunas') try { return JSON.parse(paresCorretosInput || '[]'); } catch { return []; }
