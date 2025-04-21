@@ -110,7 +110,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
         case "CompletarFrase":
              // Acessa campos aqui, com cast
             const cardCompFrase = card as Partial<CartaCompletarFrase>;
-            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: "{cardCompFrase.fraseIncompleta || '...'}"</p>;
+            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: quot;{cardCompFrase.fraseIncompleta || '...'}quot;</p>;
             renderedOptions = (
                 <>
                  {cardCompFrase.fragmentos && cardCompFrase.fragmentos.length > 0 && (
