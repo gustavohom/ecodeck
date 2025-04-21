@@ -23,9 +23,9 @@ interface CartaBase {
     id: string | number; tipo: string; titulo: string; pergunta: string;
     dificuldade: "facil" | "normal" | "dificil"; categorias: string[]; fontes: string[];
     vantagem: string; desvantagem: string; dica: string;
-    opcoes?: Opcao[]; // Opcional na base
+    opcoes?: Opcao[]; // <-- Opcional na base
 }
-interface CartaComOpcoes extends CartaBase { opcoes: Opcao[]; } // Tipo auxiliar
+interface CartaComOpcoes extends CartaBase { opcoes: Opcao[]; }
 
 interface CartaPergunta extends CartaComOpcoes { tipo: "Pergunta"; respostaCorreta: number; }
 interface CartaMultiplaEscolha extends CartaComOpcoes { tipo: "MultiplaEscolha"; respostaCorreta: number[]; }
@@ -33,12 +33,13 @@ interface CartaOrdem extends CartaComOpcoes { tipo: "Ordem"; respostaCorreta: nu
 interface CartaVantagem extends CartaComOpcoes { tipo: "Vantagem"; respostaCorreta: number[]; }
 interface CartaDesvantagem extends CartaComOpcoes { tipo: "Desvantagem"; respostaCorreta: number[]; }
 interface CartaOutras extends CartaComOpcoes { tipo: "Outras"; respostaCorreta: number[]; }
-interface CartaContraTempo extends CartaComOpcoes { tipo: "ContraTempo"; respostaCorreta: number; tempoLimite: number; }
+// CORREÇÃO: tempoLimite opcional para permitir delete
+interface CartaContraTempo extends CartaComOpcoes { tipo: "ContraTempo"; respostaCorreta: number; tempoLimite?: number; }
 
 // Tipos sem 'opcoes' padrão
 interface CartaRelacionarColunas extends CartaBase { tipo: "RelacionarColunas"; colunaA: ItemRelacionar[]; colunaB: ItemRelacionar[]; respostaCorreta: { aId: number; bId: number }[]; }
-interface CartaPontoCerto extends CartaBase { tipo: "PontoCerto"; imagemURL: string; zonasClicaveis: ZonaClicavel[]; respostaCorreta: number; }
-interface CartaCompletarFrase extends CartaBase { tipo: "CompletarFrase"; fraseIncompleta: string; fragmentos: FragmentoCompletar[]; respostaCorreta: number[]; }
+interface CartaPontoCerto extends CartaBase { tipo: "PontoCerto"; imagemURL?: string; zonasClicaveis?: ZonaClicavel[]; respostaCorreta?: number; } // Tornando opcionais para evitar erros com Partial
+interface CartaCompletarFrase extends CartaBase { tipo: "CompletarFrase"; fraseIncompleta?: string; fragmentos?: FragmentoCompletar[]; respostaCorreta?: number[]; } // Tornando opcionais
 
 // União final
 type Carta =
@@ -66,13 +67,18 @@ interface BaralhoCarregado { id: number; nome: string; cartas: Carta[]; adiciona
 
 // --- Componente de Preview Estático ---
 const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
+    // Desestruturação inicial apenas com campos base garantidos
     const {
-        tipo = "Pergunta", titulo = "", pergunta = "", opcoes = [], respostaCorreta,
-        dificuldade = "facil", categorias = [], fontes = [], vantagem = "", desvantagem = "", dica = ""
+        tipo = "Pergunta", titulo = "", pergunta = "",
+        dificuldade = "facil", categorias = [], fontes = [],
+        vantagem = "", desvantagem = "", dica = ""
     } = card;
 
+    // Renderização condicional dos campos específicos e opções
     let renderedSpecifics: React.ReactNode = null;
     let renderedOptions: React.ReactNode = null;
+    const opcoes = card.opcoes || []; // Garante que opcoes seja um array
+    const respostaCorreta = card.respostaCorreta; // Pega a resposta correta (pode ser de qualquer tipo)
 
     switch (tipo) {
         case "ContraTempo":
@@ -112,7 +118,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
         case "CompletarFrase":
             const cardCompFrase = card as Partial<CartaCompletarFrase>;
-            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: &quot;{cardCompFrase.fraseIncompleta || '...'}&quot;</p>;
+            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: "{cardCompFrase.fraseIncompleta || '...'}"</p>;
             renderedOptions = (
                 <>
                  {cardCompFrase.fragmentos && cardCompFrase.fragmentos.length > 0 && (
@@ -129,10 +135,10 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
     }
 
-    // Renderizador de opções padrão
-    if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo)) {
+     // Renderizador de opções padrão (agora separado do switch)
+     if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo)) {
         const correctSet = new Set<number>();
-        const currentOptions = card.opcoes || [];
+        const currentOptions = opcoes || []; // Garante array
         if (tipo === "Vantagem") {
             currentOptions.forEach(o => correctSet.add(o.id));
         } else if (tipo !== "Desvantagem") {
@@ -144,22 +150,23 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             <ul className="mt-2 pl-5 list-decimal space-y-1">
                 {currentOptions.map((op) => {
                     const isCorrect = correctSet.has(op.id);
-                    const orderInfo = tipo === 'Ordem' && Array.isArray(respostaCorreta) && (respostaCorreta as number[]).includes(op.id)
-                        ? ` (Pos: ${(respostaCorreta as number[]).indexOf(op.id) + 1})`
-                        : tipo === 'Ordem' ? ` (Ordem Inválida)` : '';
+                    // Determina a ordem correta para tipo 'Ordem'
+                    const orderIndex = (tipo === 'Ordem' && Array.isArray(respostaCorreta)) ? (respostaCorreta as number[]).indexOf(op.id) : -1;
+                    const orderInfo = tipo === 'Ordem' ? (orderIndex !== -1 ? ` (Pos: ${orderIndex + 1})` : ` (Não na ordem)`) : '';
 
                     return (
-                        <li key={op.id} className={cn("mb-1 text-sm", isCorrect && "text-green-700 font-semibold")}>
+                        <li key={op.id} className={cn("mb-1 text-sm", isCorrect && tipo !== 'Ordem' && "text-green-700 font-semibold")}>
                             {op.texto}
                             {isCorrect && tipo !== 'Vantagem' && tipo !== 'Ordem' && <span className="text-green-600 text-xs font-normal"> (Correta)</span>}
                             {tipo === 'Ordem' && <span className="text-blue-600 text-xs font-normal">{orderInfo}</span>}
                         </li>
                     );
                 })}
-                {currentOptions.length === 0 && ["Pergunta", "MultiplaEscolha", "Ordem", "Outras", "ContraTempo"].includes(tipo) && <li className="text-xs italic text-gray-500 list-none">Nenhuma opção definida.</li>}
+                {currentOptions.length === 0 && <li className="text-xs italic text-gray-500 list-none">Nenhuma opção definida.</li>}
             </ul>
         );
     }
+
 
     return (
         <Card className="max-w-md mx-auto my-4 shadow-md">
@@ -189,7 +196,6 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
         </Card>
     );
 };
-
 
 // --- Componente Criador Principal ---
 const CriadorDeCarta: React.FC = () => {
@@ -330,29 +336,29 @@ const CriadorDeCarta: React.FC = () => {
     const inserirTemplatePopup = (tipoPopup: 'imagem' | 'video') => {
         const idUnico = `popup-${Date.now()}`;
         let urlPrincipal = '';
-        let urlThumb = ''; // <-- ADICIONAR ESTA LINHA
+        let urlThumb = '';
         let desc = '';
         let thumbHtml = '';
 
         if (tipoPopup === 'imagem') {
             if (!popupImageUrl.trim()) { alert("Insira a URL da Imagem."); return; }
             urlPrincipal = popupImageUrl;
-            urlThumb = popupImageUrl; // Usa a mesma URL para thumb
+            urlThumb = popupImageUrl;
             desc = 'Descrição da Imagem';
-            thumbHtml = `<img src=\"${urlThumb}\" alt=\"Clique para ampliar\"/>`; // Agora urlThumb existe
-        } else { // video
+            thumbHtml = `<img src=\"${urlThumb}\" alt=\"Clique para ampliar\"/>`;
+        } else {
             if (!popupVideoUrl.trim()) { alert("Insira a URL do Vídeo (.mp4)."); return; }
             urlPrincipal = popupVideoUrl;
             desc = 'Descrição do Vídeo';
             thumbHtml = `<span>🎬 Clique para ver o vídeo</span>`;
         }
 
-        const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }\n.popup-overlay-${idUnico}:target { display: flex; }\n.popup-content-${idUnico} { position: relative; background-color: #fff; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; overflow: auto; }\n.popup-content-${idUnico} img, .popup-content-${idUnico} video { display: block; max-width: 100%; max-height: 80vh; height: auto; margin: 0 auto 15px auto; }\n.popup-close-${idUnico} { position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; color: #555; text-decoration: none; line-height: 1; }\n.popup-close-${idUnico}:hover { color: #000; }\n.thumb-link-${idUnico} { display: block; /* Alterado para block */ margin: 10px auto; /* Centraliza */ width: fit-content; /* Ajusta largura ao conteúdo */ cursor: zoom-in; border: 1px solid #ccc; padding: 3px; border-radius: 4px; background: white; }\n.thumb-link-${idUnico} img, .thumb-link-${idUnico} span { max-width: 180px; height: auto; display: block; }\n.thumb-link-${idUnico} span{padding:10px; color:blue; text-decoration:underline}\n</style>\n`;
+        const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }\n.popup-overlay-${idUnico}:target { display: flex; }\n.popup-content-${idUnico} { position: relative; background-color: #fff; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; overflow: auto; }\n.popup-content-${idUnico} img, .popup-content-${idUnico} video { display: block; max-width: 100%; max-height: 80vh; height: auto; margin: 0 auto 15px auto; }\n.popup-close-${idUnico} { position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; color: #555; text-decoration: none; line-height: 1; }\n.popup-close-${idUnico}:hover { color: #000; }\n.thumb-link-${idUnico} { display: block; margin: 10px auto; width: fit-content; cursor: zoom-in; border: 1px solid #ccc; padding: 3px; border-radius: 4px; background: white; }\n.thumb-link-${idUnico} img, .thumb-link-${idUnico} span { max-width: 180px; height: auto; display: block; }\n.thumb-link-${idUnico} span{padding:10px; color:blue; text-decoration:underline}\n</style>\n`;
         let templateElemento: string;
 
         if (tipoPopup === 'imagem') {
             templateElemento = `<!-- Link/Thumb da Imagem (Centralizado) -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\">\n  ${thumbHtml}\n</a>\n\n<!-- Popup da Imagem -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <img src=\"${urlPrincipal}\" alt=\"Imagem Ampliada\"/>\n    <p style=\"text-align: center; font-size: 0.9em; color: #666;\">${desc}</p>\n  </div>\n</div>\n`;
-        } else { // video
+        } else {
             templateElemento = `<!-- Link/Thumb do Vídeo (Centralizado) -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\" style=\"border:none; background:none; padding:0;\">\n  ${thumbHtml}\n</a>\n\n<!-- Popup do Vídeo -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <video controls width=\"100%\" style=\"max-width: 700px; max-height: 70vh;\">\n      <source src=\"${urlPrincipal}\" type=\"video/mp4\">\n      Seu navegador não suporta vídeo.\n    </video>\n    <p style=\"text-align: center; font-size: 0.9em; color: #666;\">${desc}</p>\n  </div>\n</div>\n`;
         }
         const htmlParaInserir = `\n<br>\n${templateCSS}${templateElemento}<br>\n`;
@@ -366,7 +372,6 @@ const CriadorDeCarta: React.FC = () => {
         } else { setPergunta(prev => prev + htmlParaInserir); }
     };
 
-    // --- Função para Inserir Popup YouTube ---
     const inserirTemplatePopupYouTube = () => {
         if (!popupYouTubeUrl.trim()) { alert("Insira a URL do vídeo do YouTube."); return; }
         let videoId = '';
@@ -386,10 +391,9 @@ const CriadorDeCarta: React.FC = () => {
             const textoAtual = textarea.value;
             const novoTexto = textoAtual.substring(0, start) + htmlParaInserir + textoAtual.substring(end);
             setPergunta(novoTexto);
-            setPopupYouTubeUrl(""); // Limpa input
+            setPopupYouTubeUrl("");
         } else { setPergunta(prev => prev + htmlParaInserir); }
     };
-
 
     const resetCarta = () => {
         setTipo("Pergunta"); setTitulo(""); setPergunta(""); setOpcoes([]); setNovaOpcao("");
@@ -405,7 +409,6 @@ const CriadorDeCarta: React.FC = () => {
     };
 
     const handleAddOrUpdateCard = () => {
-        // ... (Lógica como na versão anterior, sem mudanças) ...
         if (!titulo.trim() || !tipo) { alert("Título e Tipo são obrigatórios."); return; }
         let finalRespostaCorreta: number | number[] | { aId: number; bId: number }[] = [];
         let cartaEspecificaProps: any = {};
@@ -490,9 +493,7 @@ const CriadorDeCarta: React.FC = () => {
         resetCarta();
     };
 
-    // --- Load Card for Edit (sem mudanças da versão anterior) ---
     const loadCardForEdit = (index: number) => {
-        // ... (código igual ao anterior) ...
         resetCarta();
         const carta = cards[index];
         setEditIndex(index); setTipo(carta.tipo as TipoCarta); setTitulo(carta.titulo); setPergunta(carta.pergunta);
@@ -533,27 +534,22 @@ const CriadorDeCarta: React.FC = () => {
     };
     const cancelEdit = () => { resetCarta(); };
 
-    // --- Download (CORRIGIDO) ---
+    // --- Download (Corrigido) ---
     const prepareForDownload = (): Partial<Carta>[] => {
         return cards.map(({ origBaralhoId, edited, ...rest }: CartaInterna) => {
             const cardData: Partial<Carta> = { ...rest };
-            // Limpa campos específicos que NÃO pertencem ao tipo atual
-            if (rest.tipo !== "ContraTempo" && cardData.tempoLimite !== undefined) delete (cardData as Partial<CartaContraTempo>).tempoLimite;
+            // CORREÇÃO: Usar 'delete' nos campos opcionais corretos
+            if (rest.tipo !== "ContraTempo") delete (cardData as Partial<CartaContraTempo>).tempoLimite;
             if (rest.tipo !== "RelacionarColunas") { delete (cardData as Partial<CartaRelacionarColunas>).colunaA; delete (cardData as Partial<CartaRelacionarColunas>).colunaB; }
             if (rest.tipo !== "PontoCerto") { delete (cardData as Partial<CartaPontoCerto>).imagemURL; delete (cardData as Partial<CartaPontoCerto>).zonasClicaveis; }
             if (rest.tipo !== "CompletarFrase") { delete (cardData as Partial<CartaCompletarFrase>).fraseIncompleta; delete (cardData as Partial<CartaCompletarFrase>).fragmentos; }
 
-            // Limpa 'opcoes' se não for um tipo que o utiliza
-            if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo)) {
+            // Limpa 'opcoes' se não for um tipo que o utiliza OU se for undefined
+            if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo) || cardData.opcoes === undefined ) {
                  delete cardData.opcoes;
             } else if (rest.tipo === "Ordem" && cardData.opcoes) {
                  // Remove ordemTemp das opções para Ordem
                  cardData.opcoes = cardData.opcoes.map(({ ordemTemp, ...o }) => o);
-            } else if (cardData.opcoes === undefined) {
-                 // Garante array vazio para tipos que DEVEM ter opções, se por acaso ficou undefined
-                 if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo)){
-                    cardData.opcoes = [];
-                 }
             }
 
             return cardData;
@@ -843,8 +839,8 @@ const CriadorDeCarta: React.FC = () => {
                             </Select>
                         </div>
 
-                        {/* Categorias e Fontes */}
-                        <div className="space-y-4 pt-2"> {/* Layout Vertical */}
+                        {/* Categorias e Fontes (Layout Vertical) */}
+                        <div className="space-y-4 pt-2">
                             <Card className="bg-gray-50 border">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-3">
                                     <CardTitle className="text-base font-semibold">Categorias</CardTitle>
@@ -879,8 +875,8 @@ const CriadorDeCarta: React.FC = () => {
                              </Card>
                         </div>
 
-                        {/* Vantagem, Desvantagem, Dica */}
-                        <div className="space-y-4 pt-2"> {/* Layout Vertical */}
+                        {/* Vantagem, Desvantagem, Dica (Layout Vertical) */}
+                        <div className="space-y-4 pt-2">
                              <div><label className="block text-sm font-medium mb-1">Vantagem (Msg Acerto)</label><Input type="text" value={vantagem} onChange={(e) => setVantagem(e.target.value)} /></div>
                             <div><label className="block text-sm font-medium mb-1">Desvantagem (Msg Erro)</label><Input type="text" value={desvantagem} onChange={(e) => setDesvantagem(e.target.value)} /></div>
                             <div><label className="block text-sm font-medium mb-1">Dica</label><Input type="text" value={dica} onChange={(e) => setDica(e.target.value)} /></div>
@@ -892,6 +888,7 @@ const CriadorDeCarta: React.FC = () => {
                                 {editIndex !== null ? "Salvar Edições" : "Adicionar Carta"}
                             </Button>
                             {editIndex !== null && (<Button type="button" onClick={cancelEdit} variant="outline">Cancelar Edição</Button>)}
+                            {/* Botão de Preview Removido */}
                         </div>
                     </CardContent>
                 </Card>
@@ -908,7 +905,7 @@ const CriadorDeCarta: React.FC = () => {
                                 <ScrollArea className="h-[calc(50vh-6rem)] pr-3">
                                     <div className="space-y-2">
                                         {cards.map((c, index) => (
-                                            <Card key={`card-display-${c.id || index}`} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => loadCardForEdit(index)}>
+                                            <Card key={`card-display-${c.id || index}`} className={cn("hover:shadow-md transition-shadow cursor-pointer", editIndex === index && "ring-2 ring-blue-500")} onClick={() => loadCardForEdit(index)}>
                                                 <CardContent className="p-3 flex items-start justify-between gap-2">
                                                     <div className="flex-1 overflow-hidden">
                                                         <p className="text-xs font-semibold text-blue-700">{c.tipo} - {c.dificuldade}</p>
