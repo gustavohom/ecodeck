@@ -842,4 +842,4 @@ const CriadorDeCarta: React.FC = () => {
     );
 };
 
-export default CriadorDeCarta;
+export default CriadorDeCarta; 
