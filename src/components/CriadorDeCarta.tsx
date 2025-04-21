@@ -97,7 +97,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             renderedOptions = <p className="text-xs mt-1">Zona Correta ID: {typeof respostaCorreta === 'number' ? respostaCorreta : '(Inválido)'}</p>;
             break;
         case "CompletarFrase":
-            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: "{fraseIncompleta || '...'}"</p>;
+            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: &quot;{fraseIncompleta || '...'}&quot;</p>;
             renderedOptions = (
                 <>
                  {fragmentos && fragmentos.length > 0 && (
