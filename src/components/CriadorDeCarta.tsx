@@ -10,7 +10,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils"; // Assumindo que você tem este utilitário
+import { Trash } from "lucide-react"; // <-- ADICIONADO IMPORT DO TRASH
+import { cn } from "@/lib/utils";
 
 // --- Tipos de Dados (COPIADOS/ATUALIZADOS de EcoChallenge.tsx) ---
 
@@ -412,7 +413,7 @@ const CriadorDeCarta: React.FC = () => {
                      const ordemCorreta = carta.respostaCorreta as number[];
                      setOpcoes(currentOpts => currentOpts.map(op => ({...op, ordemTemp: ordemCorreta.indexOf(op.id) >= 0 ? String(ordemCorreta.indexOf(op.id) + 1) : "" })));
                  }
-                 setRespostaCorreta([]); // Resetar seleção explícita
+                 setRespostaCorreta([]);
                  break;
             case "RelacionarColunas":
                 const cRel = carta as CartaRelacionarColunas; setColunaAItems(cRel.colunaA ? [...cRel.colunaA] : []); setColunaBItems(cRel.colunaB ? [...cRel.colunaB] : []); setParesCorretosInput(Array.isArray(cRel.respostaCorreta) ? JSON.stringify(cRel.respostaCorreta, null, 2) : "[]"); break;
@@ -434,7 +435,7 @@ const CriadorDeCarta: React.FC = () => {
             if (rest.tipo !== "CompletarFrase") { delete (cardData as Partial<CartaCompletarFrase>).fraseIncompleta; delete (cardData as Partial<CartaCompletarFrase>).fragmentos; }
             if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo)) { delete (cardData as CartaPergunta).opcoes; }
             if (rest.tipo === "RelacionarColunas" || rest.tipo === "PontoCerto" || rest.tipo === "CompletarFrase") { cardData.opcoes = []; }
-            if (rest.tipo === "Ordem" && cardData.opcoes) { cardData.opcoes = cardData.opcoes.map(({ordemTemp, ...o}) => o); } // Remove ordemTemp
+            if (rest.tipo === "Ordem" && cardData.opcoes) { cardData.opcoes = cardData.opcoes.map(({ordemTemp, ...o}) => o); }
             return cardData;
         });
     };
@@ -443,10 +444,10 @@ const CriadorDeCarta: React.FC = () => {
 
     // --- JSX do Criador ---
     return (
-        <div className="p-4 max-w-6xl mx-auto"> {/* Layout principal */}
+        <div className="p-4 max-w-6xl mx-auto">
             <h1 className="text-3xl font-bold mb-6 text-center">Criador de Cartas Eco Challenge</h1>
 
-            {/* Seção Superior: Nome, Upload, Gerenciamento */}
+            {/* Seção Superior */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <Card>
                     <CardHeader><CardTitle className="text-xl">Nome do Baralho & Download</CardTitle></CardHeader>
@@ -489,16 +490,16 @@ const CriadorDeCarta: React.FC = () => {
                 </Card>
             </div>
 
-             {/* Seção Principal: Criação/Edição e Lista/Preview */}
+             {/* Seção Principal */}
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
                 {/* Coluna Esquerda: Formulário */}
-                <Card className="lg:sticky lg:top-4 self-start max-h-[90vh] overflow-y-auto"> {/* Torna formulário fixo e rolável */}
+                <Card className="lg:sticky lg:top-4 self-start max-h-[90vh] overflow-y-auto">
                     <CardHeader>
                          <CardTitle className="text-2xl">{editIndex !== null ? `Editando: ${cards[editIndex]?.titulo || `Carta ${editIndex + 1}`}` : "Criar Nova Carta"}</CardTitle>
                          <AlertDescription>Preencha os campos para {editIndex !== null ? 'atualizar' : 'criar'} uma carta.</AlertDescription>
                     </CardHeader>
-                    <CardContent className="space-y-5 pb-6"> {/* Aumenta padding bottom */}
+                    <CardContent className="space-y-5 pb-6">
                          {/* Campos Comuns */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
@@ -531,7 +532,7 @@ const CriadorDeCarta: React.FC = () => {
                                 <CardHeader className="pb-2 pt-3"><CardTitle className="text-lg">Opções</CardTitle></CardHeader>
                                 <CardContent className="space-y-3 pt-0">
                                     <div className="flex space-x-2">
-                                        <Input type="text" value={novaOpcao} onChange={(e) => setNovaOpcao(e.target.value)} placeholder="Texto da opção" className="flex-1"/>
+                                        <Input type="text" value={novaOpcao} onChange={(e) => setNovaOpcao(e.target.value)} placeholder="Texto da nova opção" className="flex-1"/>
                                         <Button type="button" onClick={handleAddOpcao}>Adicionar</Button>
                                     </div>
                                     <ScrollArea className="max-h-48 pr-2 border rounded bg-white">
@@ -553,12 +554,12 @@ const CriadorDeCarta: React.FC = () => {
                                                     <Button type="button" onClick={() => handleRemoveOpcao(o.id)} variant="destructive" size="sm" className="h-8 shrink-0">Remover</Button>
                                                 </li>
                                             ))}
-                                            {opcoes.length === 0 && <p className="text-xs text-center text-gray-500 py-2">Nenhuma opção adicionada.</p>}
+                                            {opcoes.length === 0 && <p className="text-xs text-center text-gray-500 py-2">Nenhuma opção.</p>}
                                         </ul>
                                     </ScrollArea>
-                                    {tipo === "Ordem" && <p className="text-xs text-gray-500 mt-2">Defina a posição correta (1, 2, 3...) para cada opção.</p>}
-                                    {tipo === "Vantagem" && <p className="text-xs text-green-600 mt-2">Todas as opções serão consideradas corretas.</p>}
-                                    {tipo === "Desvantagem" && <p className="text-xs text-red-600 mt-2">Nenhuma opção será considerada correta.</p>}
+                                    {tipo === "Ordem" && <p className="text-xs text-gray-500 mt-2">Defina a posição correta (1 a N).</p>}
+                                    {tipo === "Vantagem" && <p className="text-xs text-green-600 mt-2">Opções são para confirmação.</p>}
+                                    {tipo === "Desvantagem" && <p className="text-xs text-red-600 mt-2">Opções são para confirmação.</p>}
                                 </CardContent>
                             </Card>
                         )}
@@ -594,6 +595,7 @@ const CriadorDeCarta: React.FC = () => {
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium mb-1">Pares Corretos (JSON)</label>
+                                        {/* Correção: Usar " para aspas dentro do placeholder */}
                                         <Textarea value={paresCorretosInput} onChange={e => setParesCorretosInput(e.target.value)} className="h-20 font-mono text-xs" placeholder='[{"aId": 1, "bId": 101}, {"aId": 2, "bId": 102}]'/>
                                     </div>
                                 </CardContent>
@@ -630,7 +632,7 @@ const CriadorDeCarta: React.FC = () => {
                                                         </div>
                                                     </li>
                                                 ))}
-                                                 {zonasClicaveis.length === 0 && <p className="text-xs text-center text-gray-500 py-2">Nenhuma zona adicionada.</p>}
+                                                 {zonasClicaveis.length === 0 && <p className="text-xs text-center text-gray-500 py-2">Nenhuma zona.</p>}
                                              </ul>
                                          </ScrollArea>
                                     </div>
@@ -655,7 +657,7 @@ const CriadorDeCarta: React.FC = () => {
                                          <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="text-sm space-y-1">{fragmentos.map(f => <li key={f.id} className="flex justify-between items-center"><span>{f.id}: {f.texto}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveFragmento(f.id)}>X</Button></li>)}</ul></ScrollArea>
                                     </div>
                                     <div>
-                                         <label className="block text-sm font-medium mb-1">Ordem Correta* (IDs separados por vírgula)</label>
+                                         <label className="block text-sm font-medium mb-1">Ordem Correta* (IDs por vírgula)</label>
                                          <Input type="text" value={ordemFragmentos} onChange={e => setOrdemFragmentos(e.target.value)} placeholder="1, 3, 2" />
                                     </div>
                                 </CardContent>
@@ -729,16 +731,16 @@ const CriadorDeCarta: React.FC = () => {
                     </CardContent>
                 </Card>
 
-                {/* Coluna Direita: Lista de Cartas e Preview */}
-                <div className="space-y-4">
+                 {/* Coluna Direita: Lista de Cartas e Preview */}
+                 <div className="space-y-4">
                      <Card>
                         <CardHeader>
-                            <CardTitle className="text-xl">Baralho Atual ({cards.length} Cartas)</CardTitle>
-                            <AlertDescription>Clique em uma carta para editar.</AlertDescription>
+                            <CardTitle className="text-xl">Baralho Sendo Criado ({cards.length} Cartas)</CardTitle>
+                            <AlertDescription>Clique em uma carta abaixo para editá-la.</AlertDescription>
                         </CardHeader>
                         <CardContent>
                              {cards.length === 0 ? (<p className="text-gray-500 italic">Nenhuma carta.</p>) : (
-                                <ScrollArea className="h-[40vh] pr-3"> {/* Altura menor */}
+                                <ScrollArea className="h-[60vh] pr-3">
                                     <div className="space-y-2">
                                         {cards.map((c, index) => (
                                             <Card key={`card-display-${c.id || index}`} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => loadCardForEdit(index)}>
@@ -761,7 +763,7 @@ const CriadorDeCarta: React.FC = () => {
 
                      {/* Preview Estático */}
                      {showPreview && (
-                        <Card className="mt-4">
+                        <Card className="mt-4 lg:sticky lg:top-4 self-start"> {/* Preview fixo em telas grandes */}
                             <CardHeader><CardTitle className="text-lg text-center">Preview Estático</CardTitle></CardHeader>
                             <CardContent>
                                  <CardStaticView card={
@@ -769,7 +771,6 @@ const CriadorDeCarta: React.FC = () => {
                                      ? cards[editIndex]
                                      : { // Monta preview da carta sendo criada
                                          tipo, titulo, pergunta, opcoes,
-                                         // Ajusta resposta correta para preview
                                          respostaCorreta: (() => {
                                              if (tipo === 'Pergunta' || tipo === 'ContraTempo') return respostaCorreta[0];
                                              if (tipo === 'PontoCerto') return respostaCorretaPontoCerto ?? undefined;
