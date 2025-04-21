@@ -11,10 +11,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trash } from "lucide-react";
-import { cn } from "@/lib/utils"; // Assumindo que você tem este utilitário
+import { cn } from "@/lib/utils";
 
 // --- Tipos de Dados ---
-
 interface Opcao { id: number; texto: string; ordemTemp?: string; }
 interface ItemRelacionar { id: number; texto: string; }
 interface ZonaClicavel { id: number; x: number; y: number; largura: number; altura: number; descricao?: string; }
@@ -24,10 +23,9 @@ interface CartaBase {
     id: string | number; tipo: string; titulo: string; pergunta: string;
     dificuldade: "facil" | "normal" | "dificil"; categorias: string[]; fontes: string[];
     vantagem: string; desvantagem: string; dica: string;
-    opcoes?: Opcao[]; // <-- Opcional na base
+    opcoes?: Opcao[];
 }
 interface CartaComOpcoes extends CartaBase { opcoes: Opcao[]; }
-
 interface CartaPergunta extends CartaComOpcoes { tipo: "Pergunta"; respostaCorreta: number; }
 interface CartaMultiplaEscolha extends CartaComOpcoes { tipo: "MultiplaEscolha"; respostaCorreta: number[]; }
 interface CartaOrdem extends CartaComOpcoes { tipo: "Ordem"; respostaCorreta: number[]; }
@@ -35,37 +33,20 @@ interface CartaVantagem extends CartaComOpcoes { tipo: "Vantagem"; respostaCorre
 interface CartaDesvantagem extends CartaComOpcoes { tipo: "Desvantagem"; respostaCorreta: number[]; }
 interface CartaOutras extends CartaComOpcoes { tipo: "Outras"; respostaCorreta: number[]; }
 interface CartaContraTempo extends CartaComOpcoes { tipo: "ContraTempo"; respostaCorreta: number; tempoLimite: number; }
-
-// Tipos sem 'opcoes' padrão
 interface CartaRelacionarColunas extends CartaBase { tipo: "RelacionarColunas"; colunaA: ItemRelacionar[]; colunaB: ItemRelacionar[]; respostaCorreta: { aId: number; bId: number }[]; }
 interface CartaPontoCerto extends CartaBase { tipo: "PontoCerto"; imagemURL: string; zonasClicaveis: ZonaClicavel[]; respostaCorreta: number; }
 interface CartaCompletarFrase extends CartaBase { tipo: "CompletarFrase"; fraseIncompleta: string; fragmentos: FragmentoCompletar[]; respostaCorreta: number[]; }
 
-// União final
 type Carta =
     | CartaPergunta | CartaMultiplaEscolha | CartaOrdem | CartaVantagem | CartaDesvantagem | CartaOutras
     | CartaContraTempo | CartaRelacionarColunas | CartaPontoCerto | CartaCompletarFrase;
 
-// Tipo interno para o estado
-type CartaInterna = Carta & {
-    origBaralhoId?: number;
-    edited?: boolean;
-};
-
-// --- Fim dos Tipos ---
-
-const CARD_TYPES = [
-    "Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras",
-    "ContraTempo", "RelacionarColunas", "PontoCerto", "CompletarFrase"
-] as const;
+type CartaInterna = Carta & { origBaralhoId?: number; edited?: boolean; };
+const CARD_TYPES = ["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo", "RelacionarColunas", "PontoCerto", "CompletarFrase"] as const;
 type TipoCarta = typeof CARD_TYPES[number];
-
 const DIFFICULTIES = ["facil", "normal", "dificil"] as const;
 type Dificuldade = typeof DIFFICULTIES[number];
-
-interface BaralhoCarregado {
-    id: number; nome: string; cartas: Carta[]; adicionado: boolean;
-}
+interface BaralhoCarregado { id: number; nome: string; cartas: Carta[]; adicionado: boolean; }
 
 // --- Componente de Preview Estático ---
 const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
@@ -77,6 +58,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
     let renderedSpecifics: React.ReactNode = null;
     let renderedOptions: React.ReactNode = null;
 
+    // --- Lógica de Renderização do Preview (igual à anterior, exceto pela correção das aspas) ---
     switch (tipo) {
         case "ContraTempo":
             const cardContraTempo = card as Partial<CartaContraTempo>;
@@ -97,7 +79,11 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             const cardPontoCerto = card as Partial<CartaPontoCerto>;
             renderedSpecifics = (
                 <>
-                    <p className="text-xs">Imagem URL: <span className="font-mono bg-gray-100 px-1 rounded">{cardPontoCerto.imagemURL || '(Nenhuma)'}</span></p>
+                    <p className="text-xs">Imagem URL: <span className="font-mono bg-gray-100 px-1 rounded break-all">{cardPontoCerto.imagemURL || '(Nenhuma)'}</span></p>
+                    {/* Preview da Imagem no Preview da Carta */}
+                    {cardPontoCerto.imagemURL && (
+                         <img src={cardPontoCerto.imagemURL} alt="Preview Ponto Certo" className="my-2 max-w-full h-auto max-h-40 object-contain border rounded"/>
+                    )}
                     {cardPontoCerto.zonasClicaveis && cardPontoCerto.zonasClicaveis.length > 0 && (
                         <details className="text-xs mt-1">
                             <summary className="cursor-pointer font-medium">Zonas Clicáveis ({cardPontoCerto.zonasClicaveis.length})</summary>
@@ -112,7 +98,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
         case "CompletarFrase":
             const cardCompFrase = card as Partial<CartaCompletarFrase>;
-            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: &quot;{cardCompFrase.fraseIncompleta || '...'}&quot;</p>;
+            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: "{cardCompFrase.fraseIncompleta || '...'}"</p>;
             renderedOptions = (
                 <>
                  {cardCompFrase.fragmentos && cardCompFrase.fragmentos.length > 0 && (
@@ -129,32 +115,20 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
     }
 
-    // Renderizador de opções padrão
     if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo)) {
         const correctSet = new Set<number>();
         const currentOptions = card.opcoes || [];
-        if (tipo === "Vantagem") {
-            currentOptions.forEach(o => correctSet.add(o.id));
-        } else if (tipo !== "Desvantagem") {
+        if (tipo === "Vantagem") { currentOptions.forEach(o => correctSet.add(o.id)); }
+        else if (tipo !== "Desvantagem") {
             if (Array.isArray(respostaCorreta)) { (respostaCorreta as number[]).forEach(id => typeof id === 'number' && correctSet.add(id)); }
             else if (typeof respostaCorreta === 'number') { correctSet.add(respostaCorreta); }
         }
-
         renderedOptions = (
             <ul className="mt-2 pl-5 list-decimal space-y-1">
                 {currentOptions.map((op) => {
                     const isCorrect = correctSet.has(op.id);
-                    const orderInfo = tipo === 'Ordem' && Array.isArray(respostaCorreta) && (respostaCorreta as number[]).includes(op.id)
-                        ? ` (Pos: ${(respostaCorreta as number[]).indexOf(op.id) + 1})`
-                        : tipo === 'Ordem' ? ` (Ordem Inválida)` : '';
-
-                    return (
-                        <li key={op.id} className={cn("mb-1 text-sm", isCorrect && "text-green-700 font-semibold")}>
-                            {op.texto}
-                            {isCorrect && tipo !== 'Vantagem' && tipo !== 'Ordem' && <span className="text-green-600 text-xs font-normal"> (Correta)</span>}
-                            {tipo === 'Ordem' && <span className="text-blue-600 text-xs font-normal">{orderInfo}</span>}
-                        </li>
-                    );
+                    const orderInfo = tipo === 'Ordem' && Array.isArray(respostaCorreta) && (respostaCorreta as number[]).includes(op.id) ? ` (Pos: ${(respostaCorreta as number[]).indexOf(op.id) + 1})` : tipo === 'Ordem' ? ` (Ordem Inválida)` : '';
+                    return (<li key={op.id} className={cn("mb-1 text-sm", isCorrect && "text-green-700 font-semibold")}>{op.texto}{isCorrect && tipo !== 'Vantagem' && tipo !== 'Ordem' && <span className="text-green-600 text-xs font-normal"> (Correta)</span>}{tipo === 'Ordem' && <span className="text-blue-600 text-xs font-normal">{orderInfo}</span>}</li>);
                 })}
             </ul>
         );
@@ -192,7 +166,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
 // --- Componente Criador Principal ---
 const CriadorDeCarta: React.FC = () => {
     const [deckName, setDeckName] = useState("meu_baralho");
-    const [cards, setCards] = useState<CartaInterna[]>([]); // Usa tipo interno
+    const [cards, setCards] = useState<CartaInterna[]>([]);
     const [tipo, setTipo] = useState<TipoCarta>("Pergunta");
     const [titulo, setTitulo] = useState("");
     const [pergunta, setPergunta] = useState("");
@@ -224,19 +198,21 @@ const CriadorDeCarta: React.FC = () => {
     const [novoFragmento, setNovoFragmento] = useState("");
     const [ordemFragmentos, setOrdemFragmentos] = useState("");
     const [editIndex, setEditIndex] = useState<number | null>(null);
-    const [showPreview, setShowPreview] = useState(false);
+    // const [showPreview, setShowPreview] = useState(false); // Removido
     const [baralhosCarregados, setBaralhosCarregados] = useState<BaralhoCarregado[]>([]);
     const [manterCartasEditadas, setManterCartasEditadas] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const perguntaTextareaRef = useRef<HTMLTextAreaElement>(null);
 
+    // Funções Utilitárias (parseJS, recalcularCategorias) - Movidas para fora se não usarem estado local
     const parseJSDeckFileLocal = (content: string): Carta[] => {
         const match = content.match(/export default\s+(\[[\s\S]*?\]);?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?\s*export default\s+\w+;?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?/m);
         if (!match || !match[1]) { throw new Error("Array não encontrado no arquivo JS."); }
         const arrayStr = match[1]; const rawArray = new Function(`return ${arrayStr};`)() as any[];
         return rawArray.map((card, index) => ({ ...card, id: card.id || `custom_${Date.now()}_${index}` })) as Carta[];
      };
+
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files; if (!files) return;
         setIsLoading(true); setErrorMessage(null); let loadErrors: string[] = [];
@@ -261,7 +237,6 @@ const CriadorDeCarta: React.FC = () => {
     const adicionarBaralho = (baralhoId: number) => {
         setBaralhosCarregados((prev) => prev.map((b) => {
             if (b.id === baralhoId && !b.adicionado) {
-                // Cria como CartaInterna
                 const newCards: CartaInterna[] = b.cartas.map((c) => ({ ...c, id: c.id || `${b.nome}_${Math.random().toString(16).slice(2)}`, origBaralhoId: b.id, edited: false }));
                 setCards((oldCards) => [...oldCards, ...newCards]); return { ...b, adicionado: true };
             } return b;
@@ -270,8 +245,7 @@ const CriadorDeCarta: React.FC = () => {
     const removerBaralho = (baralhoId: number) => {
          setBaralhosCarregados((prev) => prev.map((b) => {
             if (b.id === baralhoId && b.adicionado) {
-                // Filtra usando CartaInterna
-                setCards((oldCards: CartaInterna[]) => oldCards.filter((c) => {
+                setCards((oldCards) => oldCards.filter((c) => {
                     if (c.origBaralhoId === baralhoId) { return c.edited && manterCartasEditadas; } return true;
                 })); return { ...b, adicionado: false };
             } return b;
@@ -334,27 +308,21 @@ const CriadorDeCarta: React.FC = () => {
         setFraseIncompleta(""); setFragmentos([]); setNovoFragmento(""); setOrdemFragmentos("");
         if (!categoriasBloqueadas) setCategorias([]);
         if (!fontesBloqueadas) setFontes([]);
-        setEditIndex(null); setShowPreview(false);
+        setEditIndex(null); // setShowPreview(false); // Preview agora sempre ativo
     };
 
-    // CORREÇÃO PRINCIPAL AQUI
     const handleAddOrUpdateCard = () => {
         if (!titulo.trim() || !tipo) { alert("Título e Tipo são obrigatórios."); return; }
         let finalRespostaCorreta: number | number[] | { aId: number; bId: number }[] = [];
-        let cartaEspecificaProps: any = {}; // Usar 'any' para flexibilidade temporária
+        let cartaEspecificaProps: any = {};
 
         try {
             switch (tipo) {
-                case "Pergunta":
+                case "Pergunta": case "ContraTempo":
                     if (respostaCorreta.length !== 1) throw new Error(`Tipo ${tipo} exige uma resposta correta.`);
                     finalRespostaCorreta = respostaCorreta[0];
                     cartaEspecificaProps.opcoes = opcoes;
-                    break;
-                case "ContraTempo":
-                    if (respostaCorreta.length !== 1) throw new Error(`Tipo ${tipo} exige uma resposta correta.`);
-                    finalRespostaCorreta = respostaCorreta[0];
-                    cartaEspecificaProps.opcoes = opcoes;
-                    cartaEspecificaProps.tempoLimite = tempoLimite;
+                    if(tipo === 'ContraTempo') cartaEspecificaProps.tempoLimite = tempoLimite;
                     break;
                 case "MultiplaEscolha": case "Outras": case "Vantagem": case "Desvantagem":
                     finalRespostaCorreta = (tipo === "Vantagem") ? opcoes.map(o => o.id) : (tipo === "Desvantagem" ? [] : respostaCorreta);
@@ -381,7 +349,6 @@ const CriadorDeCarta: React.FC = () => {
                     } catch { throw new Error("Formato JSON inválido para Pares Corretos."); }
                     cartaEspecificaProps.colunaA = colunaAItems;
                     cartaEspecificaProps.colunaB = colunaBItems;
-                    // Nao define 'opcoes' aqui
                     break;
                 case "PontoCerto":
                     if (!imagemURLPontoCerto) throw new Error("URL da Imagem é obrigatória.");
@@ -390,7 +357,6 @@ const CriadorDeCarta: React.FC = () => {
                     finalRespostaCorreta = respostaCorretaPontoCerto;
                     cartaEspecificaProps.imagemURL = imagemURLPontoCerto;
                     cartaEspecificaProps.zonasClicaveis = zonasClicaveis;
-                     // Nao define 'opcoes' aqui
                     break;
                 case "CompletarFrase":
                     if (!fraseIncompleta.trim()) throw new Error("Frase Incompleta é obrigatória.");
@@ -400,13 +366,11 @@ const CriadorDeCarta: React.FC = () => {
                     finalRespostaCorreta = ordemIdsFrag;
                     cartaEspecificaProps.fraseIncompleta = fraseIncompleta;
                     cartaEspecificaProps.fragmentos = fragmentos;
-                     // Nao define 'opcoes' aqui
                     break;
                 default: const check: never = tipo; throw new Error(`Tipo de carta desconhecido: ${check}`);
             }
         } catch (error: any) { alert(`Erro ao preparar carta: ${error.message}`); return; }
 
-        // Monta o objeto base e adiciona props específicas
         const cartaBaseProps = {
              id: editIndex !== null ? cards[editIndex].id : `new_${Date.now()}_${Math.random().toString(16).slice(2)}`,
              tipo, titulo, pergunta, dificuldade, categorias, fontes,
@@ -416,16 +380,15 @@ const CriadorDeCarta: React.FC = () => {
              origBaralhoId: editIndex !== null ? cards[editIndex].origBaralhoId : undefined
         };
 
-        // Remove 'opcoes' se não for um tipo que usa explicitamente
-        if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo)) {
-            delete cartaEspecificaProps.opcoes; // Remove se existir por acidente
-        } else if (!cartaEspecificaProps.opcoes) {
-             cartaEspecificaProps.opcoes = []; // Garante array vazio se for tipo com opções mas nenhuma foi add
+        // Adiciona opcoes se for um tipo que usa, caso contrário garante que não exista
+        if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo)) {
+            cartaEspecificaProps.opcoes = cartaEspecificaProps.opcoes || []; // Garante que 'opcoes' exista
+        } else {
+            delete cartaEspecificaProps.opcoes; // Remove se não for usado
         }
 
 
         const novaCarta: CartaInterna = { ...cartaBaseProps, ...cartaEspecificaProps } as CartaInterna;
-
 
         if (editIndex !== null) {
             setCards((oldCards) => oldCards.map((c, i) => i === editIndex ? novaCarta : c ));
@@ -436,7 +399,8 @@ const CriadorDeCarta: React.FC = () => {
     };
 
     const loadCardForEdit = (index: number) => {
-        setShowPreview(false); resetCarta();
+        /* ... (lógica de loadCardForEdit como na resposta anterior) ... */
+        resetCarta(); // Limpa primeiro
         const carta = cards[index];
         setEditIndex(index); setTipo(carta.tipo as TipoCarta); setTitulo(carta.titulo); setPergunta(carta.pergunta);
         setDificuldade(carta.dificuldade as Dificuldade); setCategorias([...carta.categorias]); setFontes([...carta.fontes]);
@@ -444,7 +408,7 @@ const CriadorDeCarta: React.FC = () => {
 
         switch (carta.tipo) {
             case "Pergunta": case "MultiplaEscolha": case "Vantagem": case "Desvantagem": case "Outras": case "ContraTempo":
-                setOpcoes(carta.opcoes ? [...carta.opcoes] : []); // Verifica se opcoes existe
+                setOpcoes(carta.opcoes ? [...carta.opcoes] : []);
                 const rcArray = Array.isArray(carta.respostaCorreta) ? carta.respostaCorreta : (typeof carta.respostaCorreta === 'number' ? [carta.respostaCorreta] : []);
                 setRespostaCorreta(rcArray.filter(id => typeof id === 'number'));
                 if(carta.tipo === 'ContraTempo') setTempoLimite((carta as CartaContraTempo).tempoLimite || 30);
@@ -465,25 +429,37 @@ const CriadorDeCarta: React.FC = () => {
                 const cFrase = carta as CartaCompletarFrase; setFraseIncompleta(cFrase.fraseIncompleta || ""); setFragmentos(cFrase.fragmentos ? [...cFrase.fragmentos] : []); setOrdemFragmentos(Array.isArray(cFrase.respostaCorreta) ? cFrase.respostaCorreta.join(', ') : ""); break;
         }
     };
-    const deleteCard = (index: number) => { if(window.confirm(`Excluir "${cards[index]?.titulo || `Carta ${index+1}`}"?`)){ setCards((old) => old.filter((_, i) => i !== index)); if (editIndex === index) { resetCarta(); } }};
+    const deleteCard = (index: number) => {
+        // Remoção silenciosa
+        setCards((old) => old.filter((_, i) => i !== index));
+        if (editIndex === index) {
+            resetCarta();
+        }
+    };
+    const handleRemoveAllCards = () => {
+        if (window.confirm(`Tem certeza que deseja remover TODAS as ${cards.length} cartas do baralho atual?`)) {
+            setCards([]);
+            setEditIndex(null); // Reseta edição também
+            resetCarta(); // Limpa o formulário
+        }
+    };
     const cancelEdit = () => { resetCarta(); };
 
     // --- Download ---
     const prepareForDownload = (): Partial<Carta>[] => {
         return cards.map(({ origBaralhoId, edited, ...rest }: CartaInterna) => {
             const cardData: Partial<Carta> = { ...rest };
-            // Limpa campos específicos que NÃO pertencem ao tipo atual
             if (rest.tipo !== "ContraTempo") delete (cardData as Partial<CartaContraTempo>).tempoLimite;
             if (rest.tipo !== "RelacionarColunas") { delete (cardData as Partial<CartaRelacionarColunas>).colunaA; delete (cardData as Partial<CartaRelacionarColunas>).colunaB; }
             if (rest.tipo !== "PontoCerto") { delete (cardData as Partial<CartaPontoCerto>).imagemURL; delete (cardData as Partial<CartaPontoCerto>).zonasClicaveis; }
             if (rest.tipo !== "CompletarFrase") { delete (cardData as Partial<CartaCompletarFrase>).fraseIncompleta; delete (cardData as Partial<CartaCompletarFrase>).fragmentos; }
 
-            // CORREÇÃO: Remove 'opcoes' se não for um tipo que o utiliza E se ele existir no objeto
             if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo) && cardData.opcoes !== undefined) {
                  delete cardData.opcoes;
             } else if (rest.tipo === "Ordem" && cardData.opcoes) {
-                 // Remove ordemTemp das opções para Ordem
                  cardData.opcoes = cardData.opcoes.map(({ ordemTemp, ...o }) => o);
+            } else if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo) && cardData.opcoes === undefined) {
+                 cardData.opcoes = []; // Garante array vazio para tipos que usam opções
             }
 
             return cardData;
@@ -494,7 +470,7 @@ const CriadorDeCarta: React.FC = () => {
 
     // --- JSX do Criador ---
     return (
-        <div className="p-4 max-w-6xl mx-auto">
+        <div className="p-4 max-w-7xl mx-auto"> {/* Aumentado max-w geral */}
             <h1 className="text-3xl font-bold mb-6 text-center">Criador de Cartas Eco Challenge</h1>
 
             {/* Seção Superior */}
@@ -510,6 +486,9 @@ const CriadorDeCarta: React.FC = () => {
                             <Button onClick={() => downloadCode('js')} className="bg-blue-600 hover:bg-blue-700 text-white flex-1">Baixar .js</Button>
                             <Button onClick={() => downloadCode('json')} className="bg-purple-600 hover:bg-purple-700 text-white flex-1">Baixar .json</Button>
                         </div>
+                         {cards.length > 0 && (
+                            <Button onClick={handleRemoveAllCards} variant="destructive" className="w-full mt-2">Remover Todas as Cartas</Button>
+                         )}
                     </CardContent>
                 </Card>
                  <Card>
@@ -540,11 +519,11 @@ const CriadorDeCarta: React.FC = () => {
                 </Card>
             </div>
 
-             {/* Seção Principal */}
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+             {/* Seção Principal: Layout ajustado */}
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8"> {/* 3 Colunas em LG */}
 
                 {/* Coluna Esquerda: Formulário */}
-                <Card className="lg:sticky lg:top-4 self-start max-h-[90vh] overflow-y-auto">
+                <Card className="lg:col-span-2 max-h-[90vh] overflow-y-auto self-start"> {/* Formulário ocupa 2 colunas */}
                     <CardHeader>
                          <CardTitle className="text-2xl">{editIndex !== null ? `Editando: ${cards[editIndex]?.titulo || `Carta ${editIndex + 1}`}` : "Criar Nova Carta"}</CardTitle>
                          <AlertDescription>Preencha os campos para {editIndex !== null ? 'atualizar' : 'criar'} uma carta.</AlertDescription>
@@ -633,7 +612,7 @@ const CriadorDeCarta: React.FC = () => {
                                             <Input type="text" value={novaColunaA} onChange={e => setNovaColunaA(e.target.value)} placeholder="Texto item A" className="flex-1"/>
                                             <Button type="button" onClick={handleAddColunaA} size="sm">Add A</Button>
                                         </div>
-                                        <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="text-sm space-y-1">{colunaAItems.map(item => <li key={item.id} className="flex justify-between items-center"><span>{item.id}: {item.texto}</span><Button type="button" variant="ghost"  className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveColunaA(item.id)}>X</Button></li>)}</ul></ScrollArea>
+                                        <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="text-sm space-y-1">{colunaAItems.map(item => <li key={item.id} className="flex justify-between items-center"><span>{item.id}: {item.texto}</span><Button type="button" variant="ghost" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveColunaA(item.id)}>X</Button></li>)}</ul></ScrollArea>
                                     </div>
                                     <div> {/* Coluna B */}
                                         <h4 className="text-md font-semibold mb-2">Coluna B</h4>
@@ -641,7 +620,7 @@ const CriadorDeCarta: React.FC = () => {
                                             <Input type="text" value={novaColunaB} onChange={e => setNovaColunaB(e.target.value)} placeholder="Texto item B" className="flex-1"/>
                                             <Button type="button" onClick={handleAddColunaB} size="sm">Add B</Button>
                                         </div>
-                                        <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="text-sm space-y-1">{colunaBItems.map(item => <li key={item.id} className="flex justify-between items-center"><span>{item.id}: {item.texto}</span><Button type="button" variant="ghost"  className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveColunaB(item.id)}>X</Button></li>)}</ul></ScrollArea>
+                                        <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="text-sm space-y-1">{colunaBItems.map(item => <li key={item.id} className="flex justify-between items-center"><span>{item.id}: {item.texto}</span><Button type="button" variant="ghost" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveColunaB(item.id)}>X</Button></li>)}</ul></ScrollArea>
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium mb-1">Pares Corretos (JSON)</label>
@@ -659,9 +638,34 @@ const CriadorDeCarta: React.FC = () => {
                                         <label className="block text-sm font-medium mb-1">URL da Imagem Principal*</label>
                                         <Input type="text" value={imagemURLPontoCerto} onChange={e => setImagemURLPontoCerto(e.target.value)} placeholder="/images/mapa.png" />
                                     </div>
+                                    {/* Preview da Imagem e Zonas */}
+                                    {imagemURLPontoCerto && (
+                                        <div className="relative border rounded overflow-hidden max-w-sm mx-auto aspect-video bg-gray-200">
+                                            <img src={imagemURLPontoCerto} alt="Preview Ponto Certo" className="block w-full h-full object-contain" onError={(e) => e.currentTarget.style.display = 'none'}/>
+                                            {/* Renderiza zonas existentes */}
+                                            {zonasClicaveis.map(z => (
+                                                <div key={`zone-vis-${z.id}`}
+                                                     className={cn(
+                                                         "absolute border-2 pointer-events-none",
+                                                         respostaCorretaPontoCerto === z.id ? "border-green-500 bg-green-500/30" : "border-red-500 bg-red-500/20"
+                                                     )}
+                                                     style={{
+                                                         left: `${z.x * 100}%`, top: `${z.y * 100}%`,
+                                                         width: `${z.largura * 100}%`, height: `${z.altura * 100}%`
+                                                     }}
+                                                     title={`ID: ${z.id} - ${z.descricao || 'Zona'}`}
+                                                >
+                                                    <span className="absolute -top-5 left-0 text-xs bg-black/50 text-white px-1 rounded">{z.id}</span>
+                                                </div>
+                                            ))}
+                                            {/* Opcional: Preview da nova zona sendo editada */}
+                                            {/* ... */}
+                                        </div>
+                                    )}
                                     <div>
                                         <h4 className="text-md font-semibold mb-2">Adicionar Zona Clicável</h4>
                                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 border p-2 rounded items-end bg-white">
+                                            {/* Inputs para novaZona */}
                                             <Input type="number" placeholder="X (0-1)" value={novaZona.x ?? ""} onChange={e => handleNovaZonaChange('x', e.target.value)} className="text-sm h-9" step="0.01" min="0" max="1"/>
                                             <Input type="number" placeholder="Y (0-1)" value={novaZona.y ?? ""} onChange={e => handleNovaZonaChange('y', e.target.value)} className="text-sm h-9" step="0.01" min="0" max="1"/>
                                             <Input type="number" placeholder="Largura (0-1)" value={novaZona.largura ?? ""} onChange={e => handleNovaZonaChange('largura', e.target.value)} className="text-sm h-9" step="0.01" min="0.01" max="1"/>
@@ -676,8 +680,8 @@ const CriadorDeCarta: React.FC = () => {
                                                     <li key={z.id} className="flex justify-between items-center odd:bg-gray-50 even:bg-white px-1 py-0.5">
                                                         <span>ID:{z.id} ({z.x},{z.y} {z.largura}x{z.altura}) {z.descricao}</span>
                                                         <div className="flex items-center gap-1">
-                                                            <Button type="button" variant={respostaCorretaPontoCerto === z.id ? "default" : "outline"}  className={cn("h-6 px-1.5", respostaCorretaPontoCerto === z.id && "bg-green-600")} onClick={() => handleSetRespostaPontoCerto(z.id)}>Correta</Button>
-                                                            <Button type="button" variant="ghost"  className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveZona(z.id)}>X</Button>
+                                                            <Button type="button" variant={respostaCorretaPontoCerto === z.id ? "default" : "outline"} size="xs" className={cn("h-6 px-1.5", respostaCorretaPontoCerto === z.id && "bg-green-600")} onClick={() => handleSetRespostaPontoCerto(z.id)}>Correta</Button>
+                                                            <Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveZona(z.id)}>X</Button>
                                                         </div>
                                                     </li>
                                                 ))}
@@ -703,7 +707,7 @@ const CriadorDeCarta: React.FC = () => {
                                             <Input type="text" value={novoFragmento} onChange={e => setNovoFragmento(e.target.value)} placeholder="Texto do fragmento" className="flex-1"/>
                                             <Button type="button" onClick={handleAddFragmento}>Add Frag.</Button>
                                         </div>
-                                         <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="text-sm space-y-1">{fragmentos.map(f => <li key={f.id} className="flex justify-between items-center"><span>{f.id}: {f.texto}</span><Button type="button" variant="ghost"  className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveFragmento(f.id)}>X</Button></li>)}</ul></ScrollArea>
+                                         <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="text-sm space-y-1">{fragmentos.map(f => <li key={f.id} className="flex justify-between items-center"><span>{f.id}: {f.texto}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveFragmento(f.id)}>X</Button></li>)}</ul></ScrollArea>
                                     </div>
                                     <div>
                                          <label className="block text-sm font-medium mb-1">Ordem Correta* (IDs por vírgula)</label>
@@ -724,8 +728,8 @@ const CriadorDeCarta: React.FC = () => {
                             </Select>
                         </div>
 
-                        {/* Categorias e Fontes */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Categorias e Fontes (Layout Vertical) */}
+                        <div className="space-y-4">
                             <Card className="bg-gray-50 border">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-3">
                                     <CardTitle className="text-base font-semibold">Categorias</CardTitle>
@@ -739,7 +743,7 @@ const CriadorDeCarta: React.FC = () => {
                                         <Input type="text" value={novaCategoria} onChange={(e) => setNovaCategoria(e.target.value)} placeholder="Nova categoria" className="flex-1 h-9"/>
                                         <Button type="button" onClick={handleAddCategoria} size="sm" className="h-9">Add</Button>
                                     </div>
-                                    <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="space-y-1 text-sm">{categorias.map((c, i) => <li key={i} className="flex justify-between items-center"><span>{c}</span><Button type="button" variant="ghost"  className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveCategoria(c)}>X</Button></li>)}</ul></ScrollArea>
+                                    <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="space-y-1 text-sm">{categorias.map((c, i) => <li key={i} className="flex justify-between items-center"><span>{c}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveCategoria(c)}>X</Button></li>)}</ul></ScrollArea>
                                 </CardContent>
                             </Card>
                              <Card className="bg-gray-50 border">
@@ -755,13 +759,13 @@ const CriadorDeCarta: React.FC = () => {
                                         <Input type="text" value={novaFonte} onChange={(e) => setNovaFonte(e.target.value)} placeholder="Nova fonte" className="flex-1 h-9"/>
                                         <Button type="button" onClick={handleAddFonte} size="sm" className="h-9">Add</Button>
                                     </div>
-                                    <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="space-y-1 text-sm">{fontes.map((f, i) => <li key={i} className="flex justify-between items-center"><span>{f}</span><Button type="button" variant="ghost"  className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveFonte(f)}>X</Button></li>)}</ul></ScrollArea>
+                                    <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="space-y-1 text-sm">{fontes.map((f, i) => <li key={i} className="flex justify-between items-center"><span>{f}</span><Button type="button" variant="ghost" size="xs" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveFonte(f)}>X</Button></li>)}</ul></ScrollArea>
                                 </CardContent>
                              </Card>
                         </div>
 
-                        {/* Vantagem, Desvantagem, Dica */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Vantagem, Desvantagem, Dica (Layout Vertical) */}
+                        <div className="space-y-4">
                              <div><label className="block text-sm font-medium mb-1">Vantagem (Msg Acerto)</label><Input type="text" value={vantagem} onChange={(e) => setVantagem(e.target.value)} /></div>
                             <div><label className="block text-sm font-medium mb-1">Desvantagem (Msg Erro)</label><Input type="text" value={desvantagem} onChange={(e) => setDesvantagem(e.target.value)} /></div>
                             <div><label className="block text-sm font-medium mb-1">Dica</label><Input type="text" value={dica} onChange={(e) => setDica(e.target.value)} /></div>
@@ -770,26 +774,24 @@ const CriadorDeCarta: React.FC = () => {
                         {/* Botões de Ação */}
                         <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0 pt-4 border-t">
                             <Button type="button" onClick={handleAddOrUpdateCard} className="bg-green-600 hover:bg-green-700 text-white">
-                                {editIndex !== null ? "Salvar Edições" : "Adicionar Carta ao Baralho"}
+                                {editIndex !== null ? "Salvar Edições" : "Adicionar Carta"}
                             </Button>
                             {editIndex !== null && (<Button type="button" onClick={cancelEdit} variant="outline">Cancelar Edição</Button>)}
-                            <Button type="button" onClick={() => setShowPreview(!showPreview)} variant="outline">
-                                {showPreview ? "Esconder Preview" : "Mostrar Preview Estático"}
-                            </Button>
+                            {/* Botão de Preview Removido */}
                         </div>
                     </CardContent>
                 </Card>
 
-                 {/* Coluna Direita: Lista de Cartas e Preview */}
+                 {/* Coluna Direita: Lista de Cartas e Preview Fixo */}
                  <div className="space-y-4">
                      <Card>
                         <CardHeader>
                             <CardTitle className="text-xl">Baralho Sendo Criado ({cards.length} Cartas)</CardTitle>
-                            <AlertDescription>Clique em uma carta abaixo para editá-la.</AlertDescription>
+                            <AlertDescription>Clique em uma carta para editar.</AlertDescription>
                         </CardHeader>
                         <CardContent>
                              {cards.length === 0 ? (<p className="text-gray-500 italic">Nenhuma carta.</p>) : (
-                                <ScrollArea className="h-[60vh] pr-3">
+                                <ScrollArea className="h-[45vh] pr-3"> {/* Altura ajustada */}
                                     <div className="space-y-2">
                                         {cards.map((c, index) => (
                                             <Card key={`card-display-${c.id || index}`} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => loadCardForEdit(index)}>
@@ -810,9 +812,8 @@ const CriadorDeCarta: React.FC = () => {
                          </CardContent>
                      </Card>
 
-                     {/* Preview Estático */}
-                     {showPreview && (
-                        <Card className="mt-4 lg:sticky lg:top-4 self-start">
+                     {/* Preview Estático Fixo */}
+                     <Card className="mt-4 lg:sticky lg:top-4 self-start">
                             <CardHeader><CardTitle className="text-lg text-center">Preview Estático</CardTitle></CardHeader>
                             <CardContent>
                                  <CardStaticView card={
@@ -820,7 +821,7 @@ const CriadorDeCarta: React.FC = () => {
                                      ? cards[editIndex]
                                      : { // Monta preview da carta sendo criada
                                          tipo, titulo, pergunta, opcoes,
-                                         respostaCorreta: (() => {
+                                         respostaCorreta: (() => { // Lógica de preview da resposta
                                              if (tipo === 'Pergunta' || tipo === 'ContraTempo') return respostaCorreta[0];
                                              if (tipo === 'PontoCerto') return respostaCorretaPontoCerto ?? undefined;
                                              if (tipo === 'RelacionarColunas') try { return JSON.parse(paresCorretosInput || '[]'); } catch { return []; }
@@ -840,7 +841,6 @@ const CriadorDeCarta: React.FC = () => {
                                  }/>
                              </CardContent>
                          </Card>
-                     )}
                  </div>
              </div>
         </div>
