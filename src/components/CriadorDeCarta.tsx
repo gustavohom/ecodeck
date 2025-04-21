@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trash, Youtube, Image as ImageIcon, Video } from "lucide-react"; // Importar Ícones
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"; // Assumindo que você tem este utilitário
 
 // --- Tipos de Dados ---
 interface Opcao { id: number; texto: string; ordemTemp?: string; }
@@ -23,9 +23,10 @@ interface CartaBase {
     id: string | number; tipo: string; titulo: string; pergunta: string;
     dificuldade: "facil" | "normal" | "dificil"; categorias: string[]; fontes: string[];
     vantagem: string; desvantagem: string; dica: string;
-    opcoes?: Opcao[];
+    opcoes?: Opcao[]; // Opcional na base
 }
-interface CartaComOpcoes extends CartaBase { opcoes: Opcao[]; }
+interface CartaComOpcoes extends CartaBase { opcoes: Opcao[]; } // Tipo auxiliar
+
 interface CartaPergunta extends CartaComOpcoes { tipo: "Pergunta"; respostaCorreta: number; }
 interface CartaMultiplaEscolha extends CartaComOpcoes { tipo: "MultiplaEscolha"; respostaCorreta: number[]; }
 interface CartaOrdem extends CartaComOpcoes { tipo: "Ordem"; respostaCorreta: number[]; }
@@ -33,15 +34,24 @@ interface CartaVantagem extends CartaComOpcoes { tipo: "Vantagem"; respostaCorre
 interface CartaDesvantagem extends CartaComOpcoes { tipo: "Desvantagem"; respostaCorreta: number[]; }
 interface CartaOutras extends CartaComOpcoes { tipo: "Outras"; respostaCorreta: number[]; }
 interface CartaContraTempo extends CartaComOpcoes { tipo: "ContraTempo"; respostaCorreta: number; tempoLimite: number; }
+
+// Tipos sem 'opcoes' padrão
 interface CartaRelacionarColunas extends CartaBase { tipo: "RelacionarColunas"; colunaA: ItemRelacionar[]; colunaB: ItemRelacionar[]; respostaCorreta: { aId: number; bId: number }[]; }
 interface CartaPontoCerto extends CartaBase { tipo: "PontoCerto"; imagemURL: string; zonasClicaveis: ZonaClicavel[]; respostaCorreta: number; }
 interface CartaCompletarFrase extends CartaBase { tipo: "CompletarFrase"; fraseIncompleta: string; fragmentos: FragmentoCompletar[]; respostaCorreta: number[]; }
 
+// União final
 type Carta =
     | CartaPergunta | CartaMultiplaEscolha | CartaOrdem | CartaVantagem | CartaDesvantagem | CartaOutras
     | CartaContraTempo | CartaRelacionarColunas | CartaPontoCerto | CartaCompletarFrase;
 
-type CartaInterna = Carta & { origBaralhoId?: number; edited?: boolean; };
+// Tipo interno para o estado
+type CartaInterna = Carta & {
+    origBaralhoId?: number;
+    edited?: boolean;
+};
+
+// --- Fim dos Tipos ---
 
 const CARD_TYPES = [
     "Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras",
@@ -56,7 +66,6 @@ interface BaralhoCarregado { id: number; nome: string; cartas: Carta[]; adiciona
 
 // --- Componente de Preview Estático ---
 const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
-    // ... (Código do CardStaticView sem alterações da versão anterior) ...
     const {
         tipo = "Pergunta", titulo = "", pergunta = "", opcoes = [], respostaCorreta,
         dificuldade = "facil", categorias = [], fontes = [], vantagem = "", desvantagem = "", dica = ""
@@ -103,7 +112,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
         case "CompletarFrase":
             const cardCompFrase = card as Partial<CartaCompletarFrase>;
-            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: &quot;{cardCompFrase.fraseIncompleta || '...'}&quot;</p>;
+            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: "{cardCompFrase.fraseIncompleta || '...'}"</p>;
             renderedOptions = (
                 <>
                  {cardCompFrase.fragmentos && cardCompFrase.fragmentos.length > 0 && (
@@ -120,6 +129,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
     }
 
+    // Renderizador de opções padrão
     if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo)) {
         const correctSet = new Set<number>();
         const currentOptions = card.opcoes || [];
@@ -180,6 +190,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
     );
 };
 
+
 // --- Componente Criador Principal ---
 const CriadorDeCarta: React.FC = () => {
     const [deckName, setDeckName] = useState("meu_baralho");
@@ -215,39 +226,33 @@ const CriadorDeCarta: React.FC = () => {
     const [novoFragmento, setNovoFragmento] = useState("");
     const [ordemFragmentos, setOrdemFragmentos] = useState("");
     const [editIndex, setEditIndex] = useState<number | null>(null);
-    const [popupImageUrl, setPopupImageUrl] = useState(""); // Unificado
+    const [popupImageUrl, setPopupImageUrl] = useState("");
     const [popupVideoUrl, setPopupVideoUrl] = useState("");
-    const [popupYouTubeUrl, setPopupYouTubeUrl] = useState(""); // Para YouTube
+    const [popupYouTubeUrl, setPopupYouTubeUrl] = useState("");
     const [baralhosCarregados, setBaralhosCarregados] = useState<BaralhoCarregado[]>([]);
     const [manterCartasEditadas, setManterCartasEditadas] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const perguntaTextareaRef = useRef<HTMLTextAreaElement>(null);
-
-    // Refs para imagens de preview
     const previewImageRefPontoCerto = useRef<HTMLImageElement>(null);
     const [previewImageSize, setPreviewImageSize] = useState({ width: 0, height: 0 });
 
-    // Calcula o tamanho real da imagem de preview para o Ponto Certo
     useEffect(() => {
         if (tipo === 'PontoCerto' && previewImageRefPontoCerto.current) {
             const updateSize = () => {
                 if (previewImageRefPontoCerto.current) {
-                    setPreviewImageSize({
-                        width: previewImageRefPontoCerto.current.offsetWidth,
-                        height: previewImageRefPontoCerto.current.offsetHeight,
-                    });
+                    setPreviewImageSize({ width: previewImageRefPontoCerto.current.offsetWidth, height: previewImageRefPontoCerto.current.offsetHeight });
                 }
             };
-            // Atualiza no mount e no resize
             const img = previewImageRefPontoCerto.current;
-            img.onload = updateSize; // Garante que a imagem carregou
-            if (img.complete) updateSize(); // Se já estiver carregada
+            img.onload = updateSize;
+            if (img.complete) updateSize();
+            const observer = new ResizeObserver(updateSize);
+            observer.observe(img);
             window.addEventListener('resize', updateSize);
-            return () => window.removeEventListener('resize', updateSize);
+            return () => { window.removeEventListener('resize', updateSize); observer.disconnect(); img.onload = null;};
         }
-    }, [tipo, imagemURLPontoCerto]); // Recalcula se a URL ou tipo mudar
-
+    }, [tipo, imagemURLPontoCerto]);
 
     const parseJSDeckFileLocal = (content: string): Carta[] => {
         const match = content.match(/export default\s+(\[[\s\S]*?\]);?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?\s*export default\s+\w+;?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?/m);
@@ -322,67 +327,57 @@ const CriadorDeCarta: React.FC = () => {
     const handleAddFonte = () => { if (novaFonte.trim() !== "" && !fontes.includes(novaFonte)) { setFontes((old) => [...old, novaFonte]); setNovaFonte(""); } };
     const handleRemoveFonte = (f: string) => { setFontes((old) => old.filter((fon) => fon !== f)); };
 
-    // --- Funções para Inserir HTML de Popup ---
     const inserirTemplatePopup = (tipoPopup: 'imagem' | 'video') => {
         const idUnico = `popup-${Date.now()}`;
-        const urlPrincipal = tipoPopup === 'imagem' ? popupImageUrl || '/images/placeholder_grande.png' : popupVideoUrl || '/videos/placeholder_video.mp4';
-        const urlThumb = tipoPopup === 'imagem' ? popupImageUrl || '/images/placeholder_thumb.png' : ''; // Usa a mesma url para thumb de imagem
-        const desc = tipoPopup === 'imagem' ? 'Descrição da Imagem' : 'Descrição do Vídeo';
+        let urlPrincipal = '';
+        let desc = '';
+        let thumbHtml = '';
 
-        const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }\n.popup-overlay-${idUnico}:target { display: flex; }\n.popup-content-${idUnico} { position: relative; background-color: #fff; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; overflow: auto; }\n.popup-content-${idUnico} img, .popup-content-${idUnico} video { display: block; max-width: 100%; max-height: 80vh; height: auto; margin: 0 auto 15px auto; }\n.popup-close-${idUnico} { position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; color: #555; text-decoration: none; line-height: 1; }\n.popup-close-${idUnico}:hover { color: #000; }\n.thumb-link-${idUnico} { display: block; /* Alterado para block */ margin: 10px auto; /* Centraliza */ width: fit-content; /* Ajusta largura ao conteúdo */ cursor: zoom-in; border: 1px solid #ccc; padding: 3px; border-radius: 4px; background: white; }\n.thumb-link-${idUnico} img, .thumb-link-${idUnico} span { max-width: 180px; height: auto; display: block; }\n.thumb-link-${idUnico} span{padding:10px; color:blue; text-decoration:underline}\n</style>\n`;
+        if (tipoPopup === 'imagem') {
+            if (!popupImageUrl.trim()) { alert("Insira a URL da Imagem."); return; }
+            urlPrincipal = popupImageUrl;
+            urlThumb = popupImageUrl; // Usar a mesma URL para thumb
+            desc = 'Descrição da Imagem';
+            thumbHtml = `<img src=\"${urlThumb}\" alt=\"Clique para ampliar\"/>`;
+        } else { // video
+            if (!popupVideoUrl.trim()) { alert("Insira a URL do Vídeo (.mp4)."); return; }
+            urlPrincipal = popupVideoUrl;
+            desc = 'Descrição do Vídeo';
+            thumbHtml = `<span>🎬 Clique para ver o vídeo</span>`;
+        }
+
+        const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }\n.popup-overlay-${idUnico}:target { display: flex; }\n.popup-content-${idUnico} { position: relative; background-color: #fff; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; overflow: auto; }\n.popup-content-${idUnico} img, .popup-content-${idUnico} video { display: block; max-width: 100%; max-height: 80vh; height: auto; margin: 0 auto 15px auto; }\n.popup-close-${idUnico} { position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; color: #555; text-decoration: none; line-height: 1; }\n.popup-close-${idUnico}:hover { color: #000; }\n.thumb-link-${idUnico} { display: block; margin: 10px auto; width: fit-content; cursor: zoom-in; border: 1px solid #ccc; padding: 3px; border-radius: 4px; background: white; }\n.thumb-link-${idUnico} img, .thumb-link-${idUnico} span { max-width: 180px; height: auto; display: block; }\n.thumb-link-${idUnico} span{padding:10px; color:blue; text-decoration:underline}\n</style>\n`;
         let templateElemento: string;
 
         if (tipoPopup === 'imagem') {
-            templateElemento = `<!-- Link/Thumb da Imagem (Centralizado) -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\">\n  <img src=\"${urlThumb}\" alt=\"Clique para ampliar\"/>\n</a>\n\n<!-- Popup da Imagem -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <img src=\"${urlPrincipal}\" alt=\"Imagem Ampliada\"/>\n    <p style=\"text-align: center; font-size: 0.9em; color: #666;\">${desc}</p>\n  </div>\n</div>\n`;
-        } else { // Video
-            templateElemento = `<!-- Link/Thumb do Vídeo (Centralizado) -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\" style=\"border:none; background:none; padding:0;\">\n  <span style=\"background:#ddd; padding: 10px 15px; border-radius:5px;\">🎬 Clique para ver o vídeo</span>\n</a>\n\n<!-- Popup do Vídeo -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <video controls width=\"100%\" style=\"max-width: 700px; max-height: 70vh;\">\n      <source src=\"${urlPrincipal}\" type=\"video/mp4\">\n      Seu navegador não suporta vídeo.\n    </video>\n    <p style=\"text-align: center; font-size: 0.9em; color: #666;\">${desc}</p>\n  </div>\n</div>\n`;
+            templateElemento = `<!-- Link/Thumb da Imagem (Centralizado) -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\">\n  ${thumbHtml}\n</a>\n\n<!-- Popup da Imagem -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <img src=\"${urlPrincipal}\" alt=\"Imagem Ampliada\"/>\n    <p style=\"text-align: center; font-size: 0.9em; color: #666;\">${desc}</p>\n  </div>\n</div>\n`;
+        } else { // video
+            templateElemento = `<!-- Link/Thumb do Vídeo (Centralizado) -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\" style=\"border:none; background:none; padding:0;\">\n  ${thumbHtml}\n</a>\n\n<!-- Popup do Vídeo -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <video controls width=\"100%\" style=\"max-width: 700px; max-height: 70vh;\">\n      <source src=\"${urlPrincipal}\" type=\"video/mp4\">\n      Seu navegador não suporta vídeo.\n    </video>\n    <p style=\"text-align: center; font-size: 0.9em; color: #666;\">${desc}</p>\n  </div>\n</div>\n`;
         }
-        // Adiciona <br> antes e depois
-        const htmlParaInserir = `\n<br>\n${templateCSS}${templateElemento}<br>\n`;
+        const htmlParaInserir = `\n<br><br>\n${templateCSS}${templateElemento}<br><br>\n`;
         const textarea = perguntaTextareaRef.current;
         if (textarea) {
             const start = textarea.selectionStart; const end = textarea.selectionEnd;
             const textoAtual = textarea.value;
             const novoTexto = textoAtual.substring(0, start) + htmlParaInserir + textoAtual.substring(end);
             setPergunta(novoTexto);
-            // Limpa os inputs de URL após inserir
             if(tipoPopup === 'imagem') { setPopupImageUrl(""); } else { setPopupVideoUrl(""); }
         } else { setPergunta(prev => prev + htmlParaInserir); }
     };
 
     // --- Função para Inserir Popup YouTube ---
     const inserirTemplatePopupYouTube = () => {
-        if (!popupYouTubeUrl.trim()) {
-            alert("Por favor, insira a URL do vídeo do YouTube.");
-            return;
-        }
-        // Extrai o ID do vídeo da URL (funciona para vários formatos comuns)
+        if (!popupYouTubeUrl.trim()) { alert("Insira a URL do vídeo do YouTube."); return; }
         let videoId = '';
         const url = popupYouTubeUrl;
-        const patterns = [
-             /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, // Padrão watch?v=
-             /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/,             // Padrão youtu.be/
-             /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/     // Padrão embed/
-        ];
-        for (const pattern of patterns) {
-            const match = url.match(pattern);
-            if (match && match[1]) {
-                videoId = match[1];
-                break;
-            }
-        }
-
-        if (!videoId) {
-            alert("URL do YouTube inválida ou formato não reconhecido. Use o link completo do vídeo (watch?v=... ou youtu.be/... ou embed/...).");
-            return;
-        }
+        const patterns = [ /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/ ];
+        for (const pattern of patterns) { const match = url.match(pattern); if (match && match[1]) { videoId = match[1]; break; } }
+        if (!videoId) { alert("URL do YouTube inválida. Use o link completo (watch?v=..., youtu.be/... ou embed/...)."); return; }
 
         const idUnico = `popup-yt-${Date.now()}`;
         const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-
-        const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }\n.popup-overlay-${idUnico}:target { display: flex; }\n.popup-content-${idUnico} { position: relative; background-color: #000; /* Fundo preto para player */ padding: 10px; border-radius: 8px; width: 90%; max-width: 800px; /* Tamanho maior para vídeo */ aspect-ratio: 16 / 9; }\n.popup-content-${idUnico} iframe { display: block; width: 100%; height: 100%; border: none; }\n.popup-close-${idUnico} { position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; background: white; border-radius: 50%; font-size: 20px; font-weight: bold; color: #333; text-decoration: none; line-height: 30px; text-align: center; box-shadow: 0 0 5px black; }\n.popup-close-${idUnico}:hover { color: #000; background: #eee; }\n.thumb-link-${idUnico} { display: block; /* Alterado para block */ margin: 10px auto; /* Centraliza */ width: fit-content; cursor: pointer; }\n.thumb-link-${idUnico} span { background:#eee; border: 1px solid #ccc; padding: 10px 15px; border-radius:5px; color: #c4302b; /* Cor YouTube */ font-weight: bold; display: flex; align-items: center; gap: 5px; }\n</style>\n`;
-        const templateElemento = `<!-- Link/Thumb YouTube -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\">\n  <span><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"#c4302b\" style=\"margin-right: 5px;\"><path d=\"M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z\"/></svg> Ver Vídeo YouTube</span>\n</a>\n\n<!-- Popup YouTube -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <iframe src=\"${embedUrl}\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" allowfullscreen></iframe>\n  </div>\n</div>\n`;
-
+        const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }\n.popup-overlay-${idUnico}:target { display: flex; }\n.popup-content-${idUnico} { position: relative; background-color: #000; padding: 10px; border-radius: 8px; width: 90%; max-width: 800px; aspect-ratio: 16 / 9; }\n.popup-content-${idUnico} iframe { display: block; width: 100%; height: 100%; border: none; }\n.popup-close-${idUnico} { position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; background: white; border-radius: 50%; font-size: 20px; font-weight: bold; color: #333; text-decoration: none; line-height: 30px; text-align: center; box-shadow: 0 0 5px black; }\n.popup-close-${idUnico}:hover { color: #000; background: #eee; }\n.thumb-link-${idUnico} { display: block; margin: 10px auto; width: fit-content; cursor: pointer; }\n.thumb-link-${idUnico} span { background:#eee; border: 1px solid #ccc; padding: 10px 15px; border-radius:5px; color: #c4302b; font-weight: bold; display: flex; align-items: center; gap: 5px; }\n</style>\n`;
+        const templateElemento = `<!-- Link/Thumb YouTube -->\n<a href=\"#${idUnico}\" class=\"thumb-link-${idUnico}\">\n  <span><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"currentColor\" style=\"margin-right: 5px;\"><path d=\"M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z\"/></svg> Ver Vídeo YouTube</span>\n</a>\n\n<!-- Popup YouTube -->\n<div id=\"${idUnico}\" class=\"popup-overlay-${idUnico}\">\n  <div class=\"popup-content-${idUnico}\">\n    <a href=\"#\" class=\"popup-close-${idUnico}\" title=\"Fechar\">×</a>\n    <iframe src=\"${embedUrl}\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" allowfullscreen></iframe>\n  </div>\n</div>\n`;
         const htmlParaInserir = `\n<br>\n${templateCSS}${templateElemento}<br>\n`;
         const textarea = perguntaTextareaRef.current;
         if (textarea) {
@@ -405,13 +400,11 @@ const CriadorDeCarta: React.FC = () => {
         if (!categoriasBloqueadas) setCategorias([]);
         if (!fontesBloqueadas) setFontes([]);
         setEditIndex(null);
-        setPopupImageUrl(""); // Limpa URL de imagem
-        setPopupVideoUrl(""); // Limpa URL de vídeo
-        setPopupYouTubeUrl(""); // Limpa URL do YouTube
+        setPopupImageUrl(""); setPopupVideoUrl(""); setPopupYouTubeUrl("");
     };
 
     const handleAddOrUpdateCard = () => {
-        // ... (Lógica de validação e construção da carta como na resposta anterior) ...
+        // ... (Lógica como na versão anterior, sem mudanças) ...
         if (!titulo.trim() || !tipo) { alert("Título e Tipo são obrigatórios."); return; }
         let finalRespostaCorreta: number | number[] | { aId: number; bId: number }[] = [];
         let cartaEspecificaProps: any = {};
@@ -496,8 +489,9 @@ const CriadorDeCarta: React.FC = () => {
         resetCarta();
     };
 
+    // --- Load Card for Edit (sem mudanças da versão anterior) ---
     const loadCardForEdit = (index: number) => {
-        // ... (Lógica de loadCardForEdit como na resposta anterior) ...
+        // ... (código igual ao anterior) ...
         resetCarta();
         const carta = cards[index];
         setEditIndex(index); setTipo(carta.tipo as TipoCarta); setTitulo(carta.titulo); setPergunta(carta.pergunta);
@@ -538,22 +532,29 @@ const CriadorDeCarta: React.FC = () => {
     };
     const cancelEdit = () => { resetCarta(); };
 
+    // --- Download (CORRIGIDO) ---
     const prepareForDownload = (): Partial<Carta>[] => {
-        // ... (Lógica prepareForDownload como na resposta anterior) ...
-         return cards.map(({ origBaralhoId, edited, ...rest }: CartaInterna) => {
+        return cards.map(({ origBaralhoId, edited, ...rest }: CartaInterna) => {
             const cardData: Partial<Carta> = { ...rest };
-            if (rest.tipo !== "ContraTempo") delete cardData.tempoLimite;
+            // Limpa campos específicos que NÃO pertencem ao tipo atual
+            if (rest.tipo !== "ContraTempo" && cardData.tempoLimite !== undefined) delete (cardData as Partial<CartaContraTempo>).tempoLimite;
             if (rest.tipo !== "RelacionarColunas") { delete (cardData as Partial<CartaRelacionarColunas>).colunaA; delete (cardData as Partial<CartaRelacionarColunas>).colunaB; }
             if (rest.tipo !== "PontoCerto") { delete (cardData as Partial<CartaPontoCerto>).imagemURL; delete (cardData as Partial<CartaPontoCerto>).zonasClicaveis; }
             if (rest.tipo !== "CompletarFrase") { delete (cardData as Partial<CartaCompletarFrase>).fraseIncompleta; delete (cardData as Partial<CartaCompletarFrase>).fragmentos; }
 
+            // Limpa 'opcoes' se não for um tipo que o utiliza
             if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo)) {
                  delete cardData.opcoes;
             } else if (rest.tipo === "Ordem" && cardData.opcoes) {
+                 // Remove ordemTemp das opções para Ordem
                  cardData.opcoes = cardData.opcoes.map(({ ordemTemp, ...o }) => o);
-            } else if (cardData.opcoes === undefined && ["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo)) {
-                 cardData.opcoes = []; // Garante array vazio
+            } else if (cardData.opcoes === undefined) {
+                 // Garante array vazio para tipos que DEVEM ter opções, se por acaso ficou undefined
+                 if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo)){
+                    cardData.opcoes = [];
+                 }
             }
+
             return cardData;
         });
     };
@@ -643,22 +644,22 @@ const CriadorDeCarta: React.FC = () => {
                              <Textarea ref={perguntaTextareaRef} value={pergunta} onChange={(e) => setPergunta(e.target.value)} className="h-36 font-mono text-sm" placeholder="Escreva aqui..."/>
                              {/* Inputs e botões para inserir popups */}
                              <Card className="mt-2 border-dashed">
-                                <CardHeader className="p-2"><CardTitle className="text-sm font-medium">Inserir Popup de Mídia</CardTitle></CardHeader>
+                                <CardHeader className="p-2"><CardTitle className="text-sm font-medium">Inserir Popup de Mídia na Pergunta</CardTitle></CardHeader>
                                 <CardContent className="p-2 space-y-2">
                                     <div className="flex items-center gap-2">
                                          <ImageIcon className="h-4 w-4 text-gray-500 shrink-0"/>
-                                         <Input type="text" value={popupImageUrl} onChange={e => setPopupImageUrl(e.target.value)} placeholder="URL Imagem (Thumb e Grande)" className="text-xs h-8 flex-1"/>
-                                         <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('imagem')} className="h-8 text-xs px-2 shrink-0">Add Img</Button>
+                                         <Input type="text" value={popupImageUrl} onChange={e => setPopupImageUrl(e.target.value)} placeholder="URL Imagem" className="text-xs h-8 flex-1"/>
+                                         <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('imagem')} className="h-8 text-xs px-2 shrink-0">Add Img Popup</Button>
                                     </div>
                                      <div className="flex items-center gap-2">
                                          <Video className="h-4 w-4 text-gray-500 shrink-0"/>
                                          <Input type="text" value={popupVideoUrl} onChange={e => setPopupVideoUrl(e.target.value)} placeholder="URL Vídeo (.mp4)" className="text-xs h-8 flex-1"/>
-                                         <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('video')} className="h-8 text-xs px-2 shrink-0">Add Vídeo</Button>
+                                         <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('video')} className="h-8 text-xs px-2 shrink-0">Add Vídeo Popup</Button>
                                      </div>
                                       <div className="flex items-center gap-2">
                                           <Youtube className="h-4 w-4 text-red-600 shrink-0"/>
                                           <Input type="text" value={popupYouTubeUrl} onChange={e => setPopupYouTubeUrl(e.target.value)} placeholder="URL YouTube (Completa)" className="text-xs h-8 flex-1"/>
-                                          <Button type="button" size="sm" variant="outline" onClick={inserirTemplatePopupYouTube} className="h-8 text-xs px-2 shrink-0">Add YouTube</Button>
+                                          <Button type="button" size="sm" variant="outline" onClick={inserirTemplatePopupYouTube} className="h-8 text-xs px-2 shrink-0">Add YouTube Popup</Button>
                                       </div>
                                 </CardContent>
                              </Card>
@@ -754,7 +755,7 @@ const CriadorDeCarta: React.FC = () => {
                                             {/* Renderiza zonas existentes */}
                                             {zonasClicaveis.map(z => (
                                                 <div key={`zone-vis-${z.id}`}
-                                                     className={cn( "absolute border-2 pointer-events-none", respostaCorretaPontoCerto === z.id ? "border-green-500 bg-green-500/30" : "border-dashed border-red-500 bg-red-500/20" )} // Destaca correta, pontilha outras
+                                                     className={cn( "absolute border-2 pointer-events-none", respostaCorretaPontoCerto === z.id ? "border-green-500 bg-green-500/30" : "border-dashed border-red-500 bg-red-500/20" )}
                                                      style={{ left: `${z.x * 100}%`, top: `${z.y * 100}%`, width: `${z.largura * 100}%`, height: `${z.altura * 100}%` }}
                                                      title={`ID: ${z.id} - ${z.descricao || 'Zona'}`}
                                                 >
@@ -890,21 +891,20 @@ const CriadorDeCarta: React.FC = () => {
                                 {editIndex !== null ? "Salvar Edições" : "Adicionar Carta"}
                             </Button>
                             {editIndex !== null && (<Button type="button" onClick={cancelEdit} variant="outline">Cancelar Edição</Button>)}
-                            {/* Botão de Preview Removido */}
                         </div>
                     </CardContent>
                 </Card>
 
                  {/* Coluna Direita: Lista de Cartas e Preview Fixo */}
-                 <div className="space-y-4 lg:sticky lg:top-4 self-start"> {/* Preview fixo */}
-                    <Card>
+                 <div className="space-y-4 lg:sticky lg:top-4 self-start">
+                     <Card>
                         <CardHeader>
                             <CardTitle className="text-xl">Baralho Atual ({cards.length} Cartas)</CardTitle>
                             <AlertDescription>Clique em uma carta abaixo para editá-la.</AlertDescription>
                         </CardHeader>
                         <CardContent>
                              {cards.length === 0 ? (<p className="text-gray-500 italic">Nenhuma carta.</p>) : (
-                                <ScrollArea className="h-[calc(50vh-6rem)] pr-3"> {/* Altura dinâmica */}
+                                <ScrollArea className="h-[calc(50vh-6rem)] pr-3">
                                     <div className="space-y-2">
                                         {cards.map((c, index) => (
                                             <Card key={`card-display-${c.id || index}`} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => loadCardForEdit(index)}>
@@ -923,16 +923,16 @@ const CriadorDeCarta: React.FC = () => {
                                 </ScrollArea>
                              )}
                          </CardContent>
-                    </Card>
+                     </Card>
 
-                    {/* Preview Estático Fixo */}
+                     {/* Preview Estático Fixo */}
                      <Card className="mt-4">
                             <CardHeader><CardTitle className="text-lg text-center">Preview Estático</CardTitle></CardHeader>
                             <CardContent>
-                                 <CardStaticView card={ // Sempre mostra o preview do estado atual do formulário
+                                 <CardStaticView card={
                                      editIndex !== null
-                                     ? cards[editIndex] // Se editando, mostra a carta sendo editada
-                                     : { // Se criando, monta preview da nova carta
+                                     ? cards[editIndex]
+                                     : { // Monta preview da carta sendo criada
                                          tipo, titulo, pergunta, opcoes,
                                          respostaCorreta: (() => {
                                              if (tipo === 'Pergunta' || tipo === 'ContraTempo') return respostaCorreta[0];
