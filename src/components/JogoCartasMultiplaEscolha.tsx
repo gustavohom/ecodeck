@@ -1,22 +1,25 @@
+// src/components/EcoChallenge.tsx
+
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
     Card, CardContent, CardFooter, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox"; // Importar Checkbox
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     CheckCircle2, XCircle, ThumbsUp, ThumbsDown, RotateCcw, HelpCircle,
     BookOpen, Home, SkipForward, Star, Award, MinusCircle, ChevronUp, Zap, Filter,
     Trash, EyeOff, Eye, Dice6, X as XIcon, Timer, Link2, MousePointerClick, Check, TextSelect,
-    ChevronDown, ChevronRight // Ícones para expandir
+    ChevronDown, ChevronRight
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils"; // Assumindo que você tem este utilitário
+import { cn } from "@/lib/utils";
 
-// Importar Decks (Mantenha seus imports originais)
+// Importar Decks
 import manejoPlantadas from "./deck/cards_manejo_plantada";
 import manejoNativas from "./deck/cards_manejo_nativa";
 import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
@@ -26,15 +29,12 @@ import testCards from "./.test/test_card";
 // --- Tipos de Dados ---
 
 interface Opcao { id: number; texto: string; }
-// ===== MODIFICAÇÃO 1: Adicionar campo 'baralho' =====
 interface CartaBase {
     id: string | number; tipo: string; titulo: string; pergunta: string;
     dificuldade: "facil" | "normal" | "dificil"; categorias: string[]; fontes: string[];
     vantagem: string; desvantagem: string; dica: string;
-    baralho?: string; // Nome do baralho interno (opcional)
+    baralho?: string;
 }
-// ===== FIM DA MODIFICAÇÃO 1 =====
-
 interface CartaPergunta extends CartaBase { tipo: "Pergunta"; opcoes: Opcao[]; respostaCorreta: number; }
 interface CartaMultiplaEscolha extends CartaBase { tipo: "MultiplaEscolha"; opcoes: Opcao[]; respostaCorreta: number[]; }
 interface CartaOrdem extends CartaBase { tipo: "Ordem"; opcoes: Opcao[]; respostaCorreta: number[]; }
@@ -62,18 +62,18 @@ interface Player {
 interface PlayerInput { id: number; name: string; color: string; showColorPicker?: boolean; }
 
 // --- Novas Interfaces para Gerenciamento de Fontes e Baralhos ---
-const DEFAULT_BARALHO_NAME = "Padrão"; // Nome padrão para cartas sem baralho definido
+const DEFAULT_BARALHO_NAME = "Padrão";
 
 interface SourceInfo {
-    id: string; // Pode ser o nome do built-in ou o ID numérico do custom deck
-    name: string; // Nome para exibição
+    id: string;
+    name: string;
     type: 'builtin' | 'custom';
     cards: Carta[];
-    internalBaralhos: string[]; // Nomes dos baralhos internos encontrados
-    active: boolean; // Se a fonte (arquivo/built-in) está ativa
+    internalBaralhos: string[];
+    active: boolean;
 }
 
-// Estado do Jogo (agora contém o estado ativo dos baralhos/fontes)
+// Estado do Jogo
 interface GameState {
     players: Player[];
     currentPlayerId: number | null;
@@ -81,8 +81,8 @@ interface GameState {
     ocultarCarta: boolean;
     probabilityIndex: number;
     jogoIniciado: boolean;
-    activeSourceIds: string[]; // IDs das fontes ativas (built-in ou custom)
-    activeInternalBaralhosState: Record<string, string[]>; // { sourceId: [activeBaralhoName, ...] }
+    activeSourceIds: string[];
+    activeInternalBaralhosState: Record<string, string[]>;
 }
 
 // --- Constantes ---
@@ -109,7 +109,7 @@ function processCardsAndExtractBaralhos(cards: Carta[]): { processedCards: Carta
     const processedCards = cards.map(card => {
         const baralhoName = card.baralho?.trim() || DEFAULT_BARALHO_NAME;
         baralhoSet.add(baralhoName);
-        return { ...card, baralho: baralhoName }; // Garante que a propriedade existe
+        return { ...card, baralho: baralhoName };
     });
     return { processedCards, internalBaralhos: Array.from(baralhoSet).sort() };
 }
@@ -130,7 +130,7 @@ const initialBuiltInSources: SourceInfo[] = builtInSourcesData.map(source => {
         ...source,
         cards: processedCards,
         internalBaralhos: internalBaralhos,
-        active: true // Ativo por padrão
+        active: true
     };
 });
 
@@ -145,27 +145,21 @@ function parseJSDeckFile(content: string): Carta[] {
     } catch (error: any) { console.error("Erro parse JS:", error); throw new Error(`Erro processar JS: ${error.message}`); }
 }
 
-// Função para recalcular categorias baseada nos baralhos *ativos*
 function recalcularCategoriasAtivas(
     allSources: SourceInfo[],
-    activeInternalBaralhos: Record<string, Set<string>> // Chave é source.id (string)
+    activeInternalBaralhos: Record<string, Set<string>>
 ): string[] {
     const activeCards: Carta[] = [];
     allSources.forEach(source => {
-        // Considera apenas fontes ativas
         if (!source.active) return;
-
         const activeBaralhosForSource = activeInternalBaralhos[source.id];
-        if (!activeBaralhosForSource) return; // Sanity check
-
+        if (!activeBaralhosForSource) return;
         source.cards.forEach(card => {
-            // Inclui a carta se seu baralho interno estiver ativo para esta fonte
             if (activeBaralhosForSource.has(card.baralho || DEFAULT_BARALHO_NAME)) {
                 activeCards.push(card);
             }
         });
     });
-
     return Array.from(new Set(activeCards.flatMap(c => c.categorias || []))).sort();
 }
 
@@ -186,6 +180,7 @@ interface TelaInicialProps {
 const TelaInicial: React.FC<TelaInicialProps> = ({
     onStartGame, initialPlayers, initialOcultarCarta, initialProbabilityIndex, hasSavedGame,
 }) => {
+    // ===== INICIO DOS ESTADOS DA TELA INICIAL =====
     const [termoBuscaCategoria, setTermoBuscaCategoria] = useState("");
     const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>([]);
     const [ocultarCarta, setOcultarCarta] = useState(initialOcultarCarta);
@@ -195,31 +190,23 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             ? initialPlayers.map((p) => ({ id: p.id, name: p.name, color: p.color, showColorPicker: false }))
             : [{ id: 0, name: "", color: predefinedColors[0], showColorPicker: false }]
     );
-
-    // Estado para gerenciar todas as fontes (built-in + custom)
     const [allSources, setAllSources] = useState<SourceInfo[]>(() => {
          if (typeof window !== "undefined") {
              const savedCustom = localStorage.getItem("customSourceInfos");
              const savedBuiltInStatus = localStorage.getItem("builtInSourceStatus");
              let customSources: SourceInfo[] = [];
              let builtInStatus: Record<string, boolean> | null = null;
-
-             try { customSources = savedCustom ? JSON.parse(savedCustom) : []; } catch { console.error("Erro ao carregar custom sources salvos."); customSources = []; }
-             try { builtInStatus = savedBuiltInStatus ? JSON.parse(savedBuiltInStatus) : null; } catch { console.error("Erro ao carregar status built-in salvos."); builtInStatus = null; }
-
-             // Re-processa custom sources para garantir que 'baralho' exista
+             try { customSources = savedCustom ? JSON.parse(savedCustom) : []; } catch { customSources = []; }
+             try { builtInStatus = savedBuiltInStatus ? JSON.parse(savedBuiltInStatus) : null; } catch { builtInStatus = null; }
              const processedCustomSources = customSources.map(source => {
                 const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards);
                 return { ...source, cards: processedCards, internalBaralhos };
              });
-
              const combined = [...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus ? (builtInStatus[bs.id] ?? true) : true})), ...processedCustomSources];
              return combined;
          }
          return initialBuiltInSources;
     });
-
-    // Estado para gerenciar baralhos internos ativos { sourceId: Set<baralhoName> }
     const [activeInternalBaralhos, setActiveInternalBaralhos] = useState<Record<string, Set<string>>>(() => {
         let initialState: Record<string, Set<string>> = {};
          if (typeof window !== "undefined") {
@@ -231,15 +218,12 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                          initialState[key] = new Set(parsed[key]);
                      }
                  });
-             } catch { console.error("Erro ao carregar baralhos internos ativos."); initialState = {}; }
+             } catch { initialState = {}; }
          }
-
-         // Garante que todas as fontes atuais tenham entrada, inicializando com todos ativos se não salvos
          allSources.forEach(source => {
              if (!initialState[source.id]) {
                  initialState[source.id] = new Set(source.internalBaralhos);
              } else {
-                 // Adiciona baralhos que podem ter surgido depois (importante se a estrutura do built-in mudar)
                  source.internalBaralhos.forEach(bName => {
                      initialState[source.id].add(bName);
                  })
@@ -247,31 +231,25 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
          });
          return initialState;
     });
-
-    // Estado para categorias disponíveis (calculado)
     const [todasCategorias, setTodasCategorias] = useState<string[]>([]);
-
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set()); // Para UI
+    const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
+    // ===== FIM DOS ESTADOS DA TELA INICIAL =====
 
-    // Recalcular categorias sempre que fontes ou baralhos internos ativos mudarem
     useEffect(() => {
         const novasCategorias = recalcularCategoriasAtivas(allSources, activeInternalBaralhos);
         setTodasCategorias(novasCategorias);
         setCategoriasSelecionadas((prev) => prev.filter(cat => novasCategorias.includes(cat)));
     }, [allSources, activeInternalBaralhos]);
 
-    // Salvar estado da UI (fontes, baralhos ativos)
     useEffect(() => {
         if (typeof window !== "undefined") {
             const customSourcesToSave = allSources.filter(s => s.type === 'custom');
             localStorage.setItem("customSourceInfos", JSON.stringify(customSourcesToSave));
-
             const builtInStatusToSave: Record<string, boolean> = {};
             allSources.filter(s => s.type === 'builtin').forEach(s => { builtInStatusToSave[s.id] = s.active; });
             localStorage.setItem("builtInSourceStatus", JSON.stringify(builtInStatusToSave));
-
             const serializableActiveInternal = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => {
                 acc[key] = Array.from(valueSet);
                 return acc;
@@ -284,106 +262,57 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files; if (!files) return; setIsLoading(true); setErrorMessage(null);
         let newCustomSources: SourceInfo[] = []; let errors: string[] = [];
-
         for (let i = 0; i < files.length; i++) {
             const file = files[i]; const content = await file.text();
             try {
                 let loadedCards: Carta[] = [];
                 const sourceName = file.name.replace(/\.(js|json)$/, "");
                 const sourceId = `custom_${Date.now()}_${i}`;
-
                 if (allSources.some(s => s.name === sourceName && s.type === 'custom')) {
                     errors.push(`Arquivo/Fonte "${sourceName}" já carregado.`); continue;
                 }
-
                 if (file.name.endsWith(".js")) { loadedCards = parseJSDeckFile(content); }
                 else if (file.name.endsWith(".json")) { const raw = JSON.parse(content) as any[]; loadedCards = raw.map((card, index) => ({ ...card, id: card.id || `${sourceId}_card_${index}` })) as Carta[]; }
                 else { errors.push(`Formato não suportado: ${file.name}. Use .js ou .json.`); continue; }
-
                 if (!Array.isArray(loadedCards) || loadedCards.length === 0) { errors.push(`Nenhuma carta válida encontrada em "${sourceName}".`); continue; }
-
                 const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(loadedCards);
-
-                newCustomSources.push({
-                    id: sourceId,
-                    name: sourceName,
-                    type: 'custom',
-                    cards: processedCards,
-                    internalBaralhos: internalBaralhos,
-                    active: true
-                });
-
+                newCustomSources.push({ id: sourceId, name: sourceName, type: 'custom', cards: processedCards, internalBaralhos: internalBaralhos, active: true });
             } catch (error: any) { errors.push(`Erro ao ler ${file.name}: ${error.message}`); }
         }
-
         if (newCustomSources.length > 0) {
             setAllSources(prev => [...prev, ...newCustomSources]);
             setActiveInternalBaralhos(prev => {
                 const newState = { ...prev };
-                newCustomSources.forEach(source => {
-                    newState[source.id] = new Set(source.internalBaralhos);
-                });
+                newCustomSources.forEach(source => { newState[source.id] = new Set(source.internalBaralhos); });
                 return newState;
             });
-             setExpandedSources(prev => {
-                const newSet = new Set(prev);
-                newCustomSources.forEach(s => newSet.add(s.id));
-                return newSet;
-             });
+             setExpandedSources(prev => { const newSet = new Set(prev); newCustomSources.forEach(s => newSet.add(s.id)); return newSet; });
         }
         if (errors.length > 0) { setErrorMessage(errors.join("\n")); }
         setIsLoading(false); e.target.value = '';
     };
 
-    const toggleSourceActive = (sourceId: string) => {
-        setAllSources(prev => prev.map(s => s.id === sourceId ? { ...s, active: !s.active } : s));
-    };
-
+    const toggleSourceActive = (sourceId: string) => { setAllSources(prev => prev.map(s => s.id === sourceId ? { ...s, active: !s.active } : s)); };
     const removeSource = (sourceId: string) => {
         const sourceToRemove = allSources.find(s => s.id === sourceId);
         if (!sourceToRemove || sourceToRemove.type !== 'custom') return;
-
         if (window.confirm(`Remover fonte "${sourceToRemove.name}"?`)) {
             setAllSources(prev => prev.filter(s => s.id !== sourceId));
-            setActiveInternalBaralhos(prev => {
-                const newState = { ...prev };
-                delete newState[sourceId];
-                return newState;
-            });
-             setExpandedSources(prev => {
-                const newSet = new Set(prev);
-                newSet.delete(sourceId);
-                return newSet;
-            });
+            setActiveInternalBaralhos(prev => { const newState = { ...prev }; delete newState[sourceId]; return newState; });
+             setExpandedSources(prev => { const newSet = new Set(prev); newSet.delete(sourceId); return newSet; });
         }
     }
-
     const toggleInternalBaralhoActive = (sourceId: string, baralhoName: string) => {
         setActiveInternalBaralhos(prev => {
             const currentSourceSet = prev[sourceId] ? new Set(prev[sourceId]) : new Set<string>();
-            if (currentSourceSet.has(baralhoName)) {
-                currentSourceSet.delete(baralhoName);
-            } else {
-                currentSourceSet.add(baralhoName);
-            }
+            if (currentSourceSet.has(baralhoName)) { currentSourceSet.delete(baralhoName); }
+            else { currentSourceSet.add(baralhoName); }
             return { ...prev, [sourceId]: currentSourceSet };
         });
     };
-
     const toggleExpandSource = (sourceId: string) => {
-        setExpandedSources(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(sourceId)) {
-                newSet.delete(sourceId);
-            } else {
-                newSet.add(sourceId);
-            }
-            return newSet;
-        });
+        setExpandedSources(prev => { const newSet = new Set(prev); if (newSet.has(sourceId)) { newSet.delete(sourceId); } else { newSet.add(sourceId); } return newSet; });
     };
-
-
-    // Funções de Jogador (sem mudanças)
     const addPlayerInput = () => { if (playerInputs.length < 8) { setPlayerInputs([...playerInputs, { id: playerInputs.length, name: "", color: predefinedColors[playerInputs.length % predefinedColors.length], showColorPicker: false, }]); } };
     const handlePlayerChange = (index: number, field: "name" | "color", value: string) => { const updatedPlayers = [...playerInputs]; const player = updatedPlayers[index]; if (field === 'name') player.name = value; if (field === 'color') player.color = value; setPlayerInputs(updatedPlayers); };
     const toggleColorPicker = (index: number) => { const updatedPlayers = playerInputs.map((p, i) => i === index ? { ...p, showColorPicker: !p.showColorPicker } : {...p, showColorPicker: false}); setPlayerInputs(updatedPlayers); };
@@ -391,45 +320,18 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 
     const handleStartGame = (continueGame = false) => {
         let gameStateToStart: Partial<GameState>;
-
-        // Recalcula categorias ativas baseado no estado *atual* da UI
         const finalCategorias = recalcularCategoriasAtivas(allSources, activeInternalBaralhos);
         const finalCategoriasSelecionadas = categoriasSelecionadas.filter(cat => finalCategorias.includes(cat));
 
-        // Validações
-         if (playerInputs.length === 0) {
-             alert("Adicione pelo menos um jogador.");
-             return;
-         }
+         // Validações
+         if (playerInputs.length === 0) { alert("Adicione pelo menos um jogador."); return; }
          const anySourceActive = allSources.some(s => s.active);
-         if (!anySourceActive) {
-             alert("Ative pelo menos uma Fonte de Cartas.");
-             return;
-         }
-         const anyInternalDeckActive = Object.entries(activeInternalBaralhos).some(([sourceId, activeSet]) =>
-             allSources.find(s => s.id === sourceId)?.active && activeSet.size > 0
-         );
-         if (!anyInternalDeckActive) {
-             alert("Ative pelo menos um baralho interno dentro das fontes ativas.");
-             return;
-         }
-         if (finalCategoriasSelecionadas.length === 0) {
-            alert("Nenhuma categoria selecionada ou nenhuma categoria disponível com os baralhos ativos. Selecione categorias ou ative mais baralhos.");
-            return;
-         }
-
-         // Validação de cartas disponíveis com os filtros atuais
-         const activeCardsForGame = allSources.flatMap(source => {
-             if (!source.active) return [];
-             const activeBaralhos = activeInternalBaralhos[source.id];
-             if (!activeBaralhos || activeBaralhos.size === 0) return [];
-             return source.cards.filter(card => activeBaralhos.has(card.baralho || DEFAULT_BARALHO_NAME));
-         });
-         if (activeCardsForGame.filter(c => c.categorias?.some(cat => finalCategoriasSelecionadas.includes(cat))).length === 0) {
-            alert("Nenhuma carta encontrada com a combinação de baralhos e categorias selecionadas.");
-            return;
-         }
-
+         if (!anySourceActive) { alert("Ative pelo menos uma Fonte de Cartas."); return; }
+         const anyInternalDeckActive = Object.entries(activeInternalBaralhos).some(([sourceId, activeSet]) => allSources.find(s => s.id === sourceId)?.active && activeSet.size > 0);
+         if (!anyInternalDeckActive) { alert("Ative pelo menos um baralho interno dentro das fontes ativas."); return; }
+         if (finalCategoriasSelecionadas.length === 0) { alert("Nenhuma categoria selecionada ou nenhuma categoria disponível com os baralhos ativos. Selecione categorias ou ative mais baralhos."); return; }
+         const activeCardsForGame = allSources.flatMap(source => { if (!source.active) return []; const activeBaralhos = activeInternalBaralhos[source.id]; if (!activeBaralhos || activeBaralhos.size === 0) return []; return source.cards.filter(card => activeBaralhos.has(card.baralho || DEFAULT_BARALHO_NAME)); });
+         if (activeCardsForGame.filter(c => c.categorias?.some(cat => finalCategoriasSelecionadas.includes(cat))).length === 0) { alert("Nenhuma carta encontrada com a combinação de baralhos e categorias selecionadas."); return; }
 
         if (continueGame && typeof window !== "undefined") {
             const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
@@ -437,37 +339,18 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                 const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
                 if (savedState && savedState.jogoIniciado) {
                     gameStateToStart = {
-                        ...savedState, // Mantém jogadores, progresso etc. do jogo salvo
-                        categoriasSelecionadas: finalCategoriasSelecionadas, // Atualiza com a seleção atual da UI
-                        ocultarCarta: ocultarCarta, // Atualiza com a seleção atual da UI
-                        probabilityIndex: probabilityIndex, // Atualiza com a seleção atual da UI
+                        ...savedState, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex,
                         activeSourceIds: allSources.filter(s => s.active).map(s => s.id),
-                        activeInternalBaralhosState: Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => {
-                            if (allSources.find(s => s.id === key)?.active) {
-                                acc[key] = Array.from(valueSet);
-                            }
-                            return acc;
-                        }, {} as Record<string, string[]>),
+                        activeInternalBaralhosState: Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => { if (allSources.find(s => s.id === key)?.active) { acc[key] = Array.from(valueSet); } return acc; }, {} as Record<string, string[]>),
                     };
                 } else { return handleStartGame(false); }
             } catch (e) { console.error("Erro ao carregar jogo salvo:", e); return handleStartGame(false); }
         } else {
-            // Novo Jogo
             const initializedPlayers: Player[] = playerInputs.map((input, index) => ({ id: index, name: input.name.trim() || `Jogador ${index + 1}`, color: input.color || predefinedColors[index % predefinedColors.length], fixedStars: 0, respostasCertas: 0, respostasErradas: 0, respostasSeguidas: 0, progresso: 0, pulosDisponiveis: 0, contadorDeEstrelas: 0, rodadasPreso: 0 }));
             gameStateToStart = {
-                players: initializedPlayers,
-                currentPlayerId: initializedPlayers[0]?.id ?? null,
-                categoriasSelecionadas: finalCategoriasSelecionadas,
-                ocultarCarta: ocultarCarta,
-                probabilityIndex: probabilityIndex,
-                jogoIniciado: true,
+                players: initializedPlayers, currentPlayerId: initializedPlayers[0]?.id ?? null, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex, jogoIniciado: true,
                 activeSourceIds: allSources.filter(s => s.active).map(s => s.id),
-                activeInternalBaralhosState: Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => {
-                     if (allSources.find(s => s.id === key)?.active) {
-                        acc[key] = Array.from(valueSet);
-                     }
-                    return acc;
-                }, {} as Record<string, string[]>),
+                activeInternalBaralhosState: Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => { if (allSources.find(s => s.id === key)?.active) { acc[key] = Array.from(valueSet); } return acc; }, {} as Record<string, string[]>),
             };
         }
         onStartGame(gameStateToStart);
@@ -483,7 +366,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                 <p className="text-sm text-center text-gray-600">O Jogo da Sustentabilidade</p>
             </CardHeader>
             <CardContent className="space-y-6">
-
                 {/* Gerenciamento de Fontes e Baralhos Internos */}
                 <div className="space-y-3">
                      <h3 className="text-lg font-semibold text-gray-800">Fontes de Cartas</h3>
@@ -491,48 +373,25 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                         {allSources.map((source) => (
                              <div key={source.id} className="border-b last:border-b-0 pb-2 mb-2">
                                 <div className="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
-                                    <Checkbox
-                                        id={`source-${source.id}`}
-                                        checked={source.active}
-                                        onCheckedChange={() => toggleSourceActive(source.id)}
-                                        className="mt-1"
-                                    />
-                                     <button
-                                        onClick={() => toggleExpandSource(source.id)}
-                                        className="flex items-center flex-1 text-left cursor-pointer min-w-0" // Adicionado min-w-0 para evitar overflow do label
-                                        aria-expanded={expandedSources.has(source.id)}
-                                    >
+                                    <Checkbox id={`source-${source.id}`} checked={source.active} onCheckedChange={() => toggleSourceActive(source.id)} className="mt-1"/>
+                                     <button onClick={() => toggleExpandSource(source.id)} className="flex items-center flex-1 text-left cursor-pointer min-w-0" aria-expanded={expandedSources.has(source.id)}>
                                         {expandedSources.has(source.id) ? <ChevronDown className="h-4 w-4 mr-1 shrink-0"/> : <ChevronRight className="h-4 w-4 mr-1 shrink-0"/>}
                                         <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={source.name}>
                                             {source.name} <span className="text-xs text-gray-500">({source.type === 'builtin' ? 'Incluído' : 'Custom'})</span>
                                         </label>
                                     </button>
                                      {source.type === 'custom' && (
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            className="h-7 w-7 p-0 text-red-500 hover:bg-red-100 shrink-0" // Adicionado shrink-0
-                                            onClick={(e) => {e.stopPropagation(); removeSource(source.id);}} // Evita que o click no botão expanda/colapse
-                                            aria-label={`Remover fonte ${source.name}`}
-                                        >
-                                            <Trash className="h-4 w-4" />
-                                        </Button>
+                                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:bg-red-100 shrink-0" onClick={(e) => {e.stopPropagation(); removeSource(source.id);}} aria-label={`Remover fonte ${source.name}`}><Trash className="h-4 w-4" /></Button>
                                     )}
                                 </div>
                                  {source.active && expandedSources.has(source.id) && (
                                      <div className="pl-8 mt-1 space-y-1">
                                          {source.internalBaralhos.length > 0 ? source.internalBaralhos.map(baralhoName => (
                                              <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
-                                                 <Checkbox
-                                                     id={`baralho-${source.id}-${baralhoName}`}
-                                                     checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false}
-                                                     onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)}
-                                                 />
+                                                 <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} />
                                                  <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer">{baralhoName}</label>
                                              </div>
-                                         )) : (
-                                             <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p>
-                                         )}
+                                         )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
                                      </div>
                                  )}
                             </div>
@@ -541,56 +400,29 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                      <div className="mt-2 space-y-1">
                         <label className="text-sm font-medium">Carregar Arquivos (.js/.json)</label>
                          {errorMessage && (<Alert variant="destructive" className="text-xs"><AlertDescription>{errorMessage}</AlertDescription></Alert>)}
-                        <Input
-                            type="file"
-                            multiple
-                            accept=".js,.json"
-                            onChange={handleCustomDeckUpload}
-                            disabled={isLoading}
-                            className="text-sm h-9"
-                        />
+                        <Input type="file" multiple accept=".js,.json" onChange={handleCustomDeckUpload} disabled={isLoading} className="text-sm h-9"/>
                         {isLoading && <p className="text-xs text-blue-600">Carregando...</p>}
                      </div>
                  </div>
-
                 {/* Seleção de Categorias */}
                 <div className="space-y-2">
                     <h3 className="text-lg font-semibold text-gray-800">Categorias (dos baralhos ativos)</h3>
-                    <Input
-                        type="text"
-                        placeholder="Pesquisar Categoria..."
-                        value={termoBuscaCategoria}
-                        onChange={(e) => setTermoBuscaCategoria(e.target.value)}
-                        className="w-full p-2 border rounded h-9"
-                    />
+                    <Input type="text" placeholder="Pesquisar Categoria..." value={termoBuscaCategoria} onChange={(e) => setTermoBuscaCategoria(e.target.value)} className="w-full p-2 border rounded h-9"/>
                     <ScrollArea className="h-40 border rounded-md p-3 bg-gray-50">
                         {categoriasFiltradas.length > 0 ? (
                             categoriasFiltradas.map((categoria) => (
                                 <div key={categoria} className="flex items-center space-x-2 mb-1 hover:bg-gray-100 p-1 rounded">
-                                    <Checkbox
-                                        id={`cat-${categoria}`}
-                                        checked={categoriasSelecionadas.includes(categoria)}
-                                        onCheckedChange={() => {
-                                            setCategoriasSelecionadas((prev) =>
-                                                prev.includes(categoria)
-                                                    ? prev.filter((c) => c !== categoria)
-                                                    : [...prev, categoria]
-                                            );
-                                        }}
-                                    />
+                                    <Checkbox id={`cat-${categoria}`} checked={categoriasSelecionadas.includes(categoria)} onCheckedChange={() => { setCategoriasSelecionadas((prev) => prev.includes(categoria) ? prev.filter((c) => c !== categoria) : [...prev, categoria]); }} />
                                     <label htmlFor={`cat-${categoria}`} className="text-sm cursor-pointer flex-1">{categoria}</label>
                                 </div>
                             ))
-                        ) : (
-                            <p className="text-sm text-gray-500 italic">Nenhuma categoria disponível para os baralhos selecionados.</p>
-                        )}
+                        ) : ( <p className="text-sm text-gray-500 italic">Nenhuma categoria disponível para os baralhos selecionados.</p> )}
                     </ScrollArea>
                     <div className="flex space-x-2 mt-2">
                         <Button onClick={() => setCategoriasSelecionadas(todasCategorias)} variant="outline" size="sm" className="flex-1" disabled={todasCategorias.length === 0}>Todas</Button>
                         <Button onClick={() => setCategoriasSelecionadas([])} variant="outline" size="sm" className="flex-1">Nenhuma</Button>
                     </div>
                 </div>
-
                 {/* Configuração de Jogadores */}
                 <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Jogadores</h3>
@@ -598,43 +430,13 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                         {playerInputs.map((player, index) => (
                             <div key={player.id} className="border p-3 rounded-md shadow-sm bg-white relative">
                                 <div className="flex items-center space-x-2">
-                                    <Input
-                                        type="text"
-                                        placeholder={`Jogador ${index + 1}`}
-                                        value={player.name}
-                                        maxLength={12}
-                                        onChange={(e) => handlePlayerChange(index, "name", e.target.value)}
-                                        className="flex-grow"
-                                    />
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="w-8 h-8 flex-shrink-0"
-                                        onClick={() => toggleColorPicker(index)}
-                                        style={{ backgroundColor: player.color }}
-                                        aria-label="Selecionar cor"
-                                    />
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="w-8 h-8 flex-shrink-0 text-red-500 hover:bg-red-100"
-                                        onClick={() => deletePlayer(index)}
-                                        aria-label="Remover jogador"
-                                    >
-                                        <Trash className="h-4 w-4" />
-                                    </Button>
+                                    <Input type="text" placeholder={`Jogador ${index + 1}`} value={player.name} maxLength={12} onChange={(e) => handlePlayerChange(index, "name", e.target.value)} className="flex-grow"/>
+                                    <Button variant="outline" size="icon" className="w-8 h-8 flex-shrink-0" onClick={() => toggleColorPicker(index)} style={{ backgroundColor: player.color }} aria-label="Selecionar cor"/>
+                                    <Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0 text-red-500 hover:bg-red-100" onClick={() => deletePlayer(index)} aria-label="Remover jogador"><Trash className="h-4 w-4" /></Button>
                                 </div>
                                 {player.showColorPicker && (
                                     <div className="absolute z-20 mt-2 right-12 w-48 bg-white border rounded-md shadow-lg p-2 grid grid-cols-6 gap-1">
-                                        {predefinedColors.map((color, idx) => (
-                                            <button
-                                                key={idx}
-                                                aria-label={`Selecionar cor ${color}`}
-                                                style={{ backgroundColor: color }}
-                                                className={cn('w-6 h-6 rounded border', player.color === color ? 'ring-2 ring-offset-1 ring-black' : 'border-gray-300')}
-                                                onClick={() => {handlePlayerChange(index, "color", color); toggleColorPicker(index);}}
-                                            />
-                                        ))}
+                                        {predefinedColors.map((color, idx) => ( <button key={idx} aria-label={`Selecionar cor ${color}`} style={{ backgroundColor: color }} className={cn('w-6 h-6 rounded border', player.color === color ? 'ring-2 ring-offset-1 ring-black' : 'border-gray-300')} onClick={() => {handlePlayerChange(index, "color", color); toggleColorPicker(index);}} /> ))}
                                     </div>
                                 )}
                             </div>
@@ -642,7 +444,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                     </div>
                     {playerInputs.length < 8 && (<Button onClick={addPlayerInput} variant="secondary" className="w-full">+ Adicionar Jogador</Button>)}
                 </div>
-
                  {/* Opções de Jogo */}
                  <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Opções</h3>
@@ -650,14 +451,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                          {ocultarCarta ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                          <span>{ocultarCarta ? "Ocultar Carta Ativado" : "Ocultar Carta Desativado"}</span>
                      </Button>
-                     <Button
-                         onClick={cycleProbability}
-                         className="w-full flex items-center justify-center space-x-2"
-                         style={{
-                             backgroundColor: probabilitySettings[probabilityIndex].color,
-                             color: probabilitySettings[probabilityIndex].textColor
-                         }}
-                     >
+                     <Button onClick={cycleProbability} className="w-full flex items-center justify-center space-x-2" style={{ backgroundColor: probabilitySettings[probabilityIndex].color, color: probabilitySettings[probabilityIndex].textColor }}>
                          <span>% Excluir Especiais:</span>
                          <span className="font-bold">{probabilitySettings[probabilityIndex].label}</span>
                      </Button>
@@ -673,6 +467,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 
 // --- Componente Principal EcoChallenge ---
 const EcoChallenge: React.FC = () => {
+    // ===== INICIO DOS ESTADOS DO ECO CHALLENGE =====
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [cartaAtual, setCartaAtual] = useState<Carta | null>(null);
     const [respondido, setRespondido] = useState(false);
@@ -695,40 +490,23 @@ const EcoChallenge: React.FC = () => {
     const [rollingNumber, setRollingNumber] = useState<number | null>(null);
     const [isDieModalOpen, setIsDieModalOpen] = useState(false);
     const [isRolling, setIsRolling] = useState(false);
+    // ===== FIM DOS ESTADOS DO ECO CHALLENGE =====
 
-    // Memoize allSources para evitar recálculos desnecessários em selecionarCartaAleatoria
     const allSourcesMemo = useMemo(() => {
-        // Recria a estrutura de fontes a partir dos dados brutos e do localStorage
          const customSourcesRaw = typeof window !== "undefined" ? localStorage.getItem("customSourceInfos") : null;
          const builtInStatusRaw = typeof window !== "undefined" ? localStorage.getItem("builtInSourceStatus") : null;
          let customSources: SourceInfo[] = [];
          let builtInStatus: Record<string, boolean> | null = null;
-
          try { customSources = customSourcesRaw ? JSON.parse(customSourcesRaw) : []; } catch { customSources = []; }
          try { builtInStatus = builtInStatusRaw ? JSON.parse(builtInStatusRaw) : null; } catch { builtInStatus = null; }
-
-          // Re-processa custom sources para garantir que 'baralho' exista
          const processedCustomSources = customSources.map(source => {
-             // Evita re-processar se já tem internalBaralhos (pode ter vindo de save antigo)
-             if (source.internalBaralhos) {
-                 const { processedCards } = processCardsAndExtractBaralhos(source.cards); // Processa cartas mesmo assim
-                 return { ...source, cards: processedCards};
-             }
+             if (source.internalBaralhos) { const { processedCards } = processCardsAndExtractBaralhos(source.cards); return { ...source, cards: processedCards}; }
              const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards);
              return { ...source, cards: processedCards, internalBaralhos };
          });
-
-         const combined = [
-             ...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus?.[bs.id] ?? true })),
-             ...processedCustomSources
-         ];
-         // Garante que cartas built-in também sejam processadas (caso a estrutura mude)
-          return combined.map(source => {
-             const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards);
-             return {...source, cards: processedCards, internalBaralhos }; // Retorna com internalBaralhos corretos
-         });
-
-     }, []); // Dependência vazia significa que só roda uma vez no mount
+         const combined = [ ...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus?.[bs.id] ?? true })), ...processedCustomSources ];
+          return combined.map(source => { const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards); return {...source, cards: processedCards, internalBaralhos }; });
+     }, []);
 
 
     const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -740,18 +518,15 @@ const EcoChallenge: React.FC = () => {
             const updatedState = { ...prev, ...newState };
             if (typeof window !== "undefined") {
                 try {
-                    // Salva o estado do jogo SEM as fontes/baralhos internos (eles são salvos na TelaInicial)
                     const { activeSourceIds, activeInternalBaralhosState, ...stateToSave } = updatedState;
                     localStorage.setItem("estadoEcoChallenge", JSON.stringify(stateToSave));
-                    // Salva separadamente os IDs ativos e baralhos internos (como array)
                     localStorage.setItem("activeSourceIds", JSON.stringify(activeSourceIds));
                     localStorage.setItem("activeInternalBaralhosState", JSON.stringify(activeInternalBaralhosState));
-
                 } catch (e) { console.error("Erro ao salvar estado:", e); }
             }
             return updatedState;
         });
-    }, []); // Removida dependência
+    }, []);
 
     const updateCurrentPlayer = useCallback((partialPlayerData: Partial<Player>) => {
         if (!gameState || gameState.currentPlayerId === null) return;
@@ -761,203 +536,107 @@ const EcoChallenge: React.FC = () => {
         updateGameState({ players: updatedPlayers });
     }, [gameState, updateGameState]);
 
-    // Carregar estado inicial do JOGO
     useEffect(() => {
         if (typeof window !== "undefined") {
             const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
             const savedActiveSources = localStorage.getItem("activeSourceIds");
             const savedActiveInternal = localStorage.getItem("activeInternalBaralhosState");
-
             try {
-                const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
+                const savedState = savedStateRaw ? JSON.parse(savedStateRaw) : null;
                 if (savedState && savedState.jogoIniciado) {
                      const activeSourceIds = savedActiveSources ? JSON.parse(savedActiveSources) : [];
                      const activeInternalBaralhosState = savedActiveInternal ? JSON.parse(savedActiveInternal) : {};
-
-                     setGameState({
-                         ...savedState,
-                         activeSourceIds,
-                         activeInternalBaralhosState
-                    });
+                     setGameState({ ...savedState, activeSourceIds, activeInternalBaralhosState });
                     return;
                 }
             } catch (e) { console.error("Erro ao carregar estado:", e); localStorage.removeItem("estadoEcoChallenge"); localStorage.removeItem("activeSourceIds"); localStorage.removeItem("activeInternalBaralhosState");}
         }
-         // Se não houver estado salvo ou der erro, não faz nada (espera TelaInicial chamar onStartGame)
-    }, []); // Roda apenas uma vez ao montar
+    }, []);
 
 
-    // Selecionar Carta Aleatória (Lógica Atualizada)
     const selecionarCartaAleatoria = useCallback(() => {
         if (!gameState || !allSourcesMemo) return;
         const { categoriasSelecionadas, probabilityIndex, activeSourceIds, activeInternalBaralhosState } = gameState;
         const probabilidadeExcluirEspecial = probabilitySettings[probabilityIndex].value;
         const incluirCartasEspeciais = probabilidadeExcluirEspecial === 0 || Math.random() >= probabilidadeExcluirEspecial;
-
-        // 1. Filtra fontes ativas
         const activeSources = allSourcesMemo.filter(s => activeSourceIds.includes(s.id));
-
-        // 2. Filtra cartas baseado em baralhos internos ativos E categorias selecionadas
         const cartasFiltradas = activeSources.flatMap(source => {
             const activeBaralhosForSource = activeInternalBaralhosState[source.id];
-            if (!activeBaralhosForSource || activeBaralhosForSource.length === 0) return []; // Pula fonte sem baralhos ativos
-
+            if (!activeBaralhosForSource || activeBaralhosForSource.length === 0) return [];
             return source.cards.filter(card => {
-                // Checa baralho interno
                 const baralhoAtivo = activeBaralhosForSource.includes(card.baralho || DEFAULT_BARALHO_NAME);
                 if (!baralhoAtivo) return false;
-
-                // Checa categoria
                 const categoriaValida = card.categorias?.some(cat => categoriasSelecionadas.includes(cat));
                 if (!categoriaValida) return false;
-
-                // Checa exclusão de especiais
                 const isTipoEspecial = tiposEspeciais.includes(card.tipo);
                 if (!incluirCartasEspeciais && isTipoEspecial) return false;
-
-                return true; // Passou por todos os filtros
+                return true;
             });
         });
 
-
-        if (cartasFiltradas.length === 0) {
-            setNoCardsAvailable(true); setCartaAtual(null); setMensagem("Nenhuma carta encontrada com os filtros atuais!"); return;
-        }
-
+        if (cartasFiltradas.length === 0) { setNoCardsAvailable(true); setCartaAtual(null); setMensagem("Nenhuma carta encontrada com os filtros atuais!"); return; }
         setNoCardsAvailable(false);
         const idxAleat = Math.floor(Math.random() * cartasFiltradas.length);
         const novaCarta = cartasFiltradas[idxAleat];
         setCartaAtual(novaCarta);
-
-        // Resetar estados da rodada
         setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setMostrarFontes(false);
         setOpcoesEliminadas([]); setCartaRevelada(!gameState.ocultarCarta); setRolledNumber(null); setIsDieModalOpen(false);
         setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null);
         setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]);
-
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
         if (novaCarta.tipo === "ContraTempo") { setTempoRestante(novaCarta.tempoLimite); }
-
     }, [gameState, allSourcesMemo]);
 
-     // Seleciona a primeira carta quando o jogo inicia
-    useEffect(() => {
-        if (gameState?.jogoIniciado && !cartaAtual && !noCardsAvailable) {
-            selecionarCartaAleatoria();
-        }
-    }, [gameState?.jogoIniciado, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]);
+    useEffect(() => { if (gameState?.jogoIniciado && !cartaAtual && !noCardsAvailable) { selecionarCartaAleatoria(); } }, [gameState?.jogoIniciado, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]);
 
-    // Timer para ContraTempo
     useEffect(() => {
         if (cartaAtual?.tipo === "ContraTempo" && tempoRestante !== null && tempoRestante > 0 && !respondido && gameState?.jogoIniciado && cartaRevelada) {
             timerIntervalRef.current = setInterval(() => {
                 setTempoRestante((prev) => {
                     if (prev === null || prev <= 1) {
-                        clearInterval(timerIntervalRef.current!);
-                        setRespondido(true); setMensagem(`Tempo esgotado! ${cartaAtual.desvantagem || 'Tente novamente.'}`);
-                        // Atualiza estado do jogador diretamente aqui se necessário
+                        clearInterval(timerIntervalRef.current!); setRespondido(true); setMensagem(`Tempo esgotado! ${cartaAtual.desvantagem || 'Tente novamente.'}`);
                          if (gameState && gameState.currentPlayerId !== null) {
                              const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
-                             if (currentPlayer) {
-                                 updateCurrentPlayer({
-                                     respostasErradas: currentPlayer.respostasErradas + 1,
-                                     respostasSeguidas: 0,
-                                     progresso: Math.max(currentPlayer.progresso - 10, 0)
-                                 });
-                             }
-                         }
-                        return 0;
+                             if (currentPlayer) { updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - 10, 0) }); }
+                         } return 0;
                     } return prev - 1;
                 });
             }, 1000);
-        } else if (timerIntervalRef.current && (respondido || tempoRestante === 0 || !cartaRevelada)) {
-            clearInterval(timerIntervalRef.current);
-        }
+        } else if (timerIntervalRef.current && (respondido || tempoRestante === 0 || !cartaRevelada)) { clearInterval(timerIntervalRef.current); }
         return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
     }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId, updateCurrentPlayer]);
 
 
-    // Handlers de Seleção (sem mudanças)
     const handleSelecao = (id: number) => { if (!respondido) setSelecionado(id); };
     const handleSelecaoMultipla = (id: number) => { if (!respondido) { setSelecoesMultiplas((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
     const handleSelecaoOrdem = (id: number) => { if (!respondido) { setOrdemSelecoes((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
     const handleSelecionarColunaA = (id: number) => { if (respondido) return; const parExistenteIndex = paresFormados.findIndex(p => p.aId === id); if (parExistenteIndex > -1) { setParesFormados(prev => prev.filter((_, index) => index !== parExistenteIndex)); setSelecaoColunaA(null); } else { setSelecaoColunaA(id === selecaoColunaA ? null : id); } };
-    const handleSelecionarColunaB = (id: number) => { if (respondido || selecaoColunaA === null) return; if (paresFormados.some(p => p.bId === id)) return; setParesFormados(prev => [...prev, { aId: selecaoColunaA, bB: id }]); setSelecaoColunaA(null); }; // CORREÇÃO: bB para bId
+    const handleSelecionarColunaB = (id: number) => { if (respondido || selecaoColunaA === null) return; if (paresFormados.some(p => p.bId === id)) return; setParesFormados(prev => [...prev, { aId: selecaoColunaA, bId: id }]); setSelecaoColunaA(null); }; // Corrigido bB para bId
     const handleImagemClick = (event: React.MouseEvent<HTMLDivElement>) => { if (respondido || !cartaAtual || cartaAtual.tipo !== 'PontoCerto') return; const target = event.currentTarget; const rect = target.getBoundingClientRect(); const x = (event.clientX - rect.left) / rect.width; const y = (event.clientY - rect.top) / rect.height; const clampedX = Math.max(0, Math.min(1, x)); const clampedY = Math.max(0, Math.min(1, y)); setCoordenadasClique({ x: clampedX, y: clampedY }); };
     const handleSelecionarFragmento = (id: number) => { if (respondido) return; setFragmentosSelecionados(prev => [...prev, id]); };
     const limparFragmentos = () => { if (!respondido) { setFragmentosSelecionados([]); } };
 
-    // Verificação da Resposta (com correção para Ordem)
     const verificarResposta = () => {
         if (!cartaAtual || !gameState || !gameState.players || gameState.currentPlayerId === null || respondido) return;
         const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
         if (!currentPlayer) return;
 
-        let cor = false;
-        let pontosGanhos = 20;
-        let pontosPerdidos = 10;
-        let darPuloDificil = cartaAtual.dificuldade === "dificil";
-        let mensagemFinal = "";
-        let aplicarEfeitoPadrao = false;
-
+        let cor = false; let pontosGanhos = 20; let pontosPerdidos = 10; let darPuloDificil = cartaAtual.dificuldade === "dificil"; let mensagemFinal = ""; let aplicarEfeitoPadrao = false;
         if (cartaAtual.tipo === "ContraTempo" && timerIntervalRef.current) { clearInterval(timerIntervalRef.current); }
 
         switch (cartaAtual.tipo) {
-            case "Pergunta": case "ContraTempo":
-                if (cartaAtual.tipo === "ContraTempo" && (tempoRestante === null || tempoRestante <= 0)) { cor = false; }
-                else { cor = selecionado === cartaAtual.respostaCorreta; }
-                aplicarEfeitoPadrao = true;
-                break;
-            case "MultiplaEscolha":
-                cor = Array.isArray(cartaAtual.respostaCorreta) && selecoesMultiplas.length === cartaAtual.respostaCorreta.length && selecoesMultiplas.sort().toString() === cartaAtual.respostaCorreta.sort().toString();
-                if (cor) pontosGanhos = 25;
-                aplicarEfeitoPadrao = true;
-                break;
-            case "Ordem":
-                cor = Array.isArray(cartaAtual.respostaCorreta) && ordemSelecoes.length === cartaAtual.respostaCorreta.length && ordemSelecoes.toString() === cartaAtual.respostaCorreta.toString();
-                if (cor) pontosGanhos = 30; darPuloDificil = true;
-                aplicarEfeitoPadrao = true;
-                break;
-            case "RelacionarColunas":
-                 if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } // Add type guard
-                 cor = paresFormados.length === cartaAtual.respostaCorreta.length && paresFormados.map(p => `${p.aId}-${p.bId}`).sort().join(',') === cartaAtual.respostaCorreta.map(p => `${p.aId}-${p.bId}`).sort().join(',');
-                 if (cor) pontosGanhos = 30; darPuloDificil = true;
-                 aplicarEfeitoPadrao = true;
-                break;
-            case "PontoCerto":
-                 if (!coordenadasClique || !Array.isArray(cartaAtual.zonasClicaveis)) { cor = false; break; } // Add type guard
-                 const zonaCorreta = cartaAtual.zonasClicaveis.find(z => z.id === cartaAtual.respostaCorreta);
-                 cor = zonaCorreta ? isClickInZone(coordenadasClique, zonaCorreta) : false;
-                 if (cor) pontosGanhos = 25; darPuloDificil = true;
-                 aplicarEfeitoPadrao = true;
-                break;
-            case "CompletarFrase":
-                 if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } // Add type guard
-                 cor = fragmentosSelecionados.length === cartaAtual.respostaCorreta.length && fragmentosSelecionados.toString() === cartaAtual.respostaCorreta.toString();
-                 if (cor) pontosGanhos = 25; darPuloDificil = true;
-                 aplicarEfeitoPadrao = true;
-                break;
-            case "Vantagem":
-                 if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } // Add type guard
-                 cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado);
-                 mensagemFinal = cor ? (cartaAtual.vantagem || "Vantagem aplicada!") : "Ação não confirmada.";
-                break;
-            case "Desvantagem":
-                 cor = false;
-                 mensagemFinal = cartaAtual.desvantagem || "Desvantagem aplicada.";
-                break;
-            case "Outras":
-                 if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } // Add type guard
-                 cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado);
-                 mensagemFinal = cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...');
-                break;
-            default:
-                const _exhaustiveCheck: never = cartaAtual;
-                console.error("Tipo não tratado:", _exhaustiveCheck); return;
+            case "Pergunta": case "ContraTempo": if (cartaAtual.tipo === "ContraTempo" && (tempoRestante === null || tempoRestante <= 0)) { cor = false; } else { cor = selecionado === cartaAtual.respostaCorreta; } aplicarEfeitoPadrao = true; break;
+            case "MultiplaEscolha": cor = Array.isArray(cartaAtual.respostaCorreta) && selecoesMultiplas.length === cartaAtual.respostaCorreta.length && selecoesMultiplas.sort().toString() === cartaAtual.respostaCorreta.sort().toString(); if (cor) pontosGanhos = 25; aplicarEfeitoPadrao = true; break;
+            case "Ordem": cor = Array.isArray(cartaAtual.respostaCorreta) && ordemSelecoes.length === cartaAtual.respostaCorreta.length && ordemSelecoes.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 30; darPuloDificil = true; aplicarEfeitoPadrao = true; break;
+            case "RelacionarColunas": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = paresFormados.length === cartaAtual.respostaCorreta.length && paresFormados.map(p => `${p.aId}-${p.bId}`).sort().join(',') === cartaAtual.respostaCorreta.map(p => `${p.aId}-${p.bId}`).sort().join(','); if (cor) pontosGanhos = 30; darPuloDificil = true; aplicarEfeitoPadrao = true; break;
+            case "PontoCerto": if (!coordenadasClique || !Array.isArray(cartaAtual.zonasClicaveis)) { cor = false; break; } const zonaCorreta = cartaAtual.zonasClicaveis.find(z => z.id === cartaAtual.respostaCorreta); cor = zonaCorreta ? isClickInZone(coordenadasClique, zonaCorreta) : false; if (cor) pontosGanhos = 25; darPuloDificil = true; aplicarEfeitoPadrao = true; break;
+            case "CompletarFrase": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = fragmentosSelecionados.length === cartaAtual.respostaCorreta.length && fragmentosSelecionados.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 25; darPuloDificil = true; aplicarEfeitoPadrao = true; break;
+            case "Vantagem": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado); mensagemFinal = cor ? (cartaAtual.vantagem || "Vantagem aplicada!") : "Ação não confirmada."; break;
+            case "Desvantagem": cor = false; mensagemFinal = cartaAtual.desvantagem || "Desvantagem aplicada."; break;
+            case "Outras": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado); mensagemFinal = cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...'); break;
+            default: const _exhaustiveCheck: never = cartaAtual; console.error("Tipo não tratado:", _exhaustiveCheck); return;
         }
-
         setRespondido(true);
-
         if (aplicarEfeitoPadrao) {
             if (cor) {
                 const novoProgresso = currentPlayer.progresso + pontosGanhos; const completouBarra = novoProgresso >= 100;
@@ -968,8 +647,7 @@ const EcoChallenge: React.FC = () => {
                 updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - pontosPerdidos, 0), });
                  mensagemFinal = `Incorreto. ${cartaAtual.desvantagem || ''}`;
             }
-        }
-        setMensagem(mensagemFinal);
+        } setMensagem(mensagemFinal);
     };
 
     const resetarContadoresJogador = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !window.confirm(`Resetar ${cp.name}?`)) return; updateCurrentPlayer({ respostasCertas: 0, respostasErradas: 0, progresso: 0, pulosDisponiveis: 0, respostasSeguidas: 0, rodadasPreso: 0, contadorDeEstrelas: 0, fixedStars: 0 }); setMensagem(`${cp.name} resetado.`); };
@@ -985,7 +663,7 @@ const EcoChallenge: React.FC = () => {
         if (cartaAtual.tipo === "Pergunta" || cartaAtual.tipo === "ContraTempo") { respostaCorretaNumeros = [cartaAtual.respostaCorreta]; }
         else if (cartaAtual.tipo === "MultiplaEscolha" || cartaAtual.tipo === "Outras") { if (Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.every(item => typeof item === 'number')) { respostaCorretaNumeros = cartaAtual.respostaCorreta as number[]; } else { console.error("Formato inesperado:", cartaAtual); setMensagem("Erro interno."); return; } }
         else { console.error("Tipo inesperado:", cartaAtual.tipo); return; }
-        const opcoesErradasDisponiveis = ('opcoes' in cartaAtual) ? cartaAtual.opcoes.filter(op => !respostaCorretaNumeros.includes(op.id) && !opcoesEliminadas.includes(op.id)) : []; // Type guard
+        const opcoesErradasDisponiveis = ('opcoes' in cartaAtual) ? cartaAtual.opcoes.filter(op => !respostaCorretaNumeros.includes(op.id) && !opcoesEliminadas.includes(op.id)) : [];
         if (opcoesErradasDisponiveis.length > 0) { const idxAleat = Math.floor(Math.random() * opcoesErradasDisponiveis.length); const opcaoEliminada = opcoesErradasDisponiveis[idxAleat].id; setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Uma opção incorreta foi eliminada! (-2 sequências)"); }
         else { setMensagem("Não há mais opções incorretas para eliminar."); }
     };
@@ -1003,7 +681,6 @@ const EcoChallenge: React.FC = () => {
 
     // --- Renderização do Jogo ---
     if (!gameState) {
-        // Tenta carregar estado salvo para decidir se mostra "Continuar"
         const savedStateRaw = typeof window !== "undefined" ? localStorage.getItem("estadoEcoChallenge") : null;
         let hasSaved = false;
         let initialPlayersData: Player[] = [];
@@ -1018,18 +695,14 @@ const EcoChallenge: React.FC = () => {
                  initialProb = savedState.probabilityIndex ?? 0;
              }
         } catch {}
-         // ===== CORREÇÃO DO ERRO DE PROPS AQUI =====
+        // ===== CORREÇÃO DO ERRO DE PROPS AQUI =====
          return (<TelaInicial
                     onStartGame={(initialState) => { if (initialState) { setGameState(initialState as GameState); } }}
                     initialPlayers={initialPlayersData}
                     initialOcultarCarta={initialOcultar}
                     initialProbabilityIndex={initialProb}
                     hasSavedGame={hasSaved}
-                    // As props categoriasDisponiveis e initialCategoriasSelecionadas
-                    // foram removidas da interface TelaInicialProps na última refatoração.
-                    // Portanto, não devemos passá-las aqui.
-                    // categoriasDisponiveis={[]} // <-- REMOVIDO
-                    // initialCategoriasSelecionadas={[]} // <-- REMOVIDO
+                    // Props removidas pois TelaInicial agora calcula internamente
                  />);
         // ===== FIM DA CORREÇÃO =====
     }
@@ -1066,16 +739,15 @@ const EcoChallenge: React.FC = () => {
             >
                 <CardHeader className="pb-3">
                     <div className="flex justify-between items-start mb-2 gap-2">
-                        <div className="flex items-center space-x-2">
-                             {/* Botão de filtro removido daqui, pois agora está na TelaInicial */}
-                            <div className="flex-1">
-                                <CardTitle className="text-lg md:text-xl font-bold leading-tight">
+                        <div className="flex items-center space-x-2 flex-1 min-w-0"> {/* Adicionado flex-1 min-w-0 */}
+                             {/* Botão de filtro removido daqui */}
+                            <div className="flex-1 min-w-0"> {/* Adicionado flex-1 min-w-0 */}
+                                <CardTitle className="text-lg md:text-xl font-bold leading-tight truncate" title={cartaAtual.titulo}> {/* Adicionado truncate e title */}
                                     {ocultarCarta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo}
                                 </CardTitle>
-                                {(!ocultarCarta || cartaRevelada) && cartaAtual.categorias && (
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        {cartaAtual.categorias.join(", ")}
-                                        {/* Opcional: Mostrar baralho interno */}
+                                {(!ocultarCarta || cartaRevelada) && (
+                                    <p className="text-xs text-gray-500 mt-1 truncate" title={cartaAtual.categorias.join(", ") + (cartaAtual.baralho && cartaAtual.baralho !== DEFAULT_BARALHO_NAME ? ` (${cartaAtual.baralho})` : '')}> {/* Adicionado truncate e title */}
+                                        {cartaAtual.categorias?.join(", ")}
                                         {cartaAtual.baralho && cartaAtual.baralho !== DEFAULT_BARALHO_NAME && ` (${cartaAtual.baralho})`}
                                     </p>
                                 )}
@@ -1084,7 +756,7 @@ const EcoChallenge: React.FC = () => {
                         {(!ocultarCarta || cartaRevelada) && (
                             <Badge
                                 variant={ cartaAtual.dificuldade === "facil" ? "secondary" : cartaAtual.dificuldade === "normal" ? "default" : "destructive" }
-                                className="capitalize flex-shrink-0 h-6"
+                                className="capitalize flex-shrink-0 h-6 ml-2" // Adicionado ml-2 para garantir espaço
                             >
                                 {cartaAtual.dificuldade}
                             </Badge>
@@ -1110,18 +782,7 @@ const EcoChallenge: React.FC = () => {
                             <EyeOff className="h-8 w-8 text-gray-500" />
                             <p className="text-sm text-gray-600">Carta Oculta</p>
                             {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>}
-                            <Button
-                                onClick={rolarDado}
-                                variant="outline"
-                                size="sm"
-                                className="mt-2 bg-white"
-                                onMouseDown={() => handleLongPressStart(rolarDado)}
-                                onMouseUp={handleLongPressEnd}
-                                onMouseLeave={handleLongPressEnd}
-                                onTouchStart={() => handleLongPressStart(rolarDado)}
-                                onTouchEnd={handleLongPressEnd}
-                                onTouchCancel={handleLongPressEnd}
-                            >
+                            <Button onClick={rolarDado} variant="outline" size="sm" className="mt-2 bg-white" onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}>
                                 <Dice6 className="h-4 w-4 mr-1" /> Rolar Dado
                             </Button>
                         </div>
@@ -1133,96 +794,39 @@ const EcoChallenge: React.FC = () => {
                         <div className="space-y-2">
                             {renderizarConteudoResposta()}
                         </div>
-                        {mostrarDica && cartaAtual.dica && (
-                            <Alert variant="default" className="mt-4 bg-blue-50 border-blue-300 text-blue-800">
-                                <HelpCircle className="h-4 w-4 text-blue-700" />
-                                <AlertDescription className="text-sm">
-                                    <strong>Dica:</strong> {cartaAtual.dica}
-                                </AlertDescription>
-                            </Alert>
-                        )}
-                        {mostrarFontes && cartaAtual.fontes && cartaAtual.fontes.length > 0 && (
-                             <Alert variant="default" className="mt-4 bg-gray-50 border-gray-300">
-                                <BookOpen className="h-4 w-4 text-gray-700" />
-                                <AlertDescription className="text-sm text-gray-800">
-                                    <strong>Fontes:</strong>
-                                    <ul className="list-disc list-inside mt-1 text-xs">
-                                        {cartaAtual.fontes.map((fonte, idx) => (<li key={idx}>{fonte}</li>))}
-                                    </ul>
-                                </AlertDescription>
-                            </Alert>
-                        )}
+                        {mostrarDica && cartaAtual.dica && ( <Alert variant="default" className="mt-4 bg-blue-50 border-blue-300 text-blue-800"> <HelpCircle className="h-4 w-4 text-blue-700" /> <AlertDescription className="text-sm"> <strong>Dica:</strong> {cartaAtual.dica} </AlertDescription> </Alert> )}
+                        {mostrarFontes && cartaAtual.fontes && cartaAtual.fontes.length > 0 && ( <Alert variant="default" className="mt-4 bg-gray-50 border-gray-300"> <BookOpen className="h-4 w-4 text-gray-700" /> <AlertDescription className="text-sm text-gray-800"> <strong>Fontes:</strong> <ul className="list-disc list-inside mt-1 text-xs"> {cartaAtual.fontes.map((fonte, idx) => (<li key={idx}>{fonte}</li>))} </ul> </AlertDescription> </Alert> )}
                     </CardContent>
                 )}
 
                 <CardFooter className="flex flex-col items-center pt-4 border-t bg-gray-50/50 rounded-b-lg">
-                    {/* Botões de Ação Primários */}
                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
-                        <Button onClick={toggleFontes} variant="outline" disabled={!cartaAtual.fontes || cartaAtual.fontes.length === 0 || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <BookOpen className="h-5 w-5" /></Button>
-                        <Button onClick={pularPergunta} variant={currentPlayer.pulosDisponiveis > 0 ? "secondary" : "outline"} disabled={currentPlayer.pulosDisponiveis === 0 || !tiposPergunta.includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <SkipForward className="h-5 w-5" /> </Button>
-                        <Button onClick={toggleDica} variant={currentPlayer.respostasSeguidas >= 2 && !dicaUsada && !!cartaAtual.dica ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || dicaUsada || !cartaAtual.dica || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <HelpCircle className="h-5 w-5" /> </Button>
-                        <Button onClick={eliminarRespostaErrada} variant={currentPlayer.respostasSeguidas >= 2 ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || !("opcoes" in cartaAtual) || cartaAtual.opcoes.length <= 2 || !["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"].includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <MinusCircle className="h-5 w-5" /> </Button>
-                        <Button onClick={resetarContadoresJogador} variant="outline" className="h-9 px-2.5"> <RotateCcw className="h-5 w-5" /> </Button>
-                        <Button onClick={voltarTelaInicial} variant="outline" className="h-9 px-2.5"> <Home className="h-5 w-5" /> </Button>
+                         <Button onClick={toggleFontes} variant="outline" disabled={!cartaAtual.fontes || cartaAtual.fontes.length === 0 || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <BookOpen className="h-5 w-5" /></Button>
+                         <Button onClick={pularPergunta} variant={currentPlayer.pulosDisponiveis > 0 ? "secondary" : "outline"} disabled={currentPlayer.pulosDisponiveis === 0 || !tiposPergunta.includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <SkipForward className="h-5 w-5" /> </Button>
+                         <Button onClick={toggleDica} variant={currentPlayer.respostasSeguidas >= 2 && !dicaUsada && !!cartaAtual.dica ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || dicaUsada || !cartaAtual.dica || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <HelpCircle className="h-5 w-5" /> </Button>
+                         <Button onClick={eliminarRespostaErrada} variant={currentPlayer.respostasSeguidas >= 2 ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || !("opcoes" in cartaAtual) || cartaAtual.opcoes.length <= 2 || !["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"].includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <MinusCircle className="h-5 w-5" /> </Button>
+                         <Button onClick={resetarContadoresJogador} variant="outline" className="h-9 px-2.5"> <RotateCcw className="h-5 w-5" /> </Button>
+                         <Button onClick={voltarTelaInicial} variant="outline" className="h-9 px-2.5"> <Home className="h-5 w-5" /> </Button>
                     </div>
-                     {/* Botões de Ajuste Manual */}
-                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
-                        <Button onClick={diminuirAcertos} variant="outline" className="h-9 px-2.5" title="Diminuir Acertos"><ThumbsUp className="h-5 w-5 text-green-500 transform scale-x-[-1]" /></Button>
-                        <Button onClick={diminuirErros} variant="outline" className="h-9 px-2.5" title="Diminuir Erros"><ThumbsDown className="h-5 w-5 text-red-500 transform scale-x-[-1]" /></Button>
-                        <Button onClick={diminuirContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Diminuir Estrela Bônus"><Star className="h-5 w-5 text-red-500" /></Button>
-                        <Button onClick={incrementarContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Aumentar Estrela Bônus"><Star className="h-5 w-5 text-yellow-500" /></Button>
-                        <Button onClick={diminuirRodadasPreso} variant="outline" className="h-9 px-2.5" title="Diminuir Rodada Preso"><ChevronUp className="h-5 w-5 text-red-500 transform rotate-180" /></Button>
-                        <Button onClick={incrementarRodadasPreso} variant="outline" className="h-9 px-2.5" title="Aumentar Rodada Preso"><ChevronUp className="h-5 w-5 text-purple-500" /></Button>
+                    <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
+                         <Button onClick={diminuirAcertos} variant="outline" className="h-9 px-2.5" title="Diminuir Acertos"><ThumbsUp className="h-5 w-5 text-green-500 transform scale-x-[-1]" /></Button>
+                         <Button onClick={diminuirErros} variant="outline" className="h-9 px-2.5" title="Diminuir Erros"><ThumbsDown className="h-5 w-5 text-red-500 transform scale-x-[-1]" /></Button>
+                         <Button onClick={diminuirContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Diminuir Estrela Bônus"><Star className="h-5 w-5 text-red-500" /></Button>
+                         <Button onClick={incrementarContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Aumentar Estrela Bônus"><Star className="h-5 w-5 text-yellow-500" /></Button>
+                         <Button onClick={diminuirRodadasPreso} variant="outline" className="h-9 px-2.5" title="Diminuir Rodada Preso"><ChevronUp className="h-5 w-5 text-red-500 transform rotate-180" /></Button>
+                         <Button onClick={incrementarRodadasPreso} variant="outline" className="h-9 px-2.5" title="Aumentar Rodada Preso"><ChevronUp className="h-5 w-5 text-purple-500" /></Button>
                     </div>
-                    {/* Botão Principal */}
                     <div className="w-full mb-3">
-                        {ocultarCarta && !cartaRevelada ? (
-                            <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                                <Eye className="mr-2 h-4 w-4"/> Revelar Carta
-                            </Button>
-                        ) : !respondido ? (
-                            <Button
-                                onClick={isVerificarDisabled() ? undefined : verificarResposta}
-                                className={cn(
-                                    "w-full bg-green-600 hover:bg-green-700 text-white",
-                                    isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400"
-                                )}
-                                onMouseDown={() => handleLongPressStart(rolarDado)}
-                                onMouseUp={handleLongPressEnd}
-                                onMouseLeave={handleLongPressEnd}
-                                onTouchStart={() => handleLongPressStart(rolarDado)}
-                                onTouchEnd={handleLongPressEnd}
-                                onTouchCancel={handleLongPressEnd}
-                                aria-disabled={isVerificarDisabled()}
-                                tabIndex={isVerificarDisabled() ? -1 : 0}
-                            >
-                                <Check className="mr-2 h-4 w-4"/> Verificar
-                            </Button>
-                        ) : (
-                            <Button onClick={selecionarCartaAleatoria} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onMouseDown={() => handleLongPressStart(selecionarCartaAleatoria)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(selecionarCartaAleatoria)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}>
-                                <SkipForward className="mr-2 h-4 w-4"/> Próxima Carta
-                            </Button>
-                        )}
+                        {ocultarCarta && !cartaRevelada ? ( <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white"> <Eye className="mr-2 h-4 w-4"/> Revelar Carta </Button>
+                        ) : !respondido ? ( <Button onClick={isVerificarDisabled() ? undefined : verificarResposta} className={cn( "w-full bg-green-600 hover:bg-green-700 text-white", isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400" )} onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd} aria-disabled={isVerificarDisabled()} tabIndex={isVerificarDisabled() ? -1 : 0} > <Check className="mr-2 h-4 w-4"/> Verificar </Button>
+                        ) : ( <Button onClick={selecionarCartaAleatoria} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onMouseDown={() => handleLongPressStart(selecionarCartaAleatoria)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(selecionarCartaAleatoria)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <SkipForward className="mr-2 h-4 w-4"/> Próxima Carta </Button> )}
                     </div>
-                    {/* Mensagem Feedback */}
                     {mensagem && (
-                        <Alert
-                            variant={getAlertVariant()}
-                            className={cn(
-                                'text-center text-sm font-semibold mb-3 w-full',
-                                // Estilos baseados em getAlertVariant e isInfoAlert (modificado)
-                                cartaAtual?.tipo === 'Vantagem' && 'bg-green-100 border-green-300 text-green-800',
-                                cartaAtual?.tipo === 'Desvantagem' && 'bg-red-100 border-red-300 text-red-800',
-                                cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800',
-                                cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800',
-                                cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800'
-                            )}
-                        >
+                        <Alert variant={getAlertVariant()} className={cn( 'text-center text-sm font-semibold mb-3 w-full', cartaAtual?.tipo === 'Vantagem' && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo === 'Desvantagem' && 'bg-red-100 border-red-300 text-red-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800' )}>
                             <AlertDescription>{mensagem}</AlertDescription>
                         </Alert>
                     )}
-                     {/* Progresso e Stats */}
-                     <div className="w-full">
+                    <div className="w-full">
                         <Progress value={currentPlayer.progresso} className="h-2.5 [&>*]:bg-orange-500" />
                          <div className="flex justify-between items-center w-full mt-2 text-sm text-gray-700 flex-wrap gap-x-4 gap-y-1 font-semibold">
                              <span className="flex items-center" title="Rodadas Preso"><ChevronUp className="h-4 w-4 text-purple-500 mr-1"/>{currentPlayer.rodadasPreso}</span>
@@ -1268,7 +872,6 @@ const EcoChallenge: React.FC = () => {
 
         switch (cartaAtual.tipo) {
             case "Pergunta": case "ContraTempo": case "Vantagem": case "Desvantagem": case "Outras":
-                // Adicionado type guard para garantir que opcoes existe
                 if (!Array.isArray((cartaAtual as any).opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas para esta carta.</p>;
                 return (cartaAtual as any).opcoes.map((op: Opcao) => {
                     const isCorrect = Array.isArray(cartaAtual.respostaCorreta) ? cartaAtual.respostaCorreta.includes(op.id) : cartaAtual.respostaCorreta === op.id;
@@ -1276,28 +879,12 @@ const EcoChallenge: React.FC = () => {
                     const isEliminated = opcoesEliminadas.includes(op.id);
                     const isWrongSelection = respondido && isSelected && !isCorrect;
                     let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100";
-                    if (respondido) {
-                        if (isCorrect) btnClass = "bg-green-100 border-green-400 hover:bg-green-200 text-green-900";
-                        else if (isSelected) btnClass = "bg-red-100 border-red-400 hover:bg-red-200 text-red-900";
-                        else btnClass = "border-gray-300 text-gray-500";
-                    } else if (isSelected) { btnClass = "bg-blue-100 border-blue-400 text-blue-900"; }
-                    return (
-                        <Button
-                            key={op.id}
-                            onClick={() => handleSelecao(op.id)}
-                            variant={"outline"}
-                            className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")}
-                            style={buttonInlineStyle}
-                            disabled={isEliminated || respondido}
-                        >
-                            <span className="flex-1">{op.texto}</span>
-                            {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />}
-                            {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />}
-                        </Button>
-                    );
+                    if (respondido) { if (isCorrect) btnClass = "bg-green-100 border-green-400 hover:bg-green-200 text-green-900"; else if (isSelected) btnClass = "bg-red-100 border-red-400 hover:bg-red-200 text-red-900"; else btnClass = "border-gray-300 text-gray-500"; }
+                    else if (isSelected) { btnClass = "bg-blue-100 border-blue-400 text-blue-900"; }
+                    return ( <Button key={op.id} onClick={() => handleSelecao(op.id)} variant={"outline"} className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} style={buttonInlineStyle} disabled={isEliminated || respondido}> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} </Button> );
                 });
              case "MultiplaEscolha":
-                 if (!Array.isArray((cartaAtual as any).opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas para esta carta.</p>; // Type guard
+                 if (!Array.isArray((cartaAtual as any).opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas para esta carta.</p>;
                 return (cartaAtual as any).opcoes.map((op: Opcao) => {
                     const isCorrect = Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(op.id);
                     const isSelected = selecoesMultiplas.includes(op.id);
@@ -1307,25 +894,10 @@ const EcoChallenge: React.FC = () => {
                     let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100";
                     if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; else btnClass = "border-gray-300 text-gray-500"; }
                     else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
-                    return (
-                        <Button
-                            key={op.id}
-                            onClick={() => handleSelecaoMultipla(op.id)}
-                            variant="outline"
-                             className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")}
-                            style={buttonInlineStyle}
-                            disabled={isEliminated || respondido}
-                        >
-                            <div className={cn("w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center", isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white')}>{isSelected && <Check className="w-3 h-3 text-white" />}</div>
-                            <span className="flex-1">{op.texto}</span>
-                            {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />}
-                            {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />}
-                            {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600 font-bold">✓</span>}
-                         </Button>
-                    );
+                    return ( <Button key={op.id} onClick={() => handleSelecaoMultipla(op.id)} variant="outline" className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} style={buttonInlineStyle} disabled={isEliminated || respondido}> <div className={cn("w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center", isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white')}>{isSelected && <Check className="w-3 h-3 text-white" />}</div> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600 font-bold">✓</span>} </Button> );
                 });
             case "Ordem":
-                 if (!Array.isArray((cartaAtual as any).opcoes) || !Array.isArray(cartaAtual.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Ordem.</p>; // Type guard mais completo
+                 if (!Array.isArray((cartaAtual as any).opcoes) || !Array.isArray(cartaAtual.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Ordem.</p>;
                  const cOrdem = cartaAtual as CartaOrdem;
                  return cOrdem.opcoes.map((op) => {
                     const isSelected = ordemSelecoes.includes(op.id); const selectionIndex = isSelected ? ordemSelecoes.indexOf(op.id) + 1 : null;
@@ -1336,37 +908,13 @@ const EcoChallenge: React.FC = () => {
                     if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; }
                     else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
                     return (
-                        <Button
-                            key={op.id}
-                            onClick={() => handleSelecaoOrdem(op.id)}
-                            variant="outline"
-                             className={cn("w-full justify-start text-sm py-2 px-3", btnClass )}
-                            style={buttonInlineStyle}
-                            disabled={respondido}
-                        >
+                        <Button key={op.id} onClick={() => handleSelecaoOrdem(op.id)} variant="outline" className={cn("w-full justify-start text-sm py-2 px-3", btnClass )} style={buttonInlineStyle} disabled={respondido}>
                             {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)}
                             <span className="flex-1">{op.texto}</span>
                             {respondido && isCorrectOptionOverall && (
-                                <> {/* Feedback agrupado */}
-                                    {/* Círculo Primário: Verde (correto) ou Vermelho (incorreto com a posição do usuário) */}
-                                    <span
-                                        className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${
-                                            isCorrectOrder ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-                                        }`}
-                                        title={isCorrectOrder ? `Posição Correta: ${correctIndex}` : `Sua Posição: ${selectionIndex}`}
-                                    >
-                                        {isCorrectOrder ? correctIndex : selectionIndex}
-                                    </span>
-
-                                    {/* Círculo Azul (Hint): Somente se a ordem estiver errada, mostra a posição correta */}
-                                    {isWrongOrder && correctIndex !== null && (
-                                        <span
-                                            className="ml-1 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white"
-                                            title={`Posição Correta: ${correctIndex}`}
-                                        >
-                                            {correctIndex}
-                                        </span>
-                                    )}
+                                <>
+                                    <span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${isCorrectOrder ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`} title={isCorrectOrder ? `Posição Correta: ${correctIndex}` : `Sua Posição: ${selectionIndex}`}>{isCorrectOrder ? correctIndex : selectionIndex}</span>
+                                    {isWrongOrder && correctIndex !== null && ( <span className="ml-1 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white" title={`Posição Correta: ${correctIndex}`}>{correctIndex}</span> )}
                                 </>
                             )}
                         </Button>
@@ -1381,21 +929,9 @@ const EcoChallenge: React.FC = () => {
                  if (!cPonto.imagemURL || !Array.isArray(cPonto.zonasClicaveis)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Ponto Certo.</p>;
                  return (<div className="relative w-full max-w-md mx-auto aspect-video overflow-hidden rounded border border-gray-300 cursor-crosshair" onClick={handleImagemClick} role="button" aria-label={`Imagem interativa: ${cPonto.titulo}`}><img src={cPonto.imagemURL} alt={`Imagem para: ${cPonto.titulo}`} className={`block w-full h-full object-contain ${respondido ? 'cursor-not-allowed' : ''}`}/>{coordenadasClique && (<div className={`absolute w-3 h-3 rounded-full border-2 pointer-events-none -translate-x-1/2 -translate-y-1/2 ${respondido ? (mensagem.toLowerCase().includes('correto') ? 'bg-green-500 border-white' : 'bg-red-500 border-white') : 'bg-blue-500 border-white'}`} style={{ left: `${coordenadasClique.x * 100}%`, top: `${coordenadasClique.y * 100}%` }}>{respondido && (mensagem.toLowerCase().includes('correto') ? <Check className="w-2 h-2 text-white" /> : <XIcon className="w-2 h-2 text-white" />)}</div>)}{respondido && (() => {
                     const zonaCorreta = cPonto.zonasClicaveis.find(z => z.id === cPonto.respostaCorreta);
-                    return zonaCorreta ? (
-                        <div
-                            className="absolute border-2 border-dashed border-green-500 pointer-events-none animate-pulse"
-                            style={{
-                                left: `${zonaCorreta.x * 100}%`,
-                                top: `${zonaCorreta.y * 100}%`,
-                                width: `${zonaCorreta.largura * 100}%`,
-                                height: `${zonaCorreta.altura * 100}%`,
-                            }}
-                            title={zonaCorreta.descricao || "Área correta"}
-                        />
-                    ) : null;
+                    return zonaCorreta ? ( <div className="absolute border-2 border-dashed border-green-500 pointer-events-none animate-pulse" style={{ left: `${zonaCorreta.x * 100}%`, top: `${zonaCorreta.y * 100}%`, width: `${zonaCorreta.largura * 100}%`, height: `${zonaCorreta.altura * 100}%` }} title={zonaCorreta.descricao || "Área correta"}/> ) : null;
                 })()}
-            </div>
-        );
+            </div>);
             case "CompletarFrase":
                 const cComp = cartaAtual as CartaCompletarFrase;
                 if (!cComp.fraseIncompleta || !Array.isArray(cComp.fragmentos) || !Array.isArray(cComp.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Completar Frase.</p>;
