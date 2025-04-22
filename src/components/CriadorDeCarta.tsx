@@ -33,13 +33,12 @@ interface CartaOrdem extends CartaComOpcoes { tipo: "Ordem"; respostaCorreta: nu
 interface CartaVantagem extends CartaComOpcoes { tipo: "Vantagem"; respostaCorreta: number[]; }
 interface CartaDesvantagem extends CartaComOpcoes { tipo: "Desvantagem"; respostaCorreta: number[]; }
 interface CartaOutras extends CartaComOpcoes { tipo: "Outras"; respostaCorreta: number[]; }
-// CORREÇÃO: tempoLimite opcional para permitir delete
 interface CartaContraTempo extends CartaComOpcoes { tipo: "ContraTempo"; respostaCorreta: number; tempoLimite?: number; }
 
 // Tipos sem 'opcoes' padrão
 interface CartaRelacionarColunas extends CartaBase { tipo: "RelacionarColunas"; colunaA: ItemRelacionar[]; colunaB: ItemRelacionar[]; respostaCorreta: { aId: number; bId: number }[]; }
-interface CartaPontoCerto extends CartaBase { tipo: "PontoCerto"; imagemURL?: string; zonasClicaveis?: ZonaClicavel[]; respostaCorreta?: number; } // Tornando opcionais para evitar erros com Partial
-interface CartaCompletarFrase extends CartaBase { tipo: "CompletarFrase"; fraseIncompleta?: string; fragmentos?: FragmentoCompletar[]; respostaCorreta?: number[]; } // Tornando opcionais
+interface CartaPontoCerto extends CartaBase { tipo: "PontoCerto"; imagemURL?: string; zonasClicaveis?: ZonaClicavel[]; respostaCorreta?: number; }
+interface CartaCompletarFrase extends CartaBase { tipo: "CompletarFrase"; fraseIncompleta?: string; fragmentos?: FragmentoCompletar[]; respostaCorreta?: number[]; }
 
 // União final
 type Carta =
@@ -65,20 +64,44 @@ type Dificuldade = typeof DIFFICULTIES[number];
 
 interface BaralhoCarregado { id: number; nome: string; cartas: Carta[]; adicionado: boolean; }
 
+// --- Função Utilitária de Parse (Relacionar Colunas) ---
+// Extraído para reutilização no save e no preview
+function parseParesRelacionar(input: string): { aId: number; bId: number }[] {
+    const paresFormatados: { aId: number; bId: number }[] = [];
+    if (!input || !input.trim()) {
+        return paresFormatados; // Retorna array vazio se input for vazio ou só espaços
+    }
+    const paresString = input.split(',');
+    for (const parStr of paresString) {
+        const partes = parStr.trim().split('-');
+        if (partes.length !== 2) {
+            throw new Error(`Formato inválido no par "${parStr.trim()}". Use IDa-IDb.`);
+        }
+        const aId = parseInt(partes[0].trim(), 10);
+        const bId = parseInt(partes[1].trim(), 10);
+        if (isNaN(aId) || isNaN(bId)) {
+            throw new Error(`IDs não numéricos no par "${parStr.trim()}".`);
+        }
+        paresFormatados.push({ aId, bId });
+    }
+    // Validação opcional de duplicados pode ser adicionada aqui se necessário
+    // Ex: const uniquePairs = new Set(paresFormatados.map(p => `${p.aId}-${p.bId}`));
+    // if (uniquePairs.size !== paresFormatados.length) { throw new Error("Pares duplicados encontrados."); }
+    return paresFormatados;
+}
+
 // --- Componente de Preview Estático ---
 const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
-    // Desestruturação inicial apenas com campos base garantidos
     const {
         tipo = "Pergunta", titulo = "", pergunta = "",
         dificuldade = "facil", categorias = [], fontes = [],
         vantagem = "", desvantagem = "", dica = ""
     } = card;
 
-    // Renderização condicional dos campos específicos e opções
     let renderedSpecifics: React.ReactNode = null;
     let renderedOptions: React.ReactNode = null;
-    const opcoes = card.opcoes || []; // Garante que opcoes seja um array
-    const respostaCorreta = card.respostaCorreta; // Pega a resposta correta (pode ser de qualquer tipo)
+    const opcoes = card.opcoes || [];
+    const respostaCorreta = card.respostaCorreta;
 
     switch (tipo) {
         case "ContraTempo":
@@ -93,8 +116,9 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
                     <div className="flex-1"><strong>Coluna B:</strong><ul>{cardRelCol.colunaB?.map(i => <li key={`b-${i.id}`}>{i.id}: {i.texto}</li>)}</ul></div>
                 </div>
             );
-             const pairs = Array.isArray(cardRelCol.respostaCorreta) ? cardRelCol.respostaCorreta.map(p => `${p.aId}-${p.bId}`).join(', ') : '(Inválida)';
-             renderedOptions = <p className="text-xs mt-1">Pares Corretos: [{pairs}]</p>;
+             // Preview mostra o formato que será salvo (Array de Objetos)
+             const pairsPreview = Array.isArray(cardRelCol.respostaCorreta) ? cardRelCol.respostaCorreta.map(p => `${p.aId}-${p.bId}`).join(', ') : '(Inválida)';
+             renderedOptions = <p className="text-xs mt-1">Pares Corretos: [{pairsPreview}]</p>;
             break;
         case "PontoCerto":
             const cardPontoCerto = card as Partial<CartaPontoCerto>;
@@ -118,7 +142,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
         case "CompletarFrase":
             const cardCompFrase = card as Partial<CartaCompletarFrase>;
-            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: &quot;{cardCompFrase.fraseIncompleta || '...'}&quot;</p>;
+            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: "{cardCompFrase.fraseIncompleta || '...'}"</p>;
             renderedOptions = (
                 <>
                  {cardCompFrase.fragmentos && cardCompFrase.fragmentos.length > 0 && (
@@ -135,10 +159,9 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
     }
 
-     // Renderizador de opções padrão (agora separado do switch)
      if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo)) {
         const correctSet = new Set<number>();
-        const currentOptions = opcoes || []; // Garante array
+        const currentOptions = opcoes || [];
         if (tipo === "Vantagem") {
             currentOptions.forEach(o => correctSet.add(o.id));
         } else if (tipo !== "Desvantagem") {
@@ -150,7 +173,6 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             <ul className="mt-2 pl-5 list-decimal space-y-1">
                 {currentOptions.map((op) => {
                     const isCorrect = correctSet.has(op.id);
-                    // Determina a ordem correta para tipo 'Ordem'
                     const orderIndex = (tipo === 'Ordem' && Array.isArray(respostaCorreta)) ? (respostaCorreta as number[]).indexOf(op.id) : -1;
                     const orderInfo = tipo === 'Ordem' ? (orderIndex !== -1 ? ` (Pos: ${orderIndex + 1})` : ` (Não na ordem)`) : '';
 
@@ -179,16 +201,9 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             </CardHeader>
             <CardContent className="pt-2 pb-3 space-y-2">
                 {renderedSpecifics}
-                {/*
-                 * MODIFICAÇÃO 2:
-                 * - Aumentado max-h de 60 para 80 (ou ajuste conforme necessário).
-                 * - Adicionado overflow-hidden ao div interno para ajudar a conter o conteúdo
-                 *   dentro dos limites do ScrollArea, garantindo que o prose faça o wrap.
-                 *   O próprio ScrollArea lida com o overflow-y: auto.
-                */}
                 <ScrollArea className="h-auto max-h-80 rounded-md border p-3 mt-2 bg-white/80 min-h-[150px]">
                      <div
-                        className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1 overflow-hidden" // Adicionado overflow-hidden aqui
+                        className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1 overflow-hidden"
                         dangerouslySetInnerHTML={{ __html: pergunta || "(Sem Pergunta/Descrição)" }}
                     />
                 </ScrollArea>
@@ -232,7 +247,8 @@ const CriadorDeCarta: React.FC = () => {
     const [novaColunaA, setNovaColunaA] = useState("");
     const [colunaBItems, setColunaBItems] = useState<ItemRelacionar[]>([]);
     const [novaColunaB, setNovaColunaB] = useState("");
-    const [paresCorretosInput, setParesCorretosInput] = useState("");
+    // Estado para o input simplificado IDa-IDb, IDa-IDb
+    const [paresCorretosInput, setParesCorretosInput] = useState(""); // <-- Alterado
     const [imagemURLPontoCerto, setImagemURLPontoCerto] = useState("");
     const [zonasClicaveis, setZonasClicaveis] = useState<ZonaClicavel[]>([]);
     const [novaZona, setNovaZona] = useState<Partial<ZonaClicavel>>({x:0, y:0, largura: 0.1, altura: 0.1});
@@ -477,7 +493,8 @@ const CriadorDeCarta: React.FC = () => {
         setTipo("Pergunta"); setTitulo(""); setPergunta(""); setOpcoes([]); setNovaOpcao("");
         setRespostaCorreta([]); setDificuldade("facil");
         setVantagem(""); setDesvantagem(""); setDica("");
-        setTempoLimite(30); setColunaAItems([]); setNovaColunaA(""); setColunaBItems([]); setNovaColunaB(""); setParesCorretosInput("");
+        setTempoLimite(30); setColunaAItems([]); setNovaColunaA(""); setColunaBItems([]); setNovaColunaB("");
+        setParesCorretosInput(""); // Reset para o input simplificado
         setImagemURLPontoCerto(""); setZonasClicaveis([]); setNovaZona({x:0, y:0, largura: 0.1, altura: 0.1}); setRespostaCorretaPontoCerto(null);
         setFraseIncompleta(""); setFragmentos([]); setNovoFragmento(""); setOrdemFragmentos("");
         if (!categoriasBloqueadas) setCategorias([]);
@@ -516,15 +533,35 @@ const CriadorDeCarta: React.FC = () => {
                     finalRespostaCorreta = ordemIds;
                     cartaEspecificaProps.opcoes = opcoes.map(({ordemTemp, ...rest}) => rest);
                     break;
+                // ===== MODIFICAÇÃO AQUI (Relacionar Colunas - Parse) =====
                 case "RelacionarColunas":
                     try {
-                        const pares = JSON.parse(paresCorretosInput || '[]');
-                        if (!Array.isArray(pares) || !pares.every(p => typeof p === 'object' && 'aId' in p && 'bId' in p && typeof p.aId === 'number' && typeof p.bId === 'number')) throw new Error();
-                        finalRespostaCorreta = pares;
-                    } catch { throw new Error("Formato JSON inválido para Pares Corretos."); }
+                        // Usa a função parseParesRelacionar para converter a string
+                        finalRespostaCorreta = parseParesRelacionar(paresCorretosInput);
+                        // Adiciona validação mínima
+                        if (colunaAItems.length === 0 || colunaBItems.length === 0) {
+                            throw new Error("Adicione itens às Colunas A e B.");
+                        }
+                        if (finalRespostaCorreta.length === 0 && paresCorretosInput.trim() !== '') {
+                             throw new Error("Formato inválido para Pares Corretos. Use IDa-IDb, IDa-IDb.");
+                        }
+                         // Validação opcional de IDs existentes (descomente se necessário)
+                         /*
+                         for (const par of finalRespostaCorreta) {
+                             if (!colunaAItems.some(item => item.id === par.aId) || !colunaBItems.some(item => item.id === par.bId)) {
+                                 throw new Error(`ID ${par.aId} ou ${par.bId} não existe nas colunas definidas.`);
+                             }
+                         }
+                         */
+
+                    } catch (error: any) {
+                        // Mantém o tratamento de erro
+                        throw new Error(`Erro ao processar Pares Corretos: ${error.message}`);
+                    }
                     cartaEspecificaProps.colunaA = colunaAItems;
                     cartaEspecificaProps.colunaB = colunaBItems;
                     break;
+                 // ===== FIM DA MODIFICAÇÃO (Relacionar Colunas - Parse) =====
                 case "PontoCerto":
                     if (!imagemURLPontoCerto) throw new Error("URL da Imagem é obrigatória.");
                     if (zonasClicaveis.length === 0) throw new Error("Adicione pelo menos uma Zona Clicável.");
@@ -593,8 +630,18 @@ const CriadorDeCarta: React.FC = () => {
                  }
                  setRespostaCorreta([]);
                  break;
+             // ===== MODIFICAÇÃO AQUI (Relacionar Colunas - Format) =====
             case "RelacionarColunas":
-                const cRel = carta as CartaRelacionarColunas; setColunaAItems(cRel.colunaA ? [...cRel.colunaA] : []); setColunaBItems(cRel.colunaB ? [...cRel.colunaB] : []); setParesCorretosInput(Array.isArray(cRel.respostaCorreta) ? JSON.stringify(cRel.respostaCorreta, null, 2) : "[]"); break;
+                const cRel = carta as CartaRelacionarColunas;
+                setColunaAItems(cRel.colunaA ? [...cRel.colunaA] : []);
+                setColunaBItems(cRel.colunaB ? [...cRel.colunaB] : []);
+                // Formata o array [{aId, bId}] para a string "aId-bId, aId-bId"
+                const paresStringFormat = Array.isArray(cRel.respostaCorreta)
+                    ? cRel.respostaCorreta.map(p => `${p.aId}-${p.bId}`).join(', ')
+                    : "";
+                setParesCorretosInput(paresStringFormat); // Define o estado do input
+                break;
+             // ===== FIM DA MODIFICAÇÃO (Relacionar Colunas - Format) =====
             case "PontoCerto":
                 const cPonto = carta as CartaPontoCerto; setImagemURLPontoCerto(cPonto.imagemURL || ""); setZonasClicaveis(cPonto.zonasClicaveis ? [...cPonto.zonasClicaveis] : []); setRespostaCorretaPontoCerto(typeof cPonto.respostaCorreta === 'number' ? cPonto.respostaCorreta : null); break;
             case "CompletarFrase":
@@ -616,20 +663,15 @@ const CriadorDeCarta: React.FC = () => {
     const prepareForDownload = (): Partial<Carta>[] => {
         return cards.map(({ origBaralhoId, edited, ...rest }: CartaInterna) => {
             const cardData: Partial<Carta> = { ...rest };
-            // CORREÇÃO: Usar 'delete' nos campos opcionais corretos
             if (rest.tipo !== "ContraTempo") delete (cardData as Partial<CartaContraTempo>).tempoLimite;
             if (rest.tipo !== "RelacionarColunas") { delete (cardData as Partial<CartaRelacionarColunas>).colunaA; delete (cardData as Partial<CartaRelacionarColunas>).colunaB; }
             if (rest.tipo !== "PontoCerto") { delete (cardData as Partial<CartaPontoCerto>).imagemURL; delete (cardData as Partial<CartaPontoCerto>).zonasClicaveis; }
             if (rest.tipo !== "CompletarFrase") { delete (cardData as Partial<CartaCompletarFrase>).fraseIncompleta; delete (cardData as Partial<CartaCompletarFrase>).fragmentos; }
-
-            // Limpa 'opcoes' se não for um tipo que o utiliza OU se for undefined
             if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo) || cardData.opcoes === undefined ) {
                  delete cardData.opcoes;
             } else if (rest.tipo === "Ordem" && cardData.opcoes) {
-                 // Remove ordemTemp das opções para Ordem
                  cardData.opcoes = cardData.opcoes.map(({ ordemTemp, ...o }) => o);
             }
-
             return cardData;
         });
     };
@@ -717,7 +759,6 @@ const CriadorDeCarta: React.FC = () => {
                         <div>
                             <label className="block text-sm font-medium mb-1">Pergunta/Descrição* (HTML)</label>
                              <Textarea ref={perguntaTextareaRef} value={pergunta} onChange={(e) => setPergunta(e.target.value)} className="h-36 font-mono text-sm" placeholder="Escreva aqui..."/>
-                             {/* Inputs e botões para inserir popups */}
                              <Card className="mt-2 border-dashed">
                                 <CardHeader className="p-2"><CardTitle className="text-sm font-medium">Inserir Popup de Mídia na Pergunta</CardTitle></CardHeader>
                                 <CardContent className="p-2 space-y-2">
@@ -808,8 +849,15 @@ const CriadorDeCarta: React.FC = () => {
                                         <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="text-sm space-y-1">{colunaBItems.map(item => <li key={item.id} className="flex justify-between items-center"><span>{item.id}: {item.texto}</span><Button type="button" variant="ghost" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveColunaB(item.id)}>X</Button></li>)}</ul></ScrollArea>
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium mb-1">Pares Corretos (JSON)</label>
-                                        <Textarea value={paresCorretosInput} onChange={e => setParesCorretosInput(e.target.value)} className="h-20 font-mono text-xs" placeholder='[{"aId": 1, "bId": 101}, {"aId": 2, "bId": 102}]'/>
+                                        {/* ===== MODIFICAÇÃO AQUI (Placeholder Relacionar Colunas) ===== */}
+                                        <label className="block text-sm font-medium mb-1">Pares Corretos (Formato: IDa-IDb, IDa-IDb)</label>
+                                        <Textarea
+                                            value={paresCorretosInput}
+                                            onChange={e => setParesCorretosInput(e.target.value)}
+                                            className="h-20 font-mono text-xs"
+                                            placeholder='Ex: 1-101, 2-102, 3-103' // Placeholder atualizado
+                                        />
+                                         {/* ===== FIM DA MODIFICAÇÃO (Placeholder Relacionar Colunas) ===== */}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -823,11 +871,9 @@ const CriadorDeCarta: React.FC = () => {
                                         <label className="block text-sm font-medium mb-1">URL da Imagem Principal*</label>
                                         <Input type="text" value={imagemURLPontoCerto} onChange={e => setImagemURLPontoCerto(e.target.value)} placeholder="/images/mapa.png" />
                                     </div>
-                                    {/* Preview da Imagem e Zonas */}
                                     {imagemURLPontoCerto && (
                                         <div className="relative border rounded overflow-hidden max-w-sm mx-auto aspect-video bg-gray-200 my-2">
                                             <img ref={previewImageRefPontoCerto} src={imagemURLPontoCerto} alt="Preview Ponto Certo" className="block w-full h-full object-contain" onError={(e) => { e.currentTarget.src = '/images/placeholder_error.png'; e.currentTarget.classList.add('opacity-50');}}/>
-                                            {/* Renderiza zonas existentes */}
                                             {zonasClicaveis.map(z => (
                                                 <div key={`zone-vis-${z.id}`}
                                                      className={cn( "absolute border-2 pointer-events-none", respostaCorretaPontoCerto === z.id ? "border-green-500 bg-green-500/30" : "border-dashed border-red-500 bg-red-500/20" )}
@@ -837,7 +883,6 @@ const CriadorDeCarta: React.FC = () => {
                                                     <span className="absolute -top-5 left-0 text-xs bg-black/50 text-white px-1 rounded">{z.id}</span>
                                                 </div>
                                             ))}
-                                             {/* Renderiza preview da NOVA zona sendo editada */}
                                               {novaZona.x != null && novaZona.y != null && novaZona.largura != null && novaZona.altura != null && (
                                                 <div
                                                     className="absolute border-2 border-blue-500 border-dotted pointer-events-none bg-blue-500/20"
@@ -966,18 +1011,12 @@ const CriadorDeCarta: React.FC = () => {
                                 {editIndex !== null ? "Salvar Edições" : "Adicionar Carta"}
                             </Button>
                             {editIndex !== null && (<Button type="button" onClick={cancelEdit} variant="outline">Cancelar Edição</Button>)}
-                            {/* Botão de Preview Removido */}
                         </div>
                     </CardContent>
                 </Card>
 
                  {/* Coluna Direita: Lista de Cartas e Preview Fixo */}
                  <div className="space-y-4 lg:sticky lg:top-4 self-start">
-
-                     {/*
-                      * MODIFICAÇÃO 1:
-                      * Preview Estático movido para ANTES de Baralho Atual
-                      */}
                      <Card className="mt-4">
                             <CardHeader><CardTitle className="text-lg text-center">Preview Estático</CardTitle></CardHeader>
                             <CardContent>
@@ -986,10 +1025,18 @@ const CriadorDeCarta: React.FC = () => {
                                      ? cards[editIndex]
                                      : { // Monta preview da carta sendo criada
                                          tipo, titulo, pergunta, opcoes,
+                                         // ===== MODIFICAÇÃO AQUI (Preview Relacionar Colunas) =====
                                          respostaCorreta: (() => {
                                              if (tipo === 'Pergunta' || tipo === 'ContraTempo') return respostaCorreta[0];
                                              if (tipo === 'PontoCerto') return respostaCorretaPontoCerto ?? undefined;
-                                             if (tipo === 'RelacionarColunas') try { return JSON.parse(paresCorretosInput || '[]'); } catch { return []; }
+                                             if (tipo === 'RelacionarColunas') {
+                                                  try {
+                                                      // Tenta parsear o input simplificado para o preview
+                                                      return parseParesRelacionar(paresCorretosInput);
+                                                  } catch {
+                                                      return []; // Retorna vazio se o formato for inválido no preview
+                                                  }
+                                             }
                                              if (tipo === 'CompletarFrase') return ordemFragmentos.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
                                              if (tipo === 'Ordem') {
                                                 const sorted = [...opcoes].sort((a, b) => (parseInt(a.ordemTemp || '999', 10) - parseInt(b.ordemTemp || '999', 10)));
@@ -999,6 +1046,7 @@ const CriadorDeCarta: React.FC = () => {
                                              if (tipo === 'Desvantagem') return [];
                                              return respostaCorreta;
                                          })(),
+                                         // ===== FIM DA MODIFICAÇÃO (Preview Relacionar Colunas) =====
                                          dificuldade, categorias, fontes, vantagem, desvantagem, dica, tempoLimite,
                                          colunaA: colunaAItems, colunaB: colunaBItems, imagemURL: imagemURLPontoCerto, zonasClicaveis,
                                          fraseIncompleta, fragmentos
@@ -1014,7 +1062,6 @@ const CriadorDeCarta: React.FC = () => {
                         </CardHeader>
                         <CardContent>
                              {cards.length === 0 ? (<p className="text-gray-500 italic">Nenhuma carta.</p>) : (
-                                /* Ajustado a altura máxima para dar espaço ao preview acima */
                                 <ScrollArea className="h-[calc(40vh-6rem)] min-h-[150px] pr-3">
                                     <div className="space-y-2">
                                         {cards.map((c, index) => (
