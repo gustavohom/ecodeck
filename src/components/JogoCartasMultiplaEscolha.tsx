@@ -88,8 +88,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const [ocultarCarta, setOcultarCarta] = useState(initialOcultarCarta);
     const [probabilityIndex, setProbabilityIndex] = useState(initialProbabilityIndex);
     const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>(() => initialPlayers.length > 0 ? initialPlayers.map((p) => ({ id: p.id, name: p.name, color: p.color, showColorPicker: false })) : [{ id: 0, name: "", color: predefinedColors[0], showColorPicker: false }] );
-    const [allSources, setAllSources] = useState<SourceInfo[]>([]); // Inicializa vazio
-    const [activeInternalBaralhos, setActiveInternalBaralhos] = useState<Record<string, Set<string>>>({}); // Inicializa vazio
+    const [allSources, setAllSources] = useState<SourceInfo[]>([]);
+    const [activeInternalBaralhos, setActiveInternalBaralhos] = useState<Record<string, Set<string>>>({});
     const [todasCategorias, setTodasCategorias] = useState<string[]>([]);
     const [categoriasComContagem, setCategoriasComContagem] = useState<Record<string, number>>({});
     const [isLoading, setIsLoading] = useState(false);
@@ -97,45 +97,43 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
     const [isClient, setIsClient] = useState(false);
 
-    // Carrega estado da UI do localStorage APÓS montagem
     useEffect(() => {
         setIsClient(true);
         const savedCustom = localStorage.getItem("customSourceInfos"); const savedBuiltInStatus = localStorage.getItem("builtInSourceStatus"); let loadedCustomSources: SourceInfo[] = []; let loadedBuiltInStatus: Record<string, boolean> | null = null;
         try { loadedCustomSources = savedCustom ? JSON.parse(savedCustom) : []; } catch { loadedCustomSources = []; } try { loadedBuiltInStatus = savedBuiltInStatus ? JSON.parse(savedBuiltInStatus) : null; } catch { loadedBuiltInStatus = null; }
         const processedCustomSources = loadedCustomSources.map(source => { const { processedCards, internalBaralhos, totalCards } = processCardsAndExtractBaralhos(source.cards || []); return { ...source, cards: processedCards, internalBaralhos, totalCards }; });
         const combinedSources = [...initialBuiltInSources.map(bs => ({...bs, active: loadedBuiltInStatus ? (loadedBuiltInStatus[bs.id] ?? true) : true})), ...processedCustomSources];
-        setAllSources(combinedSources);
+        setAllSources(combinedSources); // Define as fontes carregadas
 
         const savedActiveInternal = localStorage.getItem("activeInternalBaralhos"); let initialActiveBaralhos: Record<string, Set<string>> = {};
         try { const parsed = savedActiveInternal ? JSON.parse(savedActiveInternal) : {}; Object.keys(parsed).forEach(key => { if (Array.isArray(parsed[key])) { initialActiveBaralhos[key] = new Set(parsed[key]); } }); } catch { initialActiveBaralhos = {}; }
+        // Usa combinedSources (acabou de ser definido) para inicializar baralhos
         combinedSources.forEach(source => { if (!initialActiveBaralhos[source.id]) { initialActiveBaralhos[source.id] = new Set(Object.keys(source.internalBaralhos)); } else { Object.keys(source.internalBaralhos).forEach(bName => { initialActiveBaralhos[source.id].add(bName); }); initialActiveBaralhos[source.id].forEach(savedBName => { if (!(savedBName in source.internalBaralhos)) { initialActiveBaralhos[source.id].delete(savedBName); }}); } });
-        setActiveInternalBaralhos(initialActiveBaralhos);
-    }, []); // Roda apenas uma vez no cliente
+        setActiveInternalBaralhos(initialActiveBaralhos); // Define os baralhos ativos
+    }, []);
 
-    // Recalcular categorias e contagens
     useEffect(() => { if(isClient) { const { categorias, contagens } = recalcularCategoriasAtivas(allSources, activeInternalBaralhos); setTodasCategorias(categorias); setCategoriasComContagem(contagens); setCategoriasSelecionadas((prev) => prev.filter(cat => categorias.includes(cat))); } }, [allSources, activeInternalBaralhos, isClient]);
-    // Salvar estado da UI
     useEffect(() => { if (isClient) { const customSourcesToSave = allSources.filter(s => s.type === 'custom'); localStorage.setItem("customSourceInfos", JSON.stringify(customSourcesToSave)); const builtInStatusToSave: Record<string, boolean> = {}; allSources.filter(s => s.type === 'builtin').forEach(s => { builtInStatusToSave[s.id] = s.active; }); localStorage.setItem("builtInSourceStatus", JSON.stringify(builtInStatusToSave)); const serializableActiveInternal = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => { acc[key] = Array.from(valueSet); return acc; }, {} as Record<string, string[]>); localStorage.setItem("activeInternalBaralhos", JSON.stringify(serializableActiveInternal)); } }, [allSources, activeInternalBaralhos, isClient]);
 
-    const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => { /* ... sem mudanças ... */ };
-    const toggleSourceActive = (sourceId: string) => { /* ... sem mudanças ... */ };
-    const removeSource = (sourceId: string) => { /* ... sem mudanças ... */ };
-    const toggleInternalBaralhoActive = (sourceId: string, baralhoName: string) => { /* ... sem mudanças ... */ };
-    const toggleExpandSource = (sourceId: string) => { /* ... sem mudanças ... */ };
-    const addPlayerInput = () => { /* ... sem mudanças ... */ };
-    const handlePlayerChange = (index: number, field: "name" | "color", value: string) => { /* ... sem mudanças ... */ };
-    const toggleColorPicker = (index: number) => { /* ... sem mudanças ... */ };
-    const deletePlayer = (index: number) => { /* ... sem mudanças ... */ };
+    const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => { const files = e.target.files; if (!files) return; setIsLoading(true); setErrorMessage(null); let newCustomSources: SourceInfo[] = []; let errors: string[] = []; for (let i = 0; i < files.length; i++) { const file = files[i]; const content = await file.text(); try { let loadedCards: Carta[] = []; const sourceName = file.name.replace(/\.(js|json)$/, ""); const sourceId = `custom_${Date.now()}_${i}`; if (allSources.some(s => s.name === sourceName && s.type === 'custom')) { errors.push(`Arquivo/Fonte "${sourceName}" já carregado.`); continue; } if (file.name.endsWith(".js")) { loadedCards = parseJSDeckFile(content); } else if (file.name.endsWith(".json")) { const raw = JSON.parse(content) as any[]; loadedCards = raw.map((card, index) => ({ ...card, id: card.id || `${sourceId}_card_${index}` })) as Carta[]; } else { errors.push(`Formato não suportado: ${file.name}. Use .js ou .json.`); continue; } if (!Array.isArray(loadedCards) || loadedCards.length === 0) { errors.push(`Nenhuma carta válida encontrada em "${sourceName}".`); continue; } const { processedCards, internalBaralhos, totalCards } = processCardsAndExtractBaralhos(loadedCards); newCustomSources.push({ id: sourceId, name: sourceName, type: 'custom', cards: processedCards, internalBaralhos, totalCards, active: true }); } catch (error: any) { errors.push(`Erro ao ler ${file.name}: ${error.message}`); } } if (newCustomSources.length > 0) { setAllSources(prev => [...prev, ...newCustomSources]); setActiveInternalBaralhos(prev => { const newState = { ...prev }; newCustomSources.forEach(source => { newState[source.id] = new Set(Object.keys(source.internalBaralhos)); }); return newState; }); setExpandedSources(prev => { const newSet = new Set(prev); newCustomSources.forEach(s => newSet.add(s.id)); return newSet; }); } if (errors.length > 0) { setErrorMessage(errors.join("\n")); } setIsLoading(false); e.target.value = ''; };
+    const toggleSourceActive = (sourceId: string) => { setAllSources(prev => prev.map(s => s.id === sourceId ? { ...s, active: !s.active } : s)); };
+    const removeSource = (sourceId: string) => { const sourceToRemove = allSources.find(s => s.id === sourceId); if (!sourceToRemove || sourceToRemove.type !== 'custom') return; if (window.confirm(`Remover fonte "${sourceToRemove.name}"?`)) { setAllSources(prev => prev.filter(s => s.id !== sourceId)); setActiveInternalBaralhos(prev => { const newState = { ...prev }; delete newState[sourceId]; return newState; }); setExpandedSources(prev => { const newSet = new Set(prev); newSet.delete(sourceId); return newSet; }); } }
+    const toggleInternalBaralhoActive = (sourceId: string, baralhoName: string) => { setActiveInternalBaralhos(prev => { const currentSourceSet = prev[sourceId] ? new Set(prev[sourceId]) : new Set<string>(); if (currentSourceSet.has(baralhoName)) { currentSourceSet.delete(baralhoName); } else { currentSourceSet.add(baralhoName); } return { ...prev, [sourceId]: currentSourceSet }; }); };
+    const toggleExpandSource = (sourceId: string) => { setExpandedSources(prev => { const newSet = new Set(prev); if (newSet.has(sourceId)) { newSet.delete(sourceId); } else { newSet.add(sourceId); } return newSet; }); };
+    const addPlayerInput = () => { if (playerInputs.length < 8) { setPlayerInputs([...playerInputs, { id: playerInputs.length, name: "", color: predefinedColors[playerInputs.length % predefinedColors.length], showColorPicker: false, }]); } };
+    const handlePlayerChange = (index: number, field: "name" | "color", value: string) => { const updatedPlayers = [...playerInputs]; const player = updatedPlayers[index]; if (field === 'name') player.name = value; if (field === 'color') player.color = value; setPlayerInputs(updatedPlayers); };
+    const toggleColorPicker = (index: number) => { const updatedPlayers = playerInputs.map((p, i) => i === index ? { ...p, showColorPicker: !p.showColorPicker } : {...p, showColorPicker: false}); setPlayerInputs(updatedPlayers); };
+    const deletePlayer = (index: number) => { setPlayerInputs((prev) => prev.filter((_, i) => i !== index)); };
 
     const handleStartGame = (continueGame = false) => {
         let gameStateToPass: Partial<GameState>;
         const finalCategorias = recalcularCategoriasAtivas(allSources, activeInternalBaralhos).categorias;
         const finalCategoriasSelecionadas = categoriasSelecionadas.filter(cat => finalCategorias.includes(cat));
-         if (playerInputs.length === 0) { alert("Adicione pelo menos um jogador."); return; }
-         const anySourceActive = allSources.some(s => s.active); if (!anySourceActive) { alert("Ative pelo menos uma Fonte de Cartas."); return; }
-         const anyInternalDeckActive = Object.entries(activeInternalBaralhos).some(([sourceId, activeSet]) => allSources.find(s => s.id === sourceId)?.active && activeSet.size > 0); if (!anyInternalDeckActive) { alert("Ative pelo menos um baralho interno dentro das fontes ativas."); return; }
-         if (finalCategoriasSelecionadas.length === 0) { alert("Nenhuma categoria selecionada ou nenhuma categoria disponível com os baralhos ativos. Selecione categorias ou ative mais baralhos."); return; }
-         const activeCardsForGame = allSources.flatMap(source => { if (!source.active) return []; const activeBaralhos = activeInternalBaralhos[source.id]; if (!activeBaralhos || activeBaralhos.size === 0) return []; return source.cards.filter(card => activeBaralhos.has(card.baralho || DEFAULT_BARALHO_NAME)); }); if (activeCardsForGame.filter(c => c.categorias?.some(cat => finalCategoriasSelecionadas.includes(cat))).length === 0) { alert("Nenhuma carta encontrada com a combinação de baralhos e categorias selecionadas."); return; }
+        if (playerInputs.length === 0) { alert("Adicione pelo menos um jogador."); return; }
+        const anySourceActive = allSources.some(s => s.active); if (!anySourceActive) { alert("Ative pelo menos uma Fonte de Cartas."); return; }
+        const anyInternalDeckActive = Object.entries(activeInternalBaralhos).some(([sourceId, activeSet]) => allSources.find(s => s.id === sourceId)?.active && activeSet.size > 0); if (!anyInternalDeckActive) { alert("Ative pelo menos um baralho interno dentro das fontes ativas."); return; }
+        if (finalCategoriasSelecionadas.length === 0) { alert("Nenhuma categoria selecionada ou nenhuma categoria disponível com os baralhos ativos. Selecione categorias ou ative mais baralhos."); return; }
+        const activeCardsForGame = allSources.flatMap(source => { if (!source.active) return []; const activeBaralhos = activeInternalBaralhos[source.id]; if (!activeBaralhos || activeBaralhos.size === 0) return []; return source.cards.filter(card => activeBaralhos.has(card.baralho || DEFAULT_BARALHO_NAME)); }); if (activeCardsForGame.filter(c => c.categorias?.some(cat => finalCategoriasSelecionadas.includes(cat))).length === 0) { alert("Nenhuma carta encontrada com a combinação de baralhos e categorias selecionadas."); return; }
 
         const activeSourcesForGame = allSources.filter(s => s.active);
         const activeInternalBaralhosStateForSave = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => { if (activeSourcesForGame.some(s => s.id === key)) { acc[key] = Array.from(valueSet); } return acc; }, {} as Record<string, string[]>);
@@ -145,28 +143,13 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             try {
                 const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
                 if (savedState && savedState.jogoIniciado) {
-                    // Ao continuar, carrega o estado salvo do JOGO, mas usa as configurações ATUAIS da UI para fontes/baralhos/categorias
-                    gameStateToPass = {
-                        ...savedState, // Mantém players, currentPlayerId, etc.
-                        categoriasSelecionadas: finalCategoriasSelecionadas, // Usa seleção atual
-                        ocultarCarta: ocultarCarta, // Usa seleção atual
-                        probabilityIndex: probabilityIndex, // Usa seleção atual
-                        activeSourceIds: activeSourcesForGame.map(s => s.id), // Usa fontes ativas atuais
-                        activeInternalBaralhosState: activeInternalBaralhosStateForSave, // Usa baralhos ativos atuais
-                    };
+                    gameStateToPass = { ...savedState, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex, activeSourceIds: activeSourcesForGame.map(s => s.id), activeInternalBaralhosState: activeInternalBaralhosStateForSave, };
                 } else { return handleStartGame(false); }
             } catch (e) { console.error("Erro ao carregar jogo salvo:", e); return handleStartGame(false); }
         } else {
             const initializedPlayers: Player[] = playerInputs.map((input, index) => ({ id: index, name: input.name.trim() || `Jogador ${index + 1}`, color: input.color || predefinedColors[index % predefinedColors.length], fixedStars: 0, respostasCertas: 0, respostasErradas: 0, respostasSeguidas: 0, progresso: 0, pulosDisponiveis: 0, contadorDeEstrelas: 0, rodadasPreso: 0 }));
-            gameStateToPass = {
-                players: initializedPlayers, currentPlayerId: initializedPlayers[0]?.id ?? null,
-                categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta,
-                probabilityIndex: probabilityIndex, jogoIniciado: true,
-                activeSourceIds: activeSourcesForGame.map(s => s.id),
-                activeInternalBaralhosState: activeInternalBaralhosStateForSave,
-            };
+            gameStateToPass = { players: initializedPlayers, currentPlayerId: initializedPlayers[0]?.id ?? null, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex, jogoIniciado: true, activeSourceIds: activeSourcesForGame.map(s => s.id), activeInternalBaralhosState: activeInternalBaralhosStateForSave, };
         }
-        // Passa o estado do jogo E as fontes ativas completas
         onStartGame(gameStateToPass, activeSourcesForGame);
     };
 
@@ -175,73 +158,93 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const builtInSourcesUI = allSources.filter(s => s.type === 'builtin');
     const customSourcesUI = allSources.filter(s => s.type === 'custom');
 
-    // Renderiza apenas no cliente após estados serem inicializados
-    if (!isClient) { return null; }
+    if (!isClient) { return null; } // Renderiza nada no servidor/antes da hidratação
 
     return (
         <Card className="w-full max-w-lg mx-auto mt-8 shadow-lg">
-            {/* ... JSX da TelaInicial (sem mudanças significativas na estrutura, apenas na lógica de dados) ... */}
-            <CardHeader> <CardTitle className="text-2xl font-bold text-center text-green-700">Eco Challenge</CardTitle> <p className="text-sm text-center text-gray-600">O Jogo da Sustentabilidade</p> </CardHeader>
+             <CardHeader> <CardTitle className="text-2xl font-bold text-center text-green-700">Eco Challenge</CardTitle> <p className="text-sm text-center text-gray-600">O Jogo da Sustentabilidade</p> </CardHeader>
             <CardContent className="space-y-6">
+                 {/* Gerenciamento de Fontes e Baralhos Internos */}
                  <div className="space-y-4">
                     <div>
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">Baralhos Incluídos</h3>
                         <ScrollArea className="h-40 border rounded-md p-2 bg-gray-100 space-y-2">
-                             {builtInSourcesUI.length > 0 ? builtInSourcesUI.map((source) => (
+                            {builtInSourcesUI.length > 0 ? builtInSourcesUI.map((source) => (
                                 <div key={source.id} className="border-b last:border-b-0 pb-2 mb-2 bg-white px-2 py-1 rounded shadow-sm">
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id={`source-${source.id}`} checked={source.active} onCheckedChange={() => toggleSourceActive(source.id)} className="mt-1"/>
                                         <button onClick={() => toggleExpandSource(source.id)} className="flex items-center flex-1 text-left cursor-pointer min-w-0" aria-expanded={expandedSources.has(source.id)}>
                                             {expandedSources.has(source.id) ? <ChevronDown className="h-4 w-4 mr-1 shrink-0"/> : <ChevronRight className="h-4 w-4 mr-1 shrink-0"/>}
-                                            <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={`${source.name} (${source.totalCards} cartas)`}> {source.name} <span className="text-gray-500">({source.totalCards})</span> </label>
+                                            <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={`${source.name} (${source.totalCards} cartas)`}>
+                                                {source.name} <span className="text-gray-500">({source.totalCards})</span>
+                                            </label>
                                         </button>
                                     </div>
-                                     {source.active && expandedSources.has(source.id) && (
-                                         <div className="pl-8 mt-1 space-y-1">
-                                            {Object.entries(source.internalBaralhos).length > 0 ? Object.entries(source.internalBaralhos).map(([baralhoName, count]) => ( <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2"> <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} /> <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer"> {baralhoName} <span className="text-gray-500">({count})</span> </label> </div> )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
-                                         </div>
-                                     )}
+                                    {source.active && expandedSources.has(source.id) && (
+                                        <div className="pl-8 mt-1 space-y-1">
+                                            {Object.entries(source.internalBaralhos).length > 0 ? Object.entries(source.internalBaralhos).map(([baralhoName, count]) => (
+                                                <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
+                                                    <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} />
+                                                    <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer">
+                                                        {baralhoName} <span className="text-gray-500">({count})</span>
+                                                    </label>
+                                                </div>
+                                            )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
+                                        </div>
+                                    )}
                                 </div>
                             )) : <p className="text-sm text-gray-500 italic p-2">Nenhum baralho incluído encontrado.</p>}
                         </ScrollArea>
                     </div>
-                     <div className="mt-4">
+                    <div className="mt-4">
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">Baralhos Carregados (Arquivos)</h3>
-                         {errorMessage && (<Alert variant="destructive" className="text-xs mb-2"><AlertDescription>{errorMessage}</AlertDescription></Alert>)}
-                         <Input type="file" multiple accept=".js,.json" onChange={handleCustomDeckUpload} disabled={isLoading} className="text-sm h-9 mb-2"/>
-                         {isLoading && <p className="text-xs text-blue-600 mb-2">Carregando...</p>}
-                         {customSourcesUI.length > 0 ? (
+                        {errorMessage && (<Alert variant="destructive" className="text-xs mb-2"><AlertDescription>{errorMessage}</AlertDescription></Alert>)}
+                        <Input type="file" multiple accept=".js,.json" onChange={handleCustomDeckUpload} disabled={isLoading} className="text-sm h-9 mb-2"/>
+                        {isLoading && <p className="text-xs text-blue-600 mb-2">Carregando...</p>}
+                        {customSourcesUI.length > 0 ? (
                             <ScrollArea className="h-40 border rounded-md p-2 bg-gray-100 space-y-2">
-                                 {customSourcesUI.map((source) => (
-                                     <div key={source.id} className="border-b last:border-b-0 pb-2 mb-2 bg-white px-2 py-1 rounded shadow-sm">
-                                         <div className="flex items-center space-x-2">
-                                             <Checkbox id={`source-${source.id}`} checked={source.active} onCheckedChange={() => toggleSourceActive(source.id)} className="mt-1"/>
-                                             <button onClick={() => toggleExpandSource(source.id)} className="flex items-center flex-1 text-left cursor-pointer min-w-0" aria-expanded={expandedSources.has(source.id)}>
-                                                 {expandedSources.has(source.id) ? <ChevronDown className="h-4 w-4 mr-1 shrink-0"/> : <ChevronRight className="h-4 w-4 mr-1 shrink-0"/>}
-                                                 <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={`${source.name} (${source.totalCards} cartas)`}> {source.name} <span className="text-gray-500">({source.totalCards})</span> </label>
-                                             </button>
-                                             <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:bg-red-100 shrink-0" onClick={(e) => {e.stopPropagation(); removeSource(source.id);}} aria-label={`Remover fonte ${source.name}`}><Trash className="h-4 w-4" /></Button>
-                                         </div>
-                                         {source.active && expandedSources.has(source.id) && (
-                                             <div className="pl-8 mt-1 space-y-1">
-                                                {Object.entries(source.internalBaralhos).length > 0 ? Object.entries(source.internalBaralhos).map(([baralhoName, count]) => ( <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2"> <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} /> <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer"> {baralhoName} <span className="text-gray-500">({count})</span> </label> </div> )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
-                                             </div>
-                                         )}
-                                    </div>
-                                ))}
-                            </ScrollArea>
-                         ) : ( !isLoading && <p className="text-sm text-gray-500 italic p-2 border rounded bg-gray-100">Nenhum arquivo carregado.</p> )}
-                    </div>
-                 </div>
+                                {customSourcesUI.map((source) => (
+                                    <div key={source.id} className="border-b last:border-b-0 pb-2 mb-2 bg-white px-2 py-1 rounded shadow-sm">
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox id={`source-${source.id}`} checked={source.active} onCheckedChange={() => toggleSourceActive(source.id)} className="mt-1"/>
+                                            <button onClick={() => toggleExpandSource(source.id)} className="flex items-center flex-1 text-left cursor-pointer min-w-0" aria-expanded={expandedSources.has(source.id)}>
+                                                {expandedSources.has(source.id) ? <ChevronDown className="h-4 w-4 mr-1 shrink-0"/> : <ChevronRight className="h-4 w-4 mr-1 shrink-0"/>}
+                                                <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={`${source.name} (${source.totalCards} cartas)`}>
+                                                    {source.name} <span className="text-gray-500">({source.totalCards})</span>
+                                                </label>
+                                            </button>
+                                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:bg-red-100 shrink-0" onClick={(e) => {e.stopPropagation(); removeSource(source.id);}} aria-label={`Remover fonte ${source.name}`}><Trash className="h-4 w-4" /></Button>
+                                        </div>
+                                        {source.active && expandedSources.has(source.id) && (
+                                            <div className="pl-8 mt-1 space-y-1">
+                                                {Object.entries(source.internalBaralhos).length > 0 ? Object.entries(source.internalBaralhos).map(([baralhoName, count]) => (
+                                                    <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
+                                                        <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} />
+                                                        <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer">
+                                                            {baralhoName} <span className="text-gray-500">({count})</span>
+                                                        </label>
+                                                    </div>
+                                                )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
+                                            </div>
+                                        )}
+                                   </div>
+                               ))}
+                           </ScrollArea>
+                        ) : ( !isLoading && <p className="text-sm text-gray-500 italic p-2 border rounded bg-gray-100">Nenhum arquivo carregado.</p> )}
+                   </div>
+                </div>
+                {/* Seleção de Categorias */}
                 <div className="space-y-2">
                     <h3 className="text-lg font-semibold text-gray-800">Categorias (dos baralhos ativos)</h3>
                     <Input type="text" placeholder="Pesquisar Categoria..." value={termoBuscaCategoria} onChange={(e) => setTermoBuscaCategoria(e.target.value)} className="w-full p-2 border rounded h-9"/>
                     <ScrollArea className="h-40 border rounded-md p-3 bg-gray-50">
-                         {categoriasFiltradasParaExibicao.length > 0 ? (
+                        {categoriasFiltradasParaExibicao.length > 0 ? (
                             categoriasFiltradasParaExibicao.map(([categoria, count]) => (
                                 <div key={categoria} className="flex items-center space-x-2 mb-1 hover:bg-gray-100 p-1 rounded">
                                     <Checkbox id={`cat-${categoria}`} checked={categoriasSelecionadas.includes(categoria)} onCheckedChange={() => { setCategoriasSelecionadas((prev) => prev.includes(categoria) ? prev.filter((c) => c !== categoria) : [...prev, categoria]); }} />
-                                    <label htmlFor={`cat-${categoria}`} className="text-sm cursor-pointer flex-1"> {categoria} <span className="text-gray-500">({count})</span> </label>
+                                    <label htmlFor={`cat-${categoria}`} className="text-sm cursor-pointer flex-1">
+                                        {categoria} <span className="text-gray-500">({count})</span>
+                                    </label>
                                 </div>
                             ))
                         ) : ( <p className="text-sm text-gray-500 italic">Nenhuma categoria disponível para os baralhos selecionados.</p> )}
@@ -251,6 +254,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                         <Button onClick={() => setCategoriasSelecionadas([])} variant="outline" size="sm" className="flex-1">Nenhuma</Button>
                     </div>
                 </div>
+                {/* Configuração de Jogadores */}
                 <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Jogadores</h3>
                     <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
@@ -258,6 +262,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                     </div>
                     {playerInputs.length < 8 && (<Button onClick={addPlayerInput} variant="secondary" className="w-full">+ Adicionar Jogador</Button>)}
                 </div>
+                 {/* Opções de Jogo */}
                  <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Opções</h3>
                      <Button onClick={() => setOcultarCarta(!ocultarCarta)} variant="outline" className="w-full flex items-center justify-center space-x-2"> {ocultarCarta ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />} <span>{ocultarCarta ? "Ocultar Carta Ativado" : "Ocultar Carta Desativado"}</span> </Button>
@@ -297,69 +302,39 @@ const EcoChallenge: React.FC = () => {
     const [rollingNumber, setRollingNumber] = useState<number | null>(null);
     const [isDieModalOpen, setIsDieModalOpen] = useState(false);
     const [isRolling, setIsRolling] = useState(false);
-    const [isClientReady, setIsClientReady] = useState(false); // Estado para controle de hidratação
+    const [isClientReady, setIsClientReady] = useState(false); // Para controle de hidratação
 
     const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
 
-    // Função chamada pela TelaInicial para iniciar ou continuar o jogo
     const handleGameStart = useCallback((initialGameState?: Partial<GameState>, sourcesForGame?: SourceInfo[]) => {
-        console.log("handleGameStart chamado", { initialGameState, sourcesForGame });
+        console.log("EcoChallenge: handleGameStart chamado", { initialGameState, sourcesForGame });
         if (initialGameState && sourcesForGame && initialGameState.jogoIniciado) {
              setGameState(initialGameState as GameState);
              setCurrentGameSources(sourcesForGame);
-             // Resetar estados da rodada ao iniciar/continuar
-             setCartaAtual(null); // Será selecionada pelo useEffect
-             setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]); setOpcoesEliminadas([]); setCartaRevelada(!(initialGameState.ocultarCarta ?? true));
-        } else if (initialGameState) { // Tenta reconstruir fontes para saves antigos
+             setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]); setOpcoesEliminadas([]); setCartaRevelada(!(initialGameState.ocultarCarta ?? true));
+        } else if (initialGameState) { // Fallback para save antigo
              console.warn("Reconstruindo fontes para jogo salvo (fallback)...");
              const customSourcesRaw = typeof window !== "undefined" ? localStorage.getItem("customSourceInfos") : null; const builtInStatusRaw = typeof window !== "undefined" ? localStorage.getItem("builtInSourceStatus") : null; let customSources: SourceInfo[] = []; let builtInStatus: Record<string, boolean> | null = null; try { customSources = customSourcesRaw ? JSON.parse(customSourcesRaw) : []; } catch { customSources = []; } try { builtInStatus = builtInStatusRaw ? JSON.parse(savedBuiltInStatus) : null; } catch { builtInStatus = null; } const processedCustomSources = customSources.map(source => { const { processedCards, internalBaralhos, totalCards } = processCardsAndExtractBaralhos(source.cards); return { ...source, cards: processedCards, internalBaralhos, totalCards }; }); const reconstructedSources = [ ...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus?.[bs.id] ?? true })), ...processedCustomSources ].filter(s => initialGameState.activeSourceIds?.includes(s.id));
              setGameState(initialGameState as GameState); setCurrentGameSources(reconstructedSources);
              setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]); setOpcoesEliminadas([]); setCartaRevelada(!(initialGameState.ocultarCarta ?? true));
-        } else {
-            console.error("handleGameStart chamado sem dados válidos.");
-            setGameState(null); // Garante que volte para TelaInicial se algo der errado
-        }
+        } else { console.error("handleGameStart chamado sem dados válidos."); setGameState(null); }
      }, []);
 
-     // Persiste o estado do jogo
-    const updateGameState = useCallback((newState: Partial<GameState>) => {
-        setGameState(prev => {
-            if (!prev) return null; const updatedState = { ...prev, ...newState };
-            if (typeof window !== "undefined") { try { localStorage.setItem("estadoEcoChallenge", JSON.stringify(updatedState)); } catch (e) { console.error("Erro ao salvar estado:", e); } }
-            return updatedState;
-        });
-    }, []);
-
+    const updateGameState = useCallback((newState: Partial<GameState>) => { setGameState(prev => { if (!prev) return null; const updatedState = { ...prev, ...newState }; if (typeof window !== "undefined") { try { localStorage.setItem("estadoEcoChallenge", JSON.stringify(updatedState)); } catch (e) { console.error("Erro ao salvar estado:", e); } } return updatedState; }); }, []);
     const updateCurrentPlayer = useCallback((partialPlayerData: Partial<Player>) => { if (!gameState || gameState.currentPlayerId === null) return; const updatedPlayers = gameState.players.map(p => p.id === gameState.currentPlayerId ? { ...p, ...partialPlayerData } : p ); updateGameState({ players: updatedPlayers }); }, [gameState, updateGameState]);
 
-    // Efeito para marcar que o cliente está pronto
-     useEffect(() => {
-        setIsClientReady(true);
-    }, []);
+    useEffect(() => { setIsClientReady(true); }, []); // Marca cliente pronto na montagem
 
-    // Seleciona a primeira carta QUANDO gameState e currentGameSources estiverem prontos
-    useEffect(() => {
-         // Só roda se o jogo foi iniciado, temos fontes, e ainda não temos uma carta
-        if (gameState?.jogoIniciado && currentGameSources.length > 0 && !cartaAtual && !noCardsAvailable) {
-            console.log("Jogo iniciado e fontes carregadas. Selecionando primeira carta...");
-            selecionarCartaAleatoria();
-        }
-    }, [gameState?.jogoIniciado, currentGameSources, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]); // Depende de gameState.jogoIniciado e currentGameSources
-
-    // Timer para ContraTempo
-    useEffect(() => { /* ... sem mudanças ... */ }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId, updateCurrentPlayer]);
-
-    // Selecionar Carta Aleatória - Função Pura
+    // Selecionar carta aleatória
     const selecionarCartaAleatoria = useCallback(() => {
-        if (!gameState || currentGameSources.length === 0) { console.warn("Tentativa de selecionar carta sem gameState ou currentGameSources."); setNoCardsAvailable(true); return; }
+        if (!gameState || currentGameSources.length === 0) { setNoCardsAvailable(true); return; }
         const { categoriasSelecionadas, probabilityIndex, activeInternalBaralhosState } = gameState;
         const probabilidadeExcluirEspecial = probabilitySettings[probabilityIndex].value; const incluirCartasEspeciais = probabilidadeExcluirEspecial === 0 || Math.random() >= probabilidadeExcluirEspecial;
-        const activeSources = currentGameSources;
+        const activeSources = currentGameSources; // Usa as fontes já filtradas e ativas
 
         const cartasFiltradas = activeSources.flatMap(source => {
-            const activeBaralhosForSource = activeInternalBaralhosState[source.id];
-            if (!activeBaralhosForSource || activeBaralhosForSource.length === 0) return [];
+            const activeBaralhosForSource = activeInternalBaralhosState[source.id]; if (!activeBaralhosForSource || activeBaralhosForSource.length === 0) return [];
             const activeBaralhoSet = new Set(activeBaralhosForSource);
             return source.cards.filter(card => {
                 const baralhoAtivo = activeBaralhoSet.has(card.baralho || DEFAULT_BARALHO_NAME); if (!baralhoAtivo) return false;
@@ -369,14 +344,16 @@ const EcoChallenge: React.FC = () => {
             });
         });
 
-        console.log(`Selecionando carta de ${cartasFiltradas.length} opções filtradas.`);
-
         if (cartasFiltradas.length === 0) { setNoCardsAvailable(true); setCartaAtual(null); setMensagem("Nenhuma carta encontrada com os filtros atuais!"); return; }
-        setNoCardsAvailable(false);
-        const idxAleat = Math.floor(Math.random() * cartasFiltradas.length); const novaCarta = cartasFiltradas[idxAleat]; setCartaAtual(novaCarta);
+        setNoCardsAvailable(false); const idxAleat = Math.floor(Math.random() * cartasFiltradas.length); const novaCarta = cartasFiltradas[idxAleat]; setCartaAtual(novaCarta);
         setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setMostrarFontes(false); setOpcoesEliminadas([]); setCartaRevelada(!gameState.ocultarCarta); setRolledNumber(null); setIsDieModalOpen(false); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]);
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (novaCarta.tipo === "ContraTempo") { setTempoRestante(novaCarta.tempoLimite); }
-    }, [gameState, currentGameSources]); // Depende do gameState e das fontes do jogo atual
+    }, [gameState, currentGameSources]);
+
+    // Seleciona a primeira carta quando gameState e currentGameSources estão prontos
+    useEffect(() => { if (gameState?.jogoIniciado && currentGameSources.length > 0 && !cartaAtual && !noCardsAvailable) { selecionarCartaAleatoria(); } }, [gameState?.jogoIniciado, currentGameSources, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]);
+    // Timer do ContraTempo
+    useEffect(() => { if (cartaAtual?.tipo === "ContraTempo" && tempoRestante !== null && tempoRestante > 0 && !respondido && gameState?.jogoIniciado && cartaRevelada) { timerIntervalRef.current = setInterval(() => { setTempoRestante((prev) => { if (prev === null || prev <= 1) { clearInterval(timerIntervalRef.current!); setRespondido(true); setMensagem(`Tempo esgotado! ${cartaAtual.desvantagem || 'Tente novamente.'}`); if (gameState && gameState.currentPlayerId !== null) { const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId); if (currentPlayer) { updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - 10, 0) }); } } return 0; } return prev - 1; }); }, 1000); } else if (timerIntervalRef.current && (respondido || tempoRestante === 0 || !cartaRevelada)) { clearInterval(timerIntervalRef.current); } return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); }; }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId, updateCurrentPlayer]);
 
     // Handlers de Seleção
     const handleSelecao = (id: number) => { if (!respondido) setSelecionado(id); };
@@ -387,29 +364,36 @@ const EcoChallenge: React.FC = () => {
     const handleImagemClick = (event: React.MouseEvent<HTMLDivElement>) => { if (respondido || !cartaAtual || cartaAtual.tipo !== 'PontoCerto') return; const target = event.currentTarget; const rect = target.getBoundingClientRect(); const x = (event.clientX - rect.left) / rect.width; const y = (event.clientY - rect.top) / rect.height; const clampedX = Math.max(0, Math.min(1, x)); const clampedY = Math.max(0, Math.min(1, y)); setCoordenadasClique({ x: clampedX, y: clampedY }); };
     const handleSelecionarFragmento = (id: number) => { if (respondido) return; setFragmentosSelecionados(prev => [...prev, id]); };
     const limparFragmentos = () => { if (!respondido) { setFragmentosSelecionados([]); } };
-    const verificarResposta = () => { /* ... (sem mudanças) ... */ };
-    const resetarContadoresJogador = () => { /* ... */ }; const toggleDica = () => { /* ... */ }; const toggleFontes = () => { /* ... */ }; const pularPergunta = () => { /* ... (chama selecionarCartaAleatoria) ... */ }; const eliminarRespostaErrada = () => { /* ... */ }; const voltarTelaInicial = () => { if (window.confirm("Voltar para a Tela Inicial? Progresso salvo.")) { setGameState(null); setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setCurrentGameSources([]) } }; const diminuirAcertos = () => { /* ... */ }; const diminuirErros = () => { /* ... */ }; const incrementarContadorDeEstrelas = () => { /* ... */ }; const diminuirContadorDeEstrelas = () => { /* ... */ }; const incrementarRodadasPreso = () => { /* ... */ }; const diminuirRodadasPreso = () => { /* ... */ }; const rolarDado = () => { /* ... */ }; const handleLongPressStart = (action: () => void) => { /* ... */ }; const handleLongPressEnd = () => { /* ... */ };
+    const verificarResposta = () => { if (!cartaAtual || !gameState || !gameState.players || gameState.currentPlayerId === null || respondido) return; const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId); if (!currentPlayer) return; let cor = false; let pontosGanhos = 20; let pontosPerdidos = 10; let darPuloDificil = cartaAtual.dificuldade === "dificil"; let mensagemFinal = ""; let aplicarEfeitoPadrao = false; if (cartaAtual.tipo === "ContraTempo" && timerIntervalRef.current) { clearInterval(timerIntervalRef.current); } switch (cartaAtual.tipo) { case "Pergunta": case "ContraTempo": if (cartaAtual.tipo === "ContraTempo" && (tempoRestante === null || tempoRestante <= 0)) { cor = false; } else { cor = selecionado === cartaAtual.respostaCorreta; } aplicarEfeitoPadrao = true; break; case "MultiplaEscolha": cor = Array.isArray(cartaAtual.respostaCorreta) && selecoesMultiplas.length === cartaAtual.respostaCorreta.length && selecoesMultiplas.sort().toString() === cartaAtual.respostaCorreta.sort().toString(); if (cor) pontosGanhos = 25; aplicarEfeitoPadrao = true; break; case "Ordem": cor = Array.isArray(cartaAtual.respostaCorreta) && ordemSelecoes.length === cartaAtual.respostaCorreta.length && ordemSelecoes.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 30; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "RelacionarColunas": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = paresFormados.length === cartaAtual.respostaCorreta.length && paresFormados.map(p => `${p.aId}-${p.bId}`).sort().join(',') === cartaAtual.respostaCorreta.map(p => `${p.aId}-${p.bId}`).sort().join(','); if (cor) pontosGanhos = 30; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "PontoCerto": if (!coordenadasClique || !Array.isArray(cartaAtual.zonasClicaveis)) { cor = false; break; } const zonaCorreta = cartaAtual.zonasClicaveis.find(z => z.id === cartaAtual.respostaCorreta); cor = zonaCorreta ? isClickInZone(coordenadasClique, zonaCorreta) : false; if (cor) pontosGanhos = 25; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "CompletarFrase": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = fragmentosSelecionados.length === cartaAtual.respostaCorreta.length && fragmentosSelecionados.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 25; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "Vantagem": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado); mensagemFinal = cor ? (cartaAtual.vantagem || "Vantagem aplicada!") : "Ação não confirmada."; break; case "Desvantagem": cor = false; mensagemFinal = cartaAtual.desvantagem || "Desvantagem aplicada."; break; case "Outras": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado); mensagemFinal = cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...'); break; default: const _exhaustiveCheck: never = cartaAtual; console.error("Tipo não tratado:", _exhaustiveCheck); return; } setRespondido(true); if (aplicarEfeitoPadrao) { if (cor) { const novoProgresso = currentPlayer.progresso + pontosGanhos; const completouBarra = novoProgresso >= 100; const pulosGanhos = (completouBarra ? 1 : 0) + (darPuloDificil ? 1 : 0); const estrelasFixasGanhsa = completouBarra ? 1 : 0; updateCurrentPlayer({ respostasCertas: currentPlayer.respostasCertas + 1, respostasSeguidas: currentPlayer.respostasSeguidas + 1, progresso: completouBarra ? 0 : novoProgresso, pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + pulosGanhos, 2), fixedStars: currentPlayer.fixedStars + estrelasFixasGanhsa, }); mensagemFinal = `Correto! ${cartaAtual.vantagem || ''}${completouBarra ? ' Barra completa!' : ''}`; } else { updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - pontosPerdidos, 0), }); mensagemFinal = `Incorreto. ${cartaAtual.desvantagem || ''}`; } } setMensagem(mensagemFinal); };
+    const resetarContadoresJogador = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !window.confirm(`Resetar ${cp.name}?`)) return; updateCurrentPlayer({ respostasCertas: 0, respostasErradas: 0, progresso: 0, pulosDisponiveis: 0, respostasSeguidas: 0, rodadasPreso: 0, contadorDeEstrelas: 0, fixedStars: 0 }); setMensagem(`${cp.name} resetado.`); };
+    const toggleDica = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (dicaUsada) { setMensagem("Dica já utilizada."); return; } if (!cartaAtual.dica) { setMensagem("Carta sem dica."); return; } if (cp.respostasSeguidas >= 2) { setMostrarDica(true); setDicaUsada(true); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Dica revelada! (-2 sequências)"); } else { setMensagem("São necessárias 2 respostas corretas seguidas."); } };
+    const toggleFontes = () => { if (!cartaAtual || (gameState?.ocultarCarta && !cartaRevelada)) return; if (cartaAtual.fontes && cartaAtual.fontes.length > 0) { setMostrarFontes(!mostrarFontes); } else { setMensagem("Nenhuma fonte disponível."); } };
+    const pularPergunta = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (!tiposPergunta.includes(cartaAtual.tipo)) { setMensagem("Não pode pular este tipo."); return; } if (cp.pulosDisponiveis > 0) { updateCurrentPlayer({ pulosDisponiveis: cp.pulosDisponiveis - 1 }); setMensagem("Carta pulada!"); setTimeout(() => selecionarCartaAleatoria(), 500); } else { setMensagem("Sem pulos disponíveis."); } };
+    const eliminarRespostaErrada = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; const tiposEliminaveis: Carta['tipo'][] = ["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"]; if (!tiposEliminaveis.includes(cartaAtual.tipo) || !('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || cartaAtual.opcoes.length <= 2) { setMensagem("Não é possível eliminar opções."); return; } if (cp.respostasSeguidas < 2) { setMensagem("São necessárias 2 respostas corretas seguidas."); return; } let respostaCorretaNumeros: number[] = []; if ('respostaCorreta' in cartaAtual) { if (typeof cartaAtual.respostaCorreta === 'number') { respostaCorretaNumeros = [cartaAtual.respostaCorreta];} else if (Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.every(item => typeof item === 'number')) { respostaCorretaNumeros = cartaAtual.respostaCorreta as number[]; } else if (cartaAtual.tipo === 'Vantagem' || cartaAtual.tipo === 'Desvantagem') { if (Array.isArray(cartaAtual.respostaCorreta)) respostaCorretaNumeros = cartaAtual.respostaCorreta as number[]; else respostaCorretaNumeros = cartaAtual.opcoes.map(o => o.id); } else { setMensagem("Erro interno."); return; } } else { setMensagem("Erro interno."); return; } const opcoesErradasDisponiveis = cartaAtual.opcoes.filter(op => !respostaCorretaNumeros.includes(op.id) && !opcoesEliminadas.includes(op.id)); if (opcoesErradasDisponiveis.length > 0) { const idxAleat = Math.floor(Math.random() * opcoesErradasDisponiveis.length); const opcaoEliminada = opcoesErradasDisponiveis[idxAleat].id; setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Uma opção incorreta foi eliminada! (-2 sequências)"); } else { setMensagem("Não há mais opções incorretas para eliminar."); } };
+    const voltarTelaInicial = () => { if (window.confirm("Voltar para a Tela Inicial? Progresso salvo.")) { setGameState(null); setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setCurrentGameSources([]) } };
+    const diminuirAcertos = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp) return; updateCurrentPlayer({ respostasCertas: Math.max(0, cp.respostasCertas - 1) }); setMensagem("Acerto removido."); };
+    const diminuirErros = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp) return; updateCurrentPlayer({ respostasErradas: Math.max(0, cp.respostasErradas - 1) }); setMensagem("Erro removido."); };
+    const incrementarContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: cp.contadorDeEstrelas + 1 }); setMensagem("Estrela bônus adicionada."); };
+    const diminuirContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: Math.max(0, cp.contadorDeEstrelas - 1) }); setMensagem("Estrela bônus removida."); };
+    const incrementarRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: cp.rodadasPreso + 1 }); setMensagem("Rodada preso adicionada."); };
+    const diminuirRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: cp.rodadasPreso - 1 }); setMensagem("Rodada preso removida."); };
+    const rolarDado = () => { if (isRolling) return; setIsRolling(true); setIsDieModalOpen(true); setRolledNumber(null); let rollCount = 0; const maxRolls = 15; const rollInterval = setInterval(() => { setRollingNumber(Math.floor(Math.random() * 6) + 1); rollCount++; if (rollCount >= maxRolls) { clearInterval(rollInterval); const finalNumber = Math.floor(Math.random() * 6) + 1; setRolledNumber(finalNumber); setRollingNumber(null); setIsRolling(false); } }, 80); };
+    const handleLongPressStart = (action: () => void) => { longPressTimeout.current = setTimeout(() => { action(); }, 800); };
+    const handleLongPressEnd = () => { if (longPressTimeout.current) { clearTimeout(longPressTimeout.current); longPressTimeout.current = null; } };
 
 
     // --- Renderização do Jogo ---
-    if (!isClientReady) {
-        // Evita renderizar qualquer coisa antes do cliente estar pronto para evitar hidratação
-         return <div className="flex items-center justify-center min-h-screen"><p>Carregando...</p></div>; // Ou um spinner
-    }
+     if (!isClientReady) { return <div className="flex items-center justify-center min-h-screen"><p>Carregando Interface...</p></div>; }
 
     if (!gameState) {
-        // Se o cliente está pronto, mas não há gameState, renderiza TelaInicial
-        // Verifica se existe jogo salvo APENAS aqui, no cliente
         let hasSaved = false; let initialPlayersData: Player[] = []; let initialOcultar = true; let initialProb = 0;
         if (typeof window !== "undefined") { const savedStateRaw = localStorage.getItem("estadoEcoChallenge"); try { const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; if (savedState && savedState.jogoIniciado) { hasSaved = true; initialPlayersData = savedState.players || []; initialOcultar = savedState.ocultarCarta ?? true; initialProb = savedState.probabilityIndex ?? 0; } } catch {} }
         return (<TelaInicial onStartGame={handleGameStart} initialPlayers={initialPlayersData} initialOcultarCarta={initialOcultar} initialProbabilityIndex={initialProb} hasSavedGame={hasSaved} />);
     }
 
-    // A partir daqui, temos gameState e estamos no cliente
     const { players, currentPlayerId, ocultarCarta } = gameState;
     const currentPlayer = players.find(p => p.id === currentPlayerId);
 
-    // Mostra loading se ainda não selecionou a primeira carta (ou se noCardsAvailable é true)
     if (noCardsAvailable) { return (<div className="flex flex-col items-center justify-center min-h-screen p-4 text-center"><Card className="p-6 shadow-lg"><CardHeader><CardTitle className="text-xl text-red-600">Erro!</CardTitle></CardHeader><CardContent><p className="mb-4">Nenhuma carta disponível.</p><p className="text-sm text-gray-600 mb-4">Verifique filtros/categorias ou adicione baralhos na tela inicial.</p></CardContent><CardFooter><Button onClick={voltarTelaInicial} className="w-full">Voltar para Tela Inicial</Button></CardFooter></Card></div>); }
     if (!cartaAtual || !currentPlayer) { return (<div className="flex items-center justify-center min-h-screen"><p>Selecionando carta...</p><Button onClick={voltarTelaInicial} className="ml-4">Voltar</Button></div>); }
 
@@ -421,9 +405,8 @@ const EcoChallenge: React.FC = () => {
     return (
         <div className="flex flex-col items-center p-2 md:p-4 min-h-screen bg-gradient-to-b from-green-50 to-blue-50 font-sans">
              <Card className={cn("w-full max-w-lg mx-auto mt-4 shadow-xl border-2 rounded-lg", obterEstiloCarta())} style={players.length > 0 && currentPlayer && !(ocultarCarta && !cartaRevelada) ? { boxShadow: `0 0 15px 3px ${currentPlayer.color}` } : {}}>
-                {/* ... JSX do CardHeader, CardContent, CardFooter ... */}
                  <CardHeader className="pb-3">
-                      <div className="flex justify-between items-start mb-2 gap-2">
+                     <div className="flex justify-between items-start mb-2 gap-2">
                          <div className="flex items-center space-x-2 flex-1 min-w-0">
                              <div className="flex-1 min-w-0">
                                 <CardTitle className="text-lg md:text-xl font-bold leading-tight truncate" title={cartaAtual.titulo}> {ocultarCarta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo} </CardTitle>
@@ -450,7 +433,7 @@ const EcoChallenge: React.FC = () => {
                  <CardFooter className="flex flex-col items-center pt-4 border-t bg-gray-50/50 rounded-b-lg">
                      <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3"> <Button onClick={toggleFontes} variant="outline" disabled={!cartaAtual.fontes || cartaAtual.fontes.length === 0 || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <BookOpen className="h-5 w-5" /></Button> <Button onClick={pularPergunta} variant={currentPlayer.pulosDisponiveis > 0 ? "secondary" : "outline"} disabled={currentPlayer.pulosDisponiveis === 0 || !tiposPergunta.includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <SkipForward className="h-5 w-5" /> </Button> <Button onClick={toggleDica} variant={currentPlayer.respostasSeguidas >= 2 && !dicaUsada && !!cartaAtual.dica ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || dicaUsada || !cartaAtual.dica || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <HelpCircle className="h-5 w-5" /> </Button> <Button onClick={eliminarRespostaErrada} variant={currentPlayer.respostasSeguidas >= 2 ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || !("opcoes" in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || cartaAtual.opcoes.length <= 2 || !["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"].includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <MinusCircle className="h-5 w-5" /> </Button> <Button onClick={resetarContadoresJogador} variant="outline" className="h-9 px-2.5"> <RotateCcw className="h-5 w-5" /> </Button> <Button onClick={voltarTelaInicial} variant="outline" className="h-9 px-2.5"> <Home className="h-5 w-5" /> </Button> </div>
                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3"> <Button onClick={diminuirAcertos} variant="outline" className="h-9 px-2.5" title="Diminuir Acertos"><ThumbsUp className="h-5 w-5 text-green-500 transform scale-x-[-1]" /></Button> <Button onClick={diminuirErros} variant="outline" className="h-9 px-2.5" title="Diminuir Erros"><ThumbsDown className="h-5 w-5 text-red-500 transform scale-x-[-1]" /></Button> <Button onClick={diminuirContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Diminuir Estrela Bônus"><Star className="h-5 w-5 text-red-500" /></Button> <Button onClick={incrementarContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Aumentar Estrela Bônus"><Star className="h-5 w-5 text-yellow-500" /></Button> <Button onClick={diminuirRodadasPreso} variant="outline" className="h-9 px-2.5" title="Diminuir Rodada Preso"><ChevronUp className="h-5 w-5 text-red-500 transform rotate-180" /></Button> <Button onClick={incrementarRodadasPreso} variant="outline" className="h-9 px-2.5" title="Aumentar Rodada Preso"><ChevronUp className="h-5 w-5 text-purple-500" /></Button> </div>
-                    <div className="w-full mb-3"> {ocultarCarta && !cartaRevelada ? ( <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white"> <Eye className="mr-2 h-4 w-4"/> Revelar Carta </Button> ) : !respondido ? ( <Button onClick={isVerificarDisabled() ? undefined : verificarResposta} className={cn( "w-full bg-green-600 hover:bg-green-700 text-white", isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400" )} onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd} aria-disabled={isVerificarDisabled()} tabIndex={isVerificarDisabled() ? -1 : 0} > <Check className="mr-2 h-4 w-4"/> Verificar </Button> ) : ( <Button onClick={() => selecionarCartaAleatoria()} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onMouseDown={() => handleLongPressStart(selecionarCartaAleatoria)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(selecionarCartaAleatoria)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <SkipForward className="mr-2 h-4 w-4"/> Próxima Carta </Button> )} </div>
+                    <div className="w-full mb-3"> {ocultarCarta && !cartaRevelada ? ( <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white"> <Eye className="mr-2 h-4 w-4"/> Revelar Carta </Button> ) : !respondido ? ( <Button onClick={isVerificarDisabled() ? undefined : verificarResposta} className={cn( "w-full bg-green-600 hover:bg-green-700 text-white", isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400" )} onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd} aria-disabled={isVerificarDisabled()} tabIndex={isVerificarDisabled() ? -1 : 0} > <Check className="mr-2 h-4 w-4"/> Verificar </Button> ) : ( <Button onClick={selecionarCartaAleatoria} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onMouseDown={() => handleLongPressStart(selecionarCartaAleatoria)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(selecionarCartaAleatoria)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <SkipForward className="mr-2 h-4 w-4"/> Próxima Carta </Button> )} </div>
                     {mensagem && ( <Alert variant={getAlertVariant()} className={cn( 'text-center text-sm font-semibold mb-3 w-full', cartaAtual?.tipo === 'Vantagem' && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo === 'Desvantagem' && 'bg-red-100 border-red-300 text-red-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800' )}> <AlertDescription>{mensagem}</AlertDescription> </Alert> )}
                     <div className="w-full"> <Progress value={currentPlayer.progresso} className="h-2.5 [&>*]:bg-orange-500" /> <div className="flex justify-between items-center w-full mt-2 text-sm text-gray-700 flex-wrap gap-x-4 gap-y-1 font-semibold"> <span className="flex items-center" title="Rodadas Preso"><ChevronUp className="h-4 w-4 text-purple-500 mr-1"/>{currentPlayer.rodadasPreso}</span> <span className="flex items-center" title="Estrelas Fixas"><Award className="h-4 w-4 text-yellow-600 mr-1"/>{currentPlayer.fixedStars}</span> <span className="flex items-center" title="Estrelas Bônus"><Star className="h-4 w-4 text-yellow-500 mr-1"/>{currentPlayer.contadorDeEstrelas}</span> <span className="flex items-center" title="Pulos Disponíveis"><SkipForward className="h-4 w-4 text-blue-500 mr-1"/>{currentPlayer.pulosDisponiveis}</span> <span className="flex items-center" title="Respostas Corretas"><ThumbsUp className="h-4 w-4 text-green-500 mr-1"/>{currentPlayer.respostasCertas}</span> <span className="flex items-center" title="Respostas Erradas"><ThumbsDown className="h-4 w-4 text-red-500 mr-1"/>{currentPlayer.respostasErradas}</span> <span className="flex items-center" title="Respostas Seguidas"><Zap className="h-4 w-4 text-orange-500 mr-1"/>{currentPlayer.respostasSeguidas}</span> </div> </div>
                  </CardFooter>
