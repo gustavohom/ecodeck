@@ -841,10 +841,18 @@ const EcoChallenge: React.FC = () => {
                             variant={getAlertVariant()}
                             className={cn(
                                 'text-center text-sm font-semibold mb-3 w-full',
-                                // Estilos baseados em getAlertVariant e isInfoAlert (modificado)
-                                getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800', // Azul para info
-                                getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800', // Verde para correto/vantagem
-                                getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800' // Vermelho para erro/desvantagem
+                                // ===== LÓGICA DE CORES REFINADA =====
+                                // Força VERDE se for tipo Vantagem
+                                cartaAtual?.tipo === 'Vantagem' && 'bg-green-100 border-green-300 text-green-800',
+                                // Força VERMELHO se for tipo Desvantagem
+                                cartaAtual?.tipo === 'Desvantagem' && 'bg-red-100 border-red-300 text-red-800',
+                                // Aplica AZUL para info (se NÃO for Vantagem/Desvantagem e for 'info')
+                                cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800',
+                                // Aplica VERDE para correto (se NÃO for Vantagem/Desvantagem/Info e for 'default')
+                                cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800',
+                                // Aplica VERMELHO para erro (se NÃO for Vantagem/Desvantagem e for 'destructive')
+                                cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800'
+                                // ===== FIM DA LÓGICA DE CORES REFINADA =====
                             )}
                         >
                             <AlertDescription>{mensagem}</AlertDescription>
