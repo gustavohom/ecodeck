@@ -495,7 +495,7 @@ const EcoChallenge: React.FC = () => {
             }, 1000);
         } else if (timerIntervalRef.current && (respondido || tempoRestante === 0)) { clearInterval(timerIntervalRef.current); }
         return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
-    }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId]);
+    }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId, updateGameState]); // Adicionado updateGameState
 
     const handleSelecao = (id: number) => { if (!respondido) setSelecionado(id); };
     const handleSelecaoMultipla = (id: number) => { if (!respondido) { setSelecoesMultiplas((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
@@ -598,10 +598,20 @@ const EcoChallenge: React.FC = () => {
                 mensagemFinal = `Correto! ${cartaAtual.vantagem || ''}${completouBarra ? ' Barra completa!' : ''}`;
             } else {
                 updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - pontosPerdidos, 0), });
-                let detalheErro = "";
-                if (cartaAtual.tipo === "Ordem" && Array.isArray(cartaAtual.respostaCorreta) && Array.isArray(cartaAtual.opcoes)) { const ordemCorretaTexto = cartaAtual.respostaCorreta.map(id => cartaAtual.opcoes.find(o => o.id === id)?.texto).join(" -> "); detalheErro = ` Ordem correta: ${ordemCorretaTexto}.`; }
+                let detalheErro = ""; // Resetado aqui
+
+                 // ===== MODIFICAÇÃO 2: Remover detalhe de erro para Ordem =====
+                // Comentado ou removido o bloco if para Ordem
+                /*
+                if (cartaAtual.tipo === "Ordem" && Array.isArray(cartaAtual.respostaCorreta) && Array.isArray(cartaAtual.opcoes)) {
+                    const ordemCorretaTexto = cartaAtual.respostaCorreta.map(id => cartaAtual.opcoes.find(o => o.id === id)?.texto).join(" -> ");
+                    detalheErro = ` Ordem correta: ${ordemCorretaTexto}.`;
+                }
+                */
+                // ===== FIM DA MODIFICAÇÃO 2 =====
+
                 // Define a mensagem padrão de erro para tipos de pergunta
-                mensagemFinal = `Incorreto. ${cartaAtual.desvantagem || ''}${detalheErro}`;
+                mensagemFinal = `Incorreto. ${cartaAtual.desvantagem || ''}${detalheErro}`; // detalheErro será vazio para Ordem
             }
         }
         // Define a mensagem final no estado (seja padrão ou específica de Vantagem/Desvantagem/Outras)
@@ -656,9 +666,19 @@ const EcoChallenge: React.FC = () => {
         if (!mensagem) return "default"; const lowerMsg = mensagem.toLowerCase();
         if (lowerMsg.includes('incorreto') || lowerMsg.includes('desvantagem') || lowerMsg.includes('tempo esgotado')) return "destructive";
         if (lowerMsg.includes('correto') || lowerMsg.includes('vantagem')) return "default";
-        return "default"; // Default para mensagens informativas (azul será aplicado via classe)
+        return "default";
     };
-    const isInfoAlert = !mensagem.toLowerCase().includes('correto') && !mensagem.toLowerCase().includes('vantagem') && !mensagem.toLowerCase().includes('incorreto') && !mensagem.toLowerCase().includes('desvantagem') && !mensagem.toLowerCase().includes('tempo esgotado');
+
+     // ===== MODIFICAÇÃO 1: Ajuste no isInfoAlert =====
+    const isInfoAlert = !mensagem.toLowerCase().includes('correto') &&
+                        !mensagem.toLowerCase().includes('vantagem') &&
+                        !mensagem.toLowerCase().includes('incorreto') &&
+                        !mensagem.toLowerCase().includes('desvantagem') &&
+                        !mensagem.toLowerCase().includes('tempo esgotado') &&
+                        // Adicionado para garantir que Vantagem/Desvantagem não sejam 'info'
+                        cartaAtual?.tipo !== 'Vantagem' &&
+                        cartaAtual?.tipo !== 'Desvantagem';
+     // ===== FIM DA MODIFICAÇÃO 1 =====
 
     return (
         <div className="flex flex-col items-center p-2 md:p-4 min-h-screen bg-gradient-to-b from-green-50 to-blue-50 font-sans">
@@ -798,15 +818,14 @@ const EcoChallenge: React.FC = () => {
                                     "w-full bg-green-600 hover:bg-green-700 text-white",
                                     isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400"
                                 )}
-                                // disabled={isVerificarDisabled()} // Remover 'disabled' para permitir eventos de mouse/touch
-                                onMouseDown={() => handleLongPressStart(rolarDado)} // Long press sempre escuta
+                                onMouseDown={() => handleLongPressStart(rolarDado)}
                                 onMouseUp={handleLongPressEnd}
                                 onMouseLeave={handleLongPressEnd}
                                 onTouchStart={() => handleLongPressStart(rolarDado)}
                                 onTouchEnd={handleLongPressEnd}
                                 onTouchCancel={handleLongPressEnd}
-                                aria-disabled={isVerificarDisabled()} // Usar aria-disabled para acessibilidade
-                                tabIndex={isVerificarDisabled() ? -1 : 0} // Controla foco
+                                aria-disabled={isVerificarDisabled()}
+                                tabIndex={isVerificarDisabled() ? -1 : 0}
                             >
                                 <Check className="mr-2 h-4 w-4"/> Verificar
                             </Button>
@@ -822,6 +841,7 @@ const EcoChallenge: React.FC = () => {
                             variant={getAlertVariant()}
                             className={cn(
                                 'text-center text-sm font-semibold mb-3 w-full',
+                                // Estilos baseados em getAlertVariant e isInfoAlert (modificado)
                                 getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800', // Azul para info
                                 getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800', // Verde para correto/vantagem
                                 getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800' // Vermelho para erro/desvantagem
@@ -865,16 +885,14 @@ const EcoChallenge: React.FC = () => {
     function renderizarConteudoResposta() {
         if (!cartaAtual) return null;
 
-        // Estilos inline baseados no código antigo
         const buttonInlineStyle = {
             maxHeight: "80px",
             height: "auto",
-            overflowY: "auto" as React.CSSProperties['overflowY'], // Cast necessário
+            overflowY: "auto" as React.CSSProperties['overflowY'],
             whiteSpace: "normal" as React.CSSProperties['whiteSpace'],
             alignItems: "flex-start",
             display: "flex",
             textAlign: "left" as React.CSSProperties['textAlign'],
-            // Padding será controlado pelo Tailwind (py-2 px-3) para consistência
         };
 
         switch (cartaAtual.tipo) {
@@ -884,25 +902,19 @@ const EcoChallenge: React.FC = () => {
                     const isSelected = selecionado === op.id;
                     const isEliminated = opcoesEliminadas.includes(op.id);
                     const isWrongSelection = respondido && isSelected && !isCorrect;
-                    let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default com texto escuro e legível
+                    let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100";
                     if (respondido) {
                         if (isCorrect) btnClass = "bg-green-100 border-green-400 hover:bg-green-200 text-green-900";
                         else if (isSelected) btnClass = "bg-red-100 border-red-400 hover:bg-red-200 text-red-900";
-                        else btnClass = "border-gray-300 text-gray-500"; // Não selecionada e incorreta (texto cinza)
+                        else btnClass = "border-gray-300 text-gray-500";
                     } else if (isSelected) { btnClass = "bg-blue-100 border-blue-400 text-blue-900"; }
                     return (
                         <Button
                             key={op.id}
                             onClick={() => handleSelecao(op.id)}
                             variant={"outline"}
-                            // ===== MODIFICAÇÃO AQUI =====
-                            className={cn(
-                                "w-full justify-start text-sm py-2 px-3", // Removido h-auto e whitespace-normal (definido no style), mantido padding
-                                btnClass,
-                                isEliminated && "line-through opacity-50 cursor-not-allowed"
-                            )}
-                            style={buttonInlineStyle} // Adicionado o estilo inline
-                            // ===== FIM DA MODIFICAÇÃO =====
+                            className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")}
+                            style={buttonInlineStyle}
                             disabled={isEliminated || respondido}
                         >
                             <span className="flex-1">{op.texto}</span>
@@ -918,22 +930,16 @@ const EcoChallenge: React.FC = () => {
                     const isEliminated = opcoesEliminadas.includes(op.id);
                     const isWrongSelection = respondido && isSelected && !isCorrect;
                     const missedCorrect = respondido && isCorrect && !isSelected;
-                    let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default
-                    if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; else btnClass = "border-gray-300 text-gray-500"; } // Errada não marcada (cinza)
+                    let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100";
+                    if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; else btnClass = "border-gray-300 text-gray-500"; }
                     else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
                     return (
                         <Button
                             key={op.id}
                             onClick={() => handleSelecaoMultipla(op.id)}
                             variant="outline"
-                             // ===== MODIFICAÇÃO AQUI =====
-                             className={cn(
-                                "w-full justify-start text-sm py-2 px-3", // Removido h-auto e whitespace-normal, mantido padding
-                                btnClass,
-                                isEliminated && "line-through opacity-50 cursor-not-allowed"
-                            )}
-                            style={buttonInlineStyle} // Adicionado o estilo inline
-                             // ===== FIM DA MODIFICAÇÃO =====
+                             className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")}
+                            style={buttonInlineStyle}
                             disabled={isEliminated || respondido}
                         >
                             <div className={`w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center ${isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white'}`}>{isSelected && <Check className="w-3 h-3 text-white" />}</div>
@@ -951,31 +957,35 @@ const EcoChallenge: React.FC = () => {
                     const correctIndex = Array.isArray(cOrdem.respostaCorreta) ? cOrdem.respostaCorreta.indexOf(op.id) + 1 : null;
                     const isCorrectOrder = respondido && isSelected && selectionIndex === correctIndex; const isWrongOrder = respondido && isSelected && selectionIndex !== correctIndex;
                     const isCorrectOptionOverall = respondido && correctIndex !== null && correctIndex > 0;
-                    let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default
-                    if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; } // Não faz parte (cinza)
+                    let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100";
+                    if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; }
                     else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
                     return (
                         <Button
                             key={op.id}
                             onClick={() => handleSelecaoOrdem(op.id)}
                             variant="outline"
-                            // ===== MODIFICAÇÃO AQUI =====
-                             className={cn(
-                                "w-full justify-start text-sm py-2 px-3", // Removido h-auto e whitespace-normal, mantido padding
-                                btnClass
-                            )}
-                            style={buttonInlineStyle} // Adicionado o estilo inline
-                             // ===== FIM DA MODIFICAÇÃO =====
+                             className={cn("w-full justify-start text-sm py-2 px-3", btnClass )}
+                            style={buttonInlineStyle}
                             disabled={respondido}
                         >
                             {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)}
                             <span className="flex-1">{op.texto}</span>
-                            {respondido && isCorrectOptionOverall && (<span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${ isCorrectOrder ? 'bg-green-500 text-white' : isWrongOrder ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}`}>{correctIndex}</span>)}
-                            {isWrongOrder && selectionIndex !== null && <span className="text-xs text-red-600 ml-1">(Sua: {selectionIndex})</span>}
+                            {respondido && isCorrectOptionOverall && (
+                                <span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${ isCorrectOrder ? 'bg-green-500 text-white' : isWrongOrder ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}`}>
+                                    {correctIndex}
+                                </span>
+                            )}
+                             {/* ===== MODIFICAÇÃO 3: Remover texto "(Sua: N)" e adicionar círculo azul ===== */}
+                             {isWrongOrder && correctIndex !== null && (
+                                <span className="ml-1 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white" title={`Posição Correta: ${correctIndex}`}>
+                                    {correctIndex}
+                                </span>
+                            )}
+                             {/* ===== FIM DA MODIFICAÇÃO 3 ===== */}
                         </Button>
                     );
                 });
-            // Casos RelacionarColunas, PontoCerto, CompletarFrase permanecem sem a modificação de estilo inline nos botões principais, pois têm layouts diferentes.
             case "RelacionarColunas":
                 const cRel = cartaAtual as CartaRelacionarColunas; return (<div className="flex space-x-2 md:space-x-4"> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna A</p>{cRel.colunaA.map(itemA => { const isSelectedA = selecaoColunaA === itemA.id; const par = paresFormados.find(p => p.aId === itemA.id); const parCorreto = respondido ? cRel.respostaCorreta.find(rc => rc.aId === itemA.id) : undefined; const isCorrectPair = respondido && par && parCorreto && par.bId === parCorreto.bId; const isWrongPair = respondido && par && (!parCorreto || par.bId !== parCorreto.bId); let btnClass = "border-gray-300 text-gray-900"; if (isSelectedA) btnClass = "ring-2 ring-blue-500 border-blue-500"; if (par && !respondido) btnClass = "bg-gray-200 border-gray-400"; if (isCorrectPair) btnClass = "bg-green-100 border-green-400 text-green-900"; if (isWrongPair) btnClass = "bg-red-100 border-red-400 text-red-900"; return (<Button key={`A-${itemA.id}`} variant="outline" onClick={() => handleSelecionarColunaA(itemA.id)} disabled={respondido} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass)}><span className="flex-1">{itemA.texto}</span>{isCorrectPair && <CheckCircle2 className="ml-1 h-3.5 w-3.5 text-green-600 flex-shrink-0" />}{isWrongPair && <XCircle className="ml-1 h-3.5 w-3.5 text-red-600 flex-shrink-0" />}{isWrongPair && parCorreto && (<span className="text-[10px] ml-1 text-blue-600 hidden md:inline">({cRel.colunaB.find(iB => iB.id === parCorreto.bId)?.texto})</span>)}</Button>); })}</div> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna B</p>{cRel.colunaB.map(itemB => { const isPairedB = paresFormados.some(p => p.bId === itemB.id); const isDisabled = respondido || selecaoColunaA === null || isPairedB; let btnClass = "border-gray-300 hover:bg-gray-100 text-gray-900"; if (isPairedB) btnClass = "bg-gray-200 border-gray-400 text-gray-600"; return (<Button key={`B-${itemB.id}`} variant="outline" onClick={() => handleSelecionarColunaB(itemB.id)} disabled={isDisabled} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass, !isDisabled && selecaoColunaA !== null && "hover:border-blue-400" )}><span className="flex-1">{itemB.texto}</span></Button>); })}</div></div>);
             case "PontoCerto":
