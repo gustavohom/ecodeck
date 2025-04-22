@@ -103,7 +103,6 @@ const tiposEspeciais: Carta['tipo'][] = ["Vantagem", "Desvantagem", "Outras"];
 
 // --- Carregamento Inicial e Estruturação ---
 
-// Helper para extrair baralhos internos e atribuir padrão
 function processCardsAndExtractBaralhos(cards: Carta[]): { processedCards: Carta[], internalBaralhos: string[] } {
     const baralhoSet = new Set<string>();
     const processedCards = cards.map(card => {
@@ -114,7 +113,6 @@ function processCardsAndExtractBaralhos(cards: Carta[]): { processedCards: Carta
     return { processedCards, internalBaralhos: Array.from(baralhoSet).sort() };
 }
 
-// Processa os decks built-in
 const builtInSourcesData: Omit<SourceInfo, 'active' | 'internalBaralhos'>[] = [
     { id: "manejoPlantadas", name: "Manejo Plantadas", type: 'builtin', cards: manejoPlantadas as Carta[] },
     { id: "manejoNativas", name: "Manejo Nativas", type: 'builtin', cards: manejoNativas as Carta[] },
@@ -123,17 +121,10 @@ const builtInSourcesData: Omit<SourceInfo, 'active' | 'internalBaralhos'>[] = [
     { id: "testCards", name: "Test Cards", type: 'builtin', cards: testCards as Carta[] },
 ];
 
-// Inicializa as fontes built-in com baralhos processados
 const initialBuiltInSources: SourceInfo[] = builtInSourcesData.map(source => {
     const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards);
-    return {
-        ...source,
-        cards: processedCards,
-        internalBaralhos: internalBaralhos,
-        active: true
-    };
+    return { ...source, cards: processedCards, internalBaralhos: internalBaralhos, active: true };
 });
-
 
 // --- Funções Utilitárias ---
 function parseJSDeckFile(content: string): Carta[] {
@@ -180,7 +171,6 @@ interface TelaInicialProps {
 const TelaInicial: React.FC<TelaInicialProps> = ({
     onStartGame, initialPlayers, initialOcultarCarta, initialProbabilityIndex, hasSavedGame,
 }) => {
-    // ===== INICIO DOS ESTADOS DA TELA INICIAL =====
     const [termoBuscaCategoria, setTermoBuscaCategoria] = useState("");
     const [categoriasSelecionadas, setCategoriasSelecionadas] = useState<string[]>([]);
     const [ocultarCarta, setOcultarCarta] = useState(initialOcultarCarta);
@@ -213,21 +203,12 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
              const saved = localStorage.getItem("activeInternalBaralhos");
              try {
                  const parsed = saved ? JSON.parse(saved) : {};
-                 Object.keys(parsed).forEach(key => {
-                     if (Array.isArray(parsed[key])) {
-                         initialState[key] = new Set(parsed[key]);
-                     }
-                 });
+                 Object.keys(parsed).forEach(key => { if (Array.isArray(parsed[key])) { initialState[key] = new Set(parsed[key]); } });
              } catch { initialState = {}; }
          }
          allSources.forEach(source => {
-             if (!initialState[source.id]) {
-                 initialState[source.id] = new Set(source.internalBaralhos);
-             } else {
-                 source.internalBaralhos.forEach(bName => {
-                     initialState[source.id].add(bName);
-                 })
-             }
+             if (!initialState[source.id]) { initialState[source.id] = new Set(source.internalBaralhos); }
+             else { source.internalBaralhos.forEach(bName => { initialState[source.id].add(bName); }) }
          });
          return initialState;
     });
@@ -235,7 +216,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
-    // ===== FIM DOS ESTADOS DA TELA INICIAL =====
 
     useEffect(() => {
         const novasCategorias = recalcularCategoriasAtivas(allSources, activeInternalBaralhos);
@@ -250,10 +230,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             const builtInStatusToSave: Record<string, boolean> = {};
             allSources.filter(s => s.type === 'builtin').forEach(s => { builtInStatusToSave[s.id] = s.active; });
             localStorage.setItem("builtInSourceStatus", JSON.stringify(builtInStatusToSave));
-            const serializableActiveInternal = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => {
-                acc[key] = Array.from(valueSet);
-                return acc;
-            }, {} as Record<string, string[]>);
+            const serializableActiveInternal = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => { acc[key] = Array.from(valueSet); return acc; }, {} as Record<string, string[]>);
             localStorage.setItem("activeInternalBaralhos", JSON.stringify(serializableActiveInternal));
         }
     }, [allSources, activeInternalBaralhos]);
@@ -268,9 +245,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                 let loadedCards: Carta[] = [];
                 const sourceName = file.name.replace(/\.(js|json)$/, "");
                 const sourceId = `custom_${Date.now()}_${i}`;
-                if (allSources.some(s => s.name === sourceName && s.type === 'custom')) {
-                    errors.push(`Arquivo/Fonte "${sourceName}" já carregado.`); continue;
-                }
+                if (allSources.some(s => s.name === sourceName && s.type === 'custom')) { errors.push(`Arquivo/Fonte "${sourceName}" já carregado.`); continue; }
                 if (file.name.endsWith(".js")) { loadedCards = parseJSDeckFile(content); }
                 else if (file.name.endsWith(".json")) { const raw = JSON.parse(content) as any[]; loadedCards = raw.map((card, index) => ({ ...card, id: card.id || `${sourceId}_card_${index}` })) as Carta[]; }
                 else { errors.push(`Formato não suportado: ${file.name}. Use .js ou .json.`); continue; }
@@ -281,11 +256,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         }
         if (newCustomSources.length > 0) {
             setAllSources(prev => [...prev, ...newCustomSources]);
-            setActiveInternalBaralhos(prev => {
-                const newState = { ...prev };
-                newCustomSources.forEach(source => { newState[source.id] = new Set(source.internalBaralhos); });
-                return newState;
-            });
+            setActiveInternalBaralhos(prev => { const newState = { ...prev }; newCustomSources.forEach(source => { newState[source.id] = new Set(source.internalBaralhos); }); return newState; });
              setExpandedSources(prev => { const newSet = new Set(prev); newCustomSources.forEach(s => newSet.add(s.id)); return newSet; });
         }
         if (errors.length > 0) { setErrorMessage(errors.join("\n")); }
@@ -305,8 +276,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const toggleInternalBaralhoActive = (sourceId: string, baralhoName: string) => {
         setActiveInternalBaralhos(prev => {
             const currentSourceSet = prev[sourceId] ? new Set(prev[sourceId]) : new Set<string>();
-            if (currentSourceSet.has(baralhoName)) { currentSourceSet.delete(baralhoName); }
-            else { currentSourceSet.add(baralhoName); }
+            if (currentSourceSet.has(baralhoName)) { currentSourceSet.delete(baralhoName); } else { currentSourceSet.add(baralhoName); }
             return { ...prev, [sourceId]: currentSourceSet };
         });
     };
@@ -359,51 +329,93 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const categoriasFiltradas = todasCategorias.filter((cat) => cat.toLowerCase().includes(termoBuscaCategoria.toLowerCase())).sort();
     const cycleProbability = () => { setProbabilityIndex((prevIndex) => (prevIndex + 1) % probabilitySettings.length); };
 
+    // Separa as fontes para renderização
+    const builtInSources = allSources.filter(s => s.type === 'builtin');
+    const customSources = allSources.filter(s => s.type === 'custom');
+
+
     return (
-        <Card className="w-full max-w-lg mx-auto mt-8 shadow-lg">
+        <Card className="w-full max-w-lg mx-auto mt-8 shadow-lg"> {/* Aumentado max-w para lg */}
             <CardHeader>
                 <CardTitle className="text-2xl font-bold text-center text-green-700">Eco Challenge</CardTitle>
                 <p className="text-sm text-center text-gray-600">O Jogo da Sustentabilidade</p>
             </CardHeader>
             <CardContent className="space-y-6">
-                {/* Gerenciamento de Fontes e Baralhos Internos */}
-                <div className="space-y-3">
-                     <h3 className="text-lg font-semibold text-gray-800">Fontes de Cartas</h3>
-                     <ScrollArea className="h-60 border rounded-md p-2 bg-gray-50 space-y-2">
-                        {allSources.map((source) => (
-                             <div key={source.id} className="border-b last:border-b-0 pb-2 mb-2">
-                                <div className="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded">
-                                    <Checkbox id={`source-${source.id}`} checked={source.active} onCheckedChange={() => toggleSourceActive(source.id)} className="mt-1"/>
-                                     <button onClick={() => toggleExpandSource(source.id)} className="flex items-center flex-1 text-left cursor-pointer min-w-0" aria-expanded={expandedSources.has(source.id)}>
-                                        {expandedSources.has(source.id) ? <ChevronDown className="h-4 w-4 mr-1 shrink-0"/> : <ChevronRight className="h-4 w-4 mr-1 shrink-0"/>}
-                                        <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={source.name}>
-                                            {source.name} <span className="text-xs text-gray-500">({source.type === 'builtin' ? 'Incluído' : 'Custom'})</span>
-                                        </label>
-                                    </button>
-                                     {source.type === 'custom' && (
-                                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:bg-red-100 shrink-0" onClick={(e) => {e.stopPropagation(); removeSource(source.id);}} aria-label={`Remover fonte ${source.name}`}><Trash className="h-4 w-4" /></Button>
-                                    )}
+
+                 {/* ===== MODIFICAÇÃO: Seção de Fontes e Baralhos Internos (Separada) ===== */}
+                 <div className="space-y-4">
+                    {/* --- Baralhos Incluídos --- */}
+                    <div>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-2">Baralhos Incluídos</h3>
+                        <ScrollArea className="h-40 border rounded-md p-2 bg-gray-100 space-y-2">
+                             {builtInSources.length > 0 ? builtInSources.map((source) => (
+                                <div key={source.id} className="border-b last:border-b-0 pb-2 mb-2 bg-white px-2 py-1 rounded shadow-sm">
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox id={`source-${source.id}`} checked={source.active} onCheckedChange={() => toggleSourceActive(source.id)} className="mt-1"/>
+                                        <button onClick={() => toggleExpandSource(source.id)} className="flex items-center flex-1 text-left cursor-pointer min-w-0" aria-expanded={expandedSources.has(source.id)}>
+                                            {expandedSources.has(source.id) ? <ChevronDown className="h-4 w-4 mr-1 shrink-0"/> : <ChevronRight className="h-4 w-4 mr-1 shrink-0"/>}
+                                            <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={source.name}>
+                                                {source.name}
+                                            </label>
+                                        </button>
+                                        {/* Sem botão de remover para built-in */}
+                                    </div>
+                                     {source.active && expandedSources.has(source.id) && (
+                                         <div className="pl-8 mt-1 space-y-1">
+                                             {source.internalBaralhos.length > 0 ? source.internalBaralhos.map(baralhoName => (
+                                                 <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
+                                                     <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} />
+                                                     <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer">{baralhoName}</label>
+                                                 </div>
+                                             )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
+                                         </div>
+                                     )}
                                 </div>
-                                 {source.active && expandedSources.has(source.id) && (
-                                     <div className="pl-8 mt-1 space-y-1">
-                                         {source.internalBaralhos.length > 0 ? source.internalBaralhos.map(baralhoName => (
-                                             <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
-                                                 <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} />
-                                                 <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer">{baralhoName}</label>
+                            )) : <p className="text-sm text-gray-500 italic p-2">Nenhum baralho incluído encontrado.</p>}
+                        </ScrollArea>
+                    </div>
+
+                    {/* --- Baralhos Carregados (Arquivos) --- */}
+                     <div className="mt-4">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-2">Baralhos Carregados (Arquivos)</h3>
+                         {errorMessage && (<Alert variant="destructive" className="text-xs mb-2"><AlertDescription>{errorMessage}</AlertDescription></Alert>)}
+                         <Input type="file" multiple accept=".js,.json" onChange={handleCustomDeckUpload} disabled={isLoading} className="text-sm h-9 mb-2"/>
+                         {isLoading && <p className="text-xs text-blue-600 mb-2">Carregando...</p>}
+
+                         {customSources.length > 0 ? (
+                            <ScrollArea className="h-40 border rounded-md p-2 bg-gray-100 space-y-2">
+                                 {customSources.map((source) => (
+                                     <div key={source.id} className="border-b last:border-b-0 pb-2 mb-2 bg-white px-2 py-1 rounded shadow-sm">
+                                         <div className="flex items-center space-x-2">
+                                             <Checkbox id={`source-${source.id}`} checked={source.active} onCheckedChange={() => toggleSourceActive(source.id)} className="mt-1"/>
+                                             <button onClick={() => toggleExpandSource(source.id)} className="flex items-center flex-1 text-left cursor-pointer min-w-0" aria-expanded={expandedSources.has(source.id)}>
+                                                 {expandedSources.has(source.id) ? <ChevronDown className="h-4 w-4 mr-1 shrink-0"/> : <ChevronRight className="h-4 w-4 mr-1 shrink-0"/>}
+                                                 <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={source.name}>
+                                                     {source.name}
+                                                 </label>
+                                             </button>
+                                             <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:bg-red-100 shrink-0" onClick={(e) => {e.stopPropagation(); removeSource(source.id);}} aria-label={`Remover fonte ${source.name}`}><Trash className="h-4 w-4" /></Button>
+                                         </div>
+                                         {source.active && expandedSources.has(source.id) && (
+                                             <div className="pl-8 mt-1 space-y-1">
+                                                 {source.internalBaralhos.length > 0 ? source.internalBaralhos.map(baralhoName => (
+                                                     <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
+                                                         <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} />
+                                                         <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer">{baralhoName}</label>
+                                                     </div>
+                                                 )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
                                              </div>
-                                         )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
-                                     </div>
-                                 )}
-                            </div>
-                        ))}
-                     </ScrollArea>
-                     <div className="mt-2 space-y-1">
-                        <label className="text-sm font-medium">Carregar Arquivos (.js/.json)</label>
-                         {errorMessage && (<Alert variant="destructive" className="text-xs"><AlertDescription>{errorMessage}</AlertDescription></Alert>)}
-                        <Input type="file" multiple accept=".js,.json" onChange={handleCustomDeckUpload} disabled={isLoading} className="text-sm h-9"/>
-                        {isLoading && <p className="text-xs text-blue-600">Carregando...</p>}
-                     </div>
+                                         )}
+                                    </div>
+                                ))}
+                            </ScrollArea>
+                         ) : (
+                             !isLoading && <p className="text-sm text-gray-500 italic p-2 border rounded bg-gray-100">Nenhum arquivo carregado.</p>
+                         )}
+                    </div>
                  </div>
+                 {/* ===== FIM DA MODIFICAÇÃO ===== */}
+
                 {/* Seleção de Categorias */}
                 <div className="space-y-2">
                     <h3 className="text-lg font-semibold text-gray-800">Categorias (dos baralhos ativos)</h3>
@@ -423,6 +435,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                         <Button onClick={() => setCategoriasSelecionadas([])} variant="outline" size="sm" className="flex-1">Nenhuma</Button>
                     </div>
                 </div>
+
                 {/* Configuração de Jogadores */}
                 <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Jogadores</h3>
@@ -444,6 +457,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                     </div>
                     {playerInputs.length < 8 && (<Button onClick={addPlayerInput} variant="secondary" className="w-full">+ Adicionar Jogador</Button>)}
                 </div>
+
                  {/* Opções de Jogo */}
                  <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Opções</h3>
@@ -467,7 +481,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 
 // --- Componente Principal EcoChallenge ---
 const EcoChallenge: React.FC = () => {
-    // ===== INICIO DOS ESTADOS DO ECO CHALLENGE =====
+    // Estados do Jogo
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [cartaAtual, setCartaAtual] = useState<Carta | null>(null);
     const [respondido, setRespondido] = useState(false);
@@ -490,23 +504,23 @@ const EcoChallenge: React.FC = () => {
     const [rollingNumber, setRollingNumber] = useState<number | null>(null);
     const [isDieModalOpen, setIsDieModalOpen] = useState(false);
     const [isRolling, setIsRolling] = useState(false);
-    // ===== FIM DOS ESTADOS DO ECO CHALLENGE =====
 
+    // Memoize allSources para evitar recálculos desnecessários
     const allSourcesMemo = useMemo(() => {
-         const customSourcesRaw = typeof window !== "undefined" ? localStorage.getItem("customSourceInfos") : null;
-         const builtInStatusRaw = typeof window !== "undefined" ? localStorage.getItem("builtInSourceStatus") : null;
-         let customSources: SourceInfo[] = [];
-         let builtInStatus: Record<string, boolean> | null = null;
-         try { customSources = customSourcesRaw ? JSON.parse(customSourcesRaw) : []; } catch { customSources = []; }
-         try { builtInStatus = builtInStatusRaw ? JSON.parse(builtInStatusRaw) : null; } catch { builtInStatus = null; }
-         const processedCustomSources = customSources.map(source => {
-             if (source.internalBaralhos) { const { processedCards } = processCardsAndExtractBaralhos(source.cards); return { ...source, cards: processedCards}; }
-             const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards);
-             return { ...source, cards: processedCards, internalBaralhos };
-         });
-         const combined = [ ...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus?.[bs.id] ?? true })), ...processedCustomSources ];
-          return combined.map(source => { const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards); return {...source, cards: processedCards, internalBaralhos }; });
-     }, []);
+        const customSourcesRaw = typeof window !== "undefined" ? localStorage.getItem("customSourceInfos") : null;
+        const builtInStatusRaw = typeof window !== "undefined" ? localStorage.getItem("builtInSourceStatus") : null;
+        let customSources: SourceInfo[] = [];
+        let builtInStatus: Record<string, boolean> | null = null;
+        try { customSources = customSourcesRaw ? JSON.parse(customSourcesRaw) : []; } catch { customSources = []; }
+        try { builtInStatus = builtInStatusRaw ? JSON.parse(builtInStatusRaw) : null; } catch { builtInStatus = null; }
+        const processedCustomSources = customSources.map(source => {
+            if (source.internalBaralhos) { const { processedCards } = processCardsAndExtractBaralhos(source.cards); return { ...source, cards: processedCards}; }
+            const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards);
+            return { ...source, cards: processedCards, internalBaralhos };
+        });
+        const combined = [ ...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus?.[bs.id] ?? true })), ...processedCustomSources ];
+        return combined.map(source => { const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards); return {...source, cards: processedCards, internalBaralhos }; });
+    }, []);
 
 
     const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -542,7 +556,7 @@ const EcoChallenge: React.FC = () => {
             const savedActiveSources = localStorage.getItem("activeSourceIds");
             const savedActiveInternal = localStorage.getItem("activeInternalBaralhosState");
             try {
-                const savedState = savedStateRaw ? JSON.parse(savedStateRaw) : null;
+                const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
                 if (savedState && savedState.jogoIniciado) {
                      const activeSourceIds = savedActiveSources ? JSON.parse(savedActiveSources) : [];
                      const activeInternalBaralhosState = savedActiveInternal ? JSON.parse(savedActiveInternal) : {};
@@ -611,7 +625,7 @@ const EcoChallenge: React.FC = () => {
     const handleSelecaoMultipla = (id: number) => { if (!respondido) { setSelecoesMultiplas((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
     const handleSelecaoOrdem = (id: number) => { if (!respondido) { setOrdemSelecoes((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
     const handleSelecionarColunaA = (id: number) => { if (respondido) return; const parExistenteIndex = paresFormados.findIndex(p => p.aId === id); if (parExistenteIndex > -1) { setParesFormados(prev => prev.filter((_, index) => index !== parExistenteIndex)); setSelecaoColunaA(null); } else { setSelecaoColunaA(id === selecaoColunaA ? null : id); } };
-    const handleSelecionarColunaB = (id: number) => { if (respondido || selecaoColunaA === null) return; if (paresFormados.some(p => p.bId === id)) return; setParesFormados(prev => [...prev, { aId: selecaoColunaA, bId: id }]); setSelecaoColunaA(null); }; // Corrigido bB para bId
+    const handleSelecionarColunaB = (id: number) => { if (respondido || selecaoColunaA === null) return; if (paresFormados.some(p => p.bId === id)) return; setParesFormados(prev => [...prev, { aId: selecaoColunaA, bId: id }]); setSelecaoColunaA(null); };
     const handleImagemClick = (event: React.MouseEvent<HTMLDivElement>) => { if (respondido || !cartaAtual || cartaAtual.tipo !== 'PontoCerto') return; const target = event.currentTarget; const rect = target.getBoundingClientRect(); const x = (event.clientX - rect.left) / rect.width; const y = (event.clientY - rect.top) / rect.height; const clampedX = Math.max(0, Math.min(1, x)); const clampedY = Math.max(0, Math.min(1, y)); setCoordenadasClique({ x: clampedX, y: clampedY }); };
     const handleSelecionarFragmento = (id: number) => { if (respondido) return; setFragmentosSelecionados(prev => [...prev, id]); };
     const limparFragmentos = () => { if (!respondido) { setFragmentosSelecionados([]); } };
@@ -657,13 +671,20 @@ const EcoChallenge: React.FC = () => {
     const eliminarRespostaErrada = () => {
         const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return;
         const tiposEliminaveis: Carta['tipo'][] = ["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"];
-        if (!tiposEliminaveis.includes(cartaAtual.tipo) || !('opcoes' in cartaAtual) || cartaAtual.opcoes.length <= 2) { setMensagem("Não é possível eliminar opções para este tipo de carta ou já há poucas opções."); return; }
+        if (!tiposEliminaveis.includes(cartaAtual.tipo) || !('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || cartaAtual.opcoes.length <= 2) { setMensagem("Não é possível eliminar opções para este tipo de carta ou já há poucas opções."); return; } // Verificação mais robusta
         if (cp.respostasSeguidas < 2) { setMensagem("São necessárias 2 respostas corretas seguidas."); return; }
         let respostaCorretaNumeros: number[] = [];
-        if (cartaAtual.tipo === "Pergunta" || cartaAtual.tipo === "ContraTempo") { respostaCorretaNumeros = [cartaAtual.respostaCorreta]; }
-        else if (cartaAtual.tipo === "MultiplaEscolha" || cartaAtual.tipo === "Outras") { if (Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.every(item => typeof item === 'number')) { respostaCorretaNumeros = cartaAtual.respostaCorreta as number[]; } else { console.error("Formato inesperado:", cartaAtual); setMensagem("Erro interno."); return; } }
-        else { console.error("Tipo inesperado:", cartaAtual.tipo); return; }
-        const opcoesErradasDisponiveis = ('opcoes' in cartaAtual) ? cartaAtual.opcoes.filter(op => !respostaCorretaNumeros.includes(op.id) && !opcoesEliminadas.includes(op.id)) : [];
+        if ('respostaCorreta' in cartaAtual) {
+            if (typeof cartaAtual.respostaCorreta === 'number') { respostaCorretaNumeros = [cartaAtual.respostaCorreta];}
+            else if (Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.every(item => typeof item === 'number')) { respostaCorretaNumeros = cartaAtual.respostaCorreta as number[]; }
+            else if (cartaAtual.tipo === 'Vantagem' || cartaAtual.tipo === 'Desvantagem') { // Vantagem/Desvantagem podem ter resposta como array de IDs das opções
+                 if (Array.isArray(cartaAtual.respostaCorreta)) respostaCorretaNumeros = cartaAtual.respostaCorreta as number[];
+                 else respostaCorretaNumeros = cartaAtual.opcoes.map(o => o.id); // Considera todas as opções como "corretas" para eliminação
+            }
+            else { console.error("Formato inesperado de respostaCorreta:", cartaAtual); setMensagem("Erro interno."); return; }
+        } else { console.error("Carta sem respostaCorreta:", cartaAtual); setMensagem("Erro interno."); return; } // Verifica se respostaCorreta existe
+
+        const opcoesErradasDisponiveis = cartaAtual.opcoes.filter(op => !respostaCorretaNumeros.includes(op.id) && !opcoesEliminadas.includes(op.id));
         if (opcoesErradasDisponiveis.length > 0) { const idxAleat = Math.floor(Math.random() * opcoesErradasDisponiveis.length); const opcaoEliminada = opcoesErradasDisponiveis[idxAleat].id; setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Uma opção incorreta foi eliminada! (-2 sequências)"); }
         else { setMensagem("Não há mais opções incorretas para eliminar."); }
     };
@@ -695,16 +716,13 @@ const EcoChallenge: React.FC = () => {
                  initialProb = savedState.probabilityIndex ?? 0;
              }
         } catch {}
-        // ===== CORREÇÃO DO ERRO DE PROPS AQUI =====
          return (<TelaInicial
                     onStartGame={(initialState) => { if (initialState) { setGameState(initialState as GameState); } }}
                     initialPlayers={initialPlayersData}
                     initialOcultarCarta={initialOcultar}
                     initialProbabilityIndex={initialProb}
                     hasSavedGame={hasSaved}
-                    // Props removidas pois TelaInicial agora calcula internamente
                  />);
-        // ===== FIM DA CORREÇÃO =====
     }
 
     const { players, currentPlayerId, ocultarCarta } = gameState;
@@ -714,7 +732,7 @@ const EcoChallenge: React.FC = () => {
     if (!cartaAtual || !currentPlayer) { return (<div className="flex items-center justify-center min-h-screen"><p>Carregando...</p><Button onClick={voltarTelaInicial} className="ml-4">Voltar</Button></div>); }
 
     const obterEstiloCarta = () => { if (ocultarCarta && !cartaRevelada) return "border-gray-300 bg-gray-100"; switch (cartaAtual.tipo) { case "Vantagem": return "border-green-500 bg-green-50"; case "Desvantagem": return "border-red-500 bg-red-50"; case "Outras": return "border-blue-500 bg-blue-50"; case "ContraTempo": return "border-yellow-500 bg-yellow-50"; default: return "border-gray-300 bg-white"; } };
-    const isVerificarDisabled = () => { if (respondido) return true; switch (cartaAtual.tipo) { case "Pergunta": case "ContraTempo": case "Vantagem": case "Desvantagem": case "Outras": return selecionado === null; case "MultiplaEscolha": return selecoesMultiplas.length === 0; case "Ordem": return cartaAtual.opcoes ? ordemSelecoes.length !== cartaAtual.opcoes.length : true; case "RelacionarColunas": return !Array.isArray(cartaAtual.respostaCorreta) || paresFormados.length !== cartaAtual.respostaCorreta.length; case "PontoCerto": return coordenadasClique === null; case "CompletarFrase": return !Array.isArray(cartaAtual.respostaCorreta) || fragmentosSelecionados.length !== cartaAtual.respostaCorreta.length; default: return true; } };
+    const isVerificarDisabled = () => { if (respondido) return true; switch (cartaAtual.tipo) { case "Pergunta": case "ContraTempo": case "Vantagem": case "Desvantagem": case "Outras": return selecionado === null; case "MultiplaEscolha": return selecoesMultiplas.length === 0; case "Ordem": return !cartaAtual.opcoes || ordemSelecoes.length !== cartaAtual.opcoes.length; case "RelacionarColunas": return !Array.isArray(cartaAtual.respostaCorreta) || paresFormados.length !== cartaAtual.respostaCorreta.length; case "PontoCerto": return coordenadasClique === null; case "CompletarFrase": return !Array.isArray(cartaAtual.respostaCorreta) || fragmentosSelecionados.length !== cartaAtual.respostaCorreta.length; default: return true; } };
 
     const getAlertVariant = (): "default" | "destructive" => {
         if (!mensagem) return "default"; const lowerMsg = mensagem.toLowerCase();
@@ -738,54 +756,29 @@ const EcoChallenge: React.FC = () => {
                 style={players.length > 0 && currentPlayer && !(ocultarCarta && !cartaRevelada) ? { boxShadow: `0 0 15px 3px ${currentPlayer.color}` } : {}}
             >
                 <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start mb-2 gap-2">
-                        <div className="flex items-center space-x-2 flex-1 min-w-0"> {/* Adicionado flex-1 min-w-0 */}
-                             {/* Botão de filtro removido daqui */}
-                            <div className="flex-1 min-w-0"> {/* Adicionado flex-1 min-w-0 */}
-                                <CardTitle className="text-lg md:text-xl font-bold leading-tight truncate" title={cartaAtual.titulo}> {/* Adicionado truncate e title */}
+                     <div className="flex justify-between items-start mb-2 gap-2">
+                         <div className="flex items-center space-x-2 flex-1 min-w-0">
+                             <div className="flex-1 min-w-0">
+                                <CardTitle className="text-lg md:text-xl font-bold leading-tight truncate" title={cartaAtual.titulo}>
                                     {ocultarCarta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo}
                                 </CardTitle>
                                 {(!ocultarCarta || cartaRevelada) && (
-                                    <p className="text-xs text-gray-500 mt-1 truncate" title={cartaAtual.categorias.join(", ") + (cartaAtual.baralho && cartaAtual.baralho !== DEFAULT_BARALHO_NAME ? ` (${cartaAtual.baralho})` : '')}> {/* Adicionado truncate e title */}
+                                     <p className="text-xs text-gray-500 mt-1 truncate" title={(cartaAtual.categorias ? cartaAtual.categorias.join(", ") : '') + (cartaAtual.baralho && cartaAtual.baralho !== DEFAULT_BARALHO_NAME ? ` (${cartaAtual.baralho})` : '')}>
                                         {cartaAtual.categorias?.join(", ")}
                                         {cartaAtual.baralho && cartaAtual.baralho !== DEFAULT_BARALHO_NAME && ` (${cartaAtual.baralho})`}
                                     </p>
                                 )}
                             </div>
                         </div>
-                        {(!ocultarCarta || cartaRevelada) && (
-                            <Badge
-                                variant={ cartaAtual.dificuldade === "facil" ? "secondary" : cartaAtual.dificuldade === "normal" ? "default" : "destructive" }
-                                className="capitalize flex-shrink-0 h-6 ml-2" // Adicionado ml-2 para garantir espaço
-                            >
-                                {cartaAtual.dificuldade}
-                            </Badge>
-                        )}
+                         {(!ocultarCarta || cartaRevelada) && ( <Badge variant={ cartaAtual.dificuldade === "facil" ? "secondary" : cartaAtual.dificuldade === "normal" ? "default" : "destructive" } className="capitalize flex-shrink-0 h-6 ml-2"> {cartaAtual.dificuldade} </Badge> )}
                     </div>
-                    {cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && !respondido && cartaRevelada && (
-                        <div className="mt-2">
-                            <Progress value={(tempoRestante / cartaAtual.tempoLimite) * 100} className="h-2 [&>*]:bg-yellow-500" />
-                            <p className="text-center text-sm font-semibold text-yellow-700 mt-1">
-                                <Timer className="inline h-4 w-4 mr-1" /> Tempo: {tempoRestante}s
-                            </p>
-                        </div>
+                     {cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && !respondido && cartaRevelada && (
+                         <div className="mt-2"> <Progress value={(tempoRestante / cartaAtual.tempoLimite) * 100} className="h-2 [&>*]:bg-yellow-500" /> <p className="text-center text-sm font-semibold text-yellow-700 mt-1"> <Timer className="inline h-4 w-4 mr-1" /> Tempo: {tempoRestante}s </p> </div>
                     )}
                     {(!ocultarCarta || cartaRevelada) ? (
-                        <ScrollArea className="h-64 md:h-80 rounded-md border p-3 mt-2 bg-white/80">
-                            <div
-                                className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1"
-                                dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }}
-                            />
-                        </ScrollArea>
+                         <ScrollArea className="h-64 md:h-80 rounded-md border p-3 mt-2 bg-white/80"> <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1" dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }} /> </ScrollArea>
                     ) : (
-                        <div className="h-64 md:h-80 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200">
-                            <EyeOff className="h-8 w-8 text-gray-500" />
-                            <p className="text-sm text-gray-600">Carta Oculta</p>
-                            {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>}
-                            <Button onClick={rolarDado} variant="outline" size="sm" className="mt-2 bg-white" onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}>
-                                <Dice6 className="h-4 w-4 mr-1" /> Rolar Dado
-                            </Button>
-                        </div>
+                        <div className="h-64 md:h-80 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200"> <EyeOff className="h-8 w-8 text-gray-500" /> <p className="text-sm text-gray-600">Carta Oculta</p> {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>} <Button onClick={rolarDado} variant="outline" size="sm" className="mt-2 bg-white" onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <Dice6 className="h-4 w-4 mr-1" /> Rolar Dado </Button> </div>
                     )}
                 </CardHeader>
 
@@ -800,11 +793,11 @@ const EcoChallenge: React.FC = () => {
                 )}
 
                 <CardFooter className="flex flex-col items-center pt-4 border-t bg-gray-50/50 rounded-b-lg">
-                    <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
+                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
                          <Button onClick={toggleFontes} variant="outline" disabled={!cartaAtual.fontes || cartaAtual.fontes.length === 0 || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <BookOpen className="h-5 w-5" /></Button>
                          <Button onClick={pularPergunta} variant={currentPlayer.pulosDisponiveis > 0 ? "secondary" : "outline"} disabled={currentPlayer.pulosDisponiveis === 0 || !tiposPergunta.includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <SkipForward className="h-5 w-5" /> </Button>
                          <Button onClick={toggleDica} variant={currentPlayer.respostasSeguidas >= 2 && !dicaUsada && !!cartaAtual.dica ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || dicaUsada || !cartaAtual.dica || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <HelpCircle className="h-5 w-5" /> </Button>
-                         <Button onClick={eliminarRespostaErrada} variant={currentPlayer.respostasSeguidas >= 2 ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || !("opcoes" in cartaAtual) || cartaAtual.opcoes.length <= 2 || !["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"].includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <MinusCircle className="h-5 w-5" /> </Button>
+                         <Button onClick={eliminarRespostaErrada} variant={currentPlayer.respostasSeguidas >= 2 ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || !("opcoes" in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || cartaAtual.opcoes.length <= 2 || !["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"].includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <MinusCircle className="h-5 w-5" /> </Button> {/* Correção na condição de disabled */}
                          <Button onClick={resetarContadoresJogador} variant="outline" className="h-9 px-2.5"> <RotateCcw className="h-5 w-5" /> </Button>
                          <Button onClick={voltarTelaInicial} variant="outline" className="h-9 px-2.5"> <Home className="h-5 w-5" /> </Button>
                     </div>
@@ -821,11 +814,7 @@ const EcoChallenge: React.FC = () => {
                         ) : !respondido ? ( <Button onClick={isVerificarDisabled() ? undefined : verificarResposta} className={cn( "w-full bg-green-600 hover:bg-green-700 text-white", isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400" )} onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd} aria-disabled={isVerificarDisabled()} tabIndex={isVerificarDisabled() ? -1 : 0} > <Check className="mr-2 h-4 w-4"/> Verificar </Button>
                         ) : ( <Button onClick={selecionarCartaAleatoria} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onMouseDown={() => handleLongPressStart(selecionarCartaAleatoria)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(selecionarCartaAleatoria)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <SkipForward className="mr-2 h-4 w-4"/> Próxima Carta </Button> )}
                     </div>
-                    {mensagem && (
-                        <Alert variant={getAlertVariant()} className={cn( 'text-center text-sm font-semibold mb-3 w-full', cartaAtual?.tipo === 'Vantagem' && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo === 'Desvantagem' && 'bg-red-100 border-red-300 text-red-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800' )}>
-                            <AlertDescription>{mensagem}</AlertDescription>
-                        </Alert>
-                    )}
+                    {mensagem && ( <Alert variant={getAlertVariant()} className={cn( 'text-center text-sm font-semibold mb-3 w-full', cartaAtual?.tipo === 'Vantagem' && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo === 'Desvantagem' && 'bg-red-100 border-red-300 text-red-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800' )}> <AlertDescription>{mensagem}</AlertDescription> </Alert> )}
                     <div className="w-full">
                         <Progress value={currentPlayer.progresso} className="h-2.5 [&>*]:bg-orange-500" />
                          <div className="flex justify-between items-center w-full mt-2 text-sm text-gray-700 flex-wrap gap-x-4 gap-y-1 font-semibold">
@@ -841,38 +830,24 @@ const EcoChallenge: React.FC = () => {
                 </CardFooter>
             </Card>
 
-            {/* Seleção de Jogador */}
             <div className="mt-6 w-full max-w-lg">
-                <p className="text-center text-sm font-medium mb-2 text-gray-800">
-                    Vez de: <span style={{ color: currentPlayer.color }} className="font-bold">{currentPlayer.name}</span>
-                </p>
+                <p className="text-center text-sm font-medium mb-2 text-gray-800"> Vez de: <span style={{ color: currentPlayer.color }} className="font-bold">{currentPlayer.name}</span> </p>
                 <div className={cn('grid gap-2', players.length > 4 ? (players.length > 6 ? "grid-cols-4" : "grid-cols-3") : `grid-cols-${Math.max(players.length, 1)}`)}>
                     {players.map((pl) => ( <Button key={pl.id} onClick={() => updateGameState({ currentPlayerId: pl.id })} size="sm" variant={currentPlayerId === pl.id ? "default" : "outline"} className="truncate text-xs md:text-sm h-9" style={{ backgroundColor: currentPlayerId === pl.id ? pl.color : 'white', color: currentPlayerId === pl.id ? 'white' : pl.color, borderColor: pl.color, borderWidth: currentPlayerId === pl.id ? '2px' : '1px', }}>{pl.name}</Button> ))}
                 </div>
             </div>
 
-            {/* Modal do Dado */}
             {isDieModalOpen && ( <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50"><div className="bg-white p-6 rounded-lg shadow-xl text-center relative w-64 h-64 flex flex-col justify-center items-center"><Button className="absolute top-2 right-2" variant="ghost" size="icon" onClick={() => setIsDieModalOpen(false)} disabled={isRolling}><XIcon className="h-6 w-6 text-gray-500" /></Button>{isRolling ? (<><p className="text-lg mb-4 font-semibold">Rolando...</p><p className="text-7xl font-bold mb-6 animate-bounce">{rollingNumber}</p></>) : (<><p className="text-lg mb-2">Resultado:</p><p className="text-8xl font-bold mb-4">{rolledNumber}</p><Button onClick={rolarDado} size="lg"><Dice6 className="h-5 w-5 mr-2" /> Rolar Novamente</Button></>)}</div></div> )}
         </div>
     );
 
-    // --- Função de Renderização de Conteúdo da Resposta ---
     function renderizarConteudoResposta() {
         if (!cartaAtual) return null;
-
-        const buttonInlineStyle: React.CSSProperties = {
-            maxHeight: "80px",
-            height: "auto",
-            overflowY: "auto",
-            whiteSpace: "normal",
-            alignItems: "flex-start",
-            display: "flex",
-            textAlign: "left",
-        };
+        const buttonInlineStyle: React.CSSProperties = { maxHeight: "80px", height: "auto", overflowY: "auto", whiteSpace: "normal", alignItems: "flex-start", display: "flex", textAlign: "left", };
 
         switch (cartaAtual.tipo) {
             case "Pergunta": case "ContraTempo": case "Vantagem": case "Desvantagem": case "Outras":
-                if (!Array.isArray((cartaAtual as any).opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas para esta carta.</p>;
+                if (!Array.isArray((cartaAtual as any).opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas.</p>;
                 return (cartaAtual as any).opcoes.map((op: Opcao) => {
                     const isCorrect = Array.isArray(cartaAtual.respostaCorreta) ? cartaAtual.respostaCorreta.includes(op.id) : cartaAtual.respostaCorreta === op.id;
                     const isSelected = selecionado === op.id;
@@ -884,7 +859,7 @@ const EcoChallenge: React.FC = () => {
                     return ( <Button key={op.id} onClick={() => handleSelecao(op.id)} variant={"outline"} className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} style={buttonInlineStyle} disabled={isEliminated || respondido}> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} </Button> );
                 });
              case "MultiplaEscolha":
-                 if (!Array.isArray((cartaAtual as any).opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas para esta carta.</p>;
+                 if (!Array.isArray((cartaAtual as any).opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas.</p>;
                 return (cartaAtual as any).opcoes.map((op: Opcao) => {
                     const isCorrect = Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(op.id);
                     const isSelected = selecoesMultiplas.includes(op.id);
@@ -912,29 +887,22 @@ const EcoChallenge: React.FC = () => {
                             {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)}
                             <span className="flex-1">{op.texto}</span>
                             {respondido && isCorrectOptionOverall && (
-                                <>
-                                    <span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${isCorrectOrder ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`} title={isCorrectOrder ? `Posição Correta: ${correctIndex}` : `Sua Posição: ${selectionIndex}`}>{isCorrectOrder ? correctIndex : selectionIndex}</span>
-                                    {isWrongOrder && correctIndex !== null && ( <span className="ml-1 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white" title={`Posição Correta: ${correctIndex}`}>{correctIndex}</span> )}
-                                </>
+                                <> <span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${isCorrectOrder ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`} title={isCorrectOrder ? `Posição Correta: ${correctIndex}` : `Sua Posição: ${selectionIndex}`}>{isCorrectOrder ? correctIndex : selectionIndex}</span> {isWrongOrder && correctIndex !== null && ( <span className="ml-1 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white" title={`Posição Correta: ${correctIndex}`}>{correctIndex}</span> )} </>
                             )}
                         </Button>
                     );
                 });
             case "RelacionarColunas":
                 const cRel = cartaAtual as CartaRelacionarColunas;
-                 if (!Array.isArray(cRel.colunaA) || !Array.isArray(cRel.colunaB) || !Array.isArray(cRel.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Relacionar Colunas.</p>;
+                 if (!Array.isArray(cRel.colunaA) || !Array.isArray(cRel.colunaB) || !Array.isArray(cRel.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos.</p>;
                  return (<div className="flex space-x-2 md:space-x-4"> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna A</p>{cRel.colunaA.map(itemA => { const isSelectedA = selecaoColunaA === itemA.id; const par = paresFormados.find(p => p.aId === itemA.id); const parCorreto = respondido ? cRel.respostaCorreta.find(rc => rc.aId === itemA.id) : undefined; const isCorrectPair = respondido && par && parCorreto && par.bId === parCorreto.bId; const isWrongPair = respondido && par && (!parCorreto || par.bId !== parCorreto.bId); let btnClass = "border-gray-300 text-gray-900"; if (isSelectedA) btnClass = "ring-2 ring-blue-500 border-blue-500"; if (par && !respondido) btnClass = "bg-gray-200 border-gray-400"; if (isCorrectPair) btnClass = "bg-green-100 border-green-400 text-green-900"; if (isWrongPair) btnClass = "bg-red-100 border-red-400 text-red-900"; return (<Button key={`A-${itemA.id}`} variant="outline" onClick={() => handleSelecionarColunaA(itemA.id)} disabled={respondido} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass)}><span className="flex-1">{itemA.texto}</span>{isCorrectPair && <CheckCircle2 className="ml-1 h-3.5 w-3.5 text-green-600 flex-shrink-0" />}{isWrongPair && <XCircle className="ml-1 h-3.5 w-3.5 text-red-600 flex-shrink-0" />}{isWrongPair && parCorreto && (<span className="text-[10px] ml-1 text-blue-600 hidden md:inline">({cRel.colunaB.find(iB => iB.id === parCorreto.bId)?.texto})</span>)}</Button>); })}</div> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna B</p>{cRel.colunaB.map(itemB => { const isPairedB = paresFormados.some(p => p.bId === itemB.id); const isDisabled = respondido || selecaoColunaA === null || isPairedB; let btnClass = "border-gray-300 hover:bg-gray-100 text-gray-900"; if (isPairedB) btnClass = "bg-gray-200 border-gray-400 text-gray-600"; return (<Button key={`B-${itemB.id}`} variant="outline" onClick={() => handleSelecionarColunaB(itemB.id)} disabled={isDisabled} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass, !isDisabled && selecaoColunaA !== null && "hover:border-blue-400" )}><span className="flex-1">{itemB.texto}</span></Button>); })}</div></div>);
             case "PontoCerto":
                  const cPonto = cartaAtual as CartaPontoCerto;
-                 if (!cPonto.imagemURL || !Array.isArray(cPonto.zonasClicaveis)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Ponto Certo.</p>;
-                 return (<div className="relative w-full max-w-md mx-auto aspect-video overflow-hidden rounded border border-gray-300 cursor-crosshair" onClick={handleImagemClick} role="button" aria-label={`Imagem interativa: ${cPonto.titulo}`}><img src={cPonto.imagemURL} alt={`Imagem para: ${cPonto.titulo}`} className={`block w-full h-full object-contain ${respondido ? 'cursor-not-allowed' : ''}`}/>{coordenadasClique && (<div className={`absolute w-3 h-3 rounded-full border-2 pointer-events-none -translate-x-1/2 -translate-y-1/2 ${respondido ? (mensagem.toLowerCase().includes('correto') ? 'bg-green-500 border-white' : 'bg-red-500 border-white') : 'bg-blue-500 border-white'}`} style={{ left: `${coordenadasClique.x * 100}%`, top: `${coordenadasClique.y * 100}%` }}>{respondido && (mensagem.toLowerCase().includes('correto') ? <Check className="w-2 h-2 text-white" /> : <XIcon className="w-2 h-2 text-white" />)}</div>)}{respondido && (() => {
-                    const zonaCorreta = cPonto.zonasClicaveis.find(z => z.id === cPonto.respostaCorreta);
-                    return zonaCorreta ? ( <div className="absolute border-2 border-dashed border-green-500 pointer-events-none animate-pulse" style={{ left: `${zonaCorreta.x * 100}%`, top: `${zonaCorreta.y * 100}%`, width: `${zonaCorreta.largura * 100}%`, height: `${zonaCorreta.altura * 100}%` }} title={zonaCorreta.descricao || "Área correta"}/> ) : null;
-                })()}
-            </div>);
+                 if (!cPonto.imagemURL || !Array.isArray(cPonto.zonasClicaveis)) return <p className="text-xs text-red-500">Erro: Dados inválidos.</p>;
+                 return (<div className="relative w-full max-w-md mx-auto aspect-video overflow-hidden rounded border border-gray-300 cursor-crosshair" onClick={handleImagemClick} role="button" aria-label={`Imagem interativa: ${cPonto.titulo}`}><img src={cPonto.imagemURL} alt={`Imagem para: ${cPonto.titulo}`} className={`block w-full h-full object-contain ${respondido ? 'cursor-not-allowed' : ''}`}/>{coordenadasClique && (<div className={`absolute w-3 h-3 rounded-full border-2 pointer-events-none -translate-x-1/2 -translate-y-1/2 ${respondido ? (mensagem.toLowerCase().includes('correto') ? 'bg-green-500 border-white' : 'bg-red-500 border-white') : 'bg-blue-500 border-white'}`} style={{ left: `${coordenadasClique.x * 100}%`, top: `${coordenadasClique.y * 100}%` }}>{respondido && (mensagem.toLowerCase().includes('correto') ? <Check className="w-2 h-2 text-white" /> : <XIcon className="w-2 h-2 text-white" />)}</div>)}{respondido && (() => { const zonaCorreta = cPonto.zonasClicaveis.find(z => z.id === cPonto.respostaCorreta); return zonaCorreta ? ( <div className="absolute border-2 border-dashed border-green-500 pointer-events-none animate-pulse" style={{ left: `${zonaCorreta.x * 100}%`, top: `${zonaCorreta.y * 100}%`, width: `${zonaCorreta.largura * 100}%`, height: `${zonaCorreta.altura * 100}%` }} title={zonaCorreta.descricao || "Área correta"}/> ) : null; })()} </div>);
             case "CompletarFrase":
                 const cComp = cartaAtual as CartaCompletarFrase;
-                if (!cComp.fraseIncompleta || !Array.isArray(cComp.fragmentos) || !Array.isArray(cComp.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Completar Frase.</p>;
+                if (!cComp.fraseIncompleta || !Array.isArray(cComp.fragmentos) || !Array.isArray(cComp.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos.</p>;
                 let fraseR = cComp.fraseIncompleta; fragmentosSelecionados.forEach((fragId, index) => { const frag = cComp.fragmentos.find(f => f.id === fragId); if (frag) { fraseR = fraseR.replace(`__${index + 1}__`, `<strong class="text-blue-600 underline underline-offset-2 mx-1">${frag.texto}</strong>`); } }); fraseR = fraseR.replace(/__\d+__/g, '<span class="text-gray-400 border-b border-dashed border-gray-400 mx-1">___</span>'); const isCorretoComp = respondido && mensagem.toLowerCase().includes('correto'); return (<div className="space-y-3"><div className={`p-3 border rounded bg-gray-50 text-sm ${respondido ? (isCorretoComp ? 'border-green-300' : 'border-red-300') : 'border-gray-300'}`} dangerouslySetInnerHTML={{ __html: fraseR }}/>{!respondido && (<div className="flex flex-wrap gap-2 justify-center">{cComp.fragmentos.filter(f => !fragmentosSelecionados.includes(f.id)).map(frag => (<Button key={frag.id} variant="outline" size="sm" onClick={() => handleSelecionarFragmento(frag.id)} className="bg-white hover:bg-blue-50">{frag.texto}</Button>))}{(fragmentosSelecionados.length > 0 && <Button variant="ghost" size="sm" onClick={limparFragmentos} className="text-red-500 hover:bg-red-100" title="Limpar"><RotateCcw className="h-4 w-4 mr-1"/> Limpar</Button>)}</div>)}{respondido && !isCorretoComp && (<div className="text-xs text-center text-green-700 mt-2"><strong>Resposta:</strong> {cComp.respostaCorreta.map(id => cComp.fragmentos.find(f => f.id === id)?.texto).join(' / ')}</div>)}</div>);
             default: return <p className="text-sm text-red-500">Erro: Tipo de carta não renderizado.</p>;
         }
