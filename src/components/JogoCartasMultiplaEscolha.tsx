@@ -1,16 +1,13 @@
-// src/components/EcoChallenge.tsx (ou seu nome de arquivo preferido)
-
-import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
     Card, CardContent, CardFooter, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox"; // Importar Checkbox
 import {
     CheckCircle2, XCircle, ThumbsUp, ThumbsDown, RotateCcw, HelpCircle,
     BookOpen, Home, SkipForward, Star, Award, MinusCircle, ChevronUp, Zap, Filter,
     Trash, EyeOff, Eye, Dice6, X as XIcon, Timer, Link2, MousePointerClick, Check, TextSelect,
-    ChevronDown, ChevronRight
+    ChevronDown, ChevronRight // Ícones para expandir
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -29,12 +26,15 @@ import testCards from "./.test/test_card";
 // --- Tipos de Dados ---
 
 interface Opcao { id: number; texto: string; }
+// ===== MODIFICAÇÃO 1: Adicionar campo 'baralho' =====
 interface CartaBase {
     id: string | number; tipo: string; titulo: string; pergunta: string;
     dificuldade: "facil" | "normal" | "dificil"; categorias: string[]; fontes: string[];
     vantagem: string; desvantagem: string; dica: string;
     baralho?: string; // Nome do baralho interno (opcional)
 }
+// ===== FIM DA MODIFICAÇÃO 1 =====
+
 interface CartaPergunta extends CartaBase { tipo: "Pergunta"; opcoes: Opcao[]; respostaCorreta: number; }
 interface CartaMultiplaEscolha extends CartaBase { tipo: "MultiplaEscolha"; opcoes: Opcao[]; respostaCorreta: number[]; }
 interface CartaOrdem extends CartaBase { tipo: "Ordem"; opcoes: Opcao[]; respostaCorreta: number[]; }
@@ -512,7 +512,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                                             size="sm"
                                             variant="ghost"
                                             className="h-7 w-7 p-0 text-red-500 hover:bg-red-100 shrink-0" // Adicionado shrink-0
-                                            onClick={(e) => {e.stopPropagation(); removeSource(source.id);}} // Evita que o clique no botão expanda/colapse
+                                            onClick={(e) => {e.stopPropagation(); removeSource(source.id);}} // Evita que o click no botão expanda/colapse
                                             aria-label={`Remover fonte ${source.name}`}
                                         >
                                             <Trash className="h-4 w-4" />
@@ -769,7 +769,7 @@ const EcoChallenge: React.FC = () => {
             const savedActiveInternal = localStorage.getItem("activeInternalBaralhosState");
 
             try {
-                const savedState = savedStateRaw ? JSON.parse(savedStateRaw) : null;
+                const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
                 if (savedState && savedState.jogoIniciado) {
                      const activeSourceIds = savedActiveSources ? JSON.parse(savedActiveSources) : [];
                      const activeInternalBaralhosState = savedActiveInternal ? JSON.parse(savedActiveInternal) : {};
@@ -874,7 +874,7 @@ const EcoChallenge: React.FC = () => {
             clearInterval(timerIntervalRef.current);
         }
         return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
-    }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId, updateCurrentPlayer]); // Adicionado updateCurrentPlayer
+    }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId, updateCurrentPlayer]);
 
 
     // Handlers de Seleção (sem mudanças)
@@ -882,7 +882,7 @@ const EcoChallenge: React.FC = () => {
     const handleSelecaoMultipla = (id: number) => { if (!respondido) { setSelecoesMultiplas((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
     const handleSelecaoOrdem = (id: number) => { if (!respondido) { setOrdemSelecoes((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
     const handleSelecionarColunaA = (id: number) => { if (respondido) return; const parExistenteIndex = paresFormados.findIndex(p => p.aId === id); if (parExistenteIndex > -1) { setParesFormados(prev => prev.filter((_, index) => index !== parExistenteIndex)); setSelecaoColunaA(null); } else { setSelecaoColunaA(id === selecaoColunaA ? null : id); } };
-    const handleSelecionarColunaB = (id: number) => { if (respondido || selecaoColunaA === null) return; if (paresFormados.some(p => p.bId === id)) return; setParesFormados(prev => [...prev, { aId: selecaoColunaA, bId: id }]); setSelecaoColunaA(null); };
+    const handleSelecionarColunaB = (id: number) => { if (respondido || selecaoColunaA === null) return; if (paresFormados.some(p => p.bId === id)) return; setParesFormados(prev => [...prev, { aId: selecaoColunaA, bB: id }]); setSelecaoColunaA(null); }; // CORREÇÃO: bB para bId
     const handleImagemClick = (event: React.MouseEvent<HTMLDivElement>) => { if (respondido || !cartaAtual || cartaAtual.tipo !== 'PontoCerto') return; const target = event.currentTarget; const rect = target.getBoundingClientRect(); const x = (event.clientX - rect.left) / rect.width; const y = (event.clientY - rect.top) / rect.height; const clampedX = Math.max(0, Math.min(1, x)); const clampedY = Math.max(0, Math.min(1, y)); setCoordenadasClique({ x: clampedX, y: clampedY }); };
     const handleSelecionarFragmento = (id: number) => { if (respondido) return; setFragmentosSelecionados(prev => [...prev, id]); };
     const limparFragmentos = () => { if (!respondido) { setFragmentosSelecionados([]); } };
@@ -938,8 +938,7 @@ const EcoChallenge: React.FC = () => {
                  aplicarEfeitoPadrao = true;
                 break;
             case "Vantagem":
-                 // Type guard para respostaCorreta
-                 if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; }
+                 if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } // Add type guard
                  cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado);
                  mensagemFinal = cor ? (cartaAtual.vantagem || "Vantagem aplicada!") : "Ação não confirmada.";
                 break;
@@ -948,8 +947,7 @@ const EcoChallenge: React.FC = () => {
                  mensagemFinal = cartaAtual.desvantagem || "Desvantagem aplicada.";
                 break;
             case "Outras":
-                 // Type guard para respostaCorreta
-                 if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; }
+                 if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } // Add type guard
                  cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado);
                  mensagemFinal = cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...');
                 break;
@@ -968,29 +966,39 @@ const EcoChallenge: React.FC = () => {
                 mensagemFinal = `Correto! ${cartaAtual.vantagem || ''}${completouBarra ? ' Barra completa!' : ''}`;
             } else {
                 updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - pontosPerdidos, 0), });
-                 // Mensagem de erro sem o detalhe da ordem correta
                  mensagemFinal = `Incorreto. ${cartaAtual.desvantagem || ''}`;
             }
         }
         setMensagem(mensagemFinal);
     };
 
-     // Ações do Jogador (sem mudanças na lógica interna)
-    const resetarContadoresJogador = () => { /* ... */ };
-    const toggleDica = () => { /* ... */ };
-    const toggleFontes = () => { /* ... */ };
-    const pularPergunta = () => { /* ... */ };
-    const eliminarRespostaErrada = () => { /* ... */ };
-    const voltarTelaInicial = () => { /* ... */ };
-    const diminuirAcertos = () => { /* ... */ };
-    const diminuirErros = () => { /* ... */ };
-    const incrementarContadorDeEstrelas = () => { /* ... */ };
-    const diminuirContadorDeEstrelas = () => { /* ... */ };
-    const incrementarRodadasPreso = () => { /* ... */ };
-    const diminuirRodadasPreso = () => { /* ... */ };
-    const rolarDado = () => { /* ... */ };
-    const handleLongPressStart = (action: () => void) => { /* ... */ };
-    const handleLongPressEnd = () => { /* ... */ };
+    const resetarContadoresJogador = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !window.confirm(`Resetar ${cp.name}?`)) return; updateCurrentPlayer({ respostasCertas: 0, respostasErradas: 0, progresso: 0, pulosDisponiveis: 0, respostasSeguidas: 0, rodadasPreso: 0, contadorDeEstrelas: 0, fixedStars: 0 }); setMensagem(`${cp.name} resetado.`); };
+    const toggleDica = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (dicaUsada) { setMensagem("Dica já utilizada."); return; } if (!cartaAtual.dica) { setMensagem("Carta sem dica."); return; } if (cp.respostasSeguidas >= 2) { setMostrarDica(true); setDicaUsada(true); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Dica revelada! (-2 sequências)"); } else { setMensagem("São necessárias 2 respostas corretas seguidas."); } };
+    const toggleFontes = () => { if (!cartaAtual || (gameState?.ocultarCarta && !cartaRevelada)) return; if (cartaAtual.fontes && cartaAtual.fontes.length > 0) { setMostrarFontes(!mostrarFontes); } else { setMensagem("Nenhuma fonte disponível."); } };
+    const pularPergunta = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (!tiposPergunta.includes(cartaAtual.tipo)) { setMensagem("Não pode pular este tipo."); return; } if (cp.pulosDisponiveis > 0) { updateCurrentPlayer({ pulosDisponiveis: cp.pulosDisponiveis - 1 }); setMensagem("Carta pulada!"); setTimeout(selecionarCartaAleatoria, 500); } else { setMensagem("Sem pulos disponíveis."); } };
+    const eliminarRespostaErrada = () => {
+        const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return;
+        const tiposEliminaveis: Carta['tipo'][] = ["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"];
+        if (!tiposEliminaveis.includes(cartaAtual.tipo) || !('opcoes' in cartaAtual) || cartaAtual.opcoes.length <= 2) { setMensagem("Não é possível eliminar opções para este tipo de carta ou já há poucas opções."); return; }
+        if (cp.respostasSeguidas < 2) { setMensagem("São necessárias 2 respostas corretas seguidas."); return; }
+        let respostaCorretaNumeros: number[] = [];
+        if (cartaAtual.tipo === "Pergunta" || cartaAtual.tipo === "ContraTempo") { respostaCorretaNumeros = [cartaAtual.respostaCorreta]; }
+        else if (cartaAtual.tipo === "MultiplaEscolha" || cartaAtual.tipo === "Outras") { if (Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.every(item => typeof item === 'number')) { respostaCorretaNumeros = cartaAtual.respostaCorreta as number[]; } else { console.error("Formato inesperado:", cartaAtual); setMensagem("Erro interno."); return; } }
+        else { console.error("Tipo inesperado:", cartaAtual.tipo); return; }
+        const opcoesErradasDisponiveis = ('opcoes' in cartaAtual) ? cartaAtual.opcoes.filter(op => !respostaCorretaNumeros.includes(op.id) && !opcoesEliminadas.includes(op.id)) : []; // Type guard
+        if (opcoesErradasDisponiveis.length > 0) { const idxAleat = Math.floor(Math.random() * opcoesErradasDisponiveis.length); const opcaoEliminada = opcoesErradasDisponiveis[idxAleat].id; setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Uma opção incorreta foi eliminada! (-2 sequências)"); }
+        else { setMensagem("Não há mais opções incorretas para eliminar."); }
+    };
+    const voltarTelaInicial = () => { if (window.confirm("Voltar para a Tela Inicial? Progresso salvo.")) { setGameState(null); setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); } };
+    const diminuirAcertos = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ respostasCertas: Math.max(0, cp.respostasCertas - 1) }); setMensagem("Acerto removido."); };
+    const diminuirErros = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ respostasErradas: Math.max(0, cp.respostasErradas - 1) }); setMensagem("Erro removido."); };
+    const incrementarContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: cp.contadorDeEstrelas + 1 }); setMensagem("Estrela bônus adicionada."); };
+    const diminuirContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: Math.max(0, cp.contadorDeEstrelas - 1) }); setMensagem("Estrela bônus removida."); };
+    const incrementarRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: cp.rodadasPreso + 1 }); setMensagem("Rodada preso adicionada."); };
+    const diminuirRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: cp.rodadasPreso - 1 }); setMensagem("Rodada preso removida."); };
+    const rolarDado = () => { if (isRolling) return; setIsRolling(true); setIsDieModalOpen(true); setRolledNumber(null); let rollCount = 0; const maxRolls = 15; const rollInterval = setInterval(() => { setRollingNumber(Math.floor(Math.random() * 6) + 1); rollCount++; if (rollCount >= maxRolls) { clearInterval(rollInterval); const finalNumber = Math.floor(Math.random() * 6) + 1; setRolledNumber(finalNumber); setRollingNumber(null); setIsRolling(false); } }, 80); };
+    const handleLongPressStart = (action: () => void) => { longPressTimeout.current = setTimeout(() => { action(); }, 800); };
+    const handleLongPressEnd = () => { if (longPressTimeout.current) { clearTimeout(longPressTimeout.current); longPressTimeout.current = null; } };
 
 
     // --- Renderização do Jogo ---
@@ -1010,16 +1018,20 @@ const EcoChallenge: React.FC = () => {
                  initialProb = savedState.probabilityIndex ?? 0;
              }
         } catch {}
-        return (<TelaInicial
+         // ===== CORREÇÃO DO ERRO DE PROPS AQUI =====
+         return (<TelaInicial
                     onStartGame={(initialState) => { if (initialState) { setGameState(initialState as GameState); } }}
                     initialPlayers={initialPlayersData}
                     initialOcultarCarta={initialOcultar}
                     initialProbabilityIndex={initialProb}
                     hasSavedGame={hasSaved}
-                    // Não passa mais categorias daqui
-                    categoriasDisponiveis={[]}
-                    initialCategoriasSelecionadas={[]}
-                />);
+                    // As props categoriasDisponiveis e initialCategoriasSelecionadas
+                    // foram removidas da interface TelaInicialProps na última refatoração.
+                    // Portanto, não devemos passá-las aqui.
+                    // categoriasDisponiveis={[]} // <-- REMOVIDO
+                    // initialCategoriasSelecionadas={[]} // <-- REMOVIDO
+                 />);
+        // ===== FIM DA CORREÇÃO =====
     }
 
     const { players, currentPlayerId, ocultarCarta } = gameState;
@@ -1241,8 +1253,6 @@ const EcoChallenge: React.FC = () => {
     );
 
     // --- Função de Renderização de Conteúdo da Resposta ---
-    // (Inclui a lógica de renderização para todos os tipos de carta,
-    // usando buttonInlineStyle para os botões de opção padrão)
     function renderizarConteudoResposta() {
         if (!cartaAtual) return null;
 
@@ -1258,7 +1268,8 @@ const EcoChallenge: React.FC = () => {
 
         switch (cartaAtual.tipo) {
             case "Pergunta": case "ContraTempo": case "Vantagem": case "Desvantagem": case "Outras":
-                if (!Array.isArray((cartaAtual as any).opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas para esta carta.</p>; // Type guard
+                // Adicionado type guard para garantir que opcoes existe
+                if (!Array.isArray((cartaAtual as any).opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas para esta carta.</p>;
                 return (cartaAtual as any).opcoes.map((op: Opcao) => {
                     const isCorrect = Array.isArray(cartaAtual.respostaCorreta) ? cartaAtual.respostaCorreta.includes(op.id) : cartaAtual.respostaCorreta === op.id;
                     const isSelected = selecionado === op.id;
@@ -1314,7 +1325,7 @@ const EcoChallenge: React.FC = () => {
                     );
                 });
             case "Ordem":
-                 if (!Array.isArray((cartaAtual as any).opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas para esta carta.</p>; // Type guard
+                 if (!Array.isArray((cartaAtual as any).opcoes) || !Array.isArray(cartaAtual.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Ordem.</p>; // Type guard mais completo
                  const cOrdem = cartaAtual as CartaOrdem;
                  return cOrdem.opcoes.map((op) => {
                     const isSelected = ordemSelecoes.includes(op.id); const selectionIndex = isSelected ? ordemSelecoes.indexOf(op.id) + 1 : null;
@@ -1337,6 +1348,7 @@ const EcoChallenge: React.FC = () => {
                             <span className="flex-1">{op.texto}</span>
                             {respondido && isCorrectOptionOverall && (
                                 <> {/* Feedback agrupado */}
+                                    {/* Círculo Primário: Verde (correto) ou Vermelho (incorreto com a posição do usuário) */}
                                     <span
                                         className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${
                                             isCorrectOrder ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
@@ -1345,6 +1357,8 @@ const EcoChallenge: React.FC = () => {
                                     >
                                         {isCorrectOrder ? correctIndex : selectionIndex}
                                     </span>
+
+                                    {/* Círculo Azul (Hint): Somente se a ordem estiver errada, mostra a posição correta */}
                                     {isWrongOrder && correctIndex !== null && (
                                         <span
                                             className="ml-1 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white"
@@ -1360,11 +1374,11 @@ const EcoChallenge: React.FC = () => {
                 });
             case "RelacionarColunas":
                 const cRel = cartaAtual as CartaRelacionarColunas;
-                 if (!Array.isArray(cRel.colunaA) || !Array.isArray(cRel.colunaB) || !Array.isArray(cRel.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Relacionar Colunas.</p>; // Type guard robusto
+                 if (!Array.isArray(cRel.colunaA) || !Array.isArray(cRel.colunaB) || !Array.isArray(cRel.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Relacionar Colunas.</p>;
                  return (<div className="flex space-x-2 md:space-x-4"> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna A</p>{cRel.colunaA.map(itemA => { const isSelectedA = selecaoColunaA === itemA.id; const par = paresFormados.find(p => p.aId === itemA.id); const parCorreto = respondido ? cRel.respostaCorreta.find(rc => rc.aId === itemA.id) : undefined; const isCorrectPair = respondido && par && parCorreto && par.bId === parCorreto.bId; const isWrongPair = respondido && par && (!parCorreto || par.bId !== parCorreto.bId); let btnClass = "border-gray-300 text-gray-900"; if (isSelectedA) btnClass = "ring-2 ring-blue-500 border-blue-500"; if (par && !respondido) btnClass = "bg-gray-200 border-gray-400"; if (isCorrectPair) btnClass = "bg-green-100 border-green-400 text-green-900"; if (isWrongPair) btnClass = "bg-red-100 border-red-400 text-red-900"; return (<Button key={`A-${itemA.id}`} variant="outline" onClick={() => handleSelecionarColunaA(itemA.id)} disabled={respondido} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass)}><span className="flex-1">{itemA.texto}</span>{isCorrectPair && <CheckCircle2 className="ml-1 h-3.5 w-3.5 text-green-600 flex-shrink-0" />}{isWrongPair && <XCircle className="ml-1 h-3.5 w-3.5 text-red-600 flex-shrink-0" />}{isWrongPair && parCorreto && (<span className="text-[10px] ml-1 text-blue-600 hidden md:inline">({cRel.colunaB.find(iB => iB.id === parCorreto.bId)?.texto})</span>)}</Button>); })}</div> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna B</p>{cRel.colunaB.map(itemB => { const isPairedB = paresFormados.some(p => p.bId === itemB.id); const isDisabled = respondido || selecaoColunaA === null || isPairedB; let btnClass = "border-gray-300 hover:bg-gray-100 text-gray-900"; if (isPairedB) btnClass = "bg-gray-200 border-gray-400 text-gray-600"; return (<Button key={`B-${itemB.id}`} variant="outline" onClick={() => handleSelecionarColunaB(itemB.id)} disabled={isDisabled} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass, !isDisabled && selecaoColunaA !== null && "hover:border-blue-400" )}><span className="flex-1">{itemB.texto}</span></Button>); })}</div></div>);
             case "PontoCerto":
                  const cPonto = cartaAtual as CartaPontoCerto;
-                 if (!cPonto.imagemURL || !Array.isArray(cPonto.zonasClicaveis)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Ponto Certo.</p>; // Type guard
+                 if (!cPonto.imagemURL || !Array.isArray(cPonto.zonasClicaveis)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Ponto Certo.</p>;
                  return (<div className="relative w-full max-w-md mx-auto aspect-video overflow-hidden rounded border border-gray-300 cursor-crosshair" onClick={handleImagemClick} role="button" aria-label={`Imagem interativa: ${cPonto.titulo}`}><img src={cPonto.imagemURL} alt={`Imagem para: ${cPonto.titulo}`} className={`block w-full h-full object-contain ${respondido ? 'cursor-not-allowed' : ''}`}/>{coordenadasClique && (<div className={`absolute w-3 h-3 rounded-full border-2 pointer-events-none -translate-x-1/2 -translate-y-1/2 ${respondido ? (mensagem.toLowerCase().includes('correto') ? 'bg-green-500 border-white' : 'bg-red-500 border-white') : 'bg-blue-500 border-white'}`} style={{ left: `${coordenadasClique.x * 100}%`, top: `${coordenadasClique.y * 100}%` }}>{respondido && (mensagem.toLowerCase().includes('correto') ? <Check className="w-2 h-2 text-white" /> : <XIcon className="w-2 h-2 text-white" />)}</div>)}{respondido && (() => {
                     const zonaCorreta = cPonto.zonasClicaveis.find(z => z.id === cPonto.respostaCorreta);
                     return zonaCorreta ? (
@@ -1384,7 +1398,7 @@ const EcoChallenge: React.FC = () => {
         );
             case "CompletarFrase":
                 const cComp = cartaAtual as CartaCompletarFrase;
-                if (!cComp.fraseIncompleta || !Array.isArray(cComp.fragmentos) || !Array.isArray(cComp.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Completar Frase.</p>; // Type guard
+                if (!cComp.fraseIncompleta || !Array.isArray(cComp.fragmentos) || !Array.isArray(cComp.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Completar Frase.</p>;
                 let fraseR = cComp.fraseIncompleta; fragmentosSelecionados.forEach((fragId, index) => { const frag = cComp.fragmentos.find(f => f.id === fragId); if (frag) { fraseR = fraseR.replace(`__${index + 1}__`, `<strong class="text-blue-600 underline underline-offset-2 mx-1">${frag.texto}</strong>`); } }); fraseR = fraseR.replace(/__\d+__/g, '<span class="text-gray-400 border-b border-dashed border-gray-400 mx-1">___</span>'); const isCorretoComp = respondido && mensagem.toLowerCase().includes('correto'); return (<div className="space-y-3"><div className={`p-3 border rounded bg-gray-50 text-sm ${respondido ? (isCorretoComp ? 'border-green-300' : 'border-red-300') : 'border-gray-300'}`} dangerouslySetInnerHTML={{ __html: fraseR }}/>{!respondido && (<div className="flex flex-wrap gap-2 justify-center">{cComp.fragmentos.filter(f => !fragmentosSelecionados.includes(f.id)).map(frag => (<Button key={frag.id} variant="outline" size="sm" onClick={() => handleSelecionarFragmento(frag.id)} className="bg-white hover:bg-blue-50">{frag.texto}</Button>))}{(fragmentosSelecionados.length > 0 && <Button variant="ghost" size="sm" onClick={limparFragmentos} className="text-red-500 hover:bg-red-100" title="Limpar"><RotateCcw className="h-4 w-4 mr-1"/> Limpar</Button>)}</div>)}{respondido && !isCorretoComp && (<div className="text-xs text-center text-green-700 mt-2"><strong>Resposta:</strong> {cComp.respostaCorreta.map(id => cComp.fragmentos.find(f => f.id === id)?.texto).join(' / ')}</div>)}</div>);
             default: return <p className="text-sm text-red-500">Erro: Tipo de carta não renderizado.</p>;
         }
