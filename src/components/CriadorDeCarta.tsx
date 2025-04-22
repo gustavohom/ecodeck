@@ -118,7 +118,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
         case "CompletarFrase":
             const cardCompFrase = card as Partial<CartaCompletarFrase>;
-            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: &quot;{cardCompFrase.fraseIncompleta || '...'}&quot;</p>;
+            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: "{cardCompFrase.fraseIncompleta || '...'}"</p>;
             renderedOptions = (
                 <>
                  {cardCompFrase.fragmentos && cardCompFrase.fragmentos.length > 0 && (
@@ -179,9 +179,18 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             </CardHeader>
             <CardContent className="pt-2 pb-3 space-y-2">
                 {renderedSpecifics}
-                {/* IMPORTANTE: dangerouslySetInnerHTML executa scripts incluídos */}
-                <ScrollArea className="h-auto max-h-60 rounded-md border p-3 mt-2 bg-white/80 min-h-[100px]">
-                     <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1" dangerouslySetInnerHTML={{ __html: pergunta || "(Sem Pergunta/Descrição)" }} />
+                {/*
+                 * MODIFICAÇÃO 2:
+                 * - Aumentado max-h de 60 para 80 (ou ajuste conforme necessário).
+                 * - Adicionado overflow-hidden ao div interno para ajudar a conter o conteúdo
+                 *   dentro dos limites do ScrollArea, garantindo que o prose faça o wrap.
+                 *   O próprio ScrollArea lida com o overflow-y: auto.
+                */}
+                <ScrollArea className="h-auto max-h-80 rounded-md border p-3 mt-2 bg-white/80 min-h-[150px]">
+                     <div
+                        className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1 overflow-hidden" // Adicionado overflow-hidden aqui
+                        dangerouslySetInnerHTML={{ __html: pergunta || "(Sem Pergunta/Descrição)" }}
+                    />
                 </ScrollArea>
                 {renderedOptions}
             </CardContent>
@@ -334,7 +343,7 @@ const CriadorDeCarta: React.FC = () => {
     const handleAddFonte = () => { if (novaFonte.trim() !== "" && !fontes.includes(novaFonte)) { setFontes((old) => [...old, novaFonte]); setNovaFonte(""); } };
     const handleRemoveFonte = (f: string) => { setFontes((old) => old.filter((fon) => fon !== f)); };
 
-    // --- INÍCIO DAS MODIFICAÇÕES ---
+    // --- INÍCIO DAS MODIFICAÇÕES (Inserir Popup) ---
     const inserirTemplatePopup = (tipoPopup: 'imagem' | 'video') => {
         const idUnico = `popup-${Date.now()}`;
         let urlPrincipal = '';
@@ -964,35 +973,11 @@ const CriadorDeCarta: React.FC = () => {
 
                  {/* Coluna Direita: Lista de Cartas e Preview Fixo */}
                  <div className="space-y-4 lg:sticky lg:top-4 self-start">
-                     <Card>
-                        <CardHeader>
-                            <CardTitle className="text-xl">Baralho Atual ({cards.length} Cartas)</CardTitle>
-                            <AlertDescription>Clique em uma carta abaixo para editá-la.</AlertDescription>
-                        </CardHeader>
-                        <CardContent>
-                             {cards.length === 0 ? (<p className="text-gray-500 italic">Nenhuma carta.</p>) : (
-                                <ScrollArea className="h-[calc(50vh-6rem)] pr-3">
-                                    <div className="space-y-2">
-                                        {cards.map((c, index) => (
-                                            <Card key={`card-display-${c.id || index}`} className={cn("hover:shadow-md transition-shadow cursor-pointer", editIndex === index && "ring-2 ring-blue-500")} onClick={() => loadCardForEdit(index)}>
-                                                <CardContent className="p-3 flex items-start justify-between gap-2">
-                                                    <div className="flex-1 overflow-hidden">
-                                                        <p className="text-xs font-semibold text-blue-700">{c.tipo} - {c.dificuldade}</p>
-                                                        <p className="font-medium truncate" title={c.titulo}>{c.titulo || `Carta ${index + 1}`}</p>
-                                                    </div>
-                                                    <Button onClick={(e) => {e.stopPropagation(); deleteCard(index)}} size="sm" variant="ghost" className="text-red-500 hover:bg-red-100 h-7 w-7 p-0 flex-shrink-0">
-                                                        <Trash className="h-4 w-4"/>
-                                                    </Button>
-                                                </CardContent>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                </ScrollArea>
-                             )}
-                         </CardContent>
-                     </Card>
 
-                     {/* Preview Estático Fixo */}
+                     {/*
+                      * MODIFICAÇÃO 1:
+                      * Preview Estático movido para ANTES de Baralho Atual
+                      */}
                      <Card className="mt-4">
                             <CardHeader><CardTitle className="text-lg text-center">Preview Estático</CardTitle></CardHeader>
                             <CardContent>
@@ -1020,7 +1005,36 @@ const CriadorDeCarta: React.FC = () => {
                                      }
                                  }/>
                              </CardContent>
-                         </Card>
+                     </Card>
+
+                     <Card>
+                        <CardHeader>
+                            <CardTitle className="text-xl">Baralho Atual ({cards.length} Cartas)</CardTitle>
+                            <AlertDescription>Clique em uma carta abaixo para editá-la.</AlertDescription>
+                        </CardHeader>
+                        <CardContent>
+                             {cards.length === 0 ? (<p className="text-gray-500 italic">Nenhuma carta.</p>) : (
+                                /* Ajustado a altura máxima para dar espaço ao preview acima */
+                                <ScrollArea className="h-[calc(40vh-6rem)] min-h-[150px] pr-3">
+                                    <div className="space-y-2">
+                                        {cards.map((c, index) => (
+                                            <Card key={`card-display-${c.id || index}`} className={cn("hover:shadow-md transition-shadow cursor-pointer", editIndex === index && "ring-2 ring-blue-500")} onClick={() => loadCardForEdit(index)}>
+                                                <CardContent className="p-3 flex items-start justify-between gap-2">
+                                                    <div className="flex-1 overflow-hidden">
+                                                        <p className="text-xs font-semibold text-blue-700">{c.tipo} - {c.dificuldade}</p>
+                                                        <p className="font-medium truncate" title={c.titulo}>{c.titulo || `Carta ${index + 1}`}</p>
+                                                    </div>
+                                                    <Button onClick={(e) => {e.stopPropagation(); deleteCard(index)}} size="sm" variant="ghost" className="text-red-500 hover:bg-red-100 h-7 w-7 p-0 flex-shrink-0">
+                                                        <Trash className="h-4 w-4"/>
+                                                    </Button>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                </ScrollArea>
+                             )}
+                         </CardContent>
+                     </Card>
                  </div>
              </div>
         </div>
