@@ -35,7 +35,6 @@ interface CartaBase {
     vantagem: string; desvantagem: string; dica: string;
     baralho?: string;
 }
-// ... (Restante das interfaces Carta...)
 interface CartaPergunta extends CartaBase { tipo: "Pergunta"; opcoes: Opcao[]; respostaCorreta: number; }
 interface CartaMultiplaEscolha extends CartaBase { tipo: "MultiplaEscolha"; opcoes: Opcao[]; respostaCorreta: number[]; }
 interface CartaOrdem extends CartaBase { tipo: "Ordem"; opcoes: Opcao[]; respostaCorreta: number[]; }
@@ -69,14 +68,12 @@ interface SourceInfo {
     id: string;
     name: string;
     type: 'builtin' | 'custom';
-    cards: Carta[]; // Mantemos as cartas aqui para carregar/salvar fontes custom
+    cards: Carta[];
     internalBaralhos: Record<string, number>;
     active: boolean;
 }
 
 // Estado do Jogo
-// ===== MODIFICAÇÃO: GameState não precisa mais de activeSourceIds/activeInternalBaralhosState =====
-// A informação relevante virá de `allSourcesForGame`
 interface GameState {
     players: Player[];
     currentPlayerId: number | null;
@@ -84,14 +81,26 @@ interface GameState {
     ocultarCarta: boolean;
     probabilityIndex: number;
     jogoIniciado: boolean;
-    // Não precisamos mais salvar activeSourceIds e activeInternalBaralhosState aqui
-    // A TelaInicial vai passar a lista de fontes ativas no momento do início
+    activeSourceIds: string[];
+    activeInternalBaralhosState: Record<string, string[]>;
 }
-// ===== FIM DA MODIFICAÇÃO =====
 
 // --- Constantes ---
-const predefinedColors = [ /* ... cores ... */ ];
-const probabilitySettings = [ /* ... settings ... */ ];
+// ===== CORREÇÃO: Adicionar tipo explícito para predefinedColors =====
+const predefinedColors: string[] = [
+    "#9e0142","#f46d43","#fee08b","#66c2a5","#5e4fa2","#ff6699","#33a02c","#ff7f00",
+    "#3288bd","#999999","#8dd3c7","#ffffb3","#fb8072","#80b1d3","#b3de69","#fccde5",
+    "#bc80bd","#1f78b4","#e31a1c","#ffcc33","#6a3d9a","#b15928","#b2df8a","#cab2d6",
+    "#a6cee3","#fb9a99","#fdbf6f","#ffed6f","#ccebc5","#ff4444",
+];
+// ===== FIM DA CORREÇÃO =====
+
+const probabilitySettings = [
+    { value: 0, color: "#e5e7eb", label: "0%", textColor: "#1f2937" },
+    { value: 0.4, color: "#16a34a", label: "40%", textColor: "#ffffff" },
+    { value: 0.6, color: "#f97316", label: "60%", textColor: "#ffffff" },
+    { value: 0.8, color: "#dc2626", label: "80%", textColor: "#ffffff" },
+];
 const tiposPergunta: Carta['tipo'][] = ["Pergunta", "MultiplaEscolha", "Ordem", "ContraTempo", "RelacionarColunas", "PontoCerto", "CompletarFrase"];
 const tiposEspeciais: Carta['tipo'][] = ["Vantagem", "Desvantagem", "Outras"];
 
@@ -111,7 +120,6 @@ function processCardsAndExtractBaralhos(cards: Carta[]): { processedCards: Carta
 }
 
 const builtInSourcesData: Omit<SourceInfo, 'active' | 'internalBaralhos'>[] = [
-    // ... (seus decks built-in) ...
     { id: "manejoPlantadas", name: "Manejo Plantadas", type: 'builtin', cards: manejoPlantadas as Carta[] },
     { id: "manejoNativas", name: "Manejo Nativas", type: 'builtin', cards: manejoNativas as Carta[] },
     { id: "ecologiaFlorestal", name: "Ecologia Florestal", type: 'builtin', cards: ecologiaFlorestal as Carta[] },
@@ -127,10 +135,11 @@ const initialBuiltInSources: SourceInfo[] = builtInSourcesData.map(source => {
 
 // --- Funções Utilitárias ---
 function parseJSDeckFile(content: string): Carta[] {
-     try {
+    try {
         const match = content.match(/export default\s+(\[[\s\S]*?\]);?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?\s*export default\s+\w+;?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?/m);
         if (!match || !match[1]) { throw new Error("Array de cartas não encontrado no arquivo JS."); }
-        const arrayStr = match[1]; const rawArray = new Function(`return ${arrayStr};`)() as any[];
+        const arrayStr = match[1];
+        const rawArray = new Function(`return ${arrayStr};`)() as any[];
         if (!Array.isArray(rawArray)) { throw new Error("O conteúdo extraído não é um array."); }
         return rawArray.map((card, index) => ({ ...card, id: card.id || `custom_${Date.now()}_${index}` })) as Carta[];
     } catch (error: any) {
@@ -139,16 +148,15 @@ function parseJSDeckFile(content: string): Carta[] {
     }
 }
 
-// Recalcula categorias baseado nas fontes e baralhos *ativos* (recebe Set agora)
 function recalcularCategoriasAtivas(
     allSources: SourceInfo[],
     activeInternalBaralhos: Record<string, Set<string>>
 ): string[] {
     const activeCards: Carta[] = [];
     allSources.forEach(source => {
-        if (!source.active) return; // Pula fonte inativa
+        if (!source.active) return;
         const activeBaralhosForSource = activeInternalBaralhos[source.id];
-        if (!activeBaralhosForSource || activeBaralhosForSource.size === 0) return; // Pula se não há baralhos ativos para esta fonte
+        if (!activeBaralhosForSource) return;
         source.cards.forEach(card => {
             if (activeBaralhosForSource.has(card.baralho || DEFAULT_BARALHO_NAME)) {
                 activeCards.push(card);
@@ -159,14 +167,15 @@ function recalcularCategoriasAtivas(
 }
 
 function isClickInZone(clickCoords: { x: number; y: number } | null, zone: ZonaClicavel): boolean {
-     if (!clickCoords) return false; const { x, y } = clickCoords;
-     return (x >= zone.x && x <= zone.x + zone.largura && y >= zone.y && y <= zone.y + zone.altura);
- }
+    if (!clickCoords) return false;
+    const { x, y } = clickCoords;
+    return (x >= zone.x && x <= zone.x + zone.largura && y >= zone.y && y <= zone.y + zone.altura);
+}
+
 
 // --- Componente TelaInicial ---
-// ===== MODIFICAÇÃO: Assinatura do onStartGame =====
 interface TelaInicialProps {
-    onStartGame: (gameState: Partial<GameState>, sourcesForGame: SourceInfo[]) => void; // Passa as fontes atuais
+    onStartGame: (gameState: Partial<GameState>, sourcesForGame: SourceInfo[]) => void;
     initialPlayers: Player[];
     initialOcultarCarta: boolean;
     initialProbabilityIndex: number;
@@ -206,13 +215,20 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         let initialState: Record<string, Set<string>> = {};
          if (typeof window !== "undefined") {
              const saved = localStorage.getItem("activeInternalBaralhos");
-             try { const parsed = saved ? JSON.parse(saved) : {}; Object.keys(parsed).forEach(key => { if (Array.isArray(parsed[key])) { initialState[key] = new Set(parsed[key]); } }); }
-             catch { initialState = {}; }
+             try {
+                 const parsed = saved ? JSON.parse(saved) : {};
+                 Object.keys(parsed).forEach(key => { if (Array.isArray(parsed[key])) { initialState[key] = new Set(parsed[key]); } });
+             } catch { initialState = {}; }
          }
-         const currentAllSources = allSources; // Usa o estado local que acabou de ser inicializado
+         // Passa 'allSources' do estado para garantir que o estado inicial considere todas as fontes atuais
+         const currentAllSources = allSources; // Usa a variável local 'allSources' que está sendo inicializada
          currentAllSources.forEach(source => {
-             if (!initialState[source.id]) { initialState[source.id] = new Set(Object.keys(source.internalBaralhos)); }
-             else { Object.keys(source.internalBaralhos).forEach(bName => { initialState[source.id].add(bName); }); initialState[source.id].forEach(savedBName => { if (!(savedBName in source.internalBaralhos)) { initialState[source.id].delete(savedBName); }}); }
+             if (!initialState[source.id]) {
+                 initialState[source.id] = new Set(Object.keys(source.internalBaralhos));
+             } else {
+                 Object.keys(source.internalBaralhos).forEach(bName => { initialState[source.id].add(bName); })
+                 initialState[source.id].forEach(savedBName => { if (!(savedBName in source.internalBaralhos)) { initialState[source.id].delete(savedBName); }});
+             }
          });
          return initialState;
     });
@@ -246,7 +262,9 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         for (let i = 0; i < files.length; i++) {
             const file = files[i]; const content = await file.text();
             try {
-                let loadedCards: Carta[] = []; const sourceName = file.name.replace(/\.(js|json)$/, ""); const sourceId = `custom_${Date.now()}_${i}`;
+                let loadedCards: Carta[] = [];
+                const sourceName = file.name.replace(/\.(js|json)$/, "");
+                const sourceId = `custom_${Date.now()}_${i}`;
                 if (allSources.some(s => s.name === sourceName && s.type === 'custom')) { errors.push(`Arquivo/Fonte "${sourceName}" já carregado.`); continue; }
                 if (file.name.endsWith(".js")) { loadedCards = parseJSDeckFile(content); }
                 else if (file.name.endsWith(".json")) { const raw = JSON.parse(content) as any[]; loadedCards = raw.map((card, index) => ({ ...card, id: card.id || `${sourceId}_card_${index}` })) as Carta[]; }
@@ -267,7 +285,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 
     const toggleSourceActive = (sourceId: string) => { setAllSources(prev => prev.map(s => s.id === sourceId ? { ...s, active: !s.active } : s)); };
     const removeSource = (sourceId: string) => {
-        const sourceToRemove = allSources.find(s => s.id === sourceId); if (!sourceToRemove || sourceToRemove.type !== 'custom') return;
+        const sourceToRemove = allSources.find(s => s.id === sourceId);
+        if (!sourceToRemove || sourceToRemove.type !== 'custom') return;
         if (window.confirm(`Remover fonte "${sourceToRemove.name}"?`)) {
             setAllSources(prev => prev.filter(s => s.id !== sourceId));
             setActiveInternalBaralhos(prev => { const newState = { ...prev }; delete newState[sourceId]; return newState; });
@@ -281,66 +300,55 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             return { ...prev, [sourceId]: currentSourceSet };
         });
     };
-    const toggleExpandSource = (sourceId: string) => { setExpandedSources(prev => { const newSet = new Set(prev); if (newSet.has(sourceId)) { newSet.delete(sourceId); } else { newSet.add(sourceId); } return newSet; }); };
+    const toggleExpandSource = (sourceId: string) => {
+        setExpandedSources(prev => { const newSet = new Set(prev); if (newSet.has(sourceId)) { newSet.delete(sourceId); } else { newSet.add(sourceId); } return newSet; });
+    };
     const addPlayerInput = () => { if (playerInputs.length < 8) { setPlayerInputs([...playerInputs, { id: playerInputs.length, name: "", color: predefinedColors[playerInputs.length % predefinedColors.length], showColorPicker: false, }]); } };
     const handlePlayerChange = (index: number, field: "name" | "color", value: string) => { const updatedPlayers = [...playerInputs]; const player = updatedPlayers[index]; if (field === 'name') player.name = value; if (field === 'color') player.color = value; setPlayerInputs(updatedPlayers); };
     const toggleColorPicker = (index: number) => { const updatedPlayers = playerInputs.map((p, i) => i === index ? { ...p, showColorPicker: !p.showColorPicker } : {...p, showColorPicker: false}); setPlayerInputs(updatedPlayers); };
     const deletePlayer = (index: number) => { setPlayerInputs((prev) => prev.filter((_, i) => i !== index)); };
 
-    // ===== MODIFICAÇÃO: handleStartGame =====
     const handleStartGame = (continueGame = false) => {
         let gameStateToPass: Partial<GameState>;
         const finalCategorias = recalcularCategoriasAtivas(allSources, activeInternalBaralhos);
         const finalCategoriasSelecionadas = categoriasSelecionadas.filter(cat => finalCategorias.includes(cat));
 
-        // Validações (iguais a antes)
-        if (playerInputs.length === 0) { alert("Adicione pelo menos um jogador."); return; }
-        const anySourceActive = allSources.some(s => s.active);
-        if (!anySourceActive) { alert("Ative pelo menos uma Fonte de Cartas."); return; }
-        const anyInternalDeckActive = Object.entries(activeInternalBaralhos).some(([sourceId, activeSet]) => allSources.find(s => s.id === sourceId)?.active && activeSet.size > 0);
-        if (!anyInternalDeckActive) { alert("Ative pelo menos um baralho interno dentro das fontes ativas."); return; }
-        if (finalCategoriasSelecionadas.length === 0) { alert("Nenhuma categoria selecionada ou nenhuma categoria disponível com os baralhos ativos. Selecione categorias ou ative mais baralhos."); return; }
-        const activeCardsForGame = allSources.flatMap(source => { if (!source.active) return []; const activeBaralhos = activeInternalBaralhos[source.id]; if (!activeBaralhos || activeBaralhos.size === 0) return []; return source.cards.filter(card => activeBaralhos.has(card.baralho || DEFAULT_BARALHO_NAME)); });
-        if (activeCardsForGame.filter(c => c.categorias?.some(cat => finalCategoriasSelecionadas.includes(cat))).length === 0) { alert("Nenhuma carta encontrada com a combinação de baralhos e categorias selecionadas."); return; }
+         if (playerInputs.length === 0) { alert("Adicione pelo menos um jogador."); return; }
+         const anySourceActive = allSources.some(s => s.active);
+         if (!anySourceActive) { alert("Ative pelo menos uma Fonte de Cartas."); return; }
+         const anyInternalDeckActive = Object.entries(activeInternalBaralhos).some(([sourceId, activeSet]) => allSources.find(s => s.id === sourceId)?.active && activeSet.size > 0);
+         if (!anyInternalDeckActive) { alert("Ative pelo menos um baralho interno dentro das fontes ativas."); return; }
+         if (finalCategoriasSelecionadas.length === 0) { alert("Nenhuma categoria selecionada ou nenhuma categoria disponível com os baralhos ativos. Selecione categorias ou ative mais baralhos."); return; }
+         const activeCardsForGame = allSources.flatMap(source => { if (!source.active) return []; const activeBaralhos = activeInternalBaralhos[source.id]; if (!activeBaralhos || activeBaralhos.size === 0) return []; return source.cards.filter(card => activeBaralhos.has(card.baralho || DEFAULT_BARALHO_NAME)); });
+         if (activeCardsForGame.filter(c => c.categorias?.some(cat => finalCategoriasSelecionadas.includes(cat))).length === 0) { alert("Nenhuma carta encontrada com a combinação de baralhos e categorias selecionadas."); return; }
 
-        // Pega apenas as fontes *ativas* para passar para o jogo
         const activeSourcesForGame = allSources.filter(s => s.active);
-         // Converte o Set de baralhos ativos para Array para salvar no GameState
         const activeInternalBaralhosStateForSave = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => {
-            if (activeSourcesForGame.some(s => s.id === key)) { // Só inclui fontes ativas
-                acc[key] = Array.from(valueSet);
-            }
-            return acc;
+            if (activeSourcesForGame.some(s => s.id === key)) { acc[key] = Array.from(valueSet); } return acc;
         }, {} as Record<string, string[]>);
-
 
         if (continueGame && typeof window !== "undefined") {
             const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
             try {
                 const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
                 if (savedState && savedState.jogoIniciado) {
-                    gameStateToPass = { // Usa dados salvos do jogo, mas configurações atuais da UI
-                        ...savedState,
-                        categoriasSelecionadas: finalCategoriasSelecionadas,
-                        ocultarCarta: ocultarCarta,
-                        probabilityIndex: probabilityIndex,
-                        // activeSourceIds e activeInternalBaralhosState serão setados abaixo
+                    gameStateToPass = {
+                        ...savedState, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex,
+                        activeSourceIds: activeSourcesForGame.map(s => s.id), // Passa os IDs das fontes ativas atuais
+                        activeInternalBaralhosState: activeInternalBaralhosStateForSave, // Passa o estado atual dos baralhos internos
                     };
                 } else { return handleStartGame(false); }
             } catch (e) { console.error("Erro ao carregar jogo salvo:", e); return handleStartGame(false); }
         } else {
             const initializedPlayers: Player[] = playerInputs.map((input, index) => ({ id: index, name: input.name.trim() || `Jogador ${index + 1}`, color: input.color || predefinedColors[index % predefinedColors.length], fixedStars: 0, respostasCertas: 0, respostasErradas: 0, respostasSeguidas: 0, progresso: 0, pulosDisponiveis: 0, contadorDeEstrelas: 0, rodadasPreso: 0 }));
-            gameStateToPass = { // Novo jogo
-                players: initializedPlayers, currentPlayerId: initializedPlayers[0]?.id ?? null,
-                categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta,
-                probabilityIndex: probabilityIndex, jogoIniciado: true,
+            gameStateToPass = {
+                players: initializedPlayers, currentPlayerId: initializedPlayers[0]?.id ?? null, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex, jogoIniciado: true,
+                activeSourceIds: activeSourcesForGame.map(s => s.id),
+                activeInternalBaralhosState: activeInternalBaralhosStateForSave,
             };
         }
-
-        // Passa o estado do jogo E as fontes ativas separadamente
-        onStartGame(gameStateToPass, activeSourcesForGame);
+        onStartGame(gameStateToPass, activeSourcesForGame); // Passa as fontes completas aqui
     };
-    // ===== FIM DA MODIFICAÇÃO =====
 
     const categoriasFiltradas = todasCategorias.filter((cat) => cat.toLowerCase().includes(termoBuscaCategoria.toLowerCase())).sort();
     const cycleProbability = () => { setProbabilityIndex((prevIndex) => (prevIndex + 1) % probabilitySettings.length); };
@@ -464,9 +472,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 // --- Componente Principal EcoChallenge ---
 const EcoChallenge: React.FC = () => {
     const [gameState, setGameState] = useState<GameState | null>(null);
-     // ===== MODIFICAÇÃO: Estado para guardar as fontes do jogo atual =====
-     const [currentGameSources, setCurrentGameSources] = useState<SourceInfo[]>([]);
-    // ===== FIM DA MODIFICAÇÃO =====
+    // Estado para guardar as fontes completas DO JOGO ATUAL
+    const [currentGameSources, setCurrentGameSources] = useState<SourceInfo[]>([]);
     const [cartaAtual, setCartaAtual] = useState<Carta | null>(null);
     const [respondido, setRespondido] = useState(false);
     const [mensagem, setMensagem] = useState("");
@@ -489,58 +496,54 @@ const EcoChallenge: React.FC = () => {
     const [isDieModalOpen, setIsDieModalOpen] = useState(false);
     const [isRolling, setIsRolling] = useState(false);
 
-    // Removido allSourcesMemo, usaremos currentGameSources
-
     const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
 
-     // ===== MODIFICAÇÃO: Função onStartGame agora recebe sourcesForGame =====
-     const handleGameStart = useCallback((initialGameState?: Partial<GameState>, sourcesForGame?: SourceInfo[]) => {
-        if (initialGameState) {
-             setGameState(initialGameState as GameState); // Assume que quem chama passa o GameState completo
-             // Se sourcesForGame foi passado (novo jogo/continuar da UI), usa ele
-             if (sourcesForGame) {
-                 setCurrentGameSources(sourcesForGame);
-             } else {
-                 // Se está carregando um jogo salvo antigo (sem sourcesForGame explícito),
-                 // precisa reconstruir as fontes a partir do localStorage/built-in
-                 // (Essa lógica pode ser mais complexa dependendo de como você quer lidar com saves antigos)
-                 console.warn("Continuando jogo salvo sem `sourcesForGame` explícito. Reconstruindo fontes...");
-                 const customSourcesRaw = typeof window !== "undefined" ? localStorage.getItem("customSourceInfos") : null;
-                 const builtInStatusRaw = typeof window !== "undefined" ? localStorage.getItem("builtInSourceStatus") : null;
-                 let customSources: SourceInfo[] = [];
-                 let builtInStatus: Record<string, boolean> | null = null;
-                 try { customSources = customSourcesRaw ? JSON.parse(customSourcesRaw) : []; } catch { customSources = []; }
-                 try { builtInStatus = builtInStatusRaw ? JSON.parse(builtInStatusRaw) : null; } catch { builtInStatus = null; }
-                 const processedCustomSources = customSources.map(source => {
-                     const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards);
-                     return { ...source, cards: processedCards, internalBaralhos };
-                 });
-                 const reconstructedSources = [
-                     ...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus?.[bs.id] ?? true })),
-                     ...processedCustomSources
-                 ];
-                  setCurrentGameSources(reconstructedSources);
-             }
+    // Função chamada pela TelaInicial para iniciar ou continuar o jogo
+    const handleGameStart = useCallback((initialGameState?: Partial<GameState>, sourcesForGame?: SourceInfo[]) => {
+        if (initialGameState && sourcesForGame) {
+             setGameState(initialGameState as GameState);
+             setCurrentGameSources(sourcesForGame); // Armazena as fontes que serão usadas neste jogo
+        } else if (initialGameState) { // Caso de continuar jogo salvo sem sources explícitas (reconstrução)
+             console.warn("Reconstruindo fontes para jogo salvo...");
+             const customSourcesRaw = typeof window !== "undefined" ? localStorage.getItem("customSourceInfos") : null;
+             const builtInStatusRaw = typeof window !== "undefined" ? localStorage.getItem("builtInSourceStatus") : null;
+             let customSources: SourceInfo[] = [];
+             let builtInStatus: Record<string, boolean> | null = null;
+             try { customSources = customSourcesRaw ? JSON.parse(customSourcesRaw) : []; } catch { customSources = []; }
+             try { builtInStatus = builtInStatusRaw ? JSON.parse(builtInStatusRaw) : null; } catch { builtInStatus = null; }
+             const processedCustomSources = customSources.map(source => {
+                 const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards);
+                 return { ...source, cards: processedCards, internalBaralhos };
+             });
+             const reconstructedSources = [
+                 ...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus?.[bs.id] ?? true })),
+                 ...processedCustomSources
+             ].filter(s => initialGameState.activeSourceIds?.includes(s.id)); // Filtra pelas fontes salvas no gameState
+
+             setGameState(initialGameState as GameState);
+             setCurrentGameSources(reconstructedSources);
         }
      }, []);
-    // ===== FIM DA MODIFICAÇÃO =====
 
+     // Persiste o estado do jogo (sem as fontes)
     const updateGameState = useCallback((newState: Partial<GameState>) => {
         setGameState(prev => {
             if (!prev) return null;
             const updatedState = { ...prev, ...newState };
             if (typeof window !== "undefined") {
                 try {
-                    // Salva o estado do jogo SEM as fontes/baralhos internos (eles são salvos na TelaInicial)
-                     // Apenas salva o estado do jogo em si, não a definição das fontes
-                    localStorage.setItem("estadoEcoChallenge", JSON.stringify(updatedState));
-                    // Os dados das fontes e baralhos ativos são lidos/salvos pela TelaInicial
+                     // Exclui activeSourceIds e activeInternalBaralhosState do objeto principal salvo
+                    const { activeSourceIds, activeInternalBaralhosState, ...stateToSave } = updatedState;
+                    localStorage.setItem("estadoEcoChallenge", JSON.stringify(stateToSave));
+                     // Salva IDs e nomes de baralhos separadamente (se existirem)
+                     if(activeSourceIds) localStorage.setItem("activeSourceIds", JSON.stringify(activeSourceIds));
+                     if(activeInternalBaralhosState) localStorage.setItem("activeInternalBaralhosState", JSON.stringify(activeInternalBaralhosState));
                 } catch (e) { console.error("Erro ao salvar estado:", e); }
             }
             return updatedState;
         });
-    }, []); // Não precisa mais depender de nada aqui
+    }, []);
 
     const updateCurrentPlayer = useCallback((partialPlayerData: Partial<Player>) => {
         if (!gameState || gameState.currentPlayerId === null) return;
@@ -550,38 +553,44 @@ const EcoChallenge: React.FC = () => {
         updateGameState({ players: updatedPlayers });
     }, [gameState, updateGameState]);
 
-    // Carregar estado inicial do JOGO
+    // Carregar estado inicial do JOGO (apenas se não iniciado pela TelaInicial)
     useEffect(() => {
-        if (typeof window !== "undefined") {
+        if (!gameState && typeof window !== "undefined") { // Só tenta carregar se gameState for null
             const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
-             // Não carrega mais activeSourceIds e activeInternalBaralhosState aqui
-             // Eles serão definidos quando handleGameStart for chamado ao continuar/iniciar
+            const savedActiveSources = localStorage.getItem("activeSourceIds");
+            const savedActiveInternal = localStorage.getItem("activeInternalBaralhosState");
             try {
                 const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
                 if (savedState && savedState.jogoIniciado) {
-                    // Chama handleGameStart para inicializar o estado e reconstruir as fontes
-                    handleGameStart(savedState);
-                    return;
+                     const activeSourceIds = savedActiveSources ? JSON.parse(savedActiveSources) : [];
+                     const activeInternalBaralhosState = savedActiveInternal ? JSON.parse(savedActiveInternal) : {};
+                     // Chama handleGameStart para reconstruir fontes e setar estado
+                     handleGameStart({ ...savedState, activeSourceIds, activeInternalBaralhosState });
                 }
-            } catch (e) { console.error("Erro ao carregar estado:", e); localStorage.removeItem("estadoEcoChallenge");}
+            } catch (e) {
+                console.error("Erro ao carregar estado:", e);
+                localStorage.removeItem("estadoEcoChallenge");
+                localStorage.removeItem("activeSourceIds");
+                localStorage.removeItem("activeInternalBaralhosState");
+            }
         }
-    }, [handleGameStart]); // Depende de handleGameStart
+    }, [handleGameStart, gameState]); // Roda se gameState for null inicialmente
 
-
-    // Selecionar Carta Aleatória (Usa currentGameSources)
+    // Selecionar Carta Aleatória
     const selecionarCartaAleatoria = useCallback(() => {
         if (!gameState || currentGameSources.length === 0) return; // Usa currentGameSources
         const { categoriasSelecionadas, probabilityIndex, activeSourceIds, activeInternalBaralhosState } = gameState;
         const probabilidadeExcluirEspecial = probabilitySettings[probabilityIndex].value;
         const incluirCartasEspeciais = probabilidadeExcluirEspecial === 0 || Math.random() >= probabilidadeExcluirEspecial;
 
-        // Filtra as fontes que estão no gameState.activeSourceIds
-        const activeSources = currentGameSources.filter(s => activeSourceIds.includes(s.id));
+        // Usa diretamente currentGameSources que já foi filtrado/passado pela TelaInicial
+        const activeSources = currentGameSources;
 
         const cartasFiltradas = activeSources.flatMap(source => {
-            const activeBaralhosForSource = activeInternalBaralhosState[source.id]; // Pega o ARRAY
-            if (!activeBaralhosForSource || activeBaralhosForSource.length === 0) return [];
-            const activeBaralhoSet = new Set(activeBaralhosForSource); // Cria o Set
+             // Garante que activeInternalBaralhosState[source.id] existe e é um array
+            const activeBaralhosForSource = activeInternalBaralhosState[source.id] ?? [];
+            if (activeBaralhosForSource.length === 0) return []; // Pula fonte sem baralhos ativos
+            const activeBaralhoSet = new Set(activeBaralhosForSource);
 
             return source.cards.filter(card => {
                 const baralhoAtivo = activeBaralhoSet.has(card.baralho || DEFAULT_BARALHO_NAME);
@@ -607,15 +616,8 @@ const EcoChallenge: React.FC = () => {
         if (novaCarta.tipo === "ContraTempo") { setTempoRestante(novaCarta.tempoLimite); }
     }, [gameState, currentGameSources]); // Depende do gameState e das fontes do jogo atual
 
-     // Seleciona a primeira carta quando o jogo inicia E as fontes foram carregadas
-     useEffect(() => {
-         if (gameState?.jogoIniciado && currentGameSources.length > 0 && !cartaAtual && !noCardsAvailable) {
-             selecionarCartaAleatoria();
-         }
-     }, [gameState?.jogoIniciado, currentGameSources, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]);
+    useEffect(() => { if (gameState?.jogoIniciado && currentGameSources.length > 0 && !cartaAtual && !noCardsAvailable) { selecionarCartaAleatoria(); } }, [gameState?.jogoIniciado, currentGameSources, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]);
 
-
-    // Timer para ContraTempo (sem mudanças significativas)
     useEffect(() => {
         if (cartaAtual?.tipo === "ContraTempo" && tempoRestante !== null && tempoRestante > 0 && !respondido && gameState?.jogoIniciado && cartaRevelada) {
             timerIntervalRef.current = setInterval(() => {
@@ -667,13 +669,7 @@ const EcoChallenge: React.FC = () => {
         const savedStateRaw = typeof window !== "undefined" ? localStorage.getItem("estadoEcoChallenge") : null;
         let hasSaved = false; let initialPlayersData: Player[] = []; let initialOcultar = true; let initialProb = 0;
         try { const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; if (savedState && savedState.jogoIniciado) { hasSaved = true; initialPlayersData = savedState.players || []; initialOcultar = savedState.ocultarCarta ?? true; initialProb = savedState.probabilityIndex ?? 0; } } catch {}
-        return (<TelaInicial
-                    onStartGame={handleGameStart} // Passa a nova função wrapper
-                    initialPlayers={initialPlayersData}
-                    initialOcultarCarta={initialOcultar}
-                    initialProbabilityIndex={initialProb}
-                    hasSavedGame={hasSaved}
-                 />);
+        return (<TelaInicial onStartGame={handleGameStart} initialPlayers={initialPlayersData} initialOcultarCarta={initialOcultar} initialProbabilityIndex={initialProb} hasSavedGame={hasSaved} />);
     }
 
     const { players, currentPlayerId, ocultarCarta } = gameState;
@@ -682,20 +678,20 @@ const EcoChallenge: React.FC = () => {
     if (noCardsAvailable) { return (<div className="flex flex-col items-center justify-center min-h-screen p-4 text-center"><Card className="p-6 shadow-lg"><CardHeader><CardTitle className="text-xl text-red-600">Erro!</CardTitle></CardHeader><CardContent><p className="mb-4">Nenhuma carta disponível.</p><p className="text-sm text-gray-600 mb-4">Verifique filtros/categorias ou adicione baralhos.</p></CardContent><CardFooter><Button onClick={voltarTelaInicial} className="w-full">Voltar</Button></CardFooter></Card></div>); }
     if (!cartaAtual || !currentPlayer) { return (<div className="flex items-center justify-center min-h-screen"><p>Carregando...</p><Button onClick={voltarTelaInicial} className="ml-4">Voltar</Button></div>); }
 
-    const obterEstiloCarta = () => { /* ... sem mudanças ... */ };
-    const isVerificarDisabled = () => { /* ... sem mudanças ... */ };
-    const getAlertVariant = (): "default" | "destructive" => { /* ... sem mudanças ... */ };
+    const obterEstiloCarta = () => { if (ocultarCarta && !cartaRevelada) return "border-gray-300 bg-gray-100"; switch (cartaAtual.tipo) { case "Vantagem": return "border-green-500 bg-green-50"; case "Desvantagem": return "border-red-500 bg-red-50"; case "Outras": return "border-blue-500 bg-blue-50"; case "ContraTempo": return "border-yellow-500 bg-yellow-50"; default: return "border-gray-300 bg-white"; } };
+    const isVerificarDisabled = () => { if (respondido) return true; switch (cartaAtual.tipo) { case "Pergunta": case "ContraTempo": case "Vantagem": case "Desvantagem": case "Outras": return selecionado === null; case "MultiplaEscolha": return selecoesMultiplas.length === 0; case "Ordem": return !cartaAtual.opcoes || ordemSelecoes.length !== cartaAtual.opcoes.length; case "RelacionarColunas": return !Array.isArray(cartaAtual.respostaCorreta) || paresFormados.length !== cartaAtual.respostaCorreta.length; case "PontoCerto": return coordenadasClique === null; case "CompletarFrase": return !Array.isArray(cartaAtual.respostaCorreta) || fragmentosSelecionados.length !== cartaAtual.respostaCorreta.length; default: return true; } };
+
+    const getAlertVariant = (): "default" | "destructive" => { /* ... sem mudanças ... */ return "default";};
     const isInfoAlert = !mensagem.toLowerCase().includes('correto') && !mensagem.toLowerCase().includes('vantagem') && !mensagem.toLowerCase().includes('incorreto') && !mensagem.toLowerCase().includes('desvantagem') && !mensagem.toLowerCase().includes('tempo esgotado') && cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem';
 
     return (
         <div className="flex flex-col items-center p-2 md:p-4 min-h-screen bg-gradient-to-b from-green-50 to-blue-50 font-sans">
-            {/* Card Principal do Jogo (JSX sem mudanças estruturais significativas) */}
-            <Card
+             {/* Card Principal do Jogo (JSX sem mudanças estruturais significativas) */}
+             <Card
                 className={cn("w-full max-w-lg mx-auto mt-4 shadow-xl border-2 rounded-lg", obterEstiloCarta())}
                 style={players.length > 0 && currentPlayer && !(ocultarCarta && !cartaRevelada) ? { boxShadow: `0 0 15px 3px ${currentPlayer.color}` } : {}}
             >
-                <CardHeader className="pb-3">
-                    {/* ... Conteúdo do Header ... */}
+                 <CardHeader className="pb-3">
                      <div className="flex justify-between items-start mb-2 gap-2">
                          <div className="flex items-center space-x-2 flex-1 min-w-0">
                              <div className="flex-1 min-w-0">
@@ -727,7 +723,7 @@ const EcoChallenge: React.FC = () => {
                     </CardContent>
                 )}
 
-                <CardFooter className="flex flex-col items-center pt-4 border-t bg-gray-50/50 rounded-b-lg">
+                 <CardFooter className="flex flex-col items-center pt-4 border-t bg-gray-50/50 rounded-b-lg">
                      {/* ... Botões e Feedback ... */}
                      <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
                          <Button onClick={toggleFontes} variant="outline" disabled={!cartaAtual.fontes || cartaAtual.fontes.length === 0 || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <BookOpen className="h-5 w-5" /></Button>
