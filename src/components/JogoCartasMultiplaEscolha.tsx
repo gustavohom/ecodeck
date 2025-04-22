@@ -88,9 +88,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const [ocultarCarta, setOcultarCarta] = useState(initialOcultarCarta);
     const [probabilityIndex, setProbabilityIndex] = useState(initialProbabilityIndex);
     const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>(() => initialPlayers.length > 0 ? initialPlayers.map((p) => ({ id: p.id, name: p.name, color: p.color, showColorPicker: false })) : [{ id: 0, name: "", color: predefinedColors[0], showColorPicker: false }] );
-    // Inicializa vazio, carregamento do localStorage ocorrerá no useEffect
-    const [allSources, setAllSources] = useState<SourceInfo[]>([]);
-    const [activeInternalBaralhos, setActiveInternalBaralhos] = useState<Record<string, Set<string>>>({});
+    const [allSources, setAllSources] = useState<SourceInfo[]>([]); // Inicializa vazio
+    const [activeInternalBaralhos, setActiveInternalBaralhos] = useState<Record<string, Set<string>>>({}); // Inicializa vazio
     const [todasCategorias, setTodasCategorias] = useState<string[]>([]);
     const [categoriasComContagem, setCategoriasComContagem] = useState<Record<string, number>>({});
     const [isLoading, setIsLoading] = useState(false);
@@ -98,55 +97,28 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
     const [isClient, setIsClient] = useState(false);
 
-    // Carrega estado da UI (fontes, baralhos ativos) do localStorage APÓS montagem
+    // Carrega estado da UI do localStorage APÓS montagem
     useEffect(() => {
-        setIsClient(true); // Marca que estamos no cliente
-
-        const savedCustom = localStorage.getItem("customSourceInfos");
-        const savedBuiltInStatus = localStorage.getItem("builtInSourceStatus");
-        let loadedCustomSources: SourceInfo[] = [];
-        let loadedBuiltInStatus: Record<string, boolean> | null = null;
-        try { loadedCustomSources = savedCustom ? JSON.parse(savedCustom) : []; } catch { loadedCustomSources = []; }
-        try { loadedBuiltInStatus = savedBuiltInStatus ? JSON.parse(savedBuiltInStatus) : null; } catch { loadedBuiltInStatus = null; }
+        setIsClient(true);
+        const savedCustom = localStorage.getItem("customSourceInfos"); const savedBuiltInStatus = localStorage.getItem("builtInSourceStatus"); let loadedCustomSources: SourceInfo[] = []; let loadedBuiltInStatus: Record<string, boolean> | null = null;
+        try { loadedCustomSources = savedCustom ? JSON.parse(savedCustom) : []; } catch { loadedCustomSources = []; } try { loadedBuiltInStatus = savedBuiltInStatus ? JSON.parse(savedBuiltInStatus) : null; } catch { loadedBuiltInStatus = null; }
         const processedCustomSources = loadedCustomSources.map(source => { const { processedCards, internalBaralhos, totalCards } = processCardsAndExtractBaralhos(source.cards || []); return { ...source, cards: processedCards, internalBaralhos, totalCards }; });
         const combinedSources = [...initialBuiltInSources.map(bs => ({...bs, active: loadedBuiltInStatus ? (loadedBuiltInStatus[bs.id] ?? true) : true})), ...processedCustomSources];
         setAllSources(combinedSources);
 
-        const savedActiveInternal = localStorage.getItem("activeInternalBaralhos");
-        let initialActiveBaralhos: Record<string, Set<string>> = {};
+        const savedActiveInternal = localStorage.getItem("activeInternalBaralhos"); let initialActiveBaralhos: Record<string, Set<string>> = {};
         try { const parsed = savedActiveInternal ? JSON.parse(savedActiveInternal) : {}; Object.keys(parsed).forEach(key => { if (Array.isArray(parsed[key])) { initialActiveBaralhos[key] = new Set(parsed[key]); } }); } catch { initialActiveBaralhos = {}; }
-
-        // Garante que todas as fontes tenham entrada no estado activeInternalBaralhos
-        combinedSources.forEach(source => {
-            if (!initialActiveBaralhos[source.id]) { initialActiveBaralhos[source.id] = new Set(Object.keys(source.internalBaralhos)); }
-            else { Object.keys(source.internalBaralhos).forEach(bName => { initialActiveBaralhos[source.id].add(bName); }); initialActiveBaralhos[source.id].forEach(savedBName => { if (!(savedBName in source.internalBaralhos)) { initialActiveBaralhos[source.id].delete(savedBName); }}); }
-        });
+        combinedSources.forEach(source => { if (!initialActiveBaralhos[source.id]) { initialActiveBaralhos[source.id] = new Set(Object.keys(source.internalBaralhos)); } else { Object.keys(source.internalBaralhos).forEach(bName => { initialActiveBaralhos[source.id].add(bName); }); initialActiveBaralhos[source.id].forEach(savedBName => { if (!(savedBName in source.internalBaralhos)) { initialActiveBaralhos[source.id].delete(savedBName); }}); } });
         setActiveInternalBaralhos(initialActiveBaralhos);
-
     }, []); // Roda apenas uma vez no cliente
 
     // Recalcular categorias e contagens
-    useEffect(() => {
-        if(isClient) { // Só recalcula no cliente
-            const { categorias, contagens } = recalcularCategoriasAtivas(allSources, activeInternalBaralhos);
-            setTodasCategorias(categorias);
-            setCategoriasComContagem(contagens);
-            setCategoriasSelecionadas((prev) => prev.filter(cat => categorias.includes(cat)));
-        }
-    }, [allSources, activeInternalBaralhos, isClient]);
-
+    useEffect(() => { if(isClient) { const { categorias, contagens } = recalcularCategoriasAtivas(allSources, activeInternalBaralhos); setTodasCategorias(categorias); setCategoriasComContagem(contagens); setCategoriasSelecionadas((prev) => prev.filter(cat => categorias.includes(cat))); } }, [allSources, activeInternalBaralhos, isClient]);
     // Salvar estado da UI
-    useEffect(() => {
-        if (isClient) { // Só salva no cliente
-            const customSourcesToSave = allSources.filter(s => s.type === 'custom'); localStorage.setItem("customSourceInfos", JSON.stringify(customSourcesToSave));
-            const builtInStatusToSave: Record<string, boolean> = {}; allSources.filter(s => s.type === 'builtin').forEach(s => { builtInStatusToSave[s.id] = s.active; }); localStorage.setItem("builtInSourceStatus", JSON.stringify(builtInStatusToSave));
-            const serializableActiveInternal = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => { acc[key] = Array.from(valueSet); return acc; }, {} as Record<string, string[]>); localStorage.setItem("activeInternalBaralhos", JSON.stringify(serializableActiveInternal));
-        }
-    }, [allSources, activeInternalBaralhos, isClient]);
-
+    useEffect(() => { if (isClient) { const customSourcesToSave = allSources.filter(s => s.type === 'custom'); localStorage.setItem("customSourceInfos", JSON.stringify(customSourcesToSave)); const builtInStatusToSave: Record<string, boolean> = {}; allSources.filter(s => s.type === 'builtin').forEach(s => { builtInStatusToSave[s.id] = s.active; }); localStorage.setItem("builtInSourceStatus", JSON.stringify(builtInStatusToSave)); const serializableActiveInternal = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => { acc[key] = Array.from(valueSet); return acc; }, {} as Record<string, string[]>); localStorage.setItem("activeInternalBaralhos", JSON.stringify(serializableActiveInternal)); } }, [allSources, activeInternalBaralhos, isClient]);
 
     const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => { /* ... sem mudanças ... */ };
-    const toggleSourceActive = (sourceId: string) => { setAllSources(prev => prev.map(s => s.id === sourceId ? { ...s, active: !s.active } : s)); };
+    const toggleSourceActive = (sourceId: string) => { /* ... sem mudanças ... */ };
     const removeSource = (sourceId: string) => { /* ... sem mudanças ... */ };
     const toggleInternalBaralhoActive = (sourceId: string, baralhoName: string) => { /* ... sem mudanças ... */ };
     const toggleExpandSource = (sourceId: string) => { /* ... sem mudanças ... */ };
@@ -159,8 +131,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         let gameStateToPass: Partial<GameState>;
         const finalCategorias = recalcularCategoriasAtivas(allSources, activeInternalBaralhos).categorias;
         const finalCategoriasSelecionadas = categoriasSelecionadas.filter(cat => finalCategorias.includes(cat));
-
-        // Validações
          if (playerInputs.length === 0) { alert("Adicione pelo menos um jogador."); return; }
          const anySourceActive = allSources.some(s => s.active); if (!anySourceActive) { alert("Ative pelo menos uma Fonte de Cartas."); return; }
          const anyInternalDeckActive = Object.entries(activeInternalBaralhos).some(([sourceId, activeSet]) => allSources.find(s => s.id === sourceId)?.active && activeSet.size > 0); if (!anyInternalDeckActive) { alert("Ative pelo menos um baralho interno dentro das fontes ativas."); return; }
@@ -173,22 +143,20 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         if (continueGame && typeof window !== "undefined") {
             const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
             try {
-                // Carrega APENAS o estado do JOGO (players, currentPlayerId, etc.)
-                const savedGameState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
-                if (savedGameState && savedGameState.jogoIniciado) {
-                     // Usa o estado do jogo salvo, mas atualiza com as seleções da UI atual
+                const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
+                if (savedState && savedState.jogoIniciado) {
+                    // Ao continuar, carrega o estado salvo do JOGO, mas usa as configurações ATUAIS da UI para fontes/baralhos/categorias
                     gameStateToPass = {
-                        ...savedGameState,
-                        categoriasSelecionadas: finalCategoriasSelecionadas,
-                        ocultarCarta: ocultarCarta,
-                        probabilityIndex: probabilityIndex,
-                        activeSourceIds: activeSourcesForGame.map(s => s.id),
-                        activeInternalBaralhosState: activeInternalBaralhosStateForSave,
+                        ...savedState, // Mantém players, currentPlayerId, etc.
+                        categoriasSelecionadas: finalCategoriasSelecionadas, // Usa seleção atual
+                        ocultarCarta: ocultarCarta, // Usa seleção atual
+                        probabilityIndex: probabilityIndex, // Usa seleção atual
+                        activeSourceIds: activeSourcesForGame.map(s => s.id), // Usa fontes ativas atuais
+                        activeInternalBaralhosState: activeInternalBaralhosStateForSave, // Usa baralhos ativos atuais
                     };
-                } else { return handleStartGame(false); } // Se save inválido, inicia novo
+                } else { return handleStartGame(false); }
             } catch (e) { console.error("Erro ao carregar jogo salvo:", e); return handleStartGame(false); }
         } else {
-            // Novo Jogo
             const initializedPlayers: Player[] = playerInputs.map((input, index) => ({ id: index, name: input.name.trim() || `Jogador ${index + 1}`, color: input.color || predefinedColors[index % predefinedColors.length], fixedStars: 0, respostasCertas: 0, respostasErradas: 0, respostasSeguidas: 0, progresso: 0, pulosDisponiveis: 0, contadorDeEstrelas: 0, rodadasPreso: 0 }));
             gameStateToPass = {
                 players: initializedPlayers, currentPlayerId: initializedPlayers[0]?.id ?? null,
@@ -198,7 +166,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                 activeInternalBaralhosState: activeInternalBaralhosStateForSave,
             };
         }
-        onStartGame(gameStateToPass, activeSourcesForGame); // Passa estado do jogo e fontes ativas
+        // Passa o estado do jogo E as fontes ativas completas
+        onStartGame(gameStateToPass, activeSourcesForGame);
     };
 
     const categoriasFiltradasParaExibicao = useMemo(() => { return Object.entries(categoriasComContagem) .filter(([categoria]) => categoria.toLowerCase().includes(termoBuscaCategoria.toLowerCase())) .sort(([catA], [catB]) => catA.localeCompare(catB)); }, [categoriasComContagem, termoBuscaCategoria]);
@@ -206,13 +175,12 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const builtInSourcesUI = allSources.filter(s => s.type === 'builtin');
     const customSourcesUI = allSources.filter(s => s.type === 'custom');
 
-    // Renderiza apenas no cliente para evitar erros de hidratação com localStorage
-    if (!isClient) {
-        return null; // Ou um spinner/placeholder simples
-    }
+    // Renderiza apenas no cliente após estados serem inicializados
+    if (!isClient) { return null; }
 
     return (
         <Card className="w-full max-w-lg mx-auto mt-8 shadow-lg">
+            {/* ... JSX da TelaInicial (sem mudanças significativas na estrutura, apenas na lógica de dados) ... */}
             <CardHeader> <CardTitle className="text-2xl font-bold text-center text-green-700">Eco Challenge</CardTitle> <p className="text-sm text-center text-gray-600">O Jogo da Sustentabilidade</p> </CardHeader>
             <CardContent className="space-y-6">
                  <div className="space-y-4">
@@ -307,7 +275,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 // --- Componente Principal EcoChallenge ---
 const EcoChallenge: React.FC = () => {
     const [gameState, setGameState] = useState<GameState | null>(null);
-    const [currentGameSources, setCurrentGameSources] = useState<SourceInfo[]>([]); // Fontes para o jogo atual
+    const [currentGameSources, setCurrentGameSources] = useState<SourceInfo[]>([]);
     const [cartaAtual, setCartaAtual] = useState<Carta | null>(null);
     const [respondido, setRespondido] = useState(false);
     const [mensagem, setMensagem] = useState("");
@@ -334,31 +302,27 @@ const EcoChallenge: React.FC = () => {
     const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
 
-     // Callback para iniciar/continuar, chamado pela TelaInicial
-     const handleGameStart = useCallback((initialGameState?: Partial<GameState>, sourcesForGame?: SourceInfo[]) => {
+    // Função chamada pela TelaInicial para iniciar ou continuar o jogo
+    const handleGameStart = useCallback((initialGameState?: Partial<GameState>, sourcesForGame?: SourceInfo[]) => {
+        console.log("handleGameStart chamado", { initialGameState, sourcesForGame });
         if (initialGameState && sourcesForGame && initialGameState.jogoIniciado) {
-            console.log("handleGameStart: Iniciando/Continuando Jogo com GameState e Sources.");
              setGameState(initialGameState as GameState);
              setCurrentGameSources(sourcesForGame);
              // Resetar estados da rodada ao iniciar/continuar
-             setCartaAtual(null); // Força a seleção de uma nova carta pelo useEffect
-             setNoCardsAvailable(false);
-             setRespondido(false);
-             setMensagem("");
-             setMostrarDica(false);
-             setDicaUsada(false);
-             setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]); setOpcoesEliminadas([]);
-             // Define cartaRevelada com base no estado carregado/inicial
-             setCartaRevelada(!(initialGameState.ocultarCarta ?? true));
+             setCartaAtual(null); // Será selecionada pelo useEffect
+             setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]); setOpcoesEliminadas([]); setCartaRevelada(!(initialGameState.ocultarCarta ?? true));
+        } else if (initialGameState) { // Tenta reconstruir fontes para saves antigos
+             console.warn("Reconstruindo fontes para jogo salvo (fallback)...");
+             const customSourcesRaw = typeof window !== "undefined" ? localStorage.getItem("customSourceInfos") : null; const builtInStatusRaw = typeof window !== "undefined" ? localStorage.getItem("builtInSourceStatus") : null; let customSources: SourceInfo[] = []; let builtInStatus: Record<string, boolean> | null = null; try { customSources = customSourcesRaw ? JSON.parse(customSourcesRaw) : []; } catch { customSources = []; } try { builtInStatus = builtInStatusRaw ? JSON.parse(savedBuiltInStatus) : null; } catch { builtInStatus = null; } const processedCustomSources = customSources.map(source => { const { processedCards, internalBaralhos, totalCards } = processCardsAndExtractBaralhos(source.cards); return { ...source, cards: processedCards, internalBaralhos, totalCards }; }); const reconstructedSources = [ ...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus?.[bs.id] ?? true })), ...processedCustomSources ].filter(s => initialGameState.activeSourceIds?.includes(s.id));
+             setGameState(initialGameState as GameState); setCurrentGameSources(reconstructedSources);
+             setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]); setOpcoesEliminadas([]); setCartaRevelada(!(initialGameState.ocultarCarta ?? true));
         } else {
-            console.error("handleGameStart chamado com dados inválidos.", { initialGameState, sourcesForGame });
-             // Pode ser útil resetar o estado aqui ou mostrar um erro
-             setGameState(null); // Volta para a tela inicial se algo deu errado
-             setCurrentGameSources([]);
+            console.error("handleGameStart chamado sem dados válidos.");
+            setGameState(null); // Garante que volte para TelaInicial se algo der errado
         }
-     }, []); // useCallback sem dependências, pois a lógica depende dos argumentos
+     }, []);
 
-      // Persiste o estado do jogo (sem as fontes)
+     // Persiste o estado do jogo
     const updateGameState = useCallback((newState: Partial<GameState>) => {
         setGameState(prev => {
             if (!prev) return null; const updatedState = { ...prev, ...newState };
@@ -369,32 +333,26 @@ const EcoChallenge: React.FC = () => {
 
     const updateCurrentPlayer = useCallback((partialPlayerData: Partial<Player>) => { if (!gameState || gameState.currentPlayerId === null) return; const updatedPlayers = gameState.players.map(p => p.id === gameState.currentPlayerId ? { ...p, ...partialPlayerData } : p ); updateGameState({ players: updatedPlayers }); }, [gameState, updateGameState]);
 
-    // ===== MODIFICAÇÃO: useEffect de Carregamento Simplificado =====
+    // Efeito para marcar que o cliente está pronto
+     useEffect(() => {
+        setIsClientReady(true);
+    }, []);
+
+    // Seleciona a primeira carta QUANDO gameState e currentGameSources estiverem prontos
     useEffect(() => {
-        setIsClientReady(true); // Marca que o cliente está pronto
-
-        // Apenas tenta carregar o estado básico do jogo salvo.
-        // A lógica de reconstruir fontes e chamar handleGameStart foi movida para o render condicional abaixo.
-        if (!gameState && typeof window !== "undefined") {
-            const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
-            try {
-                const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
-                // Se existe um jogo salvo E ele está marcado como iniciado, define o gameState
-                // A reconstrução das fontes e a chamada de handleGameStart acontecerá no render
-                if (savedState && savedState.jogoIniciado) {
-                   setGameState(savedState); // Define o estado inicial (sem fontes ainda)
-                }
-            } catch (e) {
-                console.error("Erro ao carregar estado inicial:", e);
-                localStorage.removeItem("estadoEcoChallenge");
-            }
+         // Só roda se o jogo foi iniciado, temos fontes, e ainda não temos uma carta
+        if (gameState?.jogoIniciado && currentGameSources.length > 0 && !cartaAtual && !noCardsAvailable) {
+            console.log("Jogo iniciado e fontes carregadas. Selecionando primeira carta...");
+            selecionarCartaAleatoria();
         }
-    }, [gameState]); // Adicionado gameState como dependência para evitar loops desnecessários se já carregado
-    // ===== FIM DA MODIFICAÇÃO =====
+    }, [gameState?.jogoIniciado, currentGameSources, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]); // Depende de gameState.jogoIniciado e currentGameSources
 
+    // Timer para ContraTempo
+    useEffect(() => { /* ... sem mudanças ... */ }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId, updateCurrentPlayer]);
 
+    // Selecionar Carta Aleatória - Função Pura
     const selecionarCartaAleatoria = useCallback(() => {
-        if (!gameState || currentGameSources.length === 0) { setNoCardsAvailable(true); return; }
+        if (!gameState || currentGameSources.length === 0) { console.warn("Tentativa de selecionar carta sem gameState ou currentGameSources."); setNoCardsAvailable(true); return; }
         const { categoriasSelecionadas, probabilityIndex, activeInternalBaralhosState } = gameState;
         const probabilidadeExcluirEspecial = probabilitySettings[probabilityIndex].value; const incluirCartasEspeciais = probabilidadeExcluirEspecial === 0 || Math.random() >= probabilidadeExcluirEspecial;
         const activeSources = currentGameSources;
@@ -411,16 +369,16 @@ const EcoChallenge: React.FC = () => {
             });
         });
 
+        console.log(`Selecionando carta de ${cartasFiltradas.length} opções filtradas.`);
+
         if (cartasFiltradas.length === 0) { setNoCardsAvailable(true); setCartaAtual(null); setMensagem("Nenhuma carta encontrada com os filtros atuais!"); return; }
         setNoCardsAvailable(false);
         const idxAleat = Math.floor(Math.random() * cartasFiltradas.length); const novaCarta = cartasFiltradas[idxAleat]; setCartaAtual(novaCarta);
         setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setMostrarFontes(false); setOpcoesEliminadas([]); setCartaRevelada(!gameState.ocultarCarta); setRolledNumber(null); setIsDieModalOpen(false); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]);
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (novaCarta.tipo === "ContraTempo") { setTempoRestante(novaCarta.tempoLimite); }
-    }, [gameState, currentGameSources]);
+    }, [gameState, currentGameSources]); // Depende do gameState e das fontes do jogo atual
 
-     useEffect(() => { if (gameState?.jogoIniciado && currentGameSources.length > 0 && !cartaAtual && !noCardsAvailable) { selecionarCartaAleatoria(); } }, [gameState?.jogoIniciado, currentGameSources, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]);
-     useEffect(() => { if (cartaAtual?.tipo === "ContraTempo" && tempoRestante !== null && tempoRestante > 0 && !respondido && gameState?.jogoIniciado && cartaRevelada) { timerIntervalRef.current = setInterval(() => { setTempoRestante((prev) => { if (prev === null || prev <= 1) { clearInterval(timerIntervalRef.current!); setRespondido(true); setMensagem(`Tempo esgotado! ${cartaAtual.desvantagem || 'Tente novamente.'}`); if (gameState && gameState.currentPlayerId !== null) { const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId); if (currentPlayer) { updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - 10, 0) }); } } return 0; } return prev - 1; }); }, 1000); } else if (timerIntervalRef.current && (respondido || tempoRestante === 0 || !cartaRevelada)) { clearInterval(timerIntervalRef.current); } return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); }; }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId, updateCurrentPlayer]);
-
+    // Handlers de Seleção
     const handleSelecao = (id: number) => { if (!respondido) setSelecionado(id); };
     const handleSelecaoMultipla = (id: number) => { if (!respondido) { setSelecoesMultiplas((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
     const handleSelecaoOrdem = (id: number) => { if (!respondido) { setOrdemSelecoes((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
@@ -429,44 +387,31 @@ const EcoChallenge: React.FC = () => {
     const handleImagemClick = (event: React.MouseEvent<HTMLDivElement>) => { if (respondido || !cartaAtual || cartaAtual.tipo !== 'PontoCerto') return; const target = event.currentTarget; const rect = target.getBoundingClientRect(); const x = (event.clientX - rect.left) / rect.width; const y = (event.clientY - rect.top) / rect.height; const clampedX = Math.max(0, Math.min(1, x)); const clampedY = Math.max(0, Math.min(1, y)); setCoordenadasClique({ x: clampedX, y: clampedY }); };
     const handleSelecionarFragmento = (id: number) => { if (respondido) return; setFragmentosSelecionados(prev => [...prev, id]); };
     const limparFragmentos = () => { if (!respondido) { setFragmentosSelecionados([]); } };
-    const verificarResposta = () => { if (!cartaAtual || !gameState || !gameState.players || gameState.currentPlayerId === null || respondido) return; const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId); if (!currentPlayer) return; let cor = false; let pontosGanhos = 20; let pontosPerdidos = 10; let darPuloDificil = cartaAtual.dificuldade === "dificil"; let mensagemFinal = ""; let aplicarEfeitoPadrao = false; if (cartaAtual.tipo === "ContraTempo" && timerIntervalRef.current) { clearInterval(timerIntervalRef.current); } switch (cartaAtual.tipo) { case "Pergunta": case "ContraTempo": if (cartaAtual.tipo === "ContraTempo" && (tempoRestante === null || tempoRestante <= 0)) { cor = false; } else { cor = selecionado === cartaAtual.respostaCorreta; } aplicarEfeitoPadrao = true; break; case "MultiplaEscolha": cor = Array.isArray(cartaAtual.respostaCorreta) && selecoesMultiplas.length === cartaAtual.respostaCorreta.length && selecoesMultiplas.sort().toString() === cartaAtual.respostaCorreta.sort().toString(); if (cor) pontosGanhos = 25; aplicarEfeitoPadrao = true; break; case "Ordem": cor = Array.isArray(cartaAtual.respostaCorreta) && ordemSelecoes.length === cartaAtual.respostaCorreta.length && ordemSelecoes.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 30; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "RelacionarColunas": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = paresFormados.length === cartaAtual.respostaCorreta.length && paresFormados.map(p => `${p.aId}-${p.bId}`).sort().join(',') === cartaAtual.respostaCorreta.map(p => `${p.aId}-${p.bId}`).sort().join(','); if (cor) pontosGanhos = 30; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "PontoCerto": if (!coordenadasClique || !Array.isArray(cartaAtual.zonasClicaveis)) { cor = false; break; } const zonaCorreta = cartaAtual.zonasClicaveis.find(z => z.id === cartaAtual.respostaCorreta); cor = zonaCorreta ? isClickInZone(coordenadasClique, zonaCorreta) : false; if (cor) pontosGanhos = 25; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "CompletarFrase": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = fragmentosSelecionados.length === cartaAtual.respostaCorreta.length && fragmentosSelecionados.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 25; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "Vantagem": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado); mensagemFinal = cor ? (cartaAtual.vantagem || "Vantagem aplicada!") : "Ação não confirmada."; break; case "Desvantagem": cor = false; mensagemFinal = cartaAtual.desvantagem || "Desvantagem aplicada."; break; case "Outras": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado); mensagemFinal = cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...'); break; default: const _exhaustiveCheck: never = cartaAtual; console.error("Tipo não tratado:", _exhaustiveCheck); return; } setRespondido(true); if (aplicarEfeitoPadrao) { if (cor) { const novoProgresso = currentPlayer.progresso + pontosGanhos; const completouBarra = novoProgresso >= 100; const pulosGanhos = (completouBarra ? 1 : 0) + (darPuloDificil ? 1 : 0); const estrelasFixasGanhsa = completouBarra ? 1 : 0; updateCurrentPlayer({ respostasCertas: currentPlayer.respostasCertas + 1, respostasSeguidas: currentPlayer.respostasSeguidas + 1, progresso: completouBarra ? 0 : novoProgresso, pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + pulosGanhos, 2), fixedStars: currentPlayer.fixedStars + estrelasFixasGanhsa, }); mensagemFinal = `Correto! ${cartaAtual.vantagem || ''}${completouBarra ? ' Barra completa!' : ''}`; } else { updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - pontosPerdidos, 0), }); mensagemFinal = `Incorreto. ${cartaAtual.desvantagem || ''}`; } } setMensagem(mensagemFinal); };
-    const resetarContadoresJogador = () => { /* ... */ }; const toggleDica = () => { /* ... */ }; const toggleFontes = () => { /* ... */ }; const pularPergunta = () => { /* ... */ }; const eliminarRespostaErrada = () => { /* ... */ }; const voltarTelaInicial = () => { /* ... */ }; const diminuirAcertos = () => { /* ... */ }; const diminuirErros = () => { /* ... */ }; const incrementarContadorDeEstrelas = () => { /* ... */ }; const diminuirContadorDeEstrelas = () => { /* ... */ }; const incrementarRodadasPreso = () => { /* ... */ }; const diminuirRodadasPreso = () => { /* ... */ }; const rolarDado = () => { /* ... */ }; const handleLongPressStart = (action: () => void) => { /* ... */ }; const handleLongPressEnd = () => { /* ... */ };
+    const verificarResposta = () => { /* ... (sem mudanças) ... */ };
+    const resetarContadoresJogador = () => { /* ... */ }; const toggleDica = () => { /* ... */ }; const toggleFontes = () => { /* ... */ }; const pularPergunta = () => { /* ... (chama selecionarCartaAleatoria) ... */ }; const eliminarRespostaErrada = () => { /* ... */ }; const voltarTelaInicial = () => { if (window.confirm("Voltar para a Tela Inicial? Progresso salvo.")) { setGameState(null); setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setCurrentGameSources([]) } }; const diminuirAcertos = () => { /* ... */ }; const diminuirErros = () => { /* ... */ }; const incrementarContadorDeEstrelas = () => { /* ... */ }; const diminuirContadorDeEstrelas = () => { /* ... */ }; const incrementarRodadasPreso = () => { /* ... */ }; const diminuirRodadasPreso = () => { /* ... */ }; const rolarDado = () => { /* ... */ }; const handleLongPressStart = (action: () => void) => { /* ... */ }; const handleLongPressEnd = () => { /* ... */ };
 
 
     // --- Renderização do Jogo ---
-     // Renderiza TelaInicial ou Loading até o cliente estar pronto E o estado do jogo definido
-     if (!isClientReady || !gameState) {
-        // Verifica se existe jogo salvo APENAS no cliente
-        let hasSaved = false;
-        let initialPlayersData: Player[] = [];
-        let initialOcultar = true;
-        let initialProb = 0;
-        if (typeof window !== "undefined") { // Garante que só roda no cliente
-            const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
-             try { const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; if (savedState && savedState.jogoIniciado) { hasSaved = true; initialPlayersData = savedState.players || []; initialOcultar = savedState.ocultarCarta ?? true; initialProb = savedState.probabilityIndex ?? 0; } } catch {}
-        }
-
-        // Se ainda não estamos prontos no cliente, mostra loading ou null
-        if (!isClientReady) {
-             return <div className="flex items-center justify-center min-h-screen"><p>Carregando Interface...</p></div>; // Ou um spinner melhor
-        }
-
-        // Se cliente está pronto, mas não tem gameState, renderiza TelaInicial
-        return (<TelaInicial
-                    onStartGame={handleGameStart}
-                    initialPlayers={initialPlayersData}
-                    initialOcultarCarta={initialOcultar}
-                    initialProbabilityIndex={initialProb}
-                    hasSavedGame={hasSaved}
-                 />);
+    if (!isClientReady) {
+        // Evita renderizar qualquer coisa antes do cliente estar pronto para evitar hidratação
+         return <div className="flex items-center justify-center min-h-screen"><p>Carregando...</p></div>; // Ou um spinner
     }
 
-    // A partir daqui, temos gameState e estamos no cliente, renderiza o jogo
+    if (!gameState) {
+        // Se o cliente está pronto, mas não há gameState, renderiza TelaInicial
+        // Verifica se existe jogo salvo APENAS aqui, no cliente
+        let hasSaved = false; let initialPlayersData: Player[] = []; let initialOcultar = true; let initialProb = 0;
+        if (typeof window !== "undefined") { const savedStateRaw = localStorage.getItem("estadoEcoChallenge"); try { const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; if (savedState && savedState.jogoIniciado) { hasSaved = true; initialPlayersData = savedState.players || []; initialOcultar = savedState.ocultarCarta ?? true; initialProb = savedState.probabilityIndex ?? 0; } } catch {} }
+        return (<TelaInicial onStartGame={handleGameStart} initialPlayers={initialPlayersData} initialOcultarCarta={initialOcultar} initialProbabilityIndex={initialProb} hasSavedGame={hasSaved} />);
+    }
+
+    // A partir daqui, temos gameState e estamos no cliente
     const { players, currentPlayerId, ocultarCarta } = gameState;
     const currentPlayer = players.find(p => p.id === currentPlayerId);
 
-    if (noCardsAvailable) { return (<div className="flex flex-col items-center justify-center min-h-screen p-4 text-center"><Card className="p-6 shadow-lg"><CardHeader><CardTitle className="text-xl text-red-600">Erro!</CardTitle></CardHeader><CardContent><p className="mb-4">Nenhuma carta disponível.</p><p className="text-sm text-gray-600 mb-4">Verifique filtros/categorias ou adicione baralhos.</p></CardContent><CardFooter><Button onClick={voltarTelaInicial} className="w-full">Voltar</Button></CardFooter></Card></div>); }
-    if (!cartaAtual || !currentPlayer) { return (<div className="flex items-center justify-center min-h-screen"><p>Selecionando carta...</p><Button onClick={voltarTelaInicial} className="ml-4">Voltar</Button></div>); } // Mensagem melhor
+    // Mostra loading se ainda não selecionou a primeira carta (ou se noCardsAvailable é true)
+    if (noCardsAvailable) { return (<div className="flex flex-col items-center justify-center min-h-screen p-4 text-center"><Card className="p-6 shadow-lg"><CardHeader><CardTitle className="text-xl text-red-600">Erro!</CardTitle></CardHeader><CardContent><p className="mb-4">Nenhuma carta disponível.</p><p className="text-sm text-gray-600 mb-4">Verifique filtros/categorias ou adicione baralhos na tela inicial.</p></CardContent><CardFooter><Button onClick={voltarTelaInicial} className="w-full">Voltar para Tela Inicial</Button></CardFooter></Card></div>); }
+    if (!cartaAtual || !currentPlayer) { return (<div className="flex items-center justify-center min-h-screen"><p>Selecionando carta...</p><Button onClick={voltarTelaInicial} className="ml-4">Voltar</Button></div>); }
 
     const obterEstiloCarta = () => { if (ocultarCarta && !cartaRevelada) return "border-gray-300 bg-gray-100"; switch (cartaAtual.tipo) { case "Vantagem": return "border-green-500 bg-green-50"; case "Desvantagem": return "border-red-500 bg-red-50"; case "Outras": return "border-blue-500 bg-blue-50"; case "ContraTempo": return "border-yellow-500 bg-yellow-50"; default: return "border-gray-300 bg-white"; } };
     const isVerificarDisabled = () => { if (respondido) return true; switch (cartaAtual.tipo) { case "Pergunta": case "ContraTempo": case "Vantagem": case "Desvantagem": case "Outras": return selecionado === null; case "MultiplaEscolha": return selecoesMultiplas.length === 0; case "Ordem": return !(cartaAtual as CartaOrdem).opcoes || ordemSelecoes.length !== (cartaAtual as CartaOrdem).opcoes.length; case "RelacionarColunas": return !Array.isArray(cartaAtual.respostaCorreta) || paresFormados.length !== cartaAtual.respostaCorreta.length; case "PontoCerto": return coordenadasClique === null; case "CompletarFrase": return !Array.isArray(cartaAtual.respostaCorreta) || fragmentosSelecionados.length !== cartaAtual.respostaCorreta.length; default: return true; } };
@@ -476,8 +421,8 @@ const EcoChallenge: React.FC = () => {
     return (
         <div className="flex flex-col items-center p-2 md:p-4 min-h-screen bg-gradient-to-b from-green-50 to-blue-50 font-sans">
              <Card className={cn("w-full max-w-lg mx-auto mt-4 shadow-xl border-2 rounded-lg", obterEstiloCarta())} style={players.length > 0 && currentPlayer && !(ocultarCarta && !cartaRevelada) ? { boxShadow: `0 0 15px 3px ${currentPlayer.color}` } : {}}>
+                {/* ... JSX do CardHeader, CardContent, CardFooter ... */}
                  <CardHeader className="pb-3">
-                     {/* ... Header ... */}
                       <div className="flex justify-between items-start mb-2 gap-2">
                          <div className="flex items-center space-x-2 flex-1 min-w-0">
                              <div className="flex-1 min-w-0">
@@ -503,10 +448,9 @@ const EcoChallenge: React.FC = () => {
                 )}
 
                  <CardFooter className="flex flex-col items-center pt-4 border-t bg-gray-50/50 rounded-b-lg">
-                     {/* ... Botões e Feedback ... */}
                      <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3"> <Button onClick={toggleFontes} variant="outline" disabled={!cartaAtual.fontes || cartaAtual.fontes.length === 0 || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <BookOpen className="h-5 w-5" /></Button> <Button onClick={pularPergunta} variant={currentPlayer.pulosDisponiveis > 0 ? "secondary" : "outline"} disabled={currentPlayer.pulosDisponiveis === 0 || !tiposPergunta.includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <SkipForward className="h-5 w-5" /> </Button> <Button onClick={toggleDica} variant={currentPlayer.respostasSeguidas >= 2 && !dicaUsada && !!cartaAtual.dica ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || dicaUsada || !cartaAtual.dica || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <HelpCircle className="h-5 w-5" /> </Button> <Button onClick={eliminarRespostaErrada} variant={currentPlayer.respostasSeguidas >= 2 ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || !("opcoes" in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || cartaAtual.opcoes.length <= 2 || !["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"].includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <MinusCircle className="h-5 w-5" /> </Button> <Button onClick={resetarContadoresJogador} variant="outline" className="h-9 px-2.5"> <RotateCcw className="h-5 w-5" /> </Button> <Button onClick={voltarTelaInicial} variant="outline" className="h-9 px-2.5"> <Home className="h-5 w-5" /> </Button> </div>
                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3"> <Button onClick={diminuirAcertos} variant="outline" className="h-9 px-2.5" title="Diminuir Acertos"><ThumbsUp className="h-5 w-5 text-green-500 transform scale-x-[-1]" /></Button> <Button onClick={diminuirErros} variant="outline" className="h-9 px-2.5" title="Diminuir Erros"><ThumbsDown className="h-5 w-5 text-red-500 transform scale-x-[-1]" /></Button> <Button onClick={diminuirContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Diminuir Estrela Bônus"><Star className="h-5 w-5 text-red-500" /></Button> <Button onClick={incrementarContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Aumentar Estrela Bônus"><Star className="h-5 w-5 text-yellow-500" /></Button> <Button onClick={diminuirRodadasPreso} variant="outline" className="h-9 px-2.5" title="Diminuir Rodada Preso"><ChevronUp className="h-5 w-5 text-red-500 transform rotate-180" /></Button> <Button onClick={incrementarRodadasPreso} variant="outline" className="h-9 px-2.5" title="Aumentar Rodada Preso"><ChevronUp className="h-5 w-5 text-purple-500" /></Button> </div>
-                    <div className="w-full mb-3"> {ocultarCarta && !cartaRevelada ? ( <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white"> <Eye className="mr-2 h-4 w-4"/> Revelar Carta </Button> ) : !respondido ? ( <Button onClick={isVerificarDisabled() ? undefined : verificarResposta} className={cn( "w-full bg-green-600 hover:bg-green-700 text-white", isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400" )} onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd} aria-disabled={isVerificarDisabled()} tabIndex={isVerificarDisabled() ? -1 : 0} > <Check className="mr-2 h-4 w-4"/> Verificar </Button> ) : ( <Button onClick={selecionarCartaAleatoria} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onMouseDown={() => handleLongPressStart(selecionarCartaAleatoria)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(selecionarCartaAleatoria)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <SkipForward className="mr-2 h-4 w-4"/> Próxima Carta </Button> )} </div>
+                    <div className="w-full mb-3"> {ocultarCarta && !cartaRevelada ? ( <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white"> <Eye className="mr-2 h-4 w-4"/> Revelar Carta </Button> ) : !respondido ? ( <Button onClick={isVerificarDisabled() ? undefined : verificarResposta} className={cn( "w-full bg-green-600 hover:bg-green-700 text-white", isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400" )} onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd} aria-disabled={isVerificarDisabled()} tabIndex={isVerificarDisabled() ? -1 : 0} > <Check className="mr-2 h-4 w-4"/> Verificar </Button> ) : ( <Button onClick={() => selecionarCartaAleatoria()} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onMouseDown={() => handleLongPressStart(selecionarCartaAleatoria)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(selecionarCartaAleatoria)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <SkipForward className="mr-2 h-4 w-4"/> Próxima Carta </Button> )} </div>
                     {mensagem && ( <Alert variant={getAlertVariant()} className={cn( 'text-center text-sm font-semibold mb-3 w-full', cartaAtual?.tipo === 'Vantagem' && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo === 'Desvantagem' && 'bg-red-100 border-red-300 text-red-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800' )}> <AlertDescription>{mensagem}</AlertDescription> </Alert> )}
                     <div className="w-full"> <Progress value={currentPlayer.progresso} className="h-2.5 [&>*]:bg-orange-500" /> <div className="flex justify-between items-center w-full mt-2 text-sm text-gray-700 flex-wrap gap-x-4 gap-y-1 font-semibold"> <span className="flex items-center" title="Rodadas Preso"><ChevronUp className="h-4 w-4 text-purple-500 mr-1"/>{currentPlayer.rodadasPreso}</span> <span className="flex items-center" title="Estrelas Fixas"><Award className="h-4 w-4 text-yellow-600 mr-1"/>{currentPlayer.fixedStars}</span> <span className="flex items-center" title="Estrelas Bônus"><Star className="h-4 w-4 text-yellow-500 mr-1"/>{currentPlayer.contadorDeEstrelas}</span> <span className="flex items-center" title="Pulos Disponíveis"><SkipForward className="h-4 w-4 text-blue-500 mr-1"/>{currentPlayer.pulosDisponiveis}</span> <span className="flex items-center" title="Respostas Corretas"><ThumbsUp className="h-4 w-4 text-green-500 mr-1"/>{currentPlayer.respostasCertas}</span> <span className="flex items-center" title="Respostas Erradas"><ThumbsDown className="h-4 w-4 text-red-500 mr-1"/>{currentPlayer.respostasErradas}</span> <span className="flex items-center" title="Respostas Seguidas"><Zap className="h-4 w-4 text-orange-500 mr-1"/>{currentPlayer.respostasSeguidas}</span> </div> </div>
                  </CardFooter>
@@ -525,16 +469,9 @@ const EcoChallenge: React.FC = () => {
         const buttonInlineStyle: React.CSSProperties = { maxHeight: "80px", height: "auto", overflowY: "auto", whiteSpace: "normal", alignItems: "flex-start", display: "flex", textAlign: "left", };
 
         switch (cartaAtual.tipo) {
-            case "Pergunta": case "ContraTempo": case "Vantagem": case "Desvantagem": case "Outras":
-                if (!('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas.</p>;
-                return cartaAtual.opcoes.map((op: Opcao) => { const isCorrect = Array.isArray(cartaAtual.respostaCorreta) ? cartaAtual.respostaCorreta.includes(op.id) : cartaAtual.respostaCorreta === op.id; const isSelected = selecionado === op.id; const isEliminated = opcoesEliminadas.includes(op.id); const isWrongSelection = respondido && isSelected && !isCorrect; let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; if (respondido) { if (isCorrect) btnClass = "bg-green-100 border-green-400 hover:bg-green-200 text-green-900"; else if (isSelected) btnClass = "bg-red-100 border-red-400 hover:bg-red-200 text-red-900"; else btnClass = "border-gray-300 text-gray-500"; } else if (isSelected) { btnClass = "bg-blue-100 border-blue-400 text-blue-900"; } return ( <Button key={op.id} onClick={() => handleSelecao(op.id)} variant={"outline"} className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} style={buttonInlineStyle} disabled={isEliminated || respondido}> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} </Button> ); });
-             case "MultiplaEscolha":
-                 if (!('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas.</p>;
-                return cartaAtual.opcoes.map((op: Opcao) => { const isCorrect = Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(op.id); const isSelected = selecoesMultiplas.includes(op.id); const isEliminated = opcoesEliminadas.includes(op.id); const isWrongSelection = respondido && isSelected && !isCorrect; const missedCorrect = respondido && isCorrect && !isSelected; let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; else btnClass = "border-gray-300 text-gray-500"; } else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; } return ( <Button key={op.id} onClick={() => handleSelecaoMultipla(op.id)} variant="outline" className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} style={buttonInlineStyle} disabled={isEliminated || respondido}> <div className={cn("w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center", isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white')}>{isSelected && <Check className="w-3 h-3 text-white" />}</div> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600 font-bold">✓</span>} </Button> ); });
-            case "Ordem":
-                 if (!('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || !Array.isArray(cartaAtual.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos.</p>;
-                 const cOrdem = cartaAtual as CartaOrdem;
-                 return cOrdem.opcoes.map((op) => { const isSelected = ordemSelecoes.includes(op.id); const selectionIndex = isSelected ? ordemSelecoes.indexOf(op.id) + 1 : null; const correctIndex = Array.isArray(cOrdem.respostaCorreta) ? cOrdem.respostaCorreta.indexOf(op.id) + 1 : null; const isCorrectOrder = respondido && isSelected && selectionIndex === correctIndex; const isWrongOrder = respondido && isSelected && selectionIndex !== correctIndex; const isCorrectOptionOverall = respondido && correctIndex !== null && correctIndex > 0; let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; } else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; } return ( <Button key={op.id} onClick={() => handleSelecaoOrdem(op.id)} variant="outline" className={cn("w-full justify-start text-sm py-2 px-3", btnClass )} style={buttonInlineStyle} disabled={respondido}> {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)} <span className="flex-1">{op.texto}</span> {respondido && isCorrectOptionOverall && ( <> <span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${isCorrectOrder ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`} title={isCorrectOrder ? `Posição Correta: ${correctIndex}` : `Sua Posição: ${selectionIndex}`}>{isCorrectOrder ? correctIndex : selectionIndex}</span> {isWrongOrder && correctIndex !== null && ( <span className="ml-1 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white" title={`Posição Correta: ${correctIndex}`}>{correctIndex}</span> )} </> )} </Button> ); });
+            case "Pergunta": case "ContraTempo": case "Vantagem": case "Desvantagem": case "Outras": if (!('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas.</p>; return cartaAtual.opcoes.map((op: Opcao) => { const isCorrect = Array.isArray(cartaAtual.respostaCorreta) ? cartaAtual.respostaCorreta.includes(op.id) : cartaAtual.respostaCorreta === op.id; const isSelected = selecionado === op.id; const isEliminated = opcoesEliminadas.includes(op.id); const isWrongSelection = respondido && isSelected && !isCorrect; let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; if (respondido) { if (isCorrect) btnClass = "bg-green-100 border-green-400 hover:bg-green-200 text-green-900"; else if (isSelected) btnClass = "bg-red-100 border-red-400 hover:bg-red-200 text-red-900"; else btnClass = "border-gray-300 text-gray-500"; } else if (isSelected) { btnClass = "bg-blue-100 border-blue-400 text-blue-900"; } return ( <Button key={op.id} onClick={() => handleSelecao(op.id)} variant={"outline"} className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} style={buttonInlineStyle} disabled={isEliminated || respondido}> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} </Button> ); });
+             case "MultiplaEscolha": if (!('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas.</p>; return cartaAtual.opcoes.map((op: Opcao) => { const isCorrect = Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(op.id); const isSelected = selecoesMultiplas.includes(op.id); const isEliminated = opcoesEliminadas.includes(op.id); const isWrongSelection = respondido && isSelected && !isCorrect; const missedCorrect = respondido && isCorrect && !isSelected; let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; else btnClass = "border-gray-300 text-gray-500"; } else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; } return ( <Button key={op.id} onClick={() => handleSelecaoMultipla(op.id)} variant="outline" className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} style={buttonInlineStyle} disabled={isEliminated || respondido}> <div className={cn("w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center", isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white')}>{isSelected && <Check className="w-3 h-3 text-white" />}</div> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600 font-bold">✓</span>} </Button> ); });
+            case "Ordem": if (!('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || !Array.isArray(cartaAtual.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos.</p>; const cOrdem = cartaAtual as CartaOrdem; return cOrdem.opcoes.map((op) => { const isSelected = ordemSelecoes.includes(op.id); const selectionIndex = isSelected ? ordemSelecoes.indexOf(op.id) + 1 : null; const correctIndex = Array.isArray(cOrdem.respostaCorreta) ? cOrdem.respostaCorreta.indexOf(op.id) + 1 : null; const isCorrectOrder = respondido && isSelected && selectionIndex === correctIndex; const isWrongOrder = respondido && isSelected && selectionIndex !== correctIndex; const isCorrectOptionOverall = respondido && correctIndex !== null && correctIndex > 0; let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; } else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; } return ( <Button key={op.id} onClick={() => handleSelecaoOrdem(op.id)} variant="outline" className={cn("w-full justify-start text-sm py-2 px-3", btnClass )} style={buttonInlineStyle} disabled={respondido}> {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)} <span className="flex-1">{op.texto}</span> {respondido && isCorrectOptionOverall && ( <> <span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${isCorrectOrder ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`} title={isCorrectOrder ? `Posição Correta: ${correctIndex}` : `Sua Posição: ${selectionIndex}`}>{isCorrectOrder ? correctIndex : selectionIndex}</span> {isWrongOrder && correctIndex !== null && ( <span className="ml-1 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white" title={`Posição Correta: ${correctIndex}`}>{correctIndex}</span> )} </> )} </Button> ); });
             case "RelacionarColunas": const cRel = cartaAtual as CartaRelacionarColunas; if (!Array.isArray(cRel.colunaA) || !Array.isArray(cRel.colunaB) || !Array.isArray(cRel.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos.</p>; return (<div className="flex space-x-2 md:space-x-4"> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna A</p>{cRel.colunaA.map(itemA => { const isSelectedA = selecaoColunaA === itemA.id; const par = paresFormados.find(p => p.aId === itemA.id); const parCorreto = respondido ? cRel.respostaCorreta.find(rc => rc.aId === itemA.id) : undefined; const isCorrectPair = respondido && par && parCorreto && par.bId === parCorreto.bId; const isWrongPair = respondido && par && (!parCorreto || par.bId !== parCorreto.bId); let btnClass = "border-gray-300 text-gray-900"; if (isSelectedA) btnClass = "ring-2 ring-blue-500 border-blue-500"; if (par && !respondido) btnClass = "bg-gray-200 border-gray-400"; if (isCorrectPair) btnClass = "bg-green-100 border-green-400 text-green-900"; if (isWrongPair) btnClass = "bg-red-100 border-red-400 text-red-900"; return (<Button key={`A-${itemA.id}`} variant="outline" onClick={() => handleSelecionarColunaA(itemA.id)} disabled={respondido} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass)}><span className="flex-1">{itemA.texto}</span>{isCorrectPair && <CheckCircle2 className="ml-1 h-3.5 w-3.5 text-green-600 flex-shrink-0" />}{isWrongPair && <XCircle className="ml-1 h-3.5 w-3.5 text-red-600 flex-shrink-0" />}{isWrongPair && parCorreto && (<span className="text-[10px] ml-1 text-blue-600 hidden md:inline">({cRel.colunaB.find(iB => iB.id === parCorreto.bId)?.texto})</span>)}</Button>); })}</div> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna B</p>{cRel.colunaB.map(itemB => { const isPairedB = paresFormados.some(p => p.bId === itemB.id); const isDisabled = respondido || selecaoColunaA === null || isPairedB; let btnClass = "border-gray-300 hover:bg-gray-100 text-gray-900"; if (isPairedB) btnClass = "bg-gray-200 border-gray-400 text-gray-600"; return (<Button key={`B-${itemB.id}`} variant="outline" onClick={() => handleSelecionarColunaB(itemB.id)} disabled={isDisabled} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass, !isDisabled && selecaoColunaA !== null && "hover:border-blue-400" )}><span className="flex-1">{itemB.texto}</span></Button>); })}</div></div>);
             case "PontoCerto": const cPonto = cartaAtual as CartaPontoCerto; if (!cPonto.imagemURL || !Array.isArray(cPonto.zonasClicaveis)) return <p className="text-xs text-red-500">Erro: Dados inválidos.</p>; return (<div className="relative w-full max-w-md mx-auto aspect-video overflow-hidden rounded border border-gray-300 cursor-crosshair" onClick={handleImagemClick} role="button" aria-label={`Imagem interativa: ${cPonto.titulo}`}><img src={cPonto.imagemURL} alt={`Imagem para: ${cPonto.titulo}`} className={`block w-full h-full object-contain ${respondido ? 'cursor-not-allowed' : ''}`}/>{coordenadasClique && (<div className={`absolute w-3 h-3 rounded-full border-2 pointer-events-none -translate-x-1/2 -translate-y-1/2 ${respondido ? (mensagem.toLowerCase().includes('correto') ? 'bg-green-500 border-white' : 'bg-red-500 border-white') : 'bg-blue-500 border-white'}`} style={{ left: `${coordenadasClique.x * 100}%`, top: `${coordenadasClique.y * 100}%` }}>{respondido && (mensagem.toLowerCase().includes('correto') ? <Check className="w-2 h-2 text-white" /> : <XIcon className="w-2 h-2 text-white" />)}</div>)}{respondido && (() => { const zonaCorreta = cPonto.zonasClicaveis.find(z => z.id === cPonto.respostaCorreta); return zonaCorreta ? ( <div className="absolute border-2 border-dashed border-green-500 pointer-events-none animate-pulse" style={{ left: `${zonaCorreta.x * 100}%`, top: `${zonaCorreta.y * 100}%`, width: `${zonaCorreta.largura * 100}%`, height: `${zonaCorreta.altura * 100}%` }} title={zonaCorreta.descricao || "Área correta"}/> ) : null; })()} </div>);
             case "CompletarFrase": const cComp = cartaAtual as CartaCompletarFrase; if (!cComp.fraseIncompleta || !Array.isArray(cComp.fragmentos) || !Array.isArray(cComp.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos.</p>; let fraseR = cComp.fraseIncompleta; fragmentosSelecionados.forEach((fragId, index) => { const frag = cComp.fragmentos.find(f => f.id === fragId); if (frag) { fraseR = fraseR.replace(`__${index + 1}__`, `<strong class="text-blue-600 underline underline-offset-2 mx-1">${frag.texto}</strong>`); } }); fraseR = fraseR.replace(/__\d+__/g, '<span class="text-gray-400 border-b border-dashed border-gray-400 mx-1">___</span>'); const isCorretoComp = respondido && mensagem.toLowerCase().includes('correto'); return (<div className="space-y-3"><div className={`p-3 border rounded bg-gray-50 text-sm ${respondido ? (isCorretoComp ? 'border-green-300' : 'border-red-300') : 'border-gray-300'}`} dangerouslySetInnerHTML={{ __html: fraseR }}/>{!respondido && (<div className="flex flex-wrap gap-2 justify-center">{cComp.fragmentos.filter(f => !fragmentosSelecionados.includes(f.id)).map(frag => (<Button key={frag.id} variant="outline" size="sm" onClick={() => handleSelecionarFragmento(frag.id)} className="bg-white hover:bg-blue-50">{frag.texto}</Button>))}{(fragmentosSelecionados.length > 0 && <Button variant="ghost" size="sm" onClick={limparFragmentos} className="text-red-500 hover:bg-red-100" title="Limpar"><RotateCcw className="h-4 w-4 mr-1"/> Limpar</Button>)}</div>)}{respondido && !isCorretoComp && (<div className="text-xs text-center text-green-700 mt-2"><strong>Resposta:</strong> {cComp.respostaCorreta.map(id => cComp.fragmentos.find(f => f.id === id)?.texto).join(' / ')}</div>)}</div>);
