@@ -136,7 +136,32 @@ const initialBuiltInSources: SourceInfo[] = builtInSourcesData.map(source => {
 
 
 // --- Funções Utilitárias ---
-function parseJSDeckFile(content: string): Carta[] { /* ... sem mudanças ... */ }
+function parseJSDeckFile(content: string): Carta[] {
+    try {
+        // Tenta encontrar o array exportado ou definido como constante principal
+        const match = content.match(/export default\s+(\[[\s\S]*?\]);?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?\s*export default\s+\w+;?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?/m);
+        if (!match || !match[1]) {
+            throw new Error("Array de cartas não encontrado no arquivo JS.");
+        }
+        const arrayStr = match[1];
+        // Usa Function constructor para avaliar a string como código JavaScript (cuidado com segurança se a fonte não for confiável)
+        const rawArray = new Function(`return ${arrayStr};`)() as any[];
+
+        // Valida se é um array e mapeia, adicionando IDs se necessário
+        if (!Array.isArray(rawArray)) {
+             throw new Error("O conteúdo extraído não é um array.");
+        }
+        return rawArray.map((card, index) => ({
+             ...card,
+             id: card.id || `custom_${Date.now()}_${index}` // Garante um ID
+        })) as Carta[];
+
+    } catch (error: any) {
+        console.error("Erro ao processar arquivo JS:", error);
+        // Propaga o erro para ser tratado na função que chamou (handleCustomDeckUpload)
+        throw new Error(`Erro ao processar arquivo JS: ${error.message}`);
+    }
+}
 
 // Função para recalcular categorias baseada nos baralhos *ativos*
 function recalcularCategoriasAtivas(
