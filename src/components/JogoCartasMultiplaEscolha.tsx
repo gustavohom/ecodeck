@@ -877,25 +877,7 @@ const EcoChallenge: React.FC = () => {
                         else if (isSelected) btnClass = "bg-red-100 border-red-400 hover:bg-red-200 text-red-900";
                         else btnClass = "border-gray-300 text-gray-500"; // Não selecionada e incorreta (texto cinza)
                     } else if (isSelected) { btnClass = "bg-blue-100 border-blue-400 text-blue-900"; }
-                    return (
-                        <Button
-                            key={op.id}
-                            onClick={() => handleSelecao(op.id)}
-                            variant={"outline"}
-                            // ========= MODIFICAÇÃO AQUI =========
-                            className={cn(
-                                "w-full justify-start text-left text-sm h-9 py-2 px-3 whitespace-normal flex items-center", // Removido h-auto, adicionado h-9 e flex items-center
-                                btnClass,
-                                isEliminated && "line-through opacity-50 cursor-not-allowed"
-                            )}
-                            // ========= FIM DA MODIFICAÇÃO =========
-                            disabled={isEliminated || respondido}
-                        >
-                            <span className="flex-1">{op.texto}</span>
-                            {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />}
-                            {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />}
-                        </Button>
-                    );
+                    return ( <Button key={op.id} onClick={() => handleSelecao(op.id)} variant={"outline"} className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} </Button> );
                 });
              case "MultiplaEscolha":
                 return cartaAtual.opcoes.map((op) => {
@@ -907,27 +889,7 @@ const EcoChallenge: React.FC = () => {
                     let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default
                     if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; else btnClass = "border-gray-300 text-gray-500"; } // Errada não marcada (cinza)
                     else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
-                    return (
-                        <Button
-                            key={op.id}
-                            onClick={() => handleSelecaoMultipla(op.id)}
-                            variant="outline"
-                             // ========= MODIFICAÇÃO AQUI =========
-                            className={cn(
-                                "w-full justify-start text-left text-sm h-9 py-2 px-3 whitespace-normal flex items-center", // Removido h-auto, adicionado h-9 e flex items-center
-                                btnClass,
-                                isEliminated && "line-through opacity-50 cursor-not-allowed"
-                            )}
-                             // ========= FIM DA MODIFICAÇÃO =========
-                            disabled={isEliminated || respondido}
-                        >
-                            <div className={`w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center ${isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white'}`}>{isSelected && <Check className="w-3 h-3 text-white" />}</div>
-                            <span className="flex-1">{op.texto}</span>
-                            {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />}
-                            {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />}
-                            {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600">✓</span>}
-                         </Button>
-                    );
+                    return ( <Button key={op.id} onClick={() => handleSelecaoMultipla(op.id)} variant="outline" className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <div className={`w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center ${isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white'}`}>{isSelected && <Check className="w-3 h-3 text-white" />}</div> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600">✓</span>} </Button> );
                 });
             case "Ordem":
                  const cOrdem = cartaAtual as CartaOrdem;
@@ -939,27 +901,8 @@ const EcoChallenge: React.FC = () => {
                     let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default
                     if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; } // Não faz parte (cinza)
                     else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
-                    return (
-                        <Button
-                            key={op.id}
-                            onClick={() => handleSelecaoOrdem(op.id)}
-                            variant="outline"
-                            // ========= MODIFICAÇÃO AQUI =========
-                            className={cn(
-                                "w-full justify-start text-left text-sm h-9 py-2 px-3 whitespace-normal flex items-center", // Removido h-auto, adicionado h-9 e flex items-center
-                                btnClass
-                            )}
-                             // ========= FIM DA MODIFICAÇÃO =========
-                            disabled={respondido}
-                        >
-                            {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)}
-                            <span className="flex-1">{op.texto}</span>
-                            {respondido && isCorrectOptionOverall && (<span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${ isCorrectOrder ? 'bg-green-500 text-white' : isWrongOrder ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}`}>{correctIndex}</span>)}
-                            {isWrongOrder && selectionIndex !== null && <span className="text-xs text-red-600 ml-1">(Sua: {selectionIndex})</span>}
-                        </Button>
-                    );
+                    return ( <Button key={op.id} onClick={() => handleSelecaoOrdem(op.id)} variant="outline" className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass )} disabled={respondido}> {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)} <span className="flex-1">{op.texto}</span> {respondido && isCorrectOptionOverall && (<span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${ isCorrectOrder ? 'bg-green-500 text-white' : isWrongOrder ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}`}>{correctIndex}</span>)} {isWrongOrder && selectionIndex !== null && <span className="text-xs text-red-600 ml-1">(Sua: {selectionIndex})</span>} </Button> );
                 });
-            // Os casos abaixo não usam lista de botões da mesma forma, então não precisam da mudança de altura
             case "RelacionarColunas":
                 const cRel = cartaAtual as CartaRelacionarColunas; return (<div className="flex space-x-2 md:space-x-4"> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna A</p>{cRel.colunaA.map(itemA => { const isSelectedA = selecaoColunaA === itemA.id; const par = paresFormados.find(p => p.aId === itemA.id); const parCorreto = respondido ? cRel.respostaCorreta.find(rc => rc.aId === itemA.id) : undefined; const isCorrectPair = respondido && par && parCorreto && par.bId === parCorreto.bId; const isWrongPair = respondido && par && (!parCorreto || par.bId !== parCorreto.bId); let btnClass = "border-gray-300 text-gray-900"; if (isSelectedA) btnClass = "ring-2 ring-blue-500 border-blue-500"; if (par && !respondido) btnClass = "bg-gray-200 border-gray-400"; if (isCorrectPair) btnClass = "bg-green-100 border-green-400 text-green-900"; if (isWrongPair) btnClass = "bg-red-100 border-red-400 text-red-900"; return (<Button key={`A-${itemA.id}`} variant="outline" onClick={() => handleSelecionarColunaA(itemA.id)} disabled={respondido} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass)}><span className="flex-1">{itemA.texto}</span>{isCorrectPair && <CheckCircle2 className="ml-1 h-3.5 w-3.5 text-green-600 flex-shrink-0" />}{isWrongPair && <XCircle className="ml-1 h-3.5 w-3.5 text-red-600 flex-shrink-0" />}{isWrongPair && parCorreto && (<span className="text-[10px] ml-1 text-blue-600 hidden md:inline">({cRel.colunaB.find(iB => iB.id === parCorreto.bId)?.texto})</span>)}</Button>); })}</div> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna B</p>{cRel.colunaB.map(itemB => { const isPairedB = paresFormados.some(p => p.bId === itemB.id); const isDisabled = respondido || selecaoColunaA === null || isPairedB; let btnClass = "border-gray-300 hover:bg-gray-100 text-gray-900"; if (isPairedB) btnClass = "bg-gray-200 border-gray-400 text-gray-600"; return (<Button key={`B-${itemB.id}`} variant="outline" onClick={() => handleSelecionarColunaB(itemB.id)} disabled={isDisabled} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass, !isDisabled && selecaoColunaA !== null && "hover:border-blue-400" )}><span className="flex-1">{itemB.texto}</span></Button>); })}</div></div>);
             case "PontoCerto":
