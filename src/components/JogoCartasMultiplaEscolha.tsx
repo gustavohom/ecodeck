@@ -971,18 +971,30 @@ const EcoChallenge: React.FC = () => {
                         >
                             {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)}
                             <span className="flex-1">{op.texto}</span>
-                            {respondido && isCorrectOptionOverall && (
-                                <span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${ isCorrectOrder ? 'bg-green-500 text-white' : isWrongOrder ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}`}>
-                                    {correctIndex}
-                                </span>
+                             {respondido && isCorrectOptionOverall && (
+                                <> {/* Usar Fragment para agrupar os spans condicionais */}
+                                    {/* Círculo Primário: Verde (correto) ou Vermelho (incorreto com a posição do usuário) */}
+                                    <span
+                                        className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${
+                                            isCorrectOrder ? 'bg-green-500 text-white' : 'bg-red-500 text-white' // Verde se correto, Vermelho se errado
+                                        }`}
+                                        title={isCorrectOrder ? `Posição Correta: ${correctIndex}` : `Sua Posição: ${selectionIndex}`}
+                                    >
+                                        {isCorrectOrder ? correctIndex : selectionIndex} {/* Mostra índice correto OU o selecionado pelo usuário */}
+                                    </span>
+
+                                    {/* Círculo Azul (Hint): Somente se a ordem estiver errada, mostra a posição correta */}
+                                    {isWrongOrder && correctIndex !== null && (
+                                        <span
+                                            className="ml-1 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white"
+                                            title={`Posição Correta: ${correctIndex}`}
+                                        >
+                                            {correctIndex}
+                                        </span>
+                                    )}
+                                </>
                             )}
-                             {/* ===== MODIFICAÇÃO 3: Remover texto "(Sua: N)" e adicionar círculo azul ===== */}
-                             {isWrongOrder && correctIndex !== null && (
-                                <span className="ml-1 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white" title={`Posição Correta: ${correctIndex}`}>
-                                    {correctIndex}
-                                </span>
-                            )}
-                             {/* ===== FIM DA MODIFICAÇÃO 3 ===== */}
+                            {/* Fim do Feedback */}
                         </Button>
                     );
                 });
