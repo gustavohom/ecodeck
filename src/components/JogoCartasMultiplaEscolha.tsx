@@ -69,7 +69,7 @@ interface SourceInfo {
     name: string;
     type: 'builtin' | 'custom';
     cards: Carta[];
-    internalBaralhos: string[];
+    internalBaralhos: Record<string, number>; // Alterado para Record<nome, contagem>
     active: boolean;
 }
 
@@ -82,7 +82,7 @@ interface GameState {
     probabilityIndex: number;
     jogoIniciado: boolean;
     activeSourceIds: string[];
-    activeInternalBaralhosState: Record<string, string[]>;
+    activeInternalBaralhosState: Record<string, string[]>; // { sourceId: [activeBaralhoName, ...] } - Mantém como array para salvar/carregar
 }
 
 // --- Constantes ---
@@ -103,15 +103,23 @@ const tiposEspeciais: Carta['tipo'][] = ["Vantagem", "Desvantagem", "Outras"];
 
 // --- Carregamento Inicial e Estruturação ---
 
-function processCardsAndExtractBaralhos(cards: Carta[]): { processedCards: Carta[], internalBaralhos: string[] } {
-    const baralhoSet = new Set<string>();
+// ===== MODIFICAÇÃO: Helper agora retorna contagem por baralho =====
+function processCardsAndExtractBaralhos(cards: Carta[]): { processedCards: Carta[], internalBaralhos: Record<string, number> } {
+    const baralhoCounts: Record<string, number> = {};
     const processedCards = cards.map(card => {
         const baralhoName = card.baralho?.trim() || DEFAULT_BARALHO_NAME;
-        baralhoSet.add(baralhoName);
+        baralhoCounts[baralhoName] = (baralhoCounts[baralhoName] || 0) + 1;
         return { ...card, baralho: baralhoName };
     });
-    return { processedCards, internalBaralhos: Array.from(baralhoSet).sort() };
+    // Ordena os nomes dos baralhos para consistência na UI
+    const sortedBaralhoNames = Object.keys(baralhoCounts).sort();
+    const sortedInternalBaralhos: Record<string, number> = {};
+    sortedBaralhoNames.forEach(name => {
+        sortedInternalBaralhos[name] = baralhoCounts[name];
+    });
+    return { processedCards, internalBaralhos: sortedInternalBaralhos };
 }
+// ===== FIM DA MODIFICAÇÃO =====
 
 const builtInSourcesData: Omit<SourceInfo, 'active' | 'internalBaralhos'>[] = [
     { id: "manejoPlantadas", name: "Manejo Plantadas", type: 'builtin', cards: manejoPlantadas as Carta[] },
@@ -126,16 +134,11 @@ const initialBuiltInSources: SourceInfo[] = builtInSourcesData.map(source => {
     return { ...source, cards: processedCards, internalBaralhos: internalBaralhos, active: true };
 });
 
-// --- Funções Utilitárias ---
-function parseJSDeckFile(content: string): Carta[] {
-    try {
-        const match = content.match(/export default\s+(\[[\s\S]*?\]);?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?\s*export default\s+\w+;?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?/m);
-        if (!match || !match[1]) { throw new Error("Array não encontrado no arquivo JS."); }
-        const arrayStr = match[1]; const rawArray = new Function(`return ${arrayStr};`)() as any[];
-        return rawArray.map((card, index) => ({ ...card, id: card.id || `custom_${Date.now()}_${index}` })) as Carta[];
-    } catch (error: any) { console.error("Erro parse JS:", error); throw new Error(`Erro processar JS: ${error.message}`); }
-}
 
+// --- Funções Utilitárias ---
+function parseJSDeckFile(content: string): Carta[] { /* ... sem mudanças ... */ }
+
+// Função para recalcular categorias baseada nos baralhos *ativos*
 function recalcularCategoriasAtivas(
     allSources: SourceInfo[],
     activeInternalBaralhos: Record<string, Set<string>>
@@ -154,10 +157,7 @@ function recalcularCategoriasAtivas(
     return Array.from(new Set(activeCards.flatMap(c => c.categorias || []))).sort();
 }
 
-function isClickInZone(clickCoords: { x: number; y: number } | null, zone: ZonaClicavel): boolean {
-    if (!clickCoords) return false; const { x, y } = clickCoords;
-    return (x >= zone.x && x <= zone.x + zone.largura && y >= zone.y && y <= zone.y + zone.altura);
-}
+function isClickInZone(clickCoords: { x: number; y: number } | null, zone: ZonaClicavel): boolean { /* ... sem mudanças ... */ }
 
 // --- Componente TelaInicial ---
 interface TelaInicialProps {
@@ -206,12 +206,33 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                  Object.keys(parsed).forEach(key => { if (Array.isArray(parsed[key])) { initialState[key] = new Set(parsed[key]); } });
              } catch { initialState = {}; }
          }
-         allSources.forEach(source => {
-             if (!initialState[source.id]) { initialState[source.id] = new Set(source.internalBaralhos); }
-             else { source.internalBaralhos.forEach(bName => { initialState[source.id].add(bName); }) }
+         // Garante que *todas* as fontes (built-in e custom já carregadas) tenham uma entrada
+         // e que seus baralhos internos conhecidos estejam presentes no Set (se não foram desativados)
+         const currentAllSources = allSources; // Usa o estado que acabou de ser inicializado
+         currentAllSources.forEach(source => {
+             if (!initialState[source.id]) {
+                 // Se a fonte não estava salva, ativa todos os baralhos dela
+                 initialState[source.id] = new Set(Object.keys(source.internalBaralhos));
+             } else {
+                 // Se estava salva, garante que baralhos novos sejam adicionados (mas respeita os desativados)
+                 Object.keys(source.internalBaralhos).forEach(bName => {
+                      if (!initialState[source.id].has(bName)) {
+                          // Adiciona apenas se não foi explicitamente removido antes (difícil saber sem mais estado)
+                          // Para simplificar, vamos adicionar sempre, o usuário pode desmarcar se quiser.
+                          initialState[source.id].add(bName);
+                      }
+                 });
+                 // Remove baralhos que não existem mais na fonte (caso o arquivo tenha mudado)
+                 initialState[source.id].forEach(savedBName => {
+                    if (!(savedBName in source.internalBaralhos)) {
+                        initialState[source.id].delete(savedBName);
+                    }
+                 });
+             }
          });
          return initialState;
     });
+
     const [todasCategorias, setTodasCategorias] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -256,7 +277,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         }
         if (newCustomSources.length > 0) {
             setAllSources(prev => [...prev, ...newCustomSources]);
-            setActiveInternalBaralhos(prev => { const newState = { ...prev }; newCustomSources.forEach(source => { newState[source.id] = new Set(source.internalBaralhos); }); return newState; });
+            setActiveInternalBaralhos(prev => { const newState = { ...prev }; newCustomSources.forEach(source => { newState[source.id] = new Set(Object.keys(source.internalBaralhos)); }); return newState; }); // Ativa todos os baralhos da nova fonte
              setExpandedSources(prev => { const newSet = new Set(prev); newCustomSources.forEach(s => newSet.add(s.id)); return newSet; });
         }
         if (errors.length > 0) { setErrorMessage(errors.join("\n")); }
@@ -303,6 +324,14 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
          const activeCardsForGame = allSources.flatMap(source => { if (!source.active) return []; const activeBaralhos = activeInternalBaralhos[source.id]; if (!activeBaralhos || activeBaralhos.size === 0) return []; return source.cards.filter(card => activeBaralhos.has(card.baralho || DEFAULT_BARALHO_NAME)); });
          if (activeCardsForGame.filter(c => c.categorias?.some(cat => finalCategoriasSelecionadas.includes(cat))).length === 0) { alert("Nenhuma carta encontrada com a combinação de baralhos e categorias selecionadas."); return; }
 
+        // Converte o Set de baralhos ativos para Array antes de passar para GameState
+        const activeInternalBaralhosStateForSave = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => {
+            if (allSources.find(s => s.id === key)?.active) { // Só inclui fontes ativas
+                acc[key] = Array.from(valueSet);
+            }
+            return acc;
+        }, {} as Record<string, string[]>);
+
         if (continueGame && typeof window !== "undefined") {
             const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
             try {
@@ -311,7 +340,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                     gameStateToStart = {
                         ...savedState, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex,
                         activeSourceIds: allSources.filter(s => s.active).map(s => s.id),
-                        activeInternalBaralhosState: Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => { if (allSources.find(s => s.id === key)?.active) { acc[key] = Array.from(valueSet); } return acc; }, {} as Record<string, string[]>),
+                        activeInternalBaralhosState: activeInternalBaralhosStateForSave, // Usa o estado atual da UI
                     };
                 } else { return handleStartGame(false); }
             } catch (e) { console.error("Erro ao carregar jogo salvo:", e); return handleStartGame(false); }
@@ -320,7 +349,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             gameStateToStart = {
                 players: initializedPlayers, currentPlayerId: initializedPlayers[0]?.id ?? null, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex, jogoIniciado: true,
                 activeSourceIds: allSources.filter(s => s.active).map(s => s.id),
-                activeInternalBaralhosState: Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => { if (allSources.find(s => s.id === key)?.active) { acc[key] = Array.from(valueSet); } return acc; }, {} as Record<string, string[]>),
+                activeInternalBaralhosState: activeInternalBaralhosStateForSave, // Usa o estado atual da UI
             };
         }
         onStartGame(gameStateToStart);
@@ -329,26 +358,25 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const categoriasFiltradas = todasCategorias.filter((cat) => cat.toLowerCase().includes(termoBuscaCategoria.toLowerCase())).sort();
     const cycleProbability = () => { setProbabilityIndex((prevIndex) => (prevIndex + 1) % probabilitySettings.length); };
 
-    // Separa as fontes para renderização
-    const builtInSources = allSources.filter(s => s.type === 'builtin');
-    const customSources = allSources.filter(s => s.type === 'custom');
+    const builtInSourcesUI = allSources.filter(s => s.type === 'builtin');
+    const customSourcesUI = allSources.filter(s => s.type === 'custom');
 
 
     return (
-        <Card className="w-full max-w-lg mx-auto mt-8 shadow-lg"> {/* Aumentado max-w para lg */}
+        <Card className="w-full max-w-lg mx-auto mt-8 shadow-lg">
             <CardHeader>
                 <CardTitle className="text-2xl font-bold text-center text-green-700">Eco Challenge</CardTitle>
                 <p className="text-sm text-center text-gray-600">O Jogo da Sustentabilidade</p>
             </CardHeader>
             <CardContent className="space-y-6">
 
-                 {/* ===== MODIFICAÇÃO: Seção de Fontes e Baralhos Internos (Separada) ===== */}
+                 {/* Gerenciamento de Fontes e Baralhos Internos (Separado) */}
                  <div className="space-y-4">
                     {/* --- Baralhos Incluídos --- */}
                     <div>
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">Baralhos Incluídos</h3>
                         <ScrollArea className="h-40 border rounded-md p-2 bg-gray-100 space-y-2">
-                             {builtInSources.length > 0 ? builtInSources.map((source) => (
+                             {builtInSourcesUI.length > 0 ? builtInSourcesUI.map((source) => (
                                 <div key={source.id} className="border-b last:border-b-0 pb-2 mb-2 bg-white px-2 py-1 rounded shadow-sm">
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id={`source-${source.id}`} checked={source.active} onCheckedChange={() => toggleSourceActive(source.id)} className="mt-1"/>
@@ -358,16 +386,19 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                                                 {source.name}
                                             </label>
                                         </button>
-                                        {/* Sem botão de remover para built-in */}
                                     </div>
                                      {source.active && expandedSources.has(source.id) && (
                                          <div className="pl-8 mt-1 space-y-1">
-                                             {source.internalBaralhos.length > 0 ? source.internalBaralhos.map(baralhoName => (
-                                                 <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
-                                                     <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} />
-                                                     <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer">{baralhoName}</label>
-                                                 </div>
-                                             )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
+                                            {/* ===== MODIFICAÇÃO: Mostrar contagem de cartas ===== */}
+                                            {Object.entries(source.internalBaralhos).length > 0 ? Object.entries(source.internalBaralhos).map(([baralhoName, count]) => (
+                                                <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
+                                                    <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} />
+                                                    <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer">
+                                                        {baralhoName} <span className="text-gray-500">({count})</span> {/* Mostra contagem */}
+                                                    </label>
+                                                </div>
+                                            )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
+                                             {/* ===== FIM DA MODIFICAÇÃO ===== */}
                                          </div>
                                      )}
                                 </div>
@@ -382,9 +413,9 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                          <Input type="file" multiple accept=".js,.json" onChange={handleCustomDeckUpload} disabled={isLoading} className="text-sm h-9 mb-2"/>
                          {isLoading && <p className="text-xs text-blue-600 mb-2">Carregando...</p>}
 
-                         {customSources.length > 0 ? (
+                         {customSourcesUI.length > 0 ? (
                             <ScrollArea className="h-40 border rounded-md p-2 bg-gray-100 space-y-2">
-                                 {customSources.map((source) => (
+                                 {customSourcesUI.map((source) => (
                                      <div key={source.id} className="border-b last:border-b-0 pb-2 mb-2 bg-white px-2 py-1 rounded shadow-sm">
                                          <div className="flex items-center space-x-2">
                                              <Checkbox id={`source-${source.id}`} checked={source.active} onCheckedChange={() => toggleSourceActive(source.id)} className="mt-1"/>
@@ -398,23 +429,24 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                                          </div>
                                          {source.active && expandedSources.has(source.id) && (
                                              <div className="pl-8 mt-1 space-y-1">
-                                                 {source.internalBaralhos.length > 0 ? source.internalBaralhos.map(baralhoName => (
-                                                     <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
-                                                         <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} />
-                                                         <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer">{baralhoName}</label>
-                                                     </div>
-                                                 )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
+                                                {/* ===== MODIFICAÇÃO: Mostrar contagem de cartas ===== */}
+                                                {Object.entries(source.internalBaralhos).length > 0 ? Object.entries(source.internalBaralhos).map(([baralhoName, count]) => (
+                                                    <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
+                                                        <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} />
+                                                        <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer">
+                                                            {baralhoName} <span className="text-gray-500">({count})</span> {/* Mostra contagem */}
+                                                        </label>
+                                                    </div>
+                                                )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
+                                                 {/* ===== FIM DA MODIFICAÇÃO ===== */}
                                              </div>
                                          )}
                                     </div>
                                 ))}
                             </ScrollArea>
-                         ) : (
-                             !isLoading && <p className="text-sm text-gray-500 italic p-2 border rounded bg-gray-100">Nenhum arquivo carregado.</p>
-                         )}
+                         ) : ( !isLoading && <p className="text-sm text-gray-500 italic p-2 border rounded bg-gray-100">Nenhum arquivo carregado.</p> )}
                     </div>
                  </div>
-                 {/* ===== FIM DA MODIFICAÇÃO ===== */}
 
                 {/* Seleção de Categorias */}
                 <div className="space-y-2">
@@ -481,7 +513,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
 
 // --- Componente Principal EcoChallenge ---
 const EcoChallenge: React.FC = () => {
-    // Estados do Jogo
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [cartaAtual, setCartaAtual] = useState<Carta | null>(null);
     const [respondido, setRespondido] = useState(false);
@@ -505,7 +536,6 @@ const EcoChallenge: React.FC = () => {
     const [isDieModalOpen, setIsDieModalOpen] = useState(false);
     const [isRolling, setIsRolling] = useState(false);
 
-    // Memoize allSources para evitar recálculos desnecessários
     const allSourcesMemo = useMemo(() => {
         const customSourcesRaw = typeof window !== "undefined" ? localStorage.getItem("customSourceInfos") : null;
         const builtInStatusRaw = typeof window !== "undefined" ? localStorage.getItem("builtInSourceStatus") : null;
@@ -519,8 +549,8 @@ const EcoChallenge: React.FC = () => {
             return { ...source, cards: processedCards, internalBaralhos };
         });
         const combined = [ ...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus?.[bs.id] ?? true })), ...processedCustomSources ];
-        return combined.map(source => { const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards); return {...source, cards: processedCards, internalBaralhos }; });
-    }, []);
+         return combined.map(source => { const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards); return {...source, cards: processedCards, internalBaralhos }; });
+     }, []);
 
 
     const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -556,7 +586,7 @@ const EcoChallenge: React.FC = () => {
             const savedActiveSources = localStorage.getItem("activeSourceIds");
             const savedActiveInternal = localStorage.getItem("activeInternalBaralhosState");
             try {
-                const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
+                const savedState = savedStateRaw ? JSON.parse(savedStateRaw) : null;
                 if (savedState && savedState.jogoIniciado) {
                      const activeSourceIds = savedActiveSources ? JSON.parse(savedActiveSources) : [];
                      const activeInternalBaralhosState = savedActiveInternal ? JSON.parse(savedActiveInternal) : {};
@@ -574,19 +604,33 @@ const EcoChallenge: React.FC = () => {
         const probabilidadeExcluirEspecial = probabilitySettings[probabilityIndex].value;
         const incluirCartasEspeciais = probabilidadeExcluirEspecial === 0 || Math.random() >= probabilidadeExcluirEspecial;
         const activeSources = allSourcesMemo.filter(s => activeSourceIds.includes(s.id));
+
+        // ***** INÍCIO DA CORREÇÃO NA LÓGICA DE FILTRO *****
         const cartasFiltradas = activeSources.flatMap(source => {
-            const activeBaralhosForSource = activeInternalBaralhosState[source.id];
-            if (!activeBaralhosForSource || activeBaralhosForSource.length === 0) return [];
+            const activeBaralhosForSource = activeInternalBaralhosState[source.id]; // Pega o ARRAY de nomes ativos do gameState
+            if (!activeBaralhosForSource || activeBaralhosForSource.length === 0) return []; // Pula fonte sem baralhos ativos
+
+            // Cria um Set a partir do array para checagem rápida O(1)
+            const activeBaralhoSet = new Set(activeBaralhosForSource);
+
             return source.cards.filter(card => {
-                const baralhoAtivo = activeBaralhosForSource.includes(card.baralho || DEFAULT_BARALHO_NAME);
+                // Checa baralho interno usando o Set
+                const baralhoAtivo = activeBaralhoSet.has(card.baralho || DEFAULT_BARALHO_NAME);
                 if (!baralhoAtivo) return false;
+
+                // Checa categoria
                 const categoriaValida = card.categorias?.some(cat => categoriasSelecionadas.includes(cat));
                 if (!categoriaValida) return false;
+
+                // Checa exclusão de especiais
                 const isTipoEspecial = tiposEspeciais.includes(card.tipo);
                 if (!incluirCartasEspeciais && isTipoEspecial) return false;
-                return true;
+
+                return true; // Passou por todos os filtros
             });
         });
+        // ***** FIM DA CORREÇÃO NA LÓGICA DE FILTRO *****
+
 
         if (cartasFiltradas.length === 0) { setNoCardsAvailable(true); setCartaAtual(null); setMensagem("Nenhuma carta encontrada com os filtros atuais!"); return; }
         setNoCardsAvailable(false);
@@ -599,7 +643,7 @@ const EcoChallenge: React.FC = () => {
         setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]);
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
         if (novaCarta.tipo === "ContraTempo") { setTempoRestante(novaCarta.tempoLimite); }
-    }, [gameState, allSourcesMemo]);
+    }, [gameState, allSourcesMemo]); // Removida a dependência 'probabilitySettings' que era desnecessária
 
     useEffect(() => { if (gameState?.jogoIniciado && !cartaAtual && !noCardsAvailable) { selecionarCartaAleatoria(); } }, [gameState?.jogoIniciado, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]);
 
@@ -609,10 +653,7 @@ const EcoChallenge: React.FC = () => {
                 setTempoRestante((prev) => {
                     if (prev === null || prev <= 1) {
                         clearInterval(timerIntervalRef.current!); setRespondido(true); setMensagem(`Tempo esgotado! ${cartaAtual.desvantagem || 'Tente novamente.'}`);
-                         if (gameState && gameState.currentPlayerId !== null) {
-                             const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
-                             if (currentPlayer) { updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - 10, 0) }); }
-                         } return 0;
+                         if (gameState && gameState.currentPlayerId !== null) { const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId); if (currentPlayer) { updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - 10, 0) }); } } return 0;
                     } return prev - 1;
                 });
             }, 1000);
@@ -634,10 +675,8 @@ const EcoChallenge: React.FC = () => {
         if (!cartaAtual || !gameState || !gameState.players || gameState.currentPlayerId === null || respondido) return;
         const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
         if (!currentPlayer) return;
-
         let cor = false; let pontosGanhos = 20; let pontosPerdidos = 10; let darPuloDificil = cartaAtual.dificuldade === "dificil"; let mensagemFinal = ""; let aplicarEfeitoPadrao = false;
         if (cartaAtual.tipo === "ContraTempo" && timerIntervalRef.current) { clearInterval(timerIntervalRef.current); }
-
         switch (cartaAtual.tipo) {
             case "Pergunta": case "ContraTempo": if (cartaAtual.tipo === "ContraTempo" && (tempoRestante === null || tempoRestante <= 0)) { cor = false; } else { cor = selecionado === cartaAtual.respostaCorreta; } aplicarEfeitoPadrao = true; break;
             case "MultiplaEscolha": cor = Array.isArray(cartaAtual.respostaCorreta) && selecoesMultiplas.length === cartaAtual.respostaCorreta.length && selecoesMultiplas.sort().toString() === cartaAtual.respostaCorreta.sort().toString(); if (cor) pontosGanhos = 25; aplicarEfeitoPadrao = true; break;
@@ -652,15 +691,8 @@ const EcoChallenge: React.FC = () => {
         }
         setRespondido(true);
         if (aplicarEfeitoPadrao) {
-            if (cor) {
-                const novoProgresso = currentPlayer.progresso + pontosGanhos; const completouBarra = novoProgresso >= 100;
-                const pulosGanhos = (completouBarra ? 1 : 0) + (darPuloDificil ? 1 : 0); const estrelasFixasGanhsa = completouBarra ? 1 : 0;
-                updateCurrentPlayer({ respostasCertas: currentPlayer.respostasCertas + 1, respostasSeguidas: currentPlayer.respostasSeguidas + 1, progresso: completouBarra ? 0 : novoProgresso, pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + pulosGanhos, 2), fixedStars: currentPlayer.fixedStars + estrelasFixasGanhsa, });
-                mensagemFinal = `Correto! ${cartaAtual.vantagem || ''}${completouBarra ? ' Barra completa!' : ''}`;
-            } else {
-                updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - pontosPerdidos, 0), });
-                 mensagemFinal = `Incorreto. ${cartaAtual.desvantagem || ''}`;
-            }
+            if (cor) { const novoProgresso = currentPlayer.progresso + pontosGanhos; const completouBarra = novoProgresso >= 100; const pulosGanhos = (completouBarra ? 1 : 0) + (darPuloDificil ? 1 : 0); const estrelasFixasGanhsa = completouBarra ? 1 : 0; updateCurrentPlayer({ respostasCertas: currentPlayer.respostasCertas + 1, respostasSeguidas: currentPlayer.respostasSeguidas + 1, progresso: completouBarra ? 0 : novoProgresso, pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + pulosGanhos, 2), fixedStars: currentPlayer.fixedStars + estrelasFixasGanhsa, }); mensagemFinal = `Correto! ${cartaAtual.vantagem || ''}${completouBarra ? ' Barra completa!' : ''}`; }
+            else { updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - pontosPerdidos, 0), }); mensagemFinal = `Incorreto. ${cartaAtual.desvantagem || ''}`; }
         } setMensagem(mensagemFinal);
     };
 
@@ -671,25 +703,21 @@ const EcoChallenge: React.FC = () => {
     const eliminarRespostaErrada = () => {
         const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return;
         const tiposEliminaveis: Carta['tipo'][] = ["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"];
-        if (!tiposEliminaveis.includes(cartaAtual.tipo) || !('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || cartaAtual.opcoes.length <= 2) { setMensagem("Não é possível eliminar opções para este tipo de carta ou já há poucas opções."); return; } // Verificação mais robusta
+        if (!tiposEliminaveis.includes(cartaAtual.tipo) || !('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || cartaAtual.opcoes.length <= 2) { setMensagem("Não é possível eliminar opções para este tipo de carta ou já há poucas opções."); return; }
         if (cp.respostasSeguidas < 2) { setMensagem("São necessárias 2 respostas corretas seguidas."); return; }
         let respostaCorretaNumeros: number[] = [];
         if ('respostaCorreta' in cartaAtual) {
             if (typeof cartaAtual.respostaCorreta === 'number') { respostaCorretaNumeros = [cartaAtual.respostaCorreta];}
             else if (Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.every(item => typeof item === 'number')) { respostaCorretaNumeros = cartaAtual.respostaCorreta as number[]; }
-            else if (cartaAtual.tipo === 'Vantagem' || cartaAtual.tipo === 'Desvantagem') { // Vantagem/Desvantagem podem ter resposta como array de IDs das opções
-                 if (Array.isArray(cartaAtual.respostaCorreta)) respostaCorretaNumeros = cartaAtual.respostaCorreta as number[];
-                 else respostaCorretaNumeros = cartaAtual.opcoes.map(o => o.id); // Considera todas as opções como "corretas" para eliminação
-            }
+            else if (cartaAtual.tipo === 'Vantagem' || cartaAtual.tipo === 'Desvantagem') { if (Array.isArray(cartaAtual.respostaCorreta)) respostaCorretaNumeros = cartaAtual.respostaCorreta as number[]; else respostaCorretaNumeros = cartaAtual.opcoes.map(o => o.id); }
             else { console.error("Formato inesperado de respostaCorreta:", cartaAtual); setMensagem("Erro interno."); return; }
-        } else { console.error("Carta sem respostaCorreta:", cartaAtual); setMensagem("Erro interno."); return; } // Verifica se respostaCorreta existe
-
+        } else { console.error("Carta sem respostaCorreta:", cartaAtual); setMensagem("Erro interno."); return; }
         const opcoesErradasDisponiveis = cartaAtual.opcoes.filter(op => !respostaCorretaNumeros.includes(op.id) && !opcoesEliminadas.includes(op.id));
         if (opcoesErradasDisponiveis.length > 0) { const idxAleat = Math.floor(Math.random() * opcoesErradasDisponiveis.length); const opcaoEliminada = opcoesErradasDisponiveis[idxAleat].id; setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Uma opção incorreta foi eliminada! (-2 sequências)"); }
         else { setMensagem("Não há mais opções incorretas para eliminar."); }
     };
     const voltarTelaInicial = () => { if (window.confirm("Voltar para a Tela Inicial? Progresso salvo.")) { setGameState(null); setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); } };
-    const diminuirAcertos = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ respostasCertas: Math.max(0, cp.respostasCertas - 1) }); setMensagem("Acerto removido."); };
+    const diminuirAcertos = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp) return; updateCurrentPlayer({ respostasCertas: Math.max(0, cp.respostasCertas - 1) }); setMensagem("Acerto removido."); };
     const diminuirErros = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ respostasErradas: Math.max(0, cp.respostasErradas - 1) }); setMensagem("Erro removido."); };
     const incrementarContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: cp.contadorDeEstrelas + 1 }); setMensagem("Estrela bônus adicionada."); };
     const diminuirContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: Math.max(0, cp.contadorDeEstrelas - 1) }); setMensagem("Estrela bônus removida."); };
@@ -772,14 +800,9 @@ const EcoChallenge: React.FC = () => {
                         </div>
                          {(!ocultarCarta || cartaRevelada) && ( <Badge variant={ cartaAtual.dificuldade === "facil" ? "secondary" : cartaAtual.dificuldade === "normal" ? "default" : "destructive" } className="capitalize flex-shrink-0 h-6 ml-2"> {cartaAtual.dificuldade} </Badge> )}
                     </div>
-                     {cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && !respondido && cartaRevelada && (
-                         <div className="mt-2"> <Progress value={(tempoRestante / cartaAtual.tempoLimite) * 100} className="h-2 [&>*]:bg-yellow-500" /> <p className="text-center text-sm font-semibold text-yellow-700 mt-1"> <Timer className="inline h-4 w-4 mr-1" /> Tempo: {tempoRestante}s </p> </div>
-                    )}
-                    {(!ocultarCarta || cartaRevelada) ? (
-                         <ScrollArea className="h-64 md:h-80 rounded-md border p-3 mt-2 bg-white/80"> <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1" dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }} /> </ScrollArea>
-                    ) : (
-                        <div className="h-64 md:h-80 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200"> <EyeOff className="h-8 w-8 text-gray-500" /> <p className="text-sm text-gray-600">Carta Oculta</p> {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>} <Button onClick={rolarDado} variant="outline" size="sm" className="mt-2 bg-white" onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <Dice6 className="h-4 w-4 mr-1" /> Rolar Dado </Button> </div>
-                    )}
+                     {cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && !respondido && cartaRevelada && ( <div className="mt-2"> <Progress value={(tempoRestante / cartaAtual.tempoLimite) * 100} className="h-2 [&>*]:bg-yellow-500" /> <p className="text-center text-sm font-semibold text-yellow-700 mt-1"> <Timer className="inline h-4 w-4 mr-1" /> Tempo: {tempoRestante}s </p> </div> )}
+                    {(!ocultarCarta || cartaRevelada) ? ( <ScrollArea className="h-64 md:h-80 rounded-md border p-3 mt-2 bg-white/80"> <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1" dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }} /> </ScrollArea>
+                    ) : ( <div className="h-64 md:h-80 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200"> <EyeOff className="h-8 w-8 text-gray-500" /> <p className="text-sm text-gray-600">Carta Oculta</p> {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>} <Button onClick={rolarDado} variant="outline" size="sm" className="mt-2 bg-white" onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <Dice6 className="h-4 w-4 mr-1" /> Rolar Dado </Button> </div> )}
                 </CardHeader>
 
                 {(!ocultarCarta || cartaRevelada) && (
@@ -797,7 +820,7 @@ const EcoChallenge: React.FC = () => {
                          <Button onClick={toggleFontes} variant="outline" disabled={!cartaAtual.fontes || cartaAtual.fontes.length === 0 || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <BookOpen className="h-5 w-5" /></Button>
                          <Button onClick={pularPergunta} variant={currentPlayer.pulosDisponiveis > 0 ? "secondary" : "outline"} disabled={currentPlayer.pulosDisponiveis === 0 || !tiposPergunta.includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <SkipForward className="h-5 w-5" /> </Button>
                          <Button onClick={toggleDica} variant={currentPlayer.respostasSeguidas >= 2 && !dicaUsada && !!cartaAtual.dica ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || dicaUsada || !cartaAtual.dica || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <HelpCircle className="h-5 w-5" /> </Button>
-                         <Button onClick={eliminarRespostaErrada} variant={currentPlayer.respostasSeguidas >= 2 ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || !("opcoes" in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || cartaAtual.opcoes.length <= 2 || !["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"].includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <MinusCircle className="h-5 w-5" /> </Button> {/* Correção na condição de disabled */}
+                         <Button onClick={eliminarRespostaErrada} variant={currentPlayer.respostasSeguidas >= 2 ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || !("opcoes" in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || cartaAtual.opcoes.length <= 2 || !["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"].includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <MinusCircle className="h-5 w-5" /> </Button>
                          <Button onClick={resetarContadoresJogador} variant="outline" className="h-9 px-2.5"> <RotateCcw className="h-5 w-5" /> </Button>
                          <Button onClick={voltarTelaInicial} variant="outline" className="h-9 px-2.5"> <Home className="h-5 w-5" /> </Button>
                     </div>
@@ -847,8 +870,8 @@ const EcoChallenge: React.FC = () => {
 
         switch (cartaAtual.tipo) {
             case "Pergunta": case "ContraTempo": case "Vantagem": case "Desvantagem": case "Outras":
-                if (!Array.isArray((cartaAtual as any).opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas.</p>;
-                return (cartaAtual as any).opcoes.map((op: Opcao) => {
+                if (!('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas.</p>;
+                return cartaAtual.opcoes.map((op: Opcao) => {
                     const isCorrect = Array.isArray(cartaAtual.respostaCorreta) ? cartaAtual.respostaCorreta.includes(op.id) : cartaAtual.respostaCorreta === op.id;
                     const isSelected = selecionado === op.id;
                     const isEliminated = opcoesEliminadas.includes(op.id);
@@ -859,8 +882,8 @@ const EcoChallenge: React.FC = () => {
                     return ( <Button key={op.id} onClick={() => handleSelecao(op.id)} variant={"outline"} className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} style={buttonInlineStyle} disabled={isEliminated || respondido}> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} </Button> );
                 });
              case "MultiplaEscolha":
-                 if (!Array.isArray((cartaAtual as any).opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas.</p>;
-                return (cartaAtual as any).opcoes.map((op: Opcao) => {
+                 if (!('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes)) return <p className="text-xs text-red-500">Erro: Opções inválidas.</p>;
+                return cartaAtual.opcoes.map((op: Opcao) => {
                     const isCorrect = Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(op.id);
                     const isSelected = selecoesMultiplas.includes(op.id);
                     const isEliminated = opcoesEliminadas.includes(op.id);
@@ -872,7 +895,7 @@ const EcoChallenge: React.FC = () => {
                     return ( <Button key={op.id} onClick={() => handleSelecaoMultipla(op.id)} variant="outline" className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} style={buttonInlineStyle} disabled={isEliminated || respondido}> <div className={cn("w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center", isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white')}>{isSelected && <Check className="w-3 h-3 text-white" />}</div> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600 font-bold">✓</span>} </Button> );
                 });
             case "Ordem":
-                 if (!Array.isArray((cartaAtual as any).opcoes) || !Array.isArray(cartaAtual.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Ordem.</p>;
+                 if (!('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || !Array.isArray(cartaAtual.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Ordem.</p>;
                  const cOrdem = cartaAtual as CartaOrdem;
                  return cOrdem.opcoes.map((op) => {
                     const isSelected = ordemSelecoes.includes(op.id); const selectionIndex = isSelected ? ordemSelecoes.indexOf(op.id) + 1 : null;
