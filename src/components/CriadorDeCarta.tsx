@@ -1021,21 +1021,16 @@ const CriadorDeCarta: React.FC = () => {
                             <CardHeader><CardTitle className="text-lg text-center">Preview Estático</CardTitle></CardHeader>
                             <CardContent>
                                  <CardStaticView card={
-                                     editIndex !== null
-                                     ? cards[editIndex]
-                                     : { // Monta preview da carta sendo criada
-                                         tipo, titulo, pergunta, opcoes,
-                                         // ===== MODIFICAÇÃO AQUI (Preview Relacionar Colunas) =====
-                                         respostaCorreta: (() => {
+                                    editIndex !== null
+                                    ? cards[editIndex] // Usa a carta existente, que já tem o tipo correto
+                                    : (() => { // Usa uma IIFE para construir o objeto de preview condicionalmente
+                                        // Calcula a resposta correta baseado no tipo atual
+                                        const finalRespostaCorretaPreview = (() => {
                                              if (tipo === 'Pergunta' || tipo === 'ContraTempo') return respostaCorreta[0];
                                              if (tipo === 'PontoCerto') return respostaCorretaPontoCerto ?? undefined;
                                              if (tipo === 'RelacionarColunas') {
-                                                  try {
-                                                      // Tenta parsear o input simplificado para o preview
-                                                      return parseParesRelacionar(paresCorretosInput);
-                                                  } catch {
-                                                      return []; // Retorna vazio se o formato for inválido no preview
-                                                  }
+                                                  try { return parseParesRelacionar(paresCorretosInput); }
+                                                  catch { return []; }
                                              }
                                              if (tipo === 'CompletarFrase') return ordemFragmentos.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
                                              if (tipo === 'Ordem') {
@@ -1044,13 +1039,54 @@ const CriadorDeCarta: React.FC = () => {
                                              }
                                              if (tipo === 'Vantagem') return opcoes.map(o => o.id);
                                              if (tipo === 'Desvantagem') return [];
-                                             return respostaCorreta;
-                                         })(),
-                                         // ===== FIM DA MODIFICAÇÃO (Preview Relacionar Colunas) =====
-                                         dificuldade, categorias, fontes, vantagem, desvantagem, dica, tempoLimite,
-                                         colunaA: colunaAItems, colunaB: colunaBItems, imagemURL: imagemURLPontoCerto, zonasClicaveis,
-                                         fraseIncompleta, fragmentos
-                                     }
+                                             return respostaCorreta; // Para MultiplaEscolha/Outras
+                                        })();
+
+                                        // Começa com as propriedades base comuns
+                                        const previewCard: Partial<Carta> = {
+                                            // id não é necessário para preview de nova carta
+                                            tipo, titulo, pergunta, dificuldade, categorias, fontes,
+                                            vantagem, desvantagem, dica,
+                                            respostaCorreta: finalRespostaCorretaPreview as any, // Cast para simplificar, pois a lógica acima garante o tipo certo
+                                        };
+
+                                        // Adiciona propriedades específicas do tipo selecionado
+                                        switch (tipo) {
+                                            case "Pergunta":
+                                            case "MultiplaEscolha":
+                                            case "Ordem":
+                                            case "Vantagem":
+                                            case "Desvantagem":
+                                            case "Outras":
+                                                // Adiciona 'opcoes' apenas para tipos que as usam
+                                                previewCard.opcoes = opcoes;
+                                                break;
+                                            case "ContraTempo":
+                                                 // Adiciona 'opcoes' e 'tempoLimite'
+                                                previewCard.opcoes = opcoes;
+                                                (previewCard as Partial<CartaContraTempo>).tempoLimite = tempoLimite;
+                                                break;
+                                            case "RelacionarColunas":
+                                                // Adiciona 'colunaA' e 'colunaB'
+                                                (previewCard as Partial<CartaRelacionarColunas>).colunaA = colunaAItems;
+                                                (previewCard as Partial<CartaRelacionarColunas>).colunaB = colunaBItems;
+                                                break;
+                                            case "PontoCerto":
+                                                 // Adiciona 'imagemURL' e 'zonasClicaveis'
+                                                (previewCard as Partial<CartaPontoCerto>).imagemURL = imagemURLPontoCerto;
+                                                (previewCard as Partial<CartaPontoCerto>).zonasClicaveis = zonasClicaveis;
+                                                // respostaCorreta já foi tratada acima
+                                                break;
+                                            case "CompletarFrase":
+                                                // Adiciona 'fraseIncompleta' e 'fragmentos'
+                                                (previewCard as Partial<CartaCompletarFrase>).fraseIncompleta = fraseIncompleta;
+                                                (previewCard as Partial<CartaCompletarFrase>).fragmentos = fragmentos;
+                                                 // respostaCorreta já foi tratada acima
+                                                break;
+                                        }
+
+                                        return previewCard; // Retorna o objeto construído corretamente
+                                    })() // Invoca a função imediatamente
                                  }/>
                              </CardContent>
                      </Card>
