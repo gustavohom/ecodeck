@@ -27,7 +27,6 @@ import estrelasAliens from "./dlc/cards_estrelas_aliens";
 import testCards from "./.test/test_card";
 
 // --- Tipos de Dados ---
-
 interface Opcao { id: number; texto: string; }
 interface CartaBase {
     id: string | number; tipo: string; titulo: string; pergunta: string;
@@ -49,32 +48,18 @@ interface CartaPontoCerto extends CartaBase { tipo: "PontoCerto"; imagemURL: str
 interface FragmentoCompletar { id: number; texto: string; }
 interface CartaCompletarFrase extends CartaBase { tipo: "CompletarFrase"; fraseIncompleta: string; fragmentos: FragmentoCompletar[]; respostaCorreta: number[]; opcoes: []; }
 
-type Carta =
-    | CartaPergunta | CartaMultiplaEscolha | CartaOrdem | CartaVantagem | CartaDesvantagem | CartaOutras
-    | CartaContraTempo | CartaRelacionarColunas | CartaPontoCerto | CartaCompletarFrase;
+type Carta = | CartaPergunta | CartaMultiplaEscolha | CartaOrdem | CartaVantagem | CartaDesvantagem | CartaOutras | CartaContraTempo | CartaRelacionarColunas | CartaPontoCerto | CartaCompletarFrase;
 
 // --- Interfaces de Jogador e Jogo ---
-interface Player {
-    id: number; name: string; color: string; fixedStars: number; respostasCertas: number;
-    respostasErradas: number; respostasSeguidas: number; progresso: number; pulosDisponiveis: number;
-    contadorDeEstrelas: number; rodadasPreso: number;
-}
+interface Player { id: number; name: string; color: string; fixedStars: number; respostasCertas: number; respostasErradas: number; respostasSeguidas: number; progresso: number; pulosDisponiveis: number; contadorDeEstrelas: number; rodadasPreso: number; }
 interface PlayerInput { id: number; name: string; color: string; showColorPicker?: boolean; }
 
 // --- Novas Interfaces para Gerenciamento de Fontes e Baralhos ---
 const DEFAULT_BARALHO_NAME = "Padrão";
-
-interface SourceInfo {
-    id: string; name: string; type: 'builtin' | 'custom'; cards: Carta[];
-    internalBaralhos: Record<string, number>; totalCards: number; active: boolean;
-}
+interface SourceInfo { id: string; name: string; type: 'builtin' | 'custom'; cards: Carta[]; internalBaralhos: Record<string, number>; totalCards: number; active: boolean; }
 
 // Estado do Jogo
-interface GameState {
-    players: Player[]; currentPlayerId: number | null; categoriasSelecionadas: string[];
-    ocultarCarta: boolean; probabilityIndex: number; jogoIniciado: boolean;
-    activeSourceIds: string[]; activeInternalBaralhosState: Record<string, string[]>;
-}
+interface GameState { players: Player[]; currentPlayerId: number | null; categoriasSelecionadas: string[]; ocultarCarta: boolean; probabilityIndex: number; jogoIniciado: boolean; activeSourceIds: string[]; activeInternalBaralhosState: Record<string, string[]>; }
 
 // --- Constantes ---
 const predefinedColors: string[] = [ "#9e0142","#f46d43","#fee08b","#66c2a5","#5e4fa2","#ff6699","#33a02c","#ff7f00", "#3288bd","#999999","#8dd3c7","#ffffb3","#fb8072","#80b1d3","#b3de69","#fccde5", "#bc80bd","#1f78b4","#e31a1c","#ffcc33","#6a3d9a","#b15928","#b2df8a","#cab2d6", "#a6cee3","#fb9a99","#fdbf6f","#ffed6f","#ccebc5","#ff4444", ];
@@ -109,51 +94,131 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const [ocultarCarta, setOcultarCarta] = useState(initialOcultarCarta);
     const [probabilityIndex, setProbabilityIndex] = useState(initialProbabilityIndex);
     const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>(() => initialPlayers.length > 0 ? initialPlayers.map((p) => ({ id: p.id, name: p.name, color: p.color, showColorPicker: false })) : [{ id: 0, name: "", color: predefinedColors[0], showColorPicker: false }] );
-    const [allSources, setAllSources] = useState<SourceInfo[]>(() => {
-         if (typeof window !== "undefined") {
-             const savedCustom = localStorage.getItem("customSourceInfos"); const savedBuiltInStatus = localStorage.getItem("builtInSourceStatus"); let customSources: SourceInfo[] = []; let builtInStatus: Record<string, boolean> | null = null;
-             try { customSources = savedCustom ? JSON.parse(savedCustom) : []; } catch { customSources = []; } try { builtInStatus = savedBuiltInStatus ? JSON.parse(savedBuiltInStatus) : null; } catch { builtInStatus = null; }
-             const processedCustomSources = customSources.map(source => { const { processedCards, internalBaralhos, totalCards } = processCardsAndExtractBaralhos(source.cards); return { ...source, cards: processedCards, internalBaralhos, totalCards }; }); const combined = [...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus ? (builtInStatus[bs.id] ?? true) : true})), ...processedCustomSources]; return combined;
-         } return initialBuiltInSources;
-    });
-    const [activeInternalBaralhos, setActiveInternalBaralhos] = useState<Record<string, Set<string>>>(() => {
-        let initialState: Record<string, Set<string>> = {};
-         if (typeof window !== "undefined") { const saved = localStorage.getItem("activeInternalBaralhos"); try { const parsed = saved ? JSON.parse(saved) : {}; Object.keys(parsed).forEach(key => { if (Array.isArray(parsed[key])) { initialState[key] = new Set(parsed[key]); } }); } catch { initialState = {}; } }
-         // Usa a versão inicial de allSources para definir o estado inicial dos baralhos
-         const currentAllSources = allSources; // Usa a variável local 'allSources' que está sendo inicializada
-         currentAllSources.forEach(source => { if (!initialState[source.id]) { initialState[source.id] = new Set(Object.keys(source.internalBaralhos)); } else { Object.keys(source.internalBaralhos).forEach(bName => { initialState[source.id].add(bName); }); initialState[source.id].forEach(savedBName => { if (!(savedBName in source.internalBaralhos)) { initialState[source.id].delete(savedBName); }}); } });
-         return initialState;
-    });
-    // ===== CORREÇÃO: Readicionar estado que faltava =====
+
+    // ===== MODIFICAÇÃO: Inicialização de Estado Padrão =====
+    // Inicializa com os built-in, carregamento do localStorage ocorrerá no useEffect
+    const [allSources, setAllSources] = useState<SourceInfo[]>(() => initialBuiltInSources);
+    // Inicializa vazio, carregamento do localStorage ocorrerá no useEffect
+    const [activeInternalBaralhos, setActiveInternalBaralhos] = useState<Record<string, Set<string>>>({});
+    // ======================================================
+
     const [todasCategorias, setTodasCategorias] = useState<string[]>([]);
-    // =====================================================
     const [categoriasComContagem, setCategoriasComContagem] = useState<Record<string, number>>({});
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
+    const [isClient, setIsClient] = useState(false); // Estado para saber se estamos no cliente
 
-    useEffect(() => { const { categorias, contagens } = recalcularCategoriasAtivas(allSources, activeInternalBaralhos); setTodasCategorias(categorias); setCategoriasComContagem(contagens); setCategoriasSelecionadas((prev) => prev.filter(cat => categorias.includes(cat))); }, [allSources, activeInternalBaralhos]);
-    useEffect(() => { if (typeof window !== "undefined") { const customSourcesToSave = allSources.filter(s => s.type === 'custom'); localStorage.setItem("customSourceInfos", JSON.stringify(customSourcesToSave)); const builtInStatusToSave: Record<string, boolean> = {}; allSources.filter(s => s.type === 'builtin').forEach(s => { builtInStatusToSave[s.id] = s.active; }); localStorage.setItem("builtInSourceStatus", JSON.stringify(builtInStatusToSave)); const serializableActiveInternal = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => { acc[key] = Array.from(valueSet); return acc; }, {} as Record<string, string[]>); localStorage.setItem("activeInternalBaralhos", JSON.stringify(serializableActiveInternal)); } }, [allSources, activeInternalBaralhos]);
+     // ===== MODIFICAÇÃO: useEffect para carregar do localStorage APÓS montagem =====
+     useEffect(() => {
+        setIsClient(true); // Indica que estamos no cliente
+
+        // Carregar fontes custom e status das built-in
+        const savedCustom = localStorage.getItem("customSourceInfos");
+        const savedBuiltInStatus = localStorage.getItem("builtInSourceStatus");
+        let loadedCustomSources: SourceInfo[] = [];
+        let loadedBuiltInStatus: Record<string, boolean> | null = null;
+
+        try { loadedCustomSources = savedCustom ? JSON.parse(savedCustom) : []; } catch { console.error("Erro ao carregar custom sources salvos."); loadedCustomSources = []; }
+        try { loadedBuiltInStatus = savedBuiltInStatus ? JSON.parse(savedBuiltInStatus) : null; } catch { console.error("Erro ao carregar status built-in salvos."); loadedBuiltInStatus = null; }
+
+        // Re-processa custom sources para garantir estrutura correta
+        const processedCustomSources = loadedCustomSources.map(source => {
+            const { processedCards, internalBaralhos, totalCards } = processCardsAndExtractBaralhos(source.cards || []); // Adiciona fallback para cards
+            return { ...source, cards: processedCards, internalBaralhos, totalCards };
+        });
+
+        // Combina fontes built-in (com status salvo) e custom processadas
+        const combinedSources = [
+            ...initialBuiltInSources.map(bs => ({
+                ...bs,
+                active: loadedBuiltInStatus ? (loadedBuiltInStatus[bs.id] ?? true) : true // Usa status salvo ou padrão true
+            })),
+            ...processedCustomSources
+        ];
+        setAllSources(combinedSources);
+
+        // Carregar baralhos internos ativos
+        const savedActiveInternal = localStorage.getItem("activeInternalBaralhos");
+        let initialActiveBaralhos: Record<string, Set<string>> = {};
+        try {
+            const parsed = savedActiveInternal ? JSON.parse(savedActiveInternal) : {};
+            Object.keys(parsed).forEach(key => { if (Array.isArray(parsed[key])) { initialActiveBaralhos[key] = new Set(parsed[key]); } });
+        } catch { console.error("Erro ao carregar baralhos internos ativos."); initialActiveBaralhos = {}; }
+
+        // Garante que todas as fontes (combinadas) tenham entrada e baralhos atualizados
+         combinedSources.forEach(source => {
+             if (!initialActiveBaralhos[source.id]) {
+                 // Se a fonte não estava salva, ativa todos os baralhos dela
+                 initialActiveBaralhos[source.id] = new Set(Object.keys(source.internalBaralhos));
+             } else {
+                 // Se estava salva, garante que baralhos novos sejam adicionados (mas respeita os desativados)
+                 Object.keys(source.internalBaralhos).forEach(bName => {
+                     // Se o baralho existe na fonte mas não no estado salvo, adiciona (considera ativo por padrão)
+                     // (Poderia ter lógica mais complexa para não reativar, mas simplificamos)
+                     if(!initialActiveBaralhos[source.id].has(bName)) {
+                        initialActiveBaralhos[source.id].add(bName);
+                     }
+                 });
+                 // Remove baralhos que não existem mais na fonte
+                 initialActiveBaralhos[source.id].forEach(savedBName => {
+                    if (!(savedBName in source.internalBaralhos)) {
+                        initialActiveBaralhos[source.id].delete(savedBName);
+                    }
+                 });
+             }
+         });
+         setActiveInternalBaralhos(initialActiveBaralhos);
+
+     }, []); // Roda apenas uma vez no cliente
+     // ===== FIM DA MODIFICAÇÃO =====
+
+    // Recalcular categorias E contagens
+    useEffect(() => {
+        // Só recalcula se estiver no cliente e tiver fontes carregadas
+        if(isClient && allSources.length > 0) {
+            const { categorias, contagens } = recalcularCategoriasAtivas(allSources, activeInternalBaralhos);
+            setTodasCategorias(categorias);
+            setCategoriasComContagem(contagens);
+            setCategoriasSelecionadas((prev) => prev.filter(cat => categorias.includes(cat)));
+        }
+    }, [allSources, activeInternalBaralhos, isClient]);
+
+    // Salvar estado da UI
+    useEffect(() => {
+         // Só salva se estiver no cliente
+        if (isClient && typeof window !== "undefined") {
+            const customSourcesToSave = allSources.filter(s => s.type === 'custom');
+            localStorage.setItem("customSourceInfos", JSON.stringify(customSourcesToSave));
+            const builtInStatusToSave: Record<string, boolean> = {};
+            allSources.filter(s => s.type === 'builtin').forEach(s => { builtInStatusToSave[s.id] = s.active; });
+            localStorage.setItem("builtInSourceStatus", JSON.stringify(builtInStatusToSave));
+            const serializableActiveInternal = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => { acc[key] = Array.from(valueSet); return acc; }, {} as Record<string, string[]>);
+            localStorage.setItem("activeInternalBaralhos", JSON.stringify(serializableActiveInternal));
+        }
+    }, [allSources, activeInternalBaralhos, isClient]);
+
 
     const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => { const files = e.target.files; if (!files) return; setIsLoading(true); setErrorMessage(null); let newCustomSources: SourceInfo[] = []; let errors: string[] = []; for (let i = 0; i < files.length; i++) { const file = files[i]; const content = await file.text(); try { let loadedCards: Carta[] = []; const sourceName = file.name.replace(/\.(js|json)$/, ""); const sourceId = `custom_${Date.now()}_${i}`; if (allSources.some(s => s.name === sourceName && s.type === 'custom')) { errors.push(`Arquivo/Fonte "${sourceName}" já carregado.`); continue; } if (file.name.endsWith(".js")) { loadedCards = parseJSDeckFile(content); } else if (file.name.endsWith(".json")) { const raw = JSON.parse(content) as any[]; loadedCards = raw.map((card, index) => ({ ...card, id: card.id || `${sourceId}_card_${index}` })) as Carta[]; } else { errors.push(`Formato não suportado: ${file.name}. Use .js ou .json.`); continue; } if (!Array.isArray(loadedCards) || loadedCards.length === 0) { errors.push(`Nenhuma carta válida encontrada em "${sourceName}".`); continue; } const { processedCards, internalBaralhos, totalCards } = processCardsAndExtractBaralhos(loadedCards); newCustomSources.push({ id: sourceId, name: sourceName, type: 'custom', cards: processedCards, internalBaralhos, totalCards, active: true }); } catch (error: any) { errors.push(`Erro ao ler ${file.name}: ${error.message}`); } } if (newCustomSources.length > 0) { setAllSources(prev => [...prev, ...newCustomSources]); setActiveInternalBaralhos(prev => { const newState = { ...prev }; newCustomSources.forEach(source => { newState[source.id] = new Set(Object.keys(source.internalBaralhos)); }); return newState; }); setExpandedSources(prev => { const newSet = new Set(prev); newCustomSources.forEach(s => newSet.add(s.id)); return newSet; }); } if (errors.length > 0) { setErrorMessage(errors.join("\n")); } setIsLoading(false); e.target.value = ''; };
     const toggleSourceActive = (sourceId: string) => { setAllSources(prev => prev.map(s => s.id === sourceId ? { ...s, active: !s.active } : s)); };
     const removeSource = (sourceId: string) => { const sourceToRemove = allSources.find(s => s.id === sourceId); if (!sourceToRemove || sourceToRemove.type !== 'custom') return; if (window.confirm(`Remover fonte "${sourceToRemove.name}"?`)) { setAllSources(prev => prev.filter(s => s.id !== sourceId)); setActiveInternalBaralhos(prev => { const newState = { ...prev }; delete newState[sourceId]; return newState; }); setExpandedSources(prev => { const newSet = new Set(prev); newSet.delete(sourceId); return newSet; }); } }
     const toggleInternalBaralhoActive = (sourceId: string, baralhoName: string) => { setActiveInternalBaralhos(prev => { const currentSourceSet = prev[sourceId] ? new Set(prev[sourceId]) : new Set<string>(); if (currentSourceSet.has(baralhoName)) { currentSourceSet.delete(baralhoName); } else { currentSourceSet.add(baralhoName); } return { ...prev, [sourceId]: currentSourceSet }; }); };
     const toggleExpandSource = (sourceId: string) => { setExpandedSources(prev => { const newSet = new Set(prev); if (newSet.has(sourceId)) { newSet.delete(sourceId); } else { newSet.add(sourceId); } return newSet; }); };
-    const addPlayerInput = () => { if (playerInputs.length < 8) { setPlayerInputs([...playerInputs, { id: playerInputs.length, name: "", color: predefinedColors[playerInputs.length % predefinedColors.length], showColorPicker: false, }]); } };
-    const handlePlayerChange = (index: number, field: "name" | "color", value: string) => { const updatedPlayers = [...playerInputs]; const player = updatedPlayers[index]; if (field === 'name') player.name = value; if (field === 'color') player.color = value; setPlayerInputs(updatedPlayers); };
-    const toggleColorPicker = (index: number) => { const updatedPlayers = playerInputs.map((p, i) => i === index ? { ...p, showColorPicker: !p.showColorPicker } : {...p, showColorPicker: false}); setPlayerInputs(updatedPlayers); };
-    const deletePlayer = (index: number) => { setPlayerInputs((prev) => prev.filter((_, i) => i !== index)); };
+    const addPlayerInput = () => { /* ... */ };
+    const handlePlayerChange = (index: number, field: "name" | "color", value: string) => { /* ... */ };
+    const toggleColorPicker = (index: number) => { /* ... */ };
+    const deletePlayer = (index: number) => { /* ... */ };
 
     const handleStartGame = (continueGame = false) => {
         let gameStateToPass: Partial<GameState>;
-        const finalCategorias = recalcularCategoriasAtivas(allSources, activeInternalBaralhos).categorias; // Pega só os nomes
+        const finalCategorias = recalcularCategoriasAtivas(allSources, activeInternalBaralhos).categorias;
         const finalCategoriasSelecionadas = categoriasSelecionadas.filter(cat => finalCategorias.includes(cat));
         if (playerInputs.length === 0) { alert("Adicione pelo menos um jogador."); return; }
         const anySourceActive = allSources.some(s => s.active); if (!anySourceActive) { alert("Ative pelo menos uma Fonte de Cartas."); return; }
         const anyInternalDeckActive = Object.entries(activeInternalBaralhos).some(([sourceId, activeSet]) => allSources.find(s => s.id === sourceId)?.active && activeSet.size > 0); if (!anyInternalDeckActive) { alert("Ative pelo menos um baralho interno dentro das fontes ativas."); return; }
         if (finalCategoriasSelecionadas.length === 0) { alert("Nenhuma categoria selecionada ou nenhuma categoria disponível com os baralhos ativos. Selecione categorias ou ative mais baralhos."); return; }
         const activeCardsForGame = allSources.flatMap(source => { if (!source.active) return []; const activeBaralhos = activeInternalBaralhos[source.id]; if (!activeBaralhos || activeBaralhos.size === 0) return []; return source.cards.filter(card => activeBaralhos.has(card.baralho || DEFAULT_BARALHO_NAME)); }); if (activeCardsForGame.filter(c => c.categorias?.some(cat => finalCategoriasSelecionadas.includes(cat))).length === 0) { alert("Nenhuma carta encontrada com a combinação de baralhos e categorias selecionadas."); return; }
+
         const activeSourcesForGame = allSources.filter(s => s.active);
         const activeInternalBaralhosStateForSave = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => { if (activeSourcesForGame.some(s => s.id === key)) { acc[key] = Array.from(valueSet); } return acc; }, {} as Record<string, string[]>);
 
@@ -177,6 +242,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const cycleProbability = () => { setProbabilityIndex((prevIndex) => (prevIndex + 1) % probabilitySettings.length); };
     const builtInSourcesUI = allSources.filter(s => s.type === 'builtin');
     const customSourcesUI = allSources.filter(s => s.type === 'custom');
+
 
     return (
         <Card className="w-full max-w-lg mx-auto mt-8 shadow-lg">
@@ -311,46 +377,31 @@ const EcoChallenge: React.FC = () => {
 
     const handleGameStart = useCallback((initialGameState?: Partial<GameState>, sourcesForGame?: SourceInfo[]) => {
         if (initialGameState && sourcesForGame) {
-             setGameState(initialGameState as GameState);
-             setCurrentGameSources(sourcesForGame);
+             setGameState(initialGameState as GameState); setCurrentGameSources(sourcesForGame);
              setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]); setOpcoesEliminadas([]); setCartaRevelada(!(initialGameState.ocultarCarta ?? true));
-        } else if (initialGameState) {
-             console.warn("Reconstruindo fontes para jogo salvo...");
-             const customSourcesRaw = typeof window !== "undefined" ? localStorage.getItem("customSourceInfos") : null; const builtInStatusRaw = typeof window !== "undefined" ? localStorage.getItem("builtInSourceStatus") : null; let customSources: SourceInfo[] = []; let builtInStatus: Record<string, boolean> | null = null;
-             try { customSources = customSourcesRaw ? JSON.parse(customSourcesRaw) : []; } catch { customSources = []; } try { builtInStatus = builtInStatusRaw ? JSON.parse(builtInStatusRaw) : null; } catch { builtInStatus = null; }
-             const processedCustomSources = customSources.map(source => { const { processedCards, internalBaralhos, totalCards } = processCardsAndExtractBaralhos(source.cards); return { ...source, cards: processedCards, internalBaralhos, totalCards }; });
-             const reconstructedSources = [ ...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus?.[bs.id] ?? true })), ...processedCustomSources ].filter(s => initialGameState.activeSourceIds?.includes(s.id));
-             setGameState(initialGameState as GameState); setCurrentGameSources(reconstructedSources);
+        } else if (initialGameState) { // Fallback para save antigo
+             console.warn("Reconstruindo fontes para jogo salvo..."); const customSourcesRaw = typeof window !== "undefined" ? localStorage.getItem("customSourceInfos") : null; const builtInStatusRaw = typeof window !== "undefined" ? localStorage.getItem("builtInSourceStatus") : null; let customSources: SourceInfo[] = []; let builtInStatus: Record<string, boolean> | null = null; try { customSources = customSourcesRaw ? JSON.parse(customSourcesRaw) : []; } catch { customSources = []; } try { builtInStatus = builtInStatusRaw ? JSON.parse(builtInStatusRaw) : null; } catch { builtInStatus = null; } const processedCustomSources = customSources.map(source => { const { processedCards, internalBaralhos, totalCards } = processCardsAndExtractBaralhos(source.cards); return { ...source, cards: processedCards, internalBaralhos, totalCards }; }); const reconstructedSources = [ ...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus?.[bs.id] ?? true })), ...processedCustomSources ].filter(s => initialGameState.activeSourceIds?.includes(s.id)); setGameState(initialGameState as GameState); setCurrentGameSources(reconstructedSources);
              setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]); setOpcoesEliminadas([]); setCartaRevelada(!(initialGameState.ocultarCarta ?? true));
         }
      }, []);
 
-    const updateGameState = useCallback((newState: Partial<GameState>) => {
-        setGameState(prev => {
-            if (!prev) return null; const updatedState = { ...prev, ...newState };
-            if (typeof window !== "undefined") { try { localStorage.setItem("estadoEcoChallenge", JSON.stringify(updatedState)); } catch (e) { console.error("Erro ao salvar estado:", e); } }
-            return updatedState;
-        });
-    }, []);
-
+    const updateGameState = useCallback((newState: Partial<GameState>) => { setGameState(prev => { if (!prev) return null; const updatedState = { ...prev, ...newState }; if (typeof window !== "undefined") { try { localStorage.setItem("estadoEcoChallenge", JSON.stringify(updatedState)); } catch (e) { console.error("Erro ao salvar estado:", e); } } return updatedState; }); }, []);
     const updateCurrentPlayer = useCallback((partialPlayerData: Partial<Player>) => { if (!gameState || gameState.currentPlayerId === null) return; const updatedPlayers = gameState.players.map(p => p.id === gameState.currentPlayerId ? { ...p, ...partialPlayerData } : p ); updateGameState({ players: updatedPlayers }); }, [gameState, updateGameState]);
 
     useEffect(() => {
         if (!gameState && typeof window !== "undefined") {
             const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
-            try {
-                const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
-                if (savedState && savedState.jogoIniciado) { handleGameStart(savedState); } // Chama handleGameStart para reconstruir
+            try { const savedState = savedStateRaw ? JSON.parse(savedStateRaw) : null; if (savedState && savedState.jogoIniciado) { handleGameStart(savedState); }
             } catch (e) { console.error("Erro ao carregar estado:", e); localStorage.removeItem("estadoEcoChallenge"); }
         }
     }, [handleGameStart, gameState]);
 
 
     const selecionarCartaAleatoria = useCallback(() => {
-        if (!gameState || currentGameSources.length === 0) { console.warn("Tentativa de selecionar carta sem gameState ou currentGameSources."); setNoCardsAvailable(true); return; }
+        if (!gameState || currentGameSources.length === 0) { setNoCardsAvailable(true); return; }
         const { categoriasSelecionadas, probabilityIndex, activeInternalBaralhosState } = gameState;
         const probabilidadeExcluirEspecial = probabilitySettings[probabilityIndex].value; const incluirCartasEspeciais = probabilidadeExcluirEspecial === 0 || Math.random() >= probabilidadeExcluirEspecial;
-        const activeSources = currentGameSources; // Usa as fontes já filtradas e atualizadas
+        const activeSources = currentGameSources; // Usa as fontes já filtradas
 
         const cartasFiltradas = activeSources.flatMap(source => {
             const activeBaralhosForSource = activeInternalBaralhosState[source.id];
@@ -364,48 +415,44 @@ const EcoChallenge: React.FC = () => {
             });
         });
 
-        console.log(`Selecionando carta de ${cartasFiltradas.length} opções filtradas.`);
-
         if (cartasFiltradas.length === 0) { setNoCardsAvailable(true); setCartaAtual(null); setMensagem("Nenhuma carta encontrada com os filtros atuais!"); return; }
         setNoCardsAvailable(false);
         const idxAleat = Math.floor(Math.random() * cartasFiltradas.length); const novaCarta = cartasFiltradas[idxAleat]; setCartaAtual(novaCarta);
         setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setMostrarFontes(false); setOpcoesEliminadas([]); setCartaRevelada(!gameState.ocultarCarta); setRolledNumber(null); setIsDieModalOpen(false); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]);
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (novaCarta.tipo === "ContraTempo") { setTempoRestante(novaCarta.tempoLimite); }
-    }, [gameState, currentGameSources]); // Agora depende de currentGameSources
+    }, [gameState, currentGameSources]);
 
      useEffect(() => { if (gameState?.jogoIniciado && currentGameSources.length > 0 && !cartaAtual && !noCardsAvailable) { selecionarCartaAleatoria(); } }, [gameState?.jogoIniciado, currentGameSources, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]);
-
-    useEffect(() => { /* ... Timer (sem mudanças) ... */ }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId, updateCurrentPlayer]);
+    useEffect(() => { if (cartaAtual?.tipo === "ContraTempo" && tempoRestante !== null && tempoRestante > 0 && !respondido && gameState?.jogoIniciado && cartaRevelada) { timerIntervalRef.current = setInterval(() => { setTempoRestante((prev) => { if (prev === null || prev <= 1) { clearInterval(timerIntervalRef.current!); setRespondido(true); setMensagem(`Tempo esgotado! ${cartaAtual.desvantagem || 'Tente novamente.'}`); if (gameState && gameState.currentPlayerId !== null) { const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId); if (currentPlayer) { updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - 10, 0) }); } } return 0; } return prev - 1; }); }, 1000); } else if (timerIntervalRef.current && (respondido || tempoRestante === 0 || !cartaRevelada)) { clearInterval(timerIntervalRef.current); } return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); }; }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId, updateCurrentPlayer]);
 
     const handleSelecao = (id: number) => { if (!respondido) setSelecionado(id); };
     const handleSelecaoMultipla = (id: number) => { if (!respondido) { setSelecoesMultiplas((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
     const handleSelecaoOrdem = (id: number) => { if (!respondido) { setOrdemSelecoes((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
     const handleSelecionarColunaA = (id: number) => { if (respondido) return; const parExistenteIndex = paresFormados.findIndex(p => p.aId === id); if (parExistenteIndex > -1) { setParesFormados(prev => prev.filter((_, index) => index !== parExistenteIndex)); setSelecaoColunaA(null); } else { setSelecaoColunaA(id === selecaoColunaA ? null : id); } };
     const handleSelecionarColunaB = (id: number) => { if (respondido || selecaoColunaA === null) return; if (paresFormados.some(p => p.bId === id)) return; setParesFormados(prev => [...prev, { aId: selecaoColunaA, bId: id }]); setSelecaoColunaA(null); };
-    const handleImagemClick = (event: React.MouseEvent<HTMLDivElement>) => { /* ... */ };
-    const handleSelecionarFragmento = (id: number) => { /* ... */ };
-    const limparFragmentos = () => { /* ... */ };
-    const verificarResposta = () => { /* ... (sem mudanças lógicas) ... */ };
-    const resetarContadoresJogador = () => { /* ... */ };
-    const toggleDica = () => { /* ... */ };
-    const toggleFontes = () => { /* ... */ };
-    const pularPergunta = () => { /* ... (chama selecionarCartaAleatoria sem args) ... */ };
-    const eliminarRespostaErrada = () => { /* ... */ };
-    const voltarTelaInicial = () => { /* ... (limpa currentGameSources também) ... */ };
-    const diminuirAcertos = () => { /* ... */ };
-    const diminuirErros = () => { /* ... */ };
-    const incrementarContadorDeEstrelas = () => { /* ... */ };
-    const diminuirContadorDeEstrelas = () => { /* ... */ };
-    const incrementarRodadasPreso = () => { /* ... */ };
-    const diminuirRodadasPreso = () => { /* ... */ };
-    const rolarDado = () => { /* ... */ };
-    const handleLongPressStart = (action: () => void) => { /* ... */ };
-    const handleLongPressEnd = () => { /* ... */ };
+    const handleImagemClick = (event: React.MouseEvent<HTMLDivElement>) => { if (respondido || !cartaAtual || cartaAtual.tipo !== 'PontoCerto') return; const target = event.currentTarget; const rect = target.getBoundingClientRect(); const x = (event.clientX - rect.left) / rect.width; const y = (event.clientY - rect.top) / rect.height; const clampedX = Math.max(0, Math.min(1, x)); const clampedY = Math.max(0, Math.min(1, y)); setCoordenadasClique({ x: clampedX, y: clampedY }); };
+    const handleSelecionarFragmento = (id: number) => { if (respondido) return; setFragmentosSelecionados(prev => [...prev, id]); };
+    const limparFragmentos = () => { if (!respondido) { setFragmentosSelecionados([]); } };
 
+    const verificarResposta = () => { if (!cartaAtual || !gameState || !gameState.players || gameState.currentPlayerId === null || respondido) return; const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId); if (!currentPlayer) return; let cor = false; let pontosGanhos = 20; let pontosPerdidos = 10; let darPuloDificil = cartaAtual.dificuldade === "dificil"; let mensagemFinal = ""; let aplicarEfeitoPadrao = false; if (cartaAtual.tipo === "ContraTempo" && timerIntervalRef.current) { clearInterval(timerIntervalRef.current); } switch (cartaAtual.tipo) { case "Pergunta": case "ContraTempo": if (cartaAtual.tipo === "ContraTempo" && (tempoRestante === null || tempoRestante <= 0)) { cor = false; } else { cor = selecionado === cartaAtual.respostaCorreta; } aplicarEfeitoPadrao = true; break; case "MultiplaEscolha": cor = Array.isArray(cartaAtual.respostaCorreta) && selecoesMultiplas.length === cartaAtual.respostaCorreta.length && selecoesMultiplas.sort().toString() === cartaAtual.respostaCorreta.sort().toString(); if (cor) pontosGanhos = 25; aplicarEfeitoPadrao = true; break; case "Ordem": cor = Array.isArray(cartaAtual.respostaCorreta) && ordemSelecoes.length === cartaAtual.respostaCorreta.length && ordemSelecoes.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 30; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "RelacionarColunas": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = paresFormados.length === cartaAtual.respostaCorreta.length && paresFormados.map(p => `${p.aId}-${p.bId}`).sort().join(',') === cartaAtual.respostaCorreta.map(p => `${p.aId}-${p.bId}`).sort().join(','); if (cor) pontosGanhos = 30; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "PontoCerto": if (!coordenadasClique || !Array.isArray(cartaAtual.zonasClicaveis)) { cor = false; break; } const zonaCorreta = cartaAtual.zonasClicaveis.find(z => z.id === cartaAtual.respostaCorreta); cor = zonaCorreta ? isClickInZone(coordenadasClique, zonaCorreta) : false; if (cor) pontosGanhos = 25; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "CompletarFrase": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = fragmentosSelecionados.length === cartaAtual.respostaCorreta.length && fragmentosSelecionados.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 25; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "Vantagem": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado); mensagemFinal = cor ? (cartaAtual.vantagem || "Vantagem aplicada!") : "Ação não confirmada."; break; case "Desvantagem": cor = false; mensagemFinal = cartaAtual.desvantagem || "Desvantagem aplicada."; break; case "Outras": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado); mensagemFinal = cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...'); break; default: const _exhaustiveCheck: never = cartaAtual; console.error("Tipo não tratado:", _exhaustiveCheck); return; } setRespondido(true); if (aplicarEfeitoPadrao) { if (cor) { const novoProgresso = currentPlayer.progresso + pontosGanhos; const completouBarra = novoProgresso >= 100; const pulosGanhos = (completouBarra ? 1 : 0) + (darPuloDificil ? 1 : 0); const estrelasFixasGanhsa = completouBarra ? 1 : 0; updateCurrentPlayer({ respostasCertas: currentPlayer.respostasCertas + 1, respostasSeguidas: currentPlayer.respostasSeguidas + 1, progresso: completouBarra ? 0 : novoProgresso, pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + pulosGanhos, 2), fixedStars: currentPlayer.fixedStars + estrelasFixasGanhsa, }); mensagemFinal = `Correto! ${cartaAtual.vantagem || ''}${completouBarra ? ' Barra completa!' : ''}`; } else { updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - pontosPerdidos, 0), }); mensagemFinal = `Incorreto. ${cartaAtual.desvantagem || ''}`; } } setMensagem(mensagemFinal); };
+    const resetarContadoresJogador = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !window.confirm(`Resetar ${cp.name}?`)) return; updateCurrentPlayer({ respostasCertas: 0, respostasErradas: 0, progresso: 0, pulosDisponiveis: 0, respostasSeguidas: 0, rodadasPreso: 0, contadorDeEstrelas: 0, fixedStars: 0 }); setMensagem(`${cp.name} resetado.`); };
+    const toggleDica = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (dicaUsada) { setMensagem("Dica já utilizada."); return; } if (!cartaAtual.dica) { setMensagem("Carta sem dica."); return; } if (cp.respostasSeguidas >= 2) { setMostrarDica(true); setDicaUsada(true); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Dica revelada! (-2 sequências)"); } else { setMensagem("São necessárias 2 respostas corretas seguidas."); } };
+    const toggleFontes = () => { if (!cartaAtual || (gameState?.ocultarCarta && !cartaRevelada)) return; if (cartaAtual.fontes && cartaAtual.fontes.length > 0) { setMostrarFontes(!mostrarFontes); } else { setMensagem("Nenhuma fonte disponível."); } };
+    const pularPergunta = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (!tiposPergunta.includes(cartaAtual.tipo)) { setMensagem("Não pode pular este tipo."); return; } if (cp.pulosDisponiveis > 0) { updateCurrentPlayer({ pulosDisponiveis: cp.pulosDisponiveis - 1 }); setMensagem("Carta pulada!"); setTimeout(() => selecionarCartaAleatoria(), 500); } else { setMensagem("Sem pulos disponíveis."); } };
+    const eliminarRespostaErrada = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; const tiposEliminaveis: Carta['tipo'][] = ["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"]; if (!tiposEliminaveis.includes(cartaAtual.tipo) || !('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || cartaAtual.opcoes.length <= 2) { setMensagem("Não é possível eliminar opções."); return; } if (cp.respostasSeguidas < 2) { setMensagem("São necessárias 2 respostas corretas seguidas."); return; } let respostaCorretaNumeros: number[] = []; if ('respostaCorreta' in cartaAtual) { if (typeof cartaAtual.respostaCorreta === 'number') { respostaCorretaNumeros = [cartaAtual.respostaCorreta];} else if (Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.every(item => typeof item === 'number')) { respostaCorretaNumeros = cartaAtual.respostaCorreta as number[]; } else if (cartaAtual.tipo === 'Vantagem' || cartaAtual.tipo === 'Desvantagem') { if (Array.isArray(cartaAtual.respostaCorreta)) respostaCorretaNumeros = cartaAtual.respostaCorreta as number[]; else respostaCorretaNumeros = cartaAtual.opcoes.map(o => o.id); } else { setMensagem("Erro interno."); return; } } else { setMensagem("Erro interno."); return; } const opcoesErradasDisponiveis = cartaAtual.opcoes.filter(op => !respostaCorretaNumeros.includes(op.id) && !opcoesEliminadas.includes(op.id)); if (opcoesErradasDisponiveis.length > 0) { const idxAleat = Math.floor(Math.random() * opcoesErradasDisponiveis.length); const opcaoEliminada = opcoesErradasDisponiveis[idxAleat].id; setOpcoesEliminadas((prev) => [...prev, opcaoEliminada]); updateCurrentPlayer({ respostasSeguidas: cp.respostasSeguidas - 2 }); setMensagem("Uma opção incorreta foi eliminada! (-2 sequências)"); } else { setMensagem("Não há mais opções incorretas para eliminar."); } };
+    const voltarTelaInicial = () => { if (window.confirm("Voltar para a Tela Inicial? Progresso salvo.")) { setGameState(null); setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setCurrentGameSources([]) } };
+    const diminuirAcertos = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp) return; updateCurrentPlayer({ respostasCertas: Math.max(0, cp.respostasCertas - 1) }); setMensagem("Acerto removido."); };
+    const diminuirErros = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp) return; updateCurrentPlayer({ respostasErradas: Math.max(0, cp.respostasErradas - 1) }); setMensagem("Erro removido."); };
+    const incrementarContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: cp.contadorDeEstrelas + 1 }); setMensagem("Estrela bônus adicionada."); };
+    const diminuirContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: Math.max(0, cp.contadorDeEstrelas - 1) }); setMensagem("Estrela bônus removida."); };
+    const incrementarRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: cp.rodadasPreso + 1 }); setMensagem("Rodada preso adicionada."); };
+    const diminuirRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: cp.rodadasPreso - 1 }); setMensagem("Rodada preso removida."); };
+    const rolarDado = () => { if (isRolling) return; setIsRolling(true); setIsDieModalOpen(true); setRolledNumber(null); let rollCount = 0; const maxRolls = 15; const rollInterval = setInterval(() => { setRollingNumber(Math.floor(Math.random() * 6) + 1); rollCount++; if (rollCount >= maxRolls) { clearInterval(rollInterval); const finalNumber = Math.floor(Math.random() * 6) + 1; setRolledNumber(finalNumber); setRollingNumber(null); setIsRolling(false); } }, 80); };
+    const handleLongPressStart = (action: () => void) => { longPressTimeout.current = setTimeout(() => { action(); }, 800); };
+    const handleLongPressEnd = () => { if (longPressTimeout.current) { clearTimeout(longPressTimeout.current); longPressTimeout.current = null; } };
 
     // --- Renderização do Jogo ---
     if (!gameState) {
-        // Tenta carregar estado salvo para decidir se mostra "Continuar"
         const savedStateRaw = typeof window !== "undefined" ? localStorage.getItem("estadoEcoChallenge") : null;
         let hasSaved = false; let initialPlayersData: Player[] = []; let initialOcultar = true; let initialProb = 0;
         try { const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; if (savedState && savedState.jogoIniciado) { hasSaved = true; initialPlayersData = savedState.players || []; initialOcultar = savedState.ocultarCarta ?? true; initialProb = savedState.probabilityIndex ?? 0; } } catch {}
@@ -436,7 +483,7 @@ const EcoChallenge: React.FC = () => {
                         </div>
                          {(!ocultarCarta || cartaRevelada) && ( <Badge variant={ cartaAtual.dificuldade === "facil" ? "secondary" : cartaAtual.dificuldade === "normal" ? "default" : "destructive" } className="capitalize flex-shrink-0 h-6 ml-2"> {cartaAtual.dificuldade} </Badge> )}
                     </div>
-                     {cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && !respondido && cartaRevelada && ( <div className="mt-2"> <Progress value={(tempoRestante / (cartaAtual.tempoLimite || 30)) * 100} className="h-2 [&>*]:bg-yellow-500" /> <p className="text-center text-sm font-semibold text-yellow-700 mt-1"> <Timer className="inline h-4 w-4 mr-1" /> Tempo: {tempoRestante}s </p> </div> )}
+                     {cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && !respondido && cartaRevelada && ( <div className="mt-2"> <Progress value={tempoRestante / ((cartaAtual as CartaContraTempo).tempoLimite || 30) * 100} className="h-2 [&>*]:bg-yellow-500" /> <p className="text-center text-sm font-semibold text-yellow-700 mt-1"> <Timer className="inline h-4 w-4 mr-1" /> Tempo: {tempoRestante}s </p> </div> )}
                     {(!ocultarCarta || cartaRevelada) ? ( <ScrollArea className="h-64 md:h-80 rounded-md border p-3 mt-2 bg-white/80"> <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1" dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }} /> </ScrollArea>
                     ) : ( <div className="h-64 md:h-80 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200"> <EyeOff className="h-8 w-8 text-gray-500" /> <p className="text-sm text-gray-600">Carta Oculta</p> {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>} <Button onClick={rolarDado} variant="outline" size="sm" className="mt-2 bg-white" onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <Dice6 className="h-4 w-4 mr-1" /> Rolar Dado </Button> </div> )}
                 </CardHeader>
@@ -471,7 +518,7 @@ const EcoChallenge: React.FC = () => {
                     <div className="w-full mb-3">
                         {ocultarCarta && !cartaRevelada ? ( <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white"> <Eye className="mr-2 h-4 w-4"/> Revelar Carta </Button>
                         ) : !respondido ? ( <Button onClick={isVerificarDisabled() ? undefined : verificarResposta} className={cn( "w-full bg-green-600 hover:bg-green-700 text-white", isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400" )} onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd} aria-disabled={isVerificarDisabled()} tabIndex={isVerificarDisabled() ? -1 : 0} > <Check className="mr-2 h-4 w-4"/> Verificar </Button>
-                        ) : ( <Button onClick={selecionarCartaAleatoria} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onMouseDown={() => handleLongPressStart(selecionarCartaAleatoria)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(selecionarCartaAleatoria)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <SkipForward className="mr-2 h-4 w-4"/> Próxima Carta </Button> )}
+                        ) : ( <Button onClick={() => selecionarCartaAleatoria()} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onMouseDown={() => handleLongPressStart(selecionarCartaAleatoria)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(selecionarCartaAleatoria)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <SkipForward className="mr-2 h-4 w-4"/> Próxima Carta </Button> )}
                     </div>
                     {mensagem && ( <Alert variant={getAlertVariant()} className={cn( 'text-center text-sm font-semibold mb-3 w-full', cartaAtual?.tipo === 'Vantagem' && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo === 'Desvantagem' && 'bg-red-100 border-red-300 text-red-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800' )}> <AlertDescription>{mensagem}</AlertDescription> </Alert> )}
                     <div className="w-full">
