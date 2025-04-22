@@ -1,5 +1,3 @@
-// src/components/EcoChallenge.tsx // (Ou o nome do seu arquivo)
-
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
     Card, CardContent, CardFooter, CardHeader, CardTitle,
@@ -13,7 +11,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area"; // <--- Certifique-se que está importado
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils"; // Assumindo que você tem este utilitário
 
@@ -497,7 +495,7 @@ const EcoChallenge: React.FC = () => {
             }, 1000);
         } else if (timerIntervalRef.current && (respondido || tempoRestante === 0)) { clearInterval(timerIntervalRef.current); }
         return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
-    }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId, setGameState]); // Adicionado setGameState
+    }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId]);
 
     const handleSelecao = (id: number) => { if (!respondido) setSelecionado(id); };
     const handleSelecaoMultipla = (id: number) => { if (!respondido) { setSelecoesMultiplas((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
@@ -743,14 +741,9 @@ const EcoChallenge: React.FC = () => {
 
                 {(!ocultarCarta || cartaRevelada) && (
                     <CardContent className="pt-0 pb-4">
-                        {/*
-                          * REMOVIDO O div "space-y-2" que envolvia diretamente o renderizarConteudoResposta
-                          * A ScrollArea será adicionada DENTRO da função renderizarConteudoResposta
-                          * para os tipos de carta apropriados.
-                          */}
-                        {renderizarConteudoResposta()}
-
-                        {/* O resto do CardContent permanece igual */}
+                        <div className="space-y-2">
+                            {renderizarConteudoResposta()}
+                        </div>
                         {mostrarDica && cartaAtual.dica && (
                             <Alert variant="default" className="mt-4 bg-blue-50 border-blue-300 text-blue-800">
                                 <HelpCircle className="h-4 w-4 text-blue-700" />
@@ -869,77 +862,55 @@ const EcoChallenge: React.FC = () => {
     );
 
     // --- Função de Renderização de Conteúdo da Resposta ---
-    // ================== INÍCIO DA MODIFICAÇÃO ==================
     function renderizarConteudoResposta() {
         if (!cartaAtual) return null;
         switch (cartaAtual.tipo) {
-            case "Pergunta":
-            case "ContraTempo":
-            case "Vantagem":
-            case "Desvantagem":
-            case "Outras":
-                return (
-                    // Adicionada ScrollArea aqui
-                    <ScrollArea className="h-auto max-h-48 border rounded-md p-2 bg-gray-50 space-y-2">
-                        {cartaAtual.opcoes.map((op) => {
-                            const isCorrect = Array.isArray(cartaAtual.respostaCorreta) ? cartaAtual.respostaCorreta.includes(op.id) : cartaAtual.respostaCorreta === op.id;
-                            const isSelected = selecionado === op.id;
-                            const isEliminated = opcoesEliminadas.includes(op.id);
-                            const isWrongSelection = respondido && isSelected && !isCorrect;
-                            let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default com texto escuro e legível
-                            if (respondido) {
-                                if (isCorrect) btnClass = "bg-green-100 border-green-400 hover:bg-green-200 text-green-900";
-                                else if (isSelected) btnClass = "bg-red-100 border-red-400 hover:bg-red-200 text-red-900";
-                                else btnClass = "border-gray-300 text-gray-500"; // Não selecionada e incorreta (texto cinza)
-                            } else if (isSelected) { btnClass = "bg-blue-100 border-blue-400 text-blue-900"; }
-                            return ( <Button key={op.id} onClick={() => handleSelecao(op.id)} variant={"outline"} className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} </Button> );
-                        })}
-                    </ScrollArea>
-                );
+            case "Pergunta": case "ContraTempo": case "Vantagem": case "Desvantagem": case "Outras":
+                return cartaAtual.opcoes.map((op) => {
+                    const isCorrect = Array.isArray(cartaAtual.respostaCorreta) ? cartaAtual.respostaCorreta.includes(op.id) : cartaAtual.respostaCorreta === op.id;
+                    const isSelected = selecionado === op.id;
+                    const isEliminated = opcoesEliminadas.includes(op.id);
+                    const isWrongSelection = respondido && isSelected && !isCorrect;
+                    let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default com texto escuro e legível
+                    if (respondido) {
+                        if (isCorrect) btnClass = "bg-green-100 border-green-400 hover:bg-green-200 text-green-900";
+                        else if (isSelected) btnClass = "bg-red-100 border-red-400 hover:bg-red-200 text-red-900";
+                        else btnClass = "border-gray-300 text-gray-500"; // Não selecionada e incorreta (texto cinza)
+                    } else if (isSelected) { btnClass = "bg-blue-100 border-blue-400 text-blue-900"; }
+                    return ( <Button key={op.id} onClick={() => handleSelecao(op.id)} variant={"outline"} className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} </Button> );
+                });
              case "MultiplaEscolha":
-                return (
-                    // Adicionada ScrollArea aqui
-                    <ScrollArea className="h-auto max-h-48 border rounded-md p-2 bg-gray-50 space-y-2">
-                        {cartaAtual.opcoes.map((op) => {
-                            const isCorrect = Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(op.id);
-                            const isSelected = selecoesMultiplas.includes(op.id);
-                            const isEliminated = opcoesEliminadas.includes(op.id);
-                            const isWrongSelection = respondido && isSelected && !isCorrect;
-                            const missedCorrect = respondido && isCorrect && !isSelected;
-                            let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default
-                            if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; else btnClass = "border-gray-300 text-gray-500"; } // Errada não marcada (cinza)
-                            else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
-                            return ( <Button key={op.id} onClick={() => handleSelecaoMultipla(op.id)} variant="outline" className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <div className={`w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center ${isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white'}`}>{isSelected && <Check className="w-3 h-3 text-white" />}</div> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600">✓</span>} </Button> );
-                        })}
-                    </ScrollArea>
-                );
+                return cartaAtual.opcoes.map((op) => {
+                    const isCorrect = Array.isArray(cartaAtual.respostaCorreta) && cartaAtual.respostaCorreta.includes(op.id);
+                    const isSelected = selecoesMultiplas.includes(op.id);
+                    const isEliminated = opcoesEliminadas.includes(op.id);
+                    const isWrongSelection = respondido && isSelected && !isCorrect;
+                    const missedCorrect = respondido && isCorrect && !isSelected;
+                    let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default
+                    if (respondido) { if (isCorrect && isSelected) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongSelection) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (missedCorrect) btnClass = "bg-blue-100 border-blue-400 text-blue-900"; else btnClass = "border-gray-300 text-gray-500"; } // Errada não marcada (cinza)
+                    else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
+                    return ( <Button key={op.id} onClick={() => handleSelecaoMultipla(op.id)} variant="outline" className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} disabled={isEliminated || respondido}> <div className={`w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center ${isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white'}`}>{isSelected && <Check className="w-3 h-3 text-white" />}</div> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600">✓</span>} </Button> );
+                });
             case "Ordem":
                  const cOrdem = cartaAtual as CartaOrdem;
-                 return (
-                    // Adicionada ScrollArea aqui
-                    <ScrollArea className="h-auto max-h-48 border rounded-md p-2 bg-gray-50 space-y-2">
-                        {cOrdem.opcoes.map((op) => {
-                            const isSelected = ordemSelecoes.includes(op.id); const selectionIndex = isSelected ? ordemSelecoes.indexOf(op.id) + 1 : null;
-                            const correctIndex = Array.isArray(cOrdem.respostaCorreta) ? cOrdem.respostaCorreta.indexOf(op.id) + 1 : null;
-                            const isCorrectOrder = respondido && isSelected && selectionIndex === correctIndex; const isWrongOrder = respondido && isSelected && selectionIndex !== correctIndex;
-                            const isCorrectOptionOverall = respondido && correctIndex !== null && correctIndex > 0;
-                            let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default
-                            if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; } // Não faz parte (cinza)
-                            else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
-                            return ( <Button key={op.id} onClick={() => handleSelecaoOrdem(op.id)} variant="outline" className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass )} disabled={respondido}> {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)} <span className="flex-1">{op.texto}</span> {respondido && isCorrectOptionOverall && (<span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${ isCorrectOrder ? 'bg-green-500 text-white' : isWrongOrder ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}`}>{correctIndex}</span>)} {isWrongOrder && selectionIndex !== null && <span className="text-xs text-red-600 ml-1">(Sua: {selectionIndex})</span>} </Button> );
-                        })}
-                    </ScrollArea>
-                 );
+                 return cOrdem.opcoes.map((op) => {
+                    const isSelected = ordemSelecoes.includes(op.id); const selectionIndex = isSelected ? ordemSelecoes.indexOf(op.id) + 1 : null;
+                    const correctIndex = Array.isArray(cOrdem.respostaCorreta) ? cOrdem.respostaCorreta.indexOf(op.id) + 1 : null;
+                    const isCorrectOrder = respondido && isSelected && selectionIndex === correctIndex; const isWrongOrder = respondido && isSelected && selectionIndex !== correctIndex;
+                    const isCorrectOptionOverall = respondido && correctIndex !== null && correctIndex > 0;
+                    let btnClass = "border-gray-300 text-gray-900 hover:bg-gray-100"; // Default
+                    if (respondido) { if (isCorrectOrder) btnClass = "bg-green-100 border-green-400 text-green-900"; else if (isWrongOrder) btnClass = "bg-red-100 border-red-400 text-red-900"; else if (isCorrectOptionOverall) btnClass = "border-gray-300 text-gray-700"; else btnClass = "border-gray-300 text-gray-500"; } // Não faz parte (cinza)
+                    else if (isSelected) { btnClass = "bg-blue-100 border-blue-500 text-blue-900"; }
+                    return ( <Button key={op.id} onClick={() => handleSelecaoOrdem(op.id)} variant="outline" className={cn("w-full justify-start text-left text-sm h-auto py-2 px-3 whitespace-normal", btnClass )} disabled={respondido}> {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)} <span className="flex-1">{op.texto}</span> {respondido && isCorrectOptionOverall && (<span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${ isCorrectOrder ? 'bg-green-500 text-white' : isWrongOrder ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}`}>{correctIndex}</span>)} {isWrongOrder && selectionIndex !== null && <span className="text-xs text-red-600 ml-1">(Sua: {selectionIndex})</span>} </Button> );
+                });
             case "RelacionarColunas":
-                // Relacionar Colunas tem layout próprio, ScrollArea não se aplica da mesma forma aqui
                 const cRel = cartaAtual as CartaRelacionarColunas; return (<div className="flex space-x-2 md:space-x-4"> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna A</p>{cRel.colunaA.map(itemA => { const isSelectedA = selecaoColunaA === itemA.id; const par = paresFormados.find(p => p.aId === itemA.id); const parCorreto = respondido ? cRel.respostaCorreta.find(rc => rc.aId === itemA.id) : undefined; const isCorrectPair = respondido && par && parCorreto && par.bId === parCorreto.bId; const isWrongPair = respondido && par && (!parCorreto || par.bId !== parCorreto.bId); let btnClass = "border-gray-300 text-gray-900"; if (isSelectedA) btnClass = "ring-2 ring-blue-500 border-blue-500"; if (par && !respondido) btnClass = "bg-gray-200 border-gray-400"; if (isCorrectPair) btnClass = "bg-green-100 border-green-400 text-green-900"; if (isWrongPair) btnClass = "bg-red-100 border-red-400 text-red-900"; return (<Button key={`A-${itemA.id}`} variant="outline" onClick={() => handleSelecionarColunaA(itemA.id)} disabled={respondido} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass)}><span className="flex-1">{itemA.texto}</span>{isCorrectPair && <CheckCircle2 className="ml-1 h-3.5 w-3.5 text-green-600 flex-shrink-0" />}{isWrongPair && <XCircle className="ml-1 h-3.5 w-3.5 text-red-600 flex-shrink-0" />}{isWrongPair && parCorreto && (<span className="text-[10px] ml-1 text-blue-600 hidden md:inline">({cRel.colunaB.find(iB => iB.id === parCorreto.bId)?.texto})</span>)}</Button>); })}</div> <div className="w-1/2 space-y-1.5"><p className="text-xs font-semibold text-center mb-1 text-gray-600">Coluna B</p>{cRel.colunaB.map(itemB => { const isPairedB = paresFormados.some(p => p.bId === itemB.id); const isDisabled = respondido || selecaoColunaA === null || isPairedB; let btnClass = "border-gray-300 hover:bg-gray-100 text-gray-900"; if (isPairedB) btnClass = "bg-gray-200 border-gray-400 text-gray-600"; return (<Button key={`B-${itemB.id}`} variant="outline" onClick={() => handleSelecionarColunaB(itemB.id)} disabled={isDisabled} className={cn("w-full justify-start text-left h-auto py-1.5 px-2 text-xs md:text-sm whitespace-normal", btnClass, !isDisabled && selecaoColunaA !== null && "hover:border-blue-400" )}><span className="flex-1">{itemB.texto}</span></Button>); })}</div></div>);
             case "PontoCerto":
-                 // Ponto Certo usa imagem, não lista de opções padrão
-                 const cPonto = cartaAtual as CartaPontoCerto; return (<div className="relative w-full max-w-md mx-auto aspect-video overflow-hidden rounded border border-gray-300 cursor-crosshair" onClick={handleImagemClick} role="button" aria-label={`Imagem interativa: ${cPonto.titulo}`}><img src={cPonto.imagemURL} alt={`Imagem para: ${cPonto.titulo}`} className={`block w-full h-full object-contain ${respondido ? 'cursor-not-allowed' : ''}`}/>{coordenadasClique && (<div className={`absolute w-3 h-3 rounded-full border-2 pointer-events-none -translate-x-1/2 -translate-y-1/2 ${respondido ? (mensagem.toLowerCase().includes('correto') ? 'bg-green-500 border-white' : 'bg-red-500 border-white') : 'bg-blue-500 border-white'}`} style={{ left: `${coordenadasClique.x * 100}%`, top: `${coordenadasClique.y * 100}%` }}>{respondido && (mensagem.toLowerCase().includes('correto') ? <Check className="w-2 h-2 text-white" /> : <XIcon className="w-2 h-2 text-white" />)}</div>)}{respondido && (() => {
+                 const cPonto = cartaAtual as CartaPontoCerto; return (<div className="relative w-full max-w-md mx-auto aspect-video overflow-hidden rounded border border-gray-300 cursor-crosshair" onClick={handleImagemClick} role="button" aria-label={`Imagem interativa: ${cPonto.titulo}`}><img src={cPonto.imagemURL} alt={`Imagem para: ${cPonto.titulo}`} className={`block w-full h-full object-contain ${respondido ? 'cursor-not-allowed' : ''}`}/>{coordenadasClique && (<div className={`absolute w-3 h-3 rounded-full border-2 pointer-events-none -translate-x-1/2 -translate-y-1/2 ${respondido ? (mensagem.toLowerCase().includes('correto') ? 'bg-green-500 border-white' : 'bg-red-500 border-white') : 'bg-blue-500 border-white'}`} style={{ left: `${coordenadasClique.x * 100}%`, top: `${coordenadasClique.y * 100}%` }}>{respondido && (mensagem.toLowerCase().includes('correto') ? <Check className="w-2 h-2 text-white" /> : <XIcon className="w-2 h-2 text-white" />)}</div>)}{respondido && (() => { // <--- CONDIÇÃO CORRIGIDA: SÓ DEPENDE DE 'respondido'
                     const zonaCorreta = cPonto.zonasClicaveis.find(z => z.id === cPonto.respostaCorreta);
                     return zonaCorreta ? (
                         <div
-                            className="absolute border-2 border-dashed border-green-500 pointer-events-none animate-pulse"
+                            className="absolute border-2 border-dashed border-green-500 pointer-events-none animate-pulse" // Adicionei animate-pulse para destacar
                             style={{
                                 left: `${zonaCorreta.x * 100}%`,
                                 top: `${zonaCorreta.y * 100}%`,
@@ -953,23 +924,10 @@ const EcoChallenge: React.FC = () => {
             </div>
         );
             case "CompletarFrase":
-                // Completar Frase tem layout específico
-                const cComp = cartaAtual as CartaCompletarFrase; let fraseR = cComp.fraseIncompleta; fragmentosSelecionados.forEach((fragId, index) => { const frag = cComp.fragmentos.find(f => f.id === fragId); if (frag) { fraseR = fraseR.replace(`__${index + 1}__`, `<strong class="text-blue-600 underline underline-offset-2 mx-1">${frag.texto}</strong>`); } }); fraseR = fraseR.replace(/__\d+__/g, '<span class="text-gray-400 border-b border-dashed border-gray-400 mx-1">___</span>'); const isCorretoComp = respondido && mensagem.toLowerCase().includes('correto'); return (<div className="space-y-3"><div className={`p-3 border rounded bg-gray-50 text-sm ${respondido ? (isCorretoComp ? 'border-green-300' : 'border-red-300') : 'border-gray-300'}`} dangerouslySetInnerHTML={{ __html: fraseR }}/>
-                    {/* Adicionada ScrollArea para os botões de fragmentos */}
-                    {!respondido && (
-                        <ScrollArea className="h-auto max-h-32 border rounded-md p-2 bg-gray-50">
-                            <div className="flex flex-wrap gap-2 justify-center">
-                                {cComp.fragmentos.filter(f => !fragmentosSelecionados.includes(f.id)).map(frag => (<Button key={frag.id} variant="outline" size="sm" onClick={() => handleSelecionarFragmento(frag.id)} className="bg-white hover:bg-blue-50">{frag.texto}</Button>))}
-                                {(fragmentosSelecionados.length > 0 && <Button variant="ghost" size="sm" onClick={limparFragmentos} className="text-red-500 hover:bg-red-100" title="Limpar"><RotateCcw className="h-4 w-4 mr-1"/> Limpar</Button>)}
-                            </div>
-                        </ScrollArea>
-                    )}
-                    {respondido && !isCorretoComp && (<div className="text-xs text-center text-green-700 mt-2"><strong>Resposta:</strong> {cComp.respostaCorreta.map(id => cComp.fragmentos.find(f => f.id === id)?.texto).join(' / ')}</div>)}
-                </div>);
+                const cComp = cartaAtual as CartaCompletarFrase; let fraseR = cComp.fraseIncompleta; fragmentosSelecionados.forEach((fragId, index) => { const frag = cComp.fragmentos.find(f => f.id === fragId); if (frag) { fraseR = fraseR.replace(`__${index + 1}__`, `<strong class="text-blue-600 underline underline-offset-2 mx-1">${frag.texto}</strong>`); } }); fraseR = fraseR.replace(/__\d+__/g, '<span class="text-gray-400 border-b border-dashed border-gray-400 mx-1">___</span>'); const isCorretoComp = respondido && mensagem.toLowerCase().includes('correto'); return (<div className="space-y-3"><div className={`p-3 border rounded bg-gray-50 text-sm ${respondido ? (isCorretoComp ? 'border-green-300' : 'border-red-300') : 'border-gray-300'}`} dangerouslySetInnerHTML={{ __html: fraseR }}/>{!respondido && (<div className="flex flex-wrap gap-2 justify-center">{cComp.fragmentos.filter(f => !fragmentosSelecionados.includes(f.id)).map(frag => (<Button key={frag.id} variant="outline" size="sm" onClick={() => handleSelecionarFragmento(frag.id)} className="bg-white hover:bg-blue-50">{frag.texto}</Button>))}{(fragmentosSelecionados.length > 0 && <Button variant="ghost" size="sm" onClick={limparFragmentos} className="text-red-500 hover:bg-red-100" title="Limpar"><RotateCcw className="h-4 w-4 mr-1"/> Limpar</Button>)}</div>)}{respondido && !isCorretoComp && (<div className="text-xs text-center text-green-700 mt-2"><strong>Resposta:</strong> {cComp.respostaCorreta.map(id => cComp.fragmentos.find(f => f.id === id)?.texto).join(' / ')}</div>)}</div>);
             default: return <p className="text-sm text-red-500">Erro: Tipo de carta não renderizado.</p>;
         }
     }
-    // =================== FIM DA MODIFICAÇÃO ===================
 
 };
 
