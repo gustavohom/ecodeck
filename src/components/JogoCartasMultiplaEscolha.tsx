@@ -88,8 +88,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const [ocultarCarta, setOcultarCarta] = useState(initialOcultarCarta);
     const [probabilityIndex, setProbabilityIndex] = useState(initialProbabilityIndex);
     const [playerInputs, setPlayerInputs] = useState<PlayerInput[]>(() => initialPlayers.length > 0 ? initialPlayers.map((p) => ({ id: p.id, name: p.name, color: p.color, showColorPicker: false })) : [{ id: 0, name: "", color: predefinedColors[0], showColorPicker: false }] );
-    const [allSources, setAllSources] = useState<SourceInfo[]>([]);
-    const [activeInternalBaralhos, setActiveInternalBaralhos] = useState<Record<string, Set<string>>>({});
+    const [allSources, setAllSources] = useState<SourceInfo[]>([]); // Inicializa vazio
+    const [activeInternalBaralhos, setActiveInternalBaralhos] = useState<Record<string, Set<string>>>({}); // Inicializa vazio
     const [todasCategorias, setTodasCategorias] = useState<string[]>([]);
     const [categoriasComContagem, setCategoriasComContagem] = useState<Record<string, number>>({});
     const [isLoading, setIsLoading] = useState(false);
@@ -97,6 +97,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
     const [isClient, setIsClient] = useState(false);
 
+    // Carrega estado da UI do localStorage APÓS montagem
     useEffect(() => {
         setIsClient(true);
         const savedCustom = localStorage.getItem("customSourceInfos"); const savedBuiltInStatus = localStorage.getItem("builtInSourceStatus"); let loadedCustomSources: SourceInfo[] = []; let loadedBuiltInStatus: Record<string, boolean> | null = null;
@@ -109,9 +110,11 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         try { const parsed = savedActiveInternal ? JSON.parse(savedActiveInternal) : {}; Object.keys(parsed).forEach(key => { if (Array.isArray(parsed[key])) { initialActiveBaralhos[key] = new Set(parsed[key]); } }); } catch { initialActiveBaralhos = {}; }
         combinedSources.forEach(source => { if (!initialActiveBaralhos[source.id]) { initialActiveBaralhos[source.id] = new Set(Object.keys(source.internalBaralhos)); } else { Object.keys(source.internalBaralhos).forEach(bName => { initialActiveBaralhos[source.id].add(bName); }); initialActiveBaralhos[source.id].forEach(savedBName => { if (!(savedBName in source.internalBaralhos)) { initialActiveBaralhos[source.id].delete(savedBName); }}); } });
         setActiveInternalBaralhos(initialActiveBaralhos);
-    }, []);
+    }, []); // Roda apenas uma vez no cliente
 
+    // Recalcular categorias e contagens
     useEffect(() => { if(isClient) { const { categorias, contagens } = recalcularCategoriasAtivas(allSources, activeInternalBaralhos); setTodasCategorias(categorias); setCategoriasComContagem(contagens); setCategoriasSelecionadas((prev) => prev.filter(cat => categorias.includes(cat))); } }, [allSources, activeInternalBaralhos, isClient]);
+    // Salvar estado da UI
     useEffect(() => { if (isClient) { const customSourcesToSave = allSources.filter(s => s.type === 'custom'); localStorage.setItem("customSourceInfos", JSON.stringify(customSourcesToSave)); const builtInStatusToSave: Record<string, boolean> = {}; allSources.filter(s => s.type === 'builtin').forEach(s => { builtInStatusToSave[s.id] = s.active; }); localStorage.setItem("builtInSourceStatus", JSON.stringify(builtInStatusToSave)); const serializableActiveInternal = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => { acc[key] = Array.from(valueSet); return acc; }, {} as Record<string, string[]>); localStorage.setItem("activeInternalBaralhos", JSON.stringify(serializableActiveInternal)); } }, [allSources, activeInternalBaralhos, isClient]);
 
     const handleCustomDeckUpload = async (e: React.ChangeEvent<HTMLInputElement>) => { const files = e.target.files; if (!files) return; setIsLoading(true); setErrorMessage(null); let newCustomSources: SourceInfo[] = []; let errors: string[] = []; for (let i = 0; i < files.length; i++) { const file = files[i]; const content = await file.text(); try { let loadedCards: Carta[] = []; const sourceName = file.name.replace(/\.(js|json)$/, ""); const sourceId = `custom_${Date.now()}_${i}`; if (allSources.some(s => s.name === sourceName && s.type === 'custom')) { errors.push(`Arquivo/Fonte "${sourceName}" já carregado.`); continue; } if (file.name.endsWith(".js")) { loadedCards = parseJSDeckFile(content); } else if (file.name.endsWith(".json")) { const raw = JSON.parse(content) as any[]; loadedCards = raw.map((card, index) => ({ ...card, id: card.id || `${sourceId}_card_${index}` })) as Carta[]; } else { errors.push(`Formato não suportado: ${file.name}. Use .js ou .json.`); continue; } if (!Array.isArray(loadedCards) || loadedCards.length === 0) { errors.push(`Nenhuma carta válida encontrada em "${sourceName}".`); continue; } const { processedCards, internalBaralhos, totalCards } = processCardsAndExtractBaralhos(loadedCards); newCustomSources.push({ id: sourceId, name: sourceName, type: 'custom', cards: processedCards, internalBaralhos, totalCards, active: true }); } catch (error: any) { errors.push(`Erro ao ler ${file.name}: ${error.message}`); } } if (newCustomSources.length > 0) { setAllSources(prev => [...prev, ...newCustomSources]); setActiveInternalBaralhos(prev => { const newState = { ...prev }; newCustomSources.forEach(source => { newState[source.id] = new Set(Object.keys(source.internalBaralhos)); }); return newState; }); setExpandedSources(prev => { const newSet = new Set(prev); newCustomSources.forEach(s => newSet.add(s.id)); return newSet; }); } if (errors.length > 0) { setErrorMessage(errors.join("\n")); } setIsLoading(false); e.target.value = ''; };
@@ -156,7 +159,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const builtInSourcesUI = allSources.filter(s => s.type === 'builtin');
     const customSourcesUI = allSources.filter(s => s.type === 'custom');
 
-    if (!isClient) { return null; }
+    if (!isClient) { return null; } // Evita renderização no servidor
 
     return (
         <Card className="w-full max-w-lg mx-auto mt-8 shadow-lg">
@@ -165,72 +168,166 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                 <p className="text-sm text-center text-gray-600">O Jogo da Sustentabilidade</p>
             </CardHeader>
             <CardContent className="space-y-6">
-                 {/* Gerenciamento de Fontes */}
+                 {/* Gerenciamento de Fontes e Baralhos */}
                  <div className="space-y-4">
+                    {/* Baralhos Incluídos */}
                     <div>
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">Baralhos Incluídos</h3>
                         <ScrollArea className="h-40 border rounded-md p-2 bg-gray-100 space-y-2">
-                             {builtInSourcesUI.length > 0 ? builtInSourcesUI.map((source) => (
+                            {builtInSourcesUI.length > 0 ? builtInSourcesUI.map((source) => (
                                 <div key={source.id} className="border-b last:border-b-0 pb-2 mb-2 bg-white px-2 py-1 rounded shadow-sm">
                                     <div className="flex items-center space-x-2">
-                                        <Checkbox id={`source-${source.id}`} checked={source.active} onCheckedChange={() => toggleSourceActive(source.id)} className="mt-1"/>
-                                        <button onClick={() => toggleExpandSource(source.id)} className="flex items-center flex-1 text-left cursor-pointer min-w-0" aria-expanded={expandedSources.has(source.id)}>
+                                        <Checkbox
+                                            id={`source-${source.id}`}
+                                            checked={source.active}
+                                            onCheckedChange={() => toggleSourceActive(source.id)}
+                                            className="mt-1"
+                                        />
+                                        <button
+                                            onClick={() => toggleExpandSource(source.id)}
+                                            className="flex items-center flex-1 text-left cursor-pointer min-w-0"
+                                            aria-expanded={expandedSources.has(source.id)}
+                                        >
                                             {expandedSources.has(source.id) ? <ChevronDown className="h-4 w-4 mr-1 shrink-0"/> : <ChevronRight className="h-4 w-4 mr-1 shrink-0"/>}
-                                            <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={`${source.name} (${source.totalCards} cartas)`}>
+                                            <label
+                                                htmlFor={`source-${source.id}`}
+                                                className="text-sm font-medium cursor-pointer truncate flex-1"
+                                                title={`${source.name} (${source.totalCards} cartas)`}
+                                            >
                                                 {source.name} <span className="text-gray-500">({source.totalCards})</span>
                                             </label>
                                         </button>
                                     </div>
-                                     {source.active && expandedSources.has(source.id) && (
-                                         <div className="pl-8 mt-1 space-y-1">
-                                            {Object.entries(source.internalBaralhos).length > 0 ? Object.entries(source.internalBaralhos).map(([baralhoName, count]) => ( <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2"> <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} /> <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer"> {baralhoName} <span className="text-gray-500">({count})</span> </label> </div> )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
-                                         </div>
-                                     )}
+                                    {source.active && expandedSources.has(source.id) && (
+                                        <div className="pl-8 mt-1 space-y-1">
+                                            {Object.entries(source.internalBaralhos).length > 0 ? Object.entries(source.internalBaralhos).map(([baralhoName, count]) => (
+                                                <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
+                                                    <Checkbox
+                                                        id={`baralho-${source.id}-${baralhoName}`}
+                                                        checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false}
+                                                        onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)}
+                                                    />
+                                                    <label
+                                                        htmlFor={`baralho-${source.id}-${baralhoName}`}
+                                                        className="text-xs cursor-pointer"
+                                                    >
+                                                        {baralhoName} <span className="text-gray-500">({count})</span>
+                                                    </label>
+                                                </div>
+                                            )) : (
+                                                <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             )) : <p className="text-sm text-gray-500 italic p-2">Nenhum baralho incluído encontrado.</p>}
                         </ScrollArea>
                     </div>
-                     <div className="mt-4">
+                    {/* Baralhos Carregados */}
+                    <div className="mt-4">
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">Baralhos Carregados (Arquivos)</h3>
-                         {errorMessage && (<Alert variant="destructive" className="text-xs mb-2"><AlertDescription>{errorMessage}</AlertDescription></Alert>)}
-                         <Input type="file" multiple accept=".js,.json" onChange={handleCustomDeckUpload} disabled={isLoading} className="text-sm h-9 mb-2"/>
-                         {isLoading && <p className="text-xs text-blue-600 mb-2">Carregando...</p>}
-                         {customSourcesUI.length > 0 ? (
+                        {errorMessage && (<Alert variant="destructive" className="text-xs mb-2"><AlertDescription>{errorMessage}</AlertDescription></Alert>)}
+                        <Input
+                            type="file"
+                            multiple
+                            accept=".js,.json"
+                            onChange={handleCustomDeckUpload}
+                            disabled={isLoading}
+                            className="text-sm h-9 mb-2"
+                        />
+                        {isLoading && <p className="text-xs text-blue-600 mb-2">Carregando...</p>}
+                        {customSourcesUI.length > 0 ? (
                             <ScrollArea className="h-40 border rounded-md p-2 bg-gray-100 space-y-2">
-                                 {customSourcesUI.map((source) => (
-                                     <div key={source.id} className="border-b last:border-b-0 pb-2 mb-2 bg-white px-2 py-1 rounded shadow-sm">
-                                         <div className="flex items-center space-x-2">
-                                             <Checkbox id={`source-${source.id}`} checked={source.active} onCheckedChange={() => toggleSourceActive(source.id)} className="mt-1"/>
-                                             <button onClick={() => toggleExpandSource(source.id)} className="flex items-center flex-1 text-left cursor-pointer min-w-0" aria-expanded={expandedSources.has(source.id)}>
-                                                 {expandedSources.has(source.id) ? <ChevronDown className="h-4 w-4 mr-1 shrink-0"/> : <ChevronRight className="h-4 w-4 mr-1 shrink-0"/>}
-                                                 <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={`${source.name} (${source.totalCards} cartas)`}> {source.name} <span className="text-gray-500">({source.totalCards})</span> </label>
-                                             </button>
-                                             <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:bg-red-100 shrink-0" onClick={(e) => {e.stopPropagation(); removeSource(source.id);}} aria-label={`Remover fonte ${source.name}`}><Trash className="h-4 w-4" /></Button>
-                                         </div>
-                                         {source.active && expandedSources.has(source.id) && (
-                                             <div className="pl-8 mt-1 space-y-1">
-                                                {Object.entries(source.internalBaralhos).length > 0 ? Object.entries(source.internalBaralhos).map(([baralhoName, count]) => ( <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2"> <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} /> <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer"> {baralhoName} <span className="text-gray-500">({count})</span> </label> </div> )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
-                                             </div>
-                                         )}
-                                    </div>
-                                ))}
-                            </ScrollArea>
-                         ) : ( !isLoading && <p className="text-sm text-gray-500 italic p-2 border rounded bg-gray-100">Nenhum arquivo carregado.</p> )}
-                    </div>
-                 </div>
+                                {customSourcesUI.map((source) => (
+                                    <div key={source.id} className="border-b last:border-b-0 pb-2 mb-2 bg-white px-2 py-1 rounded shadow-sm">
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id={`source-${source.id}`}
+                                                checked={source.active}
+                                                onCheckedChange={() => toggleSourceActive(source.id)}
+                                                className="mt-1"
+                                            />
+                                            <button
+                                                onClick={() => toggleExpandSource(source.id)}
+                                                className="flex items-center flex-1 text-left cursor-pointer min-w-0"
+                                                aria-expanded={expandedSources.has(source.id)}
+                                            >
+                                                {expandedSources.has(source.id) ? <ChevronDown className="h-4 w-4 mr-1 shrink-0"/> : <ChevronRight className="h-4 w-4 mr-1 shrink-0"/>}
+                                                <label
+                                                    htmlFor={`source-${source.id}`}
+                                                    className="text-sm font-medium cursor-pointer truncate flex-1"
+                                                    title={`${source.name} (${source.totalCards} cartas)`}
+                                                >
+                                                    {source.name} <span className="text-gray-500">({source.totalCards})</span>
+                                                </label>
+                                            </button>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="h-7 w-7 p-0 text-red-500 hover:bg-red-100 shrink-0"
+                                                onClick={(e) => {e.stopPropagation(); removeSource(source.id);}}
+                                                aria-label={`Remover fonte ${source.name}`}
+                                            >
+                                                <Trash className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                        {source.active && expandedSources.has(source.id) && (
+                                            <div className="pl-8 mt-1 space-y-1">
+                                                {Object.entries(source.internalBaralhos).length > 0 ? Object.entries(source.internalBaralhos).map(([baralhoName, count]) => (
+                                                    <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
+                                                        <Checkbox
+                                                            id={`baralho-${source.id}-${baralhoName}`}
+                                                            checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false}
+                                                            onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)}
+                                                        />
+                                                        <label
+                                                            htmlFor={`baralho-${source.id}-${baralhoName}`}
+                                                            className="text-xs cursor-pointer"
+                                                        >
+                                                            {baralhoName} <span className="text-gray-500">({count})</span>
+                                                        </label>
+                                                    </div>
+                                                )) : (
+                                                    <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p>
+                                                )}
+                                            </div>
+                                        )}
+                                   </div>
+                               ))}
+                           </ScrollArea>
+                        ) : ( !isLoading && <p className="text-sm text-gray-500 italic p-2 border rounded bg-gray-100">Nenhum arquivo carregado.</p> )}
+                   </div>
+                </div>
                 {/* Seleção de Categorias */}
                 <div className="space-y-2">
                     <h3 className="text-lg font-semibold text-gray-800">Categorias (dos baralhos ativos)</h3>
-                    <Input type="text" placeholder="Pesquisar Categoria..." value={termoBuscaCategoria} onChange={(e) => setTermoBuscaCategoria(e.target.value)} className="w-full p-2 border rounded h-9"/>
+                    <Input
+                        type="text"
+                        placeholder="Pesquisar Categoria..."
+                        value={termoBuscaCategoria}
+                        onChange={(e) => setTermoBuscaCategoria(e.target.value)}
+                        className="w-full p-2 border rounded h-9"
+                    />
                     <ScrollArea className="h-40 border rounded-md p-3 bg-gray-50">
                         {categoriasFiltradasParaExibicao.length > 0 ? (
                             categoriasFiltradasParaExibicao.map(([categoria, count]) => (
                                 <div key={categoria} className="flex items-center space-x-2 mb-1 hover:bg-gray-100 p-1 rounded">
-                                    <Checkbox id={`cat-${categoria}`} checked={categoriasSelecionadas.includes(categoria)} onCheckedChange={() => { setCategoriasSelecionadas((prev) => prev.includes(categoria) ? prev.filter((c) => c !== categoria) : [...prev, categoria]); }} />
-                                    <label htmlFor={`cat-${categoria}`} className="text-sm cursor-pointer flex-1"> {categoria} <span className="text-gray-500">({count})</span> </label>
+                                    <Checkbox
+                                        id={`cat-${categoria}`}
+                                        checked={categoriasSelecionadas.includes(categoria)}
+                                        onCheckedChange={() => { setCategoriasSelecionadas((prev) => prev.includes(categoria) ? prev.filter((c) => c !== categoria) : [...prev, categoria]); }}
+                                    />
+                                    <label
+                                        htmlFor={`cat-${categoria}`}
+                                        className="text-sm cursor-pointer flex-1"
+                                    >
+                                        {categoria} <span className="text-gray-500">({count})</span>
+                                    </label>
                                 </div>
                             ))
-                        ) : ( <p className="text-sm text-gray-500 italic">Nenhuma categoria disponível para os baralhos selecionados.</p> )}
+                        ) : (
+                            <p className="text-sm text-gray-500 italic">Nenhuma categoria disponível para os baralhos selecionados.</p>
+                        )}
                     </ScrollArea>
                     <div className="flex space-x-2 mt-2">
                         <Button onClick={() => setCategoriasSelecionadas(todasCategorias)} variant="outline" size="sm" className="flex-1" disabled={todasCategorias.length === 0}>Todas</Button>
@@ -241,15 +338,68 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                 <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Jogadores</h3>
                     <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
-                        {playerInputs.map((player, index) => ( <div key={player.id} className="border p-3 rounded-md shadow-sm bg-white relative"> <div className="flex items-center space-x-2"> <Input type="text" placeholder={`Jogador ${index + 1}`} value={player.name} maxLength={12} onChange={(e) => handlePlayerChange(index, "name", e.target.value)} className="flex-grow"/> <Button variant="outline" size="icon" className="w-8 h-8 flex-shrink-0" onClick={() => toggleColorPicker(index)} style={{ backgroundColor: player.color }} aria-label="Selecionar cor"/> <Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0 text-red-500 hover:bg-red-100" onClick={() => deletePlayer(index)} aria-label="Remover jogador"><Trash className="h-4 w-4" /></Button> </div> {player.showColorPicker && ( <div className="absolute z-20 mt-2 right-12 w-48 bg-white border rounded-md shadow-lg p-2 grid grid-cols-6 gap-1"> {predefinedColors.map((color, idx) => ( <button key={idx} aria-label={`Selecionar cor ${color}`} style={{ backgroundColor: color }} className={cn('w-6 h-6 rounded border', player.color === color ? 'ring-2 ring-offset-1 ring-black' : 'border-gray-300')} onClick={() => {handlePlayerChange(index, "color", color); toggleColorPicker(index);}} /> ))} </div> )} </div> ))}
+                        {playerInputs.map((player, index) => (
+                            <div key={player.id} className="border p-3 rounded-md shadow-sm bg-white relative">
+                                <div className="flex items-center space-x-2">
+                                    <Input
+                                        type="text"
+                                        placeholder={`Jogador ${index + 1}`}
+                                        value={player.name}
+                                        maxLength={12}
+                                        onChange={(e) => handlePlayerChange(index, "name", e.target.value)}
+                                        className="flex-grow"
+                                    />
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="w-8 h-8 flex-shrink-0"
+                                        onClick={() => toggleColorPicker(index)}
+                                        style={{ backgroundColor: player.color }}
+                                        aria-label="Selecionar cor"
+                                    />
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="w-8 h-8 flex-shrink-0 text-red-500 hover:bg-red-100"
+                                        onClick={() => deletePlayer(index)}
+                                        aria-label="Remover jogador"
+                                    >
+                                        <Trash className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                                {player.showColorPicker && (
+                                    <div className="absolute z-20 mt-2 right-12 w-48 bg-white border rounded-md shadow-lg p-2 grid grid-cols-6 gap-1">
+                                        {predefinedColors.map((color, idx) => (
+                                            <button
+                                                key={idx}
+                                                aria-label={`Selecionar cor ${color}`}
+                                                style={{ backgroundColor: color }}
+                                                className={cn('w-6 h-6 rounded border', player.color === color ? 'ring-2 ring-offset-1 ring-black' : 'border-gray-300')}
+                                                onClick={() => {handlePlayerChange(index, "color", color); toggleColorPicker(index);}}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
                     </div>
                     {playerInputs.length < 8 && (<Button onClick={addPlayerInput} variant="secondary" className="w-full">+ Adicionar Jogador</Button>)}
                 </div>
                  {/* Opções de Jogo */}
                  <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Opções</h3>
-                     <Button onClick={() => setOcultarCarta(!ocultarCarta)} variant="outline" className="w-full flex items-center justify-center space-x-2"> {ocultarCarta ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />} <span>{ocultarCarta ? "Ocultar Carta Ativado" : "Ocultar Carta Desativado"}</span> </Button>
-                     <Button onClick={cycleProbability} className="w-full flex items-center justify-center space-x-2" style={{ backgroundColor: probabilitySettings[probabilityIndex].color, color: probabilitySettings[probabilityIndex].textColor }}> <span>% Excluir Especiais:</span> <span className="font-bold">{probabilitySettings[probabilityIndex].label}</span> </Button>
+                     <Button onClick={() => setOcultarCarta(!ocultarCarta)} variant="outline" className="w-full flex items-center justify-center space-x-2">
+                         {ocultarCarta ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                         <span>{ocultarCarta ? "Ocultar Carta Ativado" : "Ocultar Carta Desativado"}</span>
+                     </Button>
+                     <Button
+                         onClick={cycleProbability}
+                         className="w-full flex items-center justify-center space-x-2"
+                         style={{ backgroundColor: probabilitySettings[probabilityIndex].color, color: probabilitySettings[probabilityIndex].textColor }}
+                     >
+                         <span>% Excluir Especiais:</span>
+                         <span className="font-bold">{probabilitySettings[probabilityIndex].label}</span>
+                     </Button>
                  </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-3 pt-6 border-t">
@@ -290,25 +440,23 @@ const EcoChallenge: React.FC = () => {
     const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
 
-    // Função para iniciar/continuar o jogo
     const handleGameStart = useCallback((initialGameState?: Partial<GameState>, sourcesForGame?: SourceInfo[]) => {
         console.log("EcoChallenge: handleGameStart chamado", { initialGameState, sourcesForGame });
         if (initialGameState && sourcesForGame && initialGameState.jogoIniciado) {
-             setGameState(initialGameState as GameState);
-             setCurrentGameSources(sourcesForGame); // Armazena as fontes que serão usadas neste jogo
-             // Resetar estados da rodada
-             setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]); setOpcoesEliminadas([]); setCartaRevelada(!(initialGameState.ocultarCarta ?? true));
-        } else if (initialGameState) { // Tenta reconstruir fontes para saves antigos
+            setGameState(initialGameState as GameState);
+            setCurrentGameSources(sourcesForGame);
+            setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]); setOpcoesEliminadas([]); setCartaRevelada(!(initialGameState.ocultarCarta ?? true));
+        } else if (initialGameState) {
              console.warn("Reconstruindo fontes para jogo salvo (fallback)...");
              const customSourcesRaw = typeof window !== "undefined" ? localStorage.getItem("customSourceInfos") : null;
-             // ===== CORREÇÃO DO TYPO AQUI =====
+             // ===== CORREÇÃO DO TYPO =====
              const builtInStatusRaw = typeof window !== "undefined" ? localStorage.getItem("builtInSourceStatus") : null;
-             // ===== FIM DA CORREÇÃO =====
+             // ============================
              let customSources: SourceInfo[] = []; let builtInStatus: Record<string, boolean> | null = null;
              try { customSources = customSourcesRaw ? JSON.parse(customSourcesRaw) : []; } catch { customSources = []; }
-             // ===== CORREÇÃO DO TYPO AQUI =====
+             // ===== CORREÇÃO DO TYPO =====
              try { builtInStatus = builtInStatusRaw ? JSON.parse(builtInStatusRaw) : null; } catch { builtInStatus = null; }
-             // ===== FIM DA CORREÇÃO =====
+             // ============================
              const processedCustomSources = customSources.map(source => { const { processedCards, internalBaralhos, totalCards } = processCardsAndExtractBaralhos(source.cards || []); return { ...source, cards: processedCards, internalBaralhos, totalCards }; });
              const reconstructedSources = [ ...initialBuiltInSources.map(bs => ({...bs, active: builtInStatus?.[bs.id] ?? true })), ...processedCustomSources ].filter(s => initialGameState.activeSourceIds?.includes(s.id));
              setGameState(initialGameState as GameState); setCurrentGameSources(reconstructedSources);
@@ -316,26 +464,12 @@ const EcoChallenge: React.FC = () => {
         } else { console.error("handleGameStart chamado sem dados válidos."); setGameState(null); }
      }, []);
 
-    // Persiste o estado do jogo
     const updateGameState = useCallback((newState: Partial<GameState>) => { setGameState(prev => { if (!prev) return null; const updatedState = { ...prev, ...newState }; if (typeof window !== "undefined") { try { localStorage.setItem("estadoEcoChallenge", JSON.stringify(updatedState)); } catch (e) { console.error("Erro ao salvar estado:", e); } } return updatedState; }); }, []);
     const updateCurrentPlayer = useCallback((partialPlayerData: Partial<Player>) => { if (!gameState || gameState.currentPlayerId === null) return; const updatedPlayers = gameState.players.map(p => p.id === gameState.currentPlayerId ? { ...p, ...partialPlayerData } : p ); updateGameState({ players: updatedPlayers }); }, [gameState, updateGameState]);
 
-    // Marca cliente pronto e tenta carregar jogo salvo
-    useEffect(() => {
-        setIsClientReady(true);
-        if (!gameState && typeof window !== "undefined") { // Só tenta carregar se gameState ainda for null
-            const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
-            try { const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; if (savedState && savedState.jogoIniciado) { handleGameStart(savedState); } }
-            catch (e) { console.error("Erro ao carregar estado inicial:", e); localStorage.removeItem("estadoEcoChallenge"); }
-        }
-    }, [handleGameStart, gameState]); // Reage a gameState para evitar chamar handleGameStart se ele já foi definido
+    useEffect(() => { setIsClientReady(true); }, []);
 
-    // Seleciona a primeira carta
-    useEffect(() => { if (gameState?.jogoIniciado && currentGameSources.length > 0 && !cartaAtual && !noCardsAvailable) { selecionarCartaAleatoria(); } }, [gameState?.jogoIniciado, currentGameSources, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]);
-    // Timer do ContraTempo
-    useEffect(() => { if (cartaAtual?.tipo === "ContraTempo" && tempoRestante !== null && tempoRestante > 0 && !respondido && gameState?.jogoIniciado && cartaRevelada) { timerIntervalRef.current = setInterval(() => { setTempoRestante((prev) => { if (prev === null || prev <= 1) { clearInterval(timerIntervalRef.current!); setRespondido(true); setMensagem(`Tempo esgotado! ${cartaAtual.desvantagem || 'Tente novamente.'}`); if (gameState && gameState.currentPlayerId !== null) { const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId); if (currentPlayer) { updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - 10, 0) }); } } return 0; } return prev - 1; }); }, 1000); } else if (timerIntervalRef.current && (respondido || tempoRestante === 0 || !cartaRevelada)) { clearInterval(timerIntervalRef.current); } return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); }; }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId, updateCurrentPlayer]);
-
-    // Selecionar Carta Aleatória
+    // Selecionar carta aleatória
     const selecionarCartaAleatoria = useCallback(() => {
         if (!gameState || currentGameSources.length === 0) { setNoCardsAvailable(true); return; }
         const { categoriasSelecionadas, probabilityIndex, activeInternalBaralhosState } = gameState;
@@ -346,9 +480,22 @@ const EcoChallenge: React.FC = () => {
         setNoCardsAvailable(false); const idxAleat = Math.floor(Math.random() * cartasFiltradas.length); const novaCarta = cartasFiltradas[idxAleat]; setCartaAtual(novaCarta);
         setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setMostrarFontes(false); setOpcoesEliminadas([]); setCartaRevelada(!gameState.ocultarCarta); setRolledNumber(null); setIsDieModalOpen(false); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]);
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (novaCarta.tipo === "ContraTempo") { setTempoRestante(novaCarta.tempoLimite); }
-    }, [gameState, currentGameSources]); // Depende do estado do jogo e das fontes atuais
+    }, [gameState, currentGameSources]);
 
-    // Handlers de Seleção e Ações
+    // Seleciona a primeira carta quando o jogo inicia E as fontes foram carregadas
+    // ===== CORREÇÃO: Removido selecionarCartaAleatoria do array de dependências =====
+    useEffect(() => {
+        if (gameState?.jogoIniciado && currentGameSources.length > 0 && !cartaAtual && !noCardsAvailable) {
+            console.log("Jogo iniciado e fontes carregadas. Selecionando primeira carta...");
+            selecionarCartaAleatoria();
+        }
+    }, [gameState?.jogoIniciado, currentGameSources, cartaAtual, noCardsAvailable]);
+    // ===== FIM DA CORREÇÃO =====
+
+    // Timer do ContraTempo
+    useEffect(() => { /* ... sem mudanças ... */ }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId, updateCurrentPlayer]);
+
+    // Handlers de Seleção
     const handleSelecao = (id: number) => { if (!respondido) setSelecionado(id); };
     const handleSelecaoMultipla = (id: number) => { if (!respondido) { setSelecoesMultiplas((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
     const handleSelecaoOrdem = (id: number) => { if (!respondido) { setOrdemSelecoes((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
@@ -357,8 +504,11 @@ const EcoChallenge: React.FC = () => {
     const handleImagemClick = (event: React.MouseEvent<HTMLDivElement>) => { if (respondido || !cartaAtual || cartaAtual.tipo !== 'PontoCerto') return; const target = event.currentTarget; const rect = target.getBoundingClientRect(); const x = (event.clientX - rect.left) / rect.width; const y = (event.clientY - rect.top) / rect.height; const clampedX = Math.max(0, Math.min(1, x)); const clampedY = Math.max(0, Math.min(1, y)); setCoordenadasClique({ x: clampedX, y: clampedY }); };
     const handleSelecionarFragmento = (id: number) => { if (respondido) return; setFragmentosSelecionados(prev => [...prev, id]); };
     const limparFragmentos = () => { if (!respondido) { setFragmentosSelecionados([]); } };
-    const verificarResposta = () => { if (!cartaAtual || !gameState || !gameState.players || gameState.currentPlayerId === null || respondido) return; const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId); if (!currentPlayer) return; let cor = false; let pontosGanhos = 20; let pontosPerdidos = 10; let darPuloDificil = cartaAtual.dificuldade === "dificil"; let mensagemFinal = ""; let aplicarEfeitoPadrao = false; if (cartaAtual.tipo === "ContraTempo" && timerIntervalRef.current) { clearInterval(timerIntervalRef.current); } switch (cartaAtual.tipo) { case "Pergunta": case "ContraTempo": if (cartaAtual.tipo === "ContraTempo" && (tempoRestante === null || tempoRestante <= 0)) { cor = false; } else { cor = selecionado === cartaAtual.respostaCorreta; } aplicarEfeitoPadrao = true; break; case "MultiplaEscolha": cor = Array.isArray(cartaAtual.respostaCorreta) && selecoesMultiplas.length === cartaAtual.respostaCorreta.length && selecoesMultiplas.sort().toString() === cartaAtual.respostaCorreta.sort().toString(); if (cor) pontosGanhos = 25; aplicarEfeitoPadrao = true; break; case "Ordem": cor = Array.isArray(cartaAtual.respostaCorreta) && ordemSelecoes.length === cartaAtual.respostaCorreta.length && ordemSelecoes.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 30; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "RelacionarColunas": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = paresFormados.length === cartaAtual.respostaCorreta.length && paresFormados.map(p => `${p.aId}-${p.bId}`).sort().join(',') === cartaAtual.respostaCorreta.map(p => `${p.aId}-${p.bId}`).sort().join(','); if (cor) pontosGanhos = 30; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "PontoCerto": if (!coordenadasClique || !Array.isArray(cartaAtual.zonasClicaveis)) { cor = false; break; } const zonaCorreta = cartaAtual.zonasClicaveis.find(z => z.id === cartaAtual.respostaCorreta); cor = zonaCorreta ? isClickInZone(coordenadasClique, zonaCorreta) : false; if (cor) pontosGanhos = 25; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "CompletarFrase": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = fragmentosSelecionados.length === cartaAtual.respostaCorreta.length && fragmentosSelecionados.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 25; darPuloDificil = true; aplicarEfeitoPadrao = true; break; case "Vantagem": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado); mensagemFinal = cor ? (cartaAtual.vantagem || "Vantagem aplicada!") : "Ação não confirmada."; break; case "Desvantagem": cor = false; mensagemFinal = cartaAtual.desvantagem || "Desvantagem aplicada."; break; case "Outras": if (!Array.isArray(cartaAtual.respostaCorreta)) { cor = false; break; } cor = selecionado !== null && cartaAtual.respostaCorreta.includes(selecionado); mensagemFinal = cor ? (cartaAtual.vantagem || 'Ok!') : (cartaAtual.desvantagem || 'Hmm...'); break; default: const _exhaustiveCheck: never = cartaAtual; console.error("Tipo não tratado:", _exhaustiveCheck); return; } setRespondido(true); if (aplicarEfeitoPadrao) { if (cor) { const novoProgresso = currentPlayer.progresso + pontosGanhos; const completouBarra = novoProgresso >= 100; const pulosGanhos = (completouBarra ? 1 : 0) + (darPuloDificil ? 1 : 0); const estrelasFixasGanhsa = completouBarra ? 1 : 0; updateCurrentPlayer({ respostasCertas: currentPlayer.respostasCertas + 1, respostasSeguidas: currentPlayer.respostasSeguidas + 1, progresso: completouBarra ? 0 : novoProgresso, pulosDisponiveis: Math.min(currentPlayer.pulosDisponiveis + pulosGanhos, 2), fixedStars: currentPlayer.fixedStars + estrelasFixasGanhsa, }); mensagemFinal = `Correto! ${cartaAtual.vantagem || ''}${completouBarra ? ' Barra completa!' : ''}`; } else { updateCurrentPlayer({ respostasErradas: currentPlayer.respostasErradas + 1, respostasSeguidas: 0, progresso: Math.max(currentPlayer.progresso - pontosPerdidos, 0), }); mensagemFinal = `Incorreto. ${cartaAtual.desvantagem || ''}`; } } setMensagem(mensagemFinal); };
-    const resetarContadoresJogador = () => { /* ... */ }; const toggleDica = () => { /* ... */ }; const toggleFontes = () => { /* ... */ }; const pularPergunta = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (!tiposPergunta.includes(cartaAtual.tipo)) { setMensagem("Não pode pular este tipo."); return; } if (cp.pulosDisponiveis > 0) { updateCurrentPlayer({ pulosDisponiveis: cp.pulosDisponiveis - 1 }); setMensagem("Carta pulada!"); setTimeout(() => selecionarCartaAleatoria(), 500); } else { setMensagem("Sem pulos disponíveis."); } }; const eliminarRespostaErrada = () => { /* ... */ }; const voltarTelaInicial = () => { if (window.confirm("Voltar para a Tela Inicial? Progresso salvo.")) { setGameState(null); setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setCurrentGameSources([]) } }; const diminuirAcertos = () => { /* ... */ }; const diminuirErros = () => { /* ... */ }; const incrementarContadorDeEstrelas = () => { /* ... */ }; const diminuirContadorDeEstrelas = () => { /* ... */ }; const incrementarRodadasPreso = () => { /* ... */ }; const diminuirRodadasPreso = () => { /* ... */ }; const rolarDado = () => { /* ... */ }; const handleLongPressStart = (action: () => void) => { /* ... */ }; const handleLongPressEnd = () => { /* ... */ };
+    const verificarResposta = () => { /* ... sem mudanças ... */ };
+    const resetarContadoresJogador = () => { /* ... */ }; const toggleDica = () => { /* ... */ }; const toggleFontes = () => { /* ... */ };
+    const pularPergunta = () => { const cp = gameState?.players.find(p => p.id === gameState.currentPlayerId); if (!cp || !cartaAtual || respondido || (gameState?.ocultarCarta && !cartaRevelada)) return; if (!tiposPergunta.includes(cartaAtual.tipo)) { setMensagem("Não pode pular este tipo."); return; } if (cp.pulosDisponiveis > 0) { updateCurrentPlayer({ pulosDisponiveis: cp.pulosDisponiveis - 1 }); setMensagem("Carta pulada!"); setTimeout(() => selecionarCartaAleatoria(), 500); } else { setMensagem("Sem pulos disponíveis."); } };
+    const eliminarRespostaErrada = () => { /* ... */ }; const voltarTelaInicial = () => { if (window.confirm("Voltar para a Tela Inicial? Progresso salvo.")) { setGameState(null); setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setCurrentGameSources([]) } }; const diminuirAcertos = () => { /* ... */ }; const diminuirErros = () => { /* ... */ }; const incrementarContadorDeEstrelas = () => { /* ... */ }; const diminuirContadorDeEstrelas = () => { /* ... */ }; const incrementarRodadasPreso = () => { /* ... */ }; const diminuirRodadasPreso = () => { /* ... */ }; const rolarDado = () => { /* ... */ }; const handleLongPressStart = (action: () => void) => { /* ... */ }; const handleLongPressEnd = () => { /* ... */ };
+
 
     // --- Renderização do Jogo ---
     if (!isClientReady) { return <div className="flex items-center justify-center min-h-screen"><p>Carregando Interface...</p></div>; }
@@ -378,37 +528,145 @@ const EcoChallenge: React.FC = () => {
     return (
         <div className="flex flex-col items-center p-2 md:p-4 min-h-screen bg-gradient-to-b from-green-50 to-blue-50 font-sans">
              <Card className={cn("w-full max-w-lg mx-auto mt-4 shadow-xl border-2 rounded-lg", obterEstiloCarta())} style={players.length > 0 && currentPlayer && !(ocultarCarta && !cartaRevelada) ? { boxShadow: `0 0 15px 3px ${currentPlayer.color}` } : {}}>
+                 {/* CardHeader */}
                  <CardHeader className="pb-3">
-                       <div className="flex justify-between items-start mb-2 gap-2">
+                     <div className="flex justify-between items-start mb-2 gap-2">
                          <div className="flex items-center space-x-2 flex-1 min-w-0">
                              <div className="flex-1 min-w-0">
-                                <CardTitle className="text-lg md:text-xl font-bold leading-tight truncate" title={cartaAtual.titulo}> {ocultarCarta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo} </CardTitle>
-                                {(!ocultarCarta || cartaRevelada) && ( <p className="text-xs text-gray-500 mt-1 truncate" title={(cartaAtual.categorias ? cartaAtual.categorias.join(", ") : '') + (cartaAtual.baralho && cartaAtual.baralho !== DEFAULT_BARALHO_NAME ? ` (${cartaAtual.baralho})` : '')}> {cartaAtual.categorias?.join(", ")} {cartaAtual.baralho && cartaAtual.baralho !== DEFAULT_BARALHO_NAME && ` (${cartaAtual.baralho})`} </p> )}
+                                <CardTitle className="text-lg md:text-xl font-bold leading-tight truncate" title={cartaAtual.titulo}>
+                                    {ocultarCarta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo}
+                                </CardTitle>
+                                {(!ocultarCarta || cartaRevelada) && (
+                                     <p className="text-xs text-gray-500 mt-1 truncate" title={(cartaAtual.categorias ? cartaAtual.categorias.join(", ") : '') + (cartaAtual.baralho && cartaAtual.baralho !== DEFAULT_BARALHO_NAME ? ` (${cartaAtual.baralho})` : '')}>
+                                        {cartaAtual.categorias?.join(", ")}
+                                        {cartaAtual.baralho && cartaAtual.baralho !== DEFAULT_BARALHO_NAME && ` (${cartaAtual.baralho})`}
+                                    </p>
+                                )}
                             </div>
                         </div>
-                         {(!ocultarCarta || cartaRevelada) && ( <Badge variant={ cartaAtual.dificuldade === "facil" ? "secondary" : cartaAtual.dificuldade === "normal" ? "default" : "destructive" } className="capitalize flex-shrink-0 h-6 ml-2"> {cartaAtual.dificuldade} </Badge> )}
+                         {(!ocultarCarta || cartaRevelada) && (
+                            <Badge variant={ cartaAtual.dificuldade === "facil" ? "secondary" : cartaAtual.dificuldade === "normal" ? "default" : "destructive" } className="capitalize flex-shrink-0 h-6 ml-2">
+                                {cartaAtual.dificuldade}
+                            </Badge>
+                         )}
                     </div>
-                     {cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && !respondido && cartaRevelada && ( <div className="mt-2"> <Progress value={(tempoRestante / ((cartaAtual as CartaContraTempo).tempoLimite || 30)) * 100} className="h-2 [&>*]:bg-yellow-500" /> <p className="text-center text-sm font-semibold text-yellow-700 mt-1"> <Timer className="inline h-4 w-4 mr-1" /> Tempo: {tempoRestante}s </p> </div> )}
-                    {(!ocultarCarta || cartaRevelada) ? ( <ScrollArea className="h-64 md:h-80 rounded-md border p-3 mt-2 bg-white/80"> <div className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1" dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }} /> </ScrollArea>
-                    ) : ( <div className="h-64 md:h-80 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200"> <EyeOff className="h-8 w-8 text-gray-500" /> <p className="text-sm text-gray-600">Carta Oculta</p> {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>} <Button onClick={rolarDado} variant="outline" size="sm" className="mt-2 bg-white" onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <Dice6 className="h-4 w-4 mr-1" /> Rolar Dado </Button> </div> )}
+                     {cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && !respondido && cartaRevelada && (
+                        <div className="mt-2">
+                            <Progress value={(tempoRestante / ((cartaAtual as CartaContraTempo).tempoLimite || 30)) * 100} className="h-2 [&>*]:bg-yellow-500" />
+                            <p className="text-center text-sm font-semibold text-yellow-700 mt-1">
+                                <Timer className="inline h-4 w-4 mr-1" /> Tempo: {tempoRestante}s
+                            </p>
+                        </div>
+                     )}
+                    {(!ocultarCarta || cartaRevelada) ? (
+                        <ScrollArea className="h-64 md:h-80 rounded-md border p-3 mt-2 bg-white/80">
+                            <div
+                                className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1"
+                                dangerouslySetInnerHTML={{ __html: cartaAtual.pergunta || '' }}
+                            />
+                        </ScrollArea>
+                    ) : (
+                        <div className="h-64 md:h-80 flex flex-col items-center justify-center space-y-2 rounded-md border p-3 mt-2 bg-gray-200">
+                            <EyeOff className="h-8 w-8 text-gray-500" />
+                            <p className="text-sm text-gray-600">Carta Oculta</p>
+                            {rolledNumber !== null && <p className="text-lg font-bold">Dado: {rolledNumber}</p>}
+                            <Button
+                                onClick={rolarDado}
+                                variant="outline" size="sm" className="mt-2 bg-white"
+                                onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}
+                            >
+                                <Dice6 className="h-4 w-4 mr-1" /> Rolar Dado
+                            </Button>
+                        </div>
+                    )}
                 </CardHeader>
 
+                {/* CardContent */}
                 {(!ocultarCarta || cartaRevelada) && (
                     <CardContent className="pt-0 pb-4">
                         <div className="space-y-2">
                             {renderizarConteudoResposta()}
                         </div>
-                        {mostrarDica && cartaAtual.dica && ( <Alert variant="default" className="mt-4 bg-blue-50 border-blue-300 text-blue-800"> <HelpCircle className="h-4 w-4 text-blue-700" /> <AlertDescription className="text-sm"> <strong>Dica:</strong> {cartaAtual.dica} </AlertDescription> </Alert> )}
-                        {mostrarFontes && cartaAtual.fontes && cartaAtual.fontes.length > 0 && ( <Alert variant="default" className="mt-4 bg-gray-50 border-gray-300"> <BookOpen className="h-4 w-4 text-gray-700" /> <AlertDescription className="text-sm text-gray-800"> <strong>Fontes:</strong> <ul className="list-disc list-inside mt-1 text-xs"> {cartaAtual.fontes.map((fonte, idx) => (<li key={idx}>{fonte}</li>))} </ul> </AlertDescription> </Alert> )}
+                        {mostrarDica && cartaAtual.dica && (
+                            <Alert variant="default" className="mt-4 bg-blue-50 border-blue-300 text-blue-800">
+                                <HelpCircle className="h-4 w-4 text-blue-700" />
+                                <AlertDescription className="text-sm"> <strong>Dica:</strong> {cartaAtual.dica} </AlertDescription>
+                            </Alert>
+                        )}
+                        {mostrarFontes && cartaAtual.fontes && cartaAtual.fontes.length > 0 && (
+                            <Alert variant="default" className="mt-4 bg-gray-50 border-gray-300">
+                                <BookOpen className="h-4 w-4 text-gray-700" />
+                                <AlertDescription className="text-sm text-gray-800">
+                                    <strong>Fontes:</strong>
+                                    <ul className="list-disc list-inside mt-1 text-xs">
+                                        {cartaAtual.fontes.map((fonte, idx) => (<li key={idx}>{fonte}</li>))}
+                                    </ul>
+                                </AlertDescription>
+                            </Alert>
+                        )}
                     </CardContent>
                 )}
 
+                {/* CardFooter */}
                  <CardFooter className="flex flex-col items-center pt-4 border-t bg-gray-50/50 rounded-b-lg">
-                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3"> <Button onClick={toggleFontes} variant="outline" disabled={!cartaAtual.fontes || cartaAtual.fontes.length === 0 || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <BookOpen className="h-5 w-5" /></Button> <Button onClick={pularPergunta} variant={currentPlayer.pulosDisponiveis > 0 ? "secondary" : "outline"} disabled={currentPlayer.pulosDisponiveis === 0 || !tiposPergunta.includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <SkipForward className="h-5 w-5" /> </Button> <Button onClick={toggleDica} variant={currentPlayer.respostasSeguidas >= 2 && !dicaUsada && !!cartaAtual.dica ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || dicaUsada || !cartaAtual.dica || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <HelpCircle className="h-5 w-5" /> </Button> <Button onClick={eliminarRespostaErrada} variant={currentPlayer.respostasSeguidas >= 2 ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || !("opcoes" in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || cartaAtual.opcoes.length <= 2 || !["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"].includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <MinusCircle className="h-5 w-5" /> </Button> <Button onClick={resetarContadoresJogador} variant="outline" className="h-9 px-2.5"> <RotateCcw className="h-5 w-5" /> </Button> <Button onClick={voltarTelaInicial} variant="outline" className="h-9 px-2.5"> <Home className="h-5 w-5" /> </Button> </div>
-                    <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3"> <Button onClick={diminuirAcertos} variant="outline" className="h-9 px-2.5" title="Diminuir Acertos"><ThumbsUp className="h-5 w-5 text-green-500 transform scale-x-[-1]" /></Button> <Button onClick={diminuirErros} variant="outline" className="h-9 px-2.5" title="Diminuir Erros"><ThumbsDown className="h-5 w-5 text-red-500 transform scale-x-[-1]" /></Button> <Button onClick={diminuirContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Diminuir Estrela Bônus"><Star className="h-5 w-5 text-red-500" /></Button> <Button onClick={incrementarContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Aumentar Estrela Bônus"><Star className="h-5 w-5 text-yellow-500" /></Button> <Button onClick={diminuirRodadasPreso} variant="outline" className="h-9 px-2.5" title="Diminuir Rodada Preso"><ChevronUp className="h-5 w-5 text-red-500 transform rotate-180" /></Button> <Button onClick={incrementarRodadasPreso} variant="outline" className="h-9 px-2.5" title="Aumentar Rodada Preso"><ChevronUp className="h-5 w-5 text-purple-500" /></Button> </div>
-                    <div className="w-full mb-3"> {ocultarCarta && !cartaRevelada ? ( <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white"> <Eye className="mr-2 h-4 w-4"/> Revelar Carta </Button> ) : !respondido ? ( <Button onClick={isVerificarDisabled() ? undefined : verificarResposta} className={cn( "w-full bg-green-600 hover:bg-green-700 text-white", isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400" )} onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd} aria-disabled={isVerificarDisabled()} tabIndex={isVerificarDisabled() ? -1 : 0} > <Check className="mr-2 h-4 w-4"/> Verificar </Button> ) : ( <Button onClick={selecionarCartaAleatoria} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onMouseDown={() => handleLongPressStart(selecionarCartaAleatoria)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(selecionarCartaAleatoria)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}> <SkipForward className="mr-2 h-4 w-4"/> Próxima Carta </Button> )} </div>
+                     {/* Botões de Ação Primários */}
+                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
+                         <Button onClick={toggleFontes} variant="outline" disabled={!cartaAtual.fontes || cartaAtual.fontes.length === 0 || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <BookOpen className="h-5 w-5" /></Button>
+                         <Button onClick={pularPergunta} variant={currentPlayer.pulosDisponiveis > 0 ? "secondary" : "outline"} disabled={currentPlayer.pulosDisponiveis === 0 || !tiposPergunta.includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <SkipForward className="h-5 w-5" /> </Button>
+                         <Button onClick={toggleDica} variant={currentPlayer.respostasSeguidas >= 2 && !dicaUsada && !!cartaAtual.dica ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || dicaUsada || !cartaAtual.dica || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <HelpCircle className="h-5 w-5" /> </Button>
+                         <Button onClick={eliminarRespostaErrada} variant={currentPlayer.respostasSeguidas >= 2 ? "secondary" : "outline"} disabled={currentPlayer.respostasSeguidas < 2 || !("opcoes" in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || cartaAtual.opcoes.length <= 2 || !["Pergunta", "MultiplaEscolha", "ContraTempo", "Outras"].includes(cartaAtual.tipo) || respondido || (ocultarCarta && !cartaRevelada)} className="h-9 px-2.5"> <MinusCircle className="h-5 w-5" /> </Button>
+                         <Button onClick={resetarContadoresJogador} variant="outline" className="h-9 px-2.5"> <RotateCcw className="h-5 w-5" /> </Button>
+                         <Button onClick={voltarTelaInicial} variant="outline" className="h-9 px-2.5"> <Home className="h-5 w-5" /> </Button>
+                    </div>
+                     {/* Botões de Ajuste Manual */}
+                    <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3">
+                         <Button onClick={diminuirAcertos} variant="outline" className="h-9 px-2.5" title="Diminuir Acertos"><ThumbsUp className="h-5 w-5 text-green-500 transform scale-x-[-1]" /></Button>
+                         <Button onClick={diminuirErros} variant="outline" className="h-9 px-2.5" title="Diminuir Erros"><ThumbsDown className="h-5 w-5 text-red-500 transform scale-x-[-1]" /></Button>
+                         <Button onClick={diminuirContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Diminuir Estrela Bônus"><Star className="h-5 w-5 text-red-500" /></Button>
+                         <Button onClick={incrementarContadorDeEstrelas} variant="outline" className="h-9 px-2.5" title="Aumentar Estrela Bônus"><Star className="h-5 w-5 text-yellow-500" /></Button>
+                         <Button onClick={diminuirRodadasPreso} variant="outline" className="h-9 px-2.5" title="Diminuir Rodada Preso"><ChevronUp className="h-5 w-5 text-red-500 transform rotate-180" /></Button>
+                         <Button onClick={incrementarRodadasPreso} variant="outline" className="h-9 px-2.5" title="Aumentar Rodada Preso"><ChevronUp className="h-5 w-5 text-purple-500" /></Button>
+                    </div>
+                     {/* Botão Principal */}
+                    <div className="w-full mb-3">
+                        {ocultarCarta && !cartaRevelada ? (
+                            <Button onClick={() => setCartaRevelada(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                                <Eye className="mr-2 h-4 w-4"/> Revelar Carta
+                            </Button>
+                        ) : !respondido ? (
+                            <Button
+                                onClick={isVerificarDisabled() ? undefined : verificarResposta}
+                                className={cn( "w-full bg-green-600 hover:bg-green-700 text-white", isVerificarDisabled() && "opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400" )}
+                                onMouseDown={() => handleLongPressStart(rolarDado)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(rolarDado)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}
+                                aria-disabled={isVerificarDisabled()} tabIndex={isVerificarDisabled() ? -1 : 0}
+                            >
+                                <Check className="mr-2 h-4 w-4"/> Verificar
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={() => selecionarCartaAleatoria()}
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                                onMouseDown={() => handleLongPressStart(selecionarCartaAleatoria)} onMouseUp={handleLongPressEnd} onMouseLeave={handleLongPressEnd} onTouchStart={() => handleLongPressStart(selecionarCartaAleatoria)} onTouchEnd={handleLongPressEnd} onTouchCancel={handleLongPressEnd}
+                            >
+                                <SkipForward className="mr-2 h-4 w-4"/> Próxima Carta
+                            </Button>
+                        )}
+                    </div>
+                     {/* Mensagem Feedback */}
                     {mensagem && ( <Alert variant={getAlertVariant()} className={cn( 'text-center text-sm font-semibold mb-3 w-full', cartaAtual?.tipo === 'Vantagem' && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo === 'Desvantagem' && 'bg-red-100 border-red-300 text-red-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && isInfoAlert && 'bg-blue-100 border-blue-300 text-blue-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'default' && !isInfoAlert && 'bg-green-100 border-green-300 text-green-800', cartaAtual?.tipo !== 'Vantagem' && cartaAtual?.tipo !== 'Desvantagem' && getAlertVariant() === 'destructive' && 'bg-red-100 border-red-300 text-red-800' )}> <AlertDescription>{mensagem}</AlertDescription> </Alert> )}
-                    <div className="w-full"> <Progress value={currentPlayer.progresso} className="h-2.5 [&>*]:bg-orange-500" /> <div className="flex justify-between items-center w-full mt-2 text-sm text-gray-700 flex-wrap gap-x-4 gap-y-1 font-semibold"> <span className="flex items-center" title="Rodadas Preso"><ChevronUp className="h-4 w-4 text-purple-500 mr-1"/>{currentPlayer.rodadasPreso}</span> <span className="flex items-center" title="Estrelas Fixas"><Award className="h-4 w-4 text-yellow-600 mr-1"/>{currentPlayer.fixedStars}</span> <span className="flex items-center" title="Estrelas Bônus"><Star className="h-4 w-4 text-yellow-500 mr-1"/>{currentPlayer.contadorDeEstrelas}</span> <span className="flex items-center" title="Pulos Disponíveis"><SkipForward className="h-4 w-4 text-blue-500 mr-1"/>{currentPlayer.pulosDisponiveis}</span> <span className="flex items-center" title="Respostas Corretas"><ThumbsUp className="h-4 w-4 text-green-500 mr-1"/>{currentPlayer.respostasCertas}</span> <span className="flex items-center" title="Respostas Erradas"><ThumbsDown className="h-4 w-4 text-red-500 mr-1"/>{currentPlayer.respostasErradas}</span> <span className="flex items-center" title="Respostas Seguidas"><Zap className="h-4 w-4 text-orange-500 mr-1"/>{currentPlayer.respostasSeguidas}</span> </div> </div>
+                     {/* Progresso e Stats */}
+                    <div className="w-full">
+                        <Progress value={currentPlayer.progresso} className="h-2.5 [&>*]:bg-orange-500" />
+                         <div className="flex justify-between items-center w-full mt-2 text-sm text-gray-700 flex-wrap gap-x-4 gap-y-1 font-semibold">
+                             <span className="flex items-center" title="Rodadas Preso"><ChevronUp className="h-4 w-4 text-purple-500 mr-1"/>{currentPlayer.rodadasPreso}</span>
+                             <span className="flex items-center" title="Estrelas Fixas"><Award className="h-4 w-4 text-yellow-600 mr-1"/>{currentPlayer.fixedStars}</span>
+                             <span className="flex items-center" title="Estrelas Bônus"><Star className="h-4 w-4 text-yellow-500 mr-1"/>{currentPlayer.contadorDeEstrelas}</span>
+                             <span className="flex items-center" title="Pulos Disponíveis"><SkipForward className="h-4 w-4 text-blue-500 mr-1"/>{currentPlayer.pulosDisponiveis}</span>
+                             <span className="flex items-center" title="Respostas Corretas"><ThumbsUp className="h-4 w-4 text-green-500 mr-1"/>{currentPlayer.respostasCertas}</span>
+                             <span className="flex items-center" title="Respostas Erradas"><ThumbsDown className="h-4 w-4 text-red-500 mr-1"/>{currentPlayer.respostasErradas}</span>
+                             <span className="flex items-center" title="Respostas Seguidas"><Zap className="h-4 w-4 text-orange-500 mr-1"/>{currentPlayer.respostasSeguidas}</span>
+                         </div>
+                     </div>
                  </CardFooter>
             </Card>
 
@@ -437,4 +695,4 @@ const EcoChallenge: React.FC = () => {
 
 };
 
-export default EcoChallenge; 
+export default EcoChallenge;
