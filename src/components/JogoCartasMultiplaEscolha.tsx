@@ -69,7 +69,7 @@ interface SourceInfo {
     name: string;
     type: 'builtin' | 'custom';
     cards: Carta[];
-    internalBaralhos: Record<string, number>; // Alterado para Record<nome, contagem>
+    internalBaralhos: Record<string, number>;
     active: boolean;
 }
 
@@ -82,7 +82,7 @@ interface GameState {
     probabilityIndex: number;
     jogoIniciado: boolean;
     activeSourceIds: string[];
-    activeInternalBaralhosState: Record<string, string[]>; // { sourceId: [activeBaralhoName, ...] } - Mantém como array para salvar/carregar
+    activeInternalBaralhosState: Record<string, string[]>;
 }
 
 // --- Constantes ---
@@ -103,7 +103,6 @@ const tiposEspeciais: Carta['tipo'][] = ["Vantagem", "Desvantagem", "Outras"];
 
 // --- Carregamento Inicial e Estruturação ---
 
-// ===== MODIFICAÇÃO: Helper agora retorna contagem por baralho =====
 function processCardsAndExtractBaralhos(cards: Carta[]): { processedCards: Carta[], internalBaralhos: Record<string, number> } {
     const baralhoCounts: Record<string, number> = {};
     const processedCards = cards.map(card => {
@@ -111,15 +110,11 @@ function processCardsAndExtractBaralhos(cards: Carta[]): { processedCards: Carta
         baralhoCounts[baralhoName] = (baralhoCounts[baralhoName] || 0) + 1;
         return { ...card, baralho: baralhoName };
     });
-    // Ordena os nomes dos baralhos para consistência na UI
     const sortedBaralhoNames = Object.keys(baralhoCounts).sort();
     const sortedInternalBaralhos: Record<string, number> = {};
-    sortedBaralhoNames.forEach(name => {
-        sortedInternalBaralhos[name] = baralhoCounts[name];
-    });
+    sortedBaralhoNames.forEach(name => { sortedInternalBaralhos[name] = baralhoCounts[name]; });
     return { processedCards, internalBaralhos: sortedInternalBaralhos };
 }
-// ===== FIM DA MODIFICAÇÃO =====
 
 const builtInSourcesData: Omit<SourceInfo, 'active' | 'internalBaralhos'>[] = [
     { id: "manejoPlantadas", name: "Manejo Plantadas", type: 'builtin', cards: manejoPlantadas as Carta[] },
@@ -138,32 +133,18 @@ const initialBuiltInSources: SourceInfo[] = builtInSourcesData.map(source => {
 // --- Funções Utilitárias ---
 function parseJSDeckFile(content: string): Carta[] {
     try {
-        // Tenta encontrar o array exportado ou definido como constante principal
         const match = content.match(/export default\s+(\[[\s\S]*?\]);?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?\s*export default\s+\w+;?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?/m);
-        if (!match || !match[1]) {
-            throw new Error("Array de cartas não encontrado no arquivo JS.");
-        }
+        if (!match || !match[1]) { throw new Error("Array de cartas não encontrado no arquivo JS."); }
         const arrayStr = match[1];
-        // Usa Function constructor para avaliar a string como código JavaScript (cuidado com segurança se a fonte não for confiável)
         const rawArray = new Function(`return ${arrayStr};`)() as any[];
-
-        // Valida se é um array e mapeia, adicionando IDs se necessário
-        if (!Array.isArray(rawArray)) {
-             throw new Error("O conteúdo extraído não é um array.");
-        }
-        return rawArray.map((card, index) => ({
-             ...card,
-             id: card.id || `custom_${Date.now()}_${index}` // Garante um ID
-        })) as Carta[];
-
+        if (!Array.isArray(rawArray)) { throw new Error("O conteúdo extraído não é um array."); }
+        return rawArray.map((card, index) => ({ ...card, id: card.id || `custom_${Date.now()}_${index}` })) as Carta[];
     } catch (error: any) {
         console.error("Erro ao processar arquivo JS:", error);
-        // Propaga o erro para ser tratado na função que chamou (handleCustomDeckUpload)
         throw new Error(`Erro ao processar arquivo JS: ${error.message}`);
     }
 }
 
-// Função para recalcular categorias baseada nos baralhos *ativos*
 function recalcularCategoriasAtivas(
     allSources: SourceInfo[],
     activeInternalBaralhos: Record<string, Set<string>>
@@ -182,7 +163,14 @@ function recalcularCategoriasAtivas(
     return Array.from(new Set(activeCards.flatMap(c => c.categorias || []))).sort();
 }
 
-function isClickInZone(clickCoords: { x: number; y: number } | null, zone: ZonaClicavel): boolean { /* ... sem mudanças ... */ }
+// ===== CORREÇÃO: Restaurar corpo da função isClickInZone =====
+function isClickInZone(clickCoords: { x: number; y: number } | null, zone: ZonaClicavel): boolean {
+    if (!clickCoords) return false;
+    const { x, y } = clickCoords;
+    // Verifica se o ponto (x, y) está dentro dos limites da zona [x, x+largura] e [y, y+altura]
+    return (x >= zone.x && x <= zone.x + zone.largura && y >= zone.y && y <= zone.y + zone.altura);
+}
+// ===== FIM DA CORREÇÃO =====
 
 // --- Componente TelaInicial ---
 interface TelaInicialProps {
@@ -231,33 +219,18 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                  Object.keys(parsed).forEach(key => { if (Array.isArray(parsed[key])) { initialState[key] = new Set(parsed[key]); } });
              } catch { initialState = {}; }
          }
-         // Garante que *todas* as fontes (built-in e custom já carregadas) tenham uma entrada
-         // e que seus baralhos internos conhecidos estejam presentes no Set (se não foram desativados)
-         const currentAllSources = allSources; // Usa o estado que acabou de ser inicializado
+         // Passa 'allSources' aqui para garantir que o estado inicial considere todas as fontes atuais
+         const currentAllSources = allSources; // Usa a variável local 'allSources' que está sendo inicializada
          currentAllSources.forEach(source => {
              if (!initialState[source.id]) {
-                 // Se a fonte não estava salva, ativa todos os baralhos dela
                  initialState[source.id] = new Set(Object.keys(source.internalBaralhos));
              } else {
-                 // Se estava salva, garante que baralhos novos sejam adicionados (mas respeita os desativados)
-                 Object.keys(source.internalBaralhos).forEach(bName => {
-                      if (!initialState[source.id].has(bName)) {
-                          // Adiciona apenas se não foi explicitamente removido antes (difícil saber sem mais estado)
-                          // Para simplificar, vamos adicionar sempre, o usuário pode desmarcar se quiser.
-                          initialState[source.id].add(bName);
-                      }
-                 });
-                 // Remove baralhos que não existem mais na fonte (caso o arquivo tenha mudado)
-                 initialState[source.id].forEach(savedBName => {
-                    if (!(savedBName in source.internalBaralhos)) {
-                        initialState[source.id].delete(savedBName);
-                    }
-                 });
+                 Object.keys(source.internalBaralhos).forEach(bName => { initialState[source.id].add(bName); })
+                 initialState[source.id].forEach(savedBName => { if (!(savedBName in source.internalBaralhos)) { initialState[source.id].delete(savedBName); }});
              }
          });
          return initialState;
     });
-
     const [todasCategorias, setTodasCategorias] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -302,7 +275,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         }
         if (newCustomSources.length > 0) {
             setAllSources(prev => [...prev, ...newCustomSources]);
-            setActiveInternalBaralhos(prev => { const newState = { ...prev }; newCustomSources.forEach(source => { newState[source.id] = new Set(Object.keys(source.internalBaralhos)); }); return newState; }); // Ativa todos os baralhos da nova fonte
+            setActiveInternalBaralhos(prev => { const newState = { ...prev }; newCustomSources.forEach(source => { newState[source.id] = new Set(Object.keys(source.internalBaralhos)); }); return newState; });
              setExpandedSources(prev => { const newSet = new Set(prev); newCustomSources.forEach(s => newSet.add(s.id)); return newSet; });
         }
         if (errors.length > 0) { setErrorMessage(errors.join("\n")); }
@@ -339,7 +312,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         const finalCategorias = recalcularCategoriasAtivas(allSources, activeInternalBaralhos);
         const finalCategoriasSelecionadas = categoriasSelecionadas.filter(cat => finalCategorias.includes(cat));
 
-         // Validações
          if (playerInputs.length === 0) { alert("Adicione pelo menos um jogador."); return; }
          const anySourceActive = allSources.some(s => s.active);
          if (!anySourceActive) { alert("Ative pelo menos uma Fonte de Cartas."); return; }
@@ -349,12 +321,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
          const activeCardsForGame = allSources.flatMap(source => { if (!source.active) return []; const activeBaralhos = activeInternalBaralhos[source.id]; if (!activeBaralhos || activeBaralhos.size === 0) return []; return source.cards.filter(card => activeBaralhos.has(card.baralho || DEFAULT_BARALHO_NAME)); });
          if (activeCardsForGame.filter(c => c.categorias?.some(cat => finalCategoriasSelecionadas.includes(cat))).length === 0) { alert("Nenhuma carta encontrada com a combinação de baralhos e categorias selecionadas."); return; }
 
-        // Converte o Set de baralhos ativos para Array antes de passar para GameState
         const activeInternalBaralhosStateForSave = Object.entries(activeInternalBaralhos).reduce((acc, [key, valueSet]) => {
-            if (allSources.find(s => s.id === key)?.active) { // Só inclui fontes ativas
-                acc[key] = Array.from(valueSet);
-            }
-            return acc;
+            if (allSources.find(s => s.id === key)?.active) { acc[key] = Array.from(valueSet); } return acc;
         }, {} as Record<string, string[]>);
 
         if (continueGame && typeof window !== "undefined") {
@@ -365,7 +333,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                     gameStateToStart = {
                         ...savedState, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex,
                         activeSourceIds: allSources.filter(s => s.active).map(s => s.id),
-                        activeInternalBaralhosState: activeInternalBaralhosStateForSave, // Usa o estado atual da UI
+                        activeInternalBaralhosState: activeInternalBaralhosStateForSave,
                     };
                 } else { return handleStartGame(false); }
             } catch (e) { console.error("Erro ao carregar jogo salvo:", e); return handleStartGame(false); }
@@ -374,7 +342,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
             gameStateToStart = {
                 players: initializedPlayers, currentPlayerId: initializedPlayers[0]?.id ?? null, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex, jogoIniciado: true,
                 activeSourceIds: allSources.filter(s => s.active).map(s => s.id),
-                activeInternalBaralhosState: activeInternalBaralhosStateForSave, // Usa o estado atual da UI
+                activeInternalBaralhosState: activeInternalBaralhosStateForSave,
             };
         }
         onStartGame(gameStateToStart);
@@ -394,10 +362,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                 <p className="text-sm text-center text-gray-600">O Jogo da Sustentabilidade</p>
             </CardHeader>
             <CardContent className="space-y-6">
-
-                 {/* Gerenciamento de Fontes e Baralhos Internos (Separado) */}
                  <div className="space-y-4">
-                    {/* --- Baralhos Incluídos --- */}
                     <div>
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">Baralhos Incluídos</h3>
                         <ScrollArea className="h-40 border rounded-md p-2 bg-gray-100 space-y-2">
@@ -407,37 +372,28 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                                         <Checkbox id={`source-${source.id}`} checked={source.active} onCheckedChange={() => toggleSourceActive(source.id)} className="mt-1"/>
                                         <button onClick={() => toggleExpandSource(source.id)} className="flex items-center flex-1 text-left cursor-pointer min-w-0" aria-expanded={expandedSources.has(source.id)}>
                                             {expandedSources.has(source.id) ? <ChevronDown className="h-4 w-4 mr-1 shrink-0"/> : <ChevronRight className="h-4 w-4 mr-1 shrink-0"/>}
-                                            <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={source.name}>
-                                                {source.name}
-                                            </label>
+                                            <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={source.name}> {source.name} </label>
                                         </button>
                                     </div>
                                      {source.active && expandedSources.has(source.id) && (
                                          <div className="pl-8 mt-1 space-y-1">
-                                            {/* ===== MODIFICAÇÃO: Mostrar contagem de cartas ===== */}
                                             {Object.entries(source.internalBaralhos).length > 0 ? Object.entries(source.internalBaralhos).map(([baralhoName, count]) => (
                                                 <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
                                                     <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} />
-                                                    <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer">
-                                                        {baralhoName} <span className="text-gray-500">({count})</span> {/* Mostra contagem */}
-                                                    </label>
+                                                    <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer"> {baralhoName} <span className="text-gray-500">({count})</span> </label>
                                                 </div>
                                             )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
-                                             {/* ===== FIM DA MODIFICAÇÃO ===== */}
                                          </div>
                                      )}
                                 </div>
                             )) : <p className="text-sm text-gray-500 italic p-2">Nenhum baralho incluído encontrado.</p>}
                         </ScrollArea>
                     </div>
-
-                    {/* --- Baralhos Carregados (Arquivos) --- */}
                      <div className="mt-4">
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">Baralhos Carregados (Arquivos)</h3>
                          {errorMessage && (<Alert variant="destructive" className="text-xs mb-2"><AlertDescription>{errorMessage}</AlertDescription></Alert>)}
                          <Input type="file" multiple accept=".js,.json" onChange={handleCustomDeckUpload} disabled={isLoading} className="text-sm h-9 mb-2"/>
                          {isLoading && <p className="text-xs text-blue-600 mb-2">Carregando...</p>}
-
                          {customSourcesUI.length > 0 ? (
                             <ScrollArea className="h-40 border rounded-md p-2 bg-gray-100 space-y-2">
                                  {customSourcesUI.map((source) => (
@@ -446,24 +402,18 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                                              <Checkbox id={`source-${source.id}`} checked={source.active} onCheckedChange={() => toggleSourceActive(source.id)} className="mt-1"/>
                                              <button onClick={() => toggleExpandSource(source.id)} className="flex items-center flex-1 text-left cursor-pointer min-w-0" aria-expanded={expandedSources.has(source.id)}>
                                                  {expandedSources.has(source.id) ? <ChevronDown className="h-4 w-4 mr-1 shrink-0"/> : <ChevronRight className="h-4 w-4 mr-1 shrink-0"/>}
-                                                 <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={source.name}>
-                                                     {source.name}
-                                                 </label>
+                                                 <label htmlFor={`source-${source.id}`} className="text-sm font-medium cursor-pointer truncate flex-1" title={source.name}> {source.name} </label>
                                              </button>
                                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:bg-red-100 shrink-0" onClick={(e) => {e.stopPropagation(); removeSource(source.id);}} aria-label={`Remover fonte ${source.name}`}><Trash className="h-4 w-4" /></Button>
                                          </div>
                                          {source.active && expandedSources.has(source.id) && (
                                              <div className="pl-8 mt-1 space-y-1">
-                                                {/* ===== MODIFICAÇÃO: Mostrar contagem de cartas ===== */}
                                                 {Object.entries(source.internalBaralhos).length > 0 ? Object.entries(source.internalBaralhos).map(([baralhoName, count]) => (
                                                     <div key={`${source.id}-${baralhoName}`} className="flex items-center space-x-2">
                                                         <Checkbox id={`baralho-${source.id}-${baralhoName}`} checked={activeInternalBaralhos[source.id]?.has(baralhoName) ?? false} onCheckedChange={() => toggleInternalBaralhoActive(source.id, baralhoName)} />
-                                                        <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer">
-                                                            {baralhoName} <span className="text-gray-500">({count})</span> {/* Mostra contagem */}
-                                                        </label>
+                                                        <label htmlFor={`baralho-${source.id}-${baralhoName}`} className="text-xs cursor-pointer"> {baralhoName} <span className="text-gray-500">({count})</span> </label>
                                                     </div>
                                                 )) : ( <p className="text-xs italic text-gray-500">Nenhum baralho interno definido.</p> )}
-                                                 {/* ===== FIM DA MODIFICAÇÃO ===== */}
                                              </div>
                                          )}
                                     </div>
@@ -472,8 +422,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                          ) : ( !isLoading && <p className="text-sm text-gray-500 italic p-2 border rounded bg-gray-100">Nenhum arquivo carregado.</p> )}
                     </div>
                  </div>
-
-                {/* Seleção de Categorias */}
                 <div className="space-y-2">
                     <h3 className="text-lg font-semibold text-gray-800">Categorias (dos baralhos ativos)</h3>
                     <Input type="text" placeholder="Pesquisar Categoria..." value={termoBuscaCategoria} onChange={(e) => setTermoBuscaCategoria(e.target.value)} className="w-full p-2 border rounded h-9"/>
@@ -492,8 +440,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                         <Button onClick={() => setCategoriasSelecionadas([])} variant="outline" size="sm" className="flex-1">Nenhuma</Button>
                     </div>
                 </div>
-
-                {/* Configuração de Jogadores */}
                 <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Jogadores</h3>
                     <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
@@ -504,28 +450,16 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                                     <Button variant="outline" size="icon" className="w-8 h-8 flex-shrink-0" onClick={() => toggleColorPicker(index)} style={{ backgroundColor: player.color }} aria-label="Selecionar cor"/>
                                     <Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0 text-red-500 hover:bg-red-100" onClick={() => deletePlayer(index)} aria-label="Remover jogador"><Trash className="h-4 w-4" /></Button>
                                 </div>
-                                {player.showColorPicker && (
-                                    <div className="absolute z-20 mt-2 right-12 w-48 bg-white border rounded-md shadow-lg p-2 grid grid-cols-6 gap-1">
-                                        {predefinedColors.map((color, idx) => ( <button key={idx} aria-label={`Selecionar cor ${color}`} style={{ backgroundColor: color }} className={cn('w-6 h-6 rounded border', player.color === color ? 'ring-2 ring-offset-1 ring-black' : 'border-gray-300')} onClick={() => {handlePlayerChange(index, "color", color); toggleColorPicker(index);}} /> ))}
-                                    </div>
-                                )}
+                                {player.showColorPicker && ( <div className="absolute z-20 mt-2 right-12 w-48 bg-white border rounded-md shadow-lg p-2 grid grid-cols-6 gap-1"> {predefinedColors.map((color, idx) => ( <button key={idx} aria-label={`Selecionar cor ${color}`} style={{ backgroundColor: color }} className={cn('w-6 h-6 rounded border', player.color === color ? 'ring-2 ring-offset-1 ring-black' : 'border-gray-300')} onClick={() => {handlePlayerChange(index, "color", color); toggleColorPicker(index);}} /> ))} </div> )}
                             </div>
                         ))}
                     </div>
                     {playerInputs.length < 8 && (<Button onClick={addPlayerInput} variant="secondary" className="w-full">+ Adicionar Jogador</Button>)}
                 </div>
-
-                 {/* Opções de Jogo */}
                  <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Opções</h3>
-                     <Button onClick={() => setOcultarCarta(!ocultarCarta)} variant="outline" className="w-full flex items-center justify-center space-x-2">
-                         {ocultarCarta ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                         <span>{ocultarCarta ? "Ocultar Carta Ativado" : "Ocultar Carta Desativado"}</span>
-                     </Button>
-                     <Button onClick={cycleProbability} className="w-full flex items-center justify-center space-x-2" style={{ backgroundColor: probabilitySettings[probabilityIndex].color, color: probabilitySettings[probabilityIndex].textColor }}>
-                         <span>% Excluir Especiais:</span>
-                         <span className="font-bold">{probabilitySettings[probabilityIndex].label}</span>
-                     </Button>
+                     <Button onClick={() => setOcultarCarta(!ocultarCarta)} variant="outline" className="w-full flex items-center justify-center space-x-2"> {ocultarCarta ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />} <span>{ocultarCarta ? "Ocultar Carta Ativado" : "Ocultar Carta Desativado"}</span> </Button>
+                     <Button onClick={cycleProbability} className="w-full flex items-center justify-center space-x-2" style={{ backgroundColor: probabilitySettings[probabilityIndex].color, color: probabilitySettings[probabilityIndex].textColor }}> <span>% Excluir Especiais:</span> <span className="font-bold">{probabilitySettings[probabilityIndex].label}</span> </Button>
                  </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-3 pt-6 border-t">
@@ -569,7 +503,10 @@ const EcoChallenge: React.FC = () => {
         try { customSources = customSourcesRaw ? JSON.parse(customSourcesRaw) : []; } catch { customSources = []; }
         try { builtInStatus = builtInStatusRaw ? JSON.parse(builtInStatusRaw) : null; } catch { builtInStatus = null; }
         const processedCustomSources = customSources.map(source => {
-            if (source.internalBaralhos) { const { processedCards } = processCardsAndExtractBaralhos(source.cards); return { ...source, cards: processedCards}; }
+            if (source.internalBaralhos && typeof source.internalBaralhos === 'object' && !Array.isArray(source.internalBaralhos)) { // Verifica se já tem o formato Record
+                 const { processedCards } = processCardsAndExtractBaralhos(source.cards);
+                 return { ...source, cards: processedCards};
+             }
             const { processedCards, internalBaralhos } = processCardsAndExtractBaralhos(source.cards);
             return { ...source, cards: processedCards, internalBaralhos };
         });
@@ -630,32 +567,21 @@ const EcoChallenge: React.FC = () => {
         const incluirCartasEspeciais = probabilidadeExcluirEspecial === 0 || Math.random() >= probabilidadeExcluirEspecial;
         const activeSources = allSourcesMemo.filter(s => activeSourceIds.includes(s.id));
 
-        // ***** INÍCIO DA CORREÇÃO NA LÓGICA DE FILTRO *****
         const cartasFiltradas = activeSources.flatMap(source => {
-            const activeBaralhosForSource = activeInternalBaralhosState[source.id]; // Pega o ARRAY de nomes ativos do gameState
-            if (!activeBaralhosForSource || activeBaralhosForSource.length === 0) return []; // Pula fonte sem baralhos ativos
-
-            // Cria um Set a partir do array para checagem rápida O(1)
-            const activeBaralhoSet = new Set(activeBaralhosForSource);
+            const activeBaralhosForSource = activeInternalBaralhosState[source.id]; // Pega o ARRAY
+            if (!activeBaralhosForSource || activeBaralhosForSource.length === 0) return [];
+            const activeBaralhoSet = new Set(activeBaralhosForSource); // Cria o Set para checagem rápida
 
             return source.cards.filter(card => {
-                // Checa baralho interno usando o Set
                 const baralhoAtivo = activeBaralhoSet.has(card.baralho || DEFAULT_BARALHO_NAME);
                 if (!baralhoAtivo) return false;
-
-                // Checa categoria
                 const categoriaValida = card.categorias?.some(cat => categoriasSelecionadas.includes(cat));
                 if (!categoriaValida) return false;
-
-                // Checa exclusão de especiais
                 const isTipoEspecial = tiposEspeciais.includes(card.tipo);
                 if (!incluirCartasEspeciais && isTipoEspecial) return false;
-
-                return true; // Passou por todos os filtros
+                return true;
             });
         });
-        // ***** FIM DA CORREÇÃO NA LÓGICA DE FILTRO *****
-
 
         if (cartasFiltradas.length === 0) { setNoCardsAvailable(true); setCartaAtual(null); setMensagem("Nenhuma carta encontrada com os filtros atuais!"); return; }
         setNoCardsAvailable(false);
@@ -668,7 +594,7 @@ const EcoChallenge: React.FC = () => {
         setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]);
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
         if (novaCarta.tipo === "ContraTempo") { setTempoRestante(novaCarta.tempoLimite); }
-    }, [gameState, allSourcesMemo]); // Removida a dependência 'probabilitySettings' que era desnecessária
+    }, [gameState, allSourcesMemo]);
 
     useEffect(() => { if (gameState?.jogoIniciado && !cartaAtual && !noCardsAvailable) { selecionarCartaAleatoria(); } }, [gameState?.jogoIniciado, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]);
 
@@ -920,7 +846,7 @@ const EcoChallenge: React.FC = () => {
                     return ( <Button key={op.id} onClick={() => handleSelecaoMultipla(op.id)} variant="outline" className={cn( "w-full justify-start text-sm py-2 px-3", btnClass, isEliminated && "line-through opacity-50 cursor-not-allowed")} style={buttonInlineStyle} disabled={isEliminated || respondido}> <div className={cn("w-4 h-4 mr-2 border rounded flex-shrink-0 flex items-center justify-center", isSelected ? 'bg-blue-600 border-blue-700' : 'border-gray-400 bg-white')}>{isSelected && <Check className="w-3 h-3 text-white" />}</div> <span className="flex-1">{op.texto}</span> {isCorrect && respondido && <CheckCircle2 className="ml-2 h-4 w-4 text-green-600 flex-shrink-0" />} {isWrongSelection && <XCircle className="ml-2 h-4 w-4 text-red-600 flex-shrink-0" />} {missedCorrect && <span title="Esta era correta" className="ml-2 text-blue-600 font-bold">✓</span>} </Button> );
                 });
             case "Ordem":
-                 if (!('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || !Array.isArray(cartaAtual.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos para Ordem.</p>;
+                 if (!('opcoes' in cartaAtual) || !Array.isArray(cartaAtual.opcoes) || !Array.isArray(cartaAtual.respostaCorreta)) return <p className="text-xs text-red-500">Erro: Dados inválidos.</p>;
                  const cOrdem = cartaAtual as CartaOrdem;
                  return cOrdem.opcoes.map((op) => {
                     const isSelected = ordemSelecoes.includes(op.id); const selectionIndex = isSelected ? ordemSelecoes.indexOf(op.id) + 1 : null;
@@ -934,9 +860,7 @@ const EcoChallenge: React.FC = () => {
                         <Button key={op.id} onClick={() => handleSelecaoOrdem(op.id)} variant="outline" className={cn("w-full justify-start text-sm py-2 px-3", btnClass )} style={buttonInlineStyle} disabled={respondido}>
                             {isSelected && !respondido && (<span className="mr-2 font-bold text-blue-600 text-xs w-5 h-5 flex items-center justify-center rounded-full bg-white ring-1 ring-blue-500">{selectionIndex}</span>)}
                             <span className="flex-1">{op.texto}</span>
-                            {respondido && isCorrectOptionOverall && (
-                                <> <span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${isCorrectOrder ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`} title={isCorrectOrder ? `Posição Correta: ${correctIndex}` : `Sua Posição: ${selectionIndex}`}>{isCorrectOrder ? correctIndex : selectionIndex}</span> {isWrongOrder && correctIndex !== null && ( <span className="ml-1 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white" title={`Posição Correta: ${correctIndex}`}>{correctIndex}</span> )} </>
-                            )}
+                            {respondido && isCorrectOptionOverall && ( <> <span className={`ml-2 font-bold text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${isCorrectOrder ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`} title={isCorrectOrder ? `Posição Correta: ${correctIndex}` : `Sua Posição: ${selectionIndex}`}>{isCorrectOrder ? correctIndex : selectionIndex}</span> {isWrongOrder && correctIndex !== null && ( <span className="ml-1 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-white" title={`Posição Correta: ${correctIndex}`}>{correctIndex}</span> )} </> )}
                         </Button>
                     );
                 });
