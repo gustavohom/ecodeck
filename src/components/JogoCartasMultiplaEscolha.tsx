@@ -336,7 +336,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                 <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Jogadores</h3>
                     {/* CORREÇÃO: Revertida altura para max-h-60 */}
-                    <ScrollArea className="max-h-60 space-y-2 pr-2 border rounded-md bg-gray-50 p-2">
+                    <ScrollArea className="max-h-128 space-y-2 pr-2 border rounded-md bg-gray-50 p-2">
                         {playerInputs.map((player, index) => (
                             <div key={player.id} className="border p-3 rounded-md shadow-sm bg-white relative">
                                 <div className="flex items-center space-x-2">
