@@ -61,11 +61,14 @@ interface SourceInfo {
     id: string; name: string; type: 'builtin' | 'custom'; cards: Carta[];
     internalBaralhos: Record<string, number>; totalCards: number; active: boolean;
 }
+// Estado do Jogo (GameState) - Inclui mostrarSomentePerguntas
 interface GameState {
     players: Player[]; currentPlayerId: number | null; categoriasSelecionadas: string[];
     ocultarCarta: boolean; probabilityIndex: number; jogoIniciado: boolean;
     activeSourceIds: string[]; activeInternalBaralhosState: Record<string, string[]>;
+    mostrarSomentePerguntas: boolean; // <<--- REINTEGRADO
 }
+// Estado da UI da Tela Inicial (Salvo separadamente)
 interface TelaInicialUISettings {
     categoriasSelecionadas: string[]; ocultarCarta: boolean; probabilityIndex: number;
 }
@@ -195,7 +198,6 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const handleStartGame = (continueGame = false) => {
         let gameStateToPass: Partial<GameState>; let sourcesForGame: SourceInfo[] = [];
         if (!isClient) { alert("Aguarde inicialização."); return; }
-        // CORREÇÃO: Não filtrar jogadores aqui, apenas validar se existe pelo menos um
         if (playerInputs.length === 0) { alert("Adicione pelo menos um jogador."); return; }
         const activeSources = allSources.filter(s => s.active); if (activeSources.length === 0) { alert("Nenhuma Fonte ativa."); return; }
         const anyInternalDeckActive = activeSources.some(source => activeInternalBaralhos[source.id]?.size > 0); if (!anyInternalDeckActive) { alert("Nenhum baralho interno ativo."); return; }
@@ -205,19 +207,12 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
         sourcesForGame = activeSources; const activeInternalBaralhosStateForSave = Object.entries(activeInternalBaralhos).filter(([sourceId]) => sourcesForGame.some(s => s.id === sourceId)).reduce((acc, [key, valueSet]) => { acc[key] = Array.from(valueSet); return acc; }, {} as Record<string, string[]>);
         if (continueGame && hasSavedGame && typeof window !== "undefined") {
             const savedStateRaw = localStorage.getItem(LOCALSTORAGE_KEYS.GAME_STATE);
-            try { const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; if (savedState && savedState.jogoIniciado) { gameStateToPass = { ...savedState, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex, activeSourceIds: sourcesForGame.map(s => s.id), activeInternalBaralhosState: activeInternalBaralhosStateForSave, jogoIniciado: true, }; console.log("Continuando jogo:", gameStateToPass); } else { console.warn("Jogo salvo inválido. Iniciando novo."); return handleStartGame(false); } } catch (e) { console.error("Erro carregar jogo:", e); return handleStartGame(false); }
+            try { const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; if (savedState && savedState.jogoIniciado) { gameStateToPass = { ...savedState, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex, activeSourceIds: sourcesForGame.map(s => s.id), activeInternalBaralhosState: activeInternalBaralhosStateForSave, jogoIniciado: true, mostrarSomentePerguntas: savedState.mostrarSomentePerguntas ?? false }; console.log("Continuando jogo:", gameStateToPass); } else { console.warn("Jogo salvo inválido. Iniciando novo."); return handleStartGame(false); } } catch (e) { console.error("Erro carregar jogo:", e); return handleStartGame(false); }
         } else {
-            // CORREÇÃO: Mapear *todos* os playerInputs e aplicar nome padrão se vazio
-            const initializedPlayers: Player[] = playerInputs.map((input, index) => ({
-                id: index, // Usar index como ID para novo jogo
-                name: input.name.trim() || `Jogador ${index + 1}`, // Nome padrão
-                color: input.color || predefinedColors[index % predefinedColors.length],
-                fixedStars: 0, respostasCertas: 0, respostasErradas: 0, respostasSeguidas: 0,
-                progresso: 0, pulosDisponiveis: 0, contadorDeEstrelas: 0, rodadasPreso: 0
-            }));
-            // Validação após mapeamento com nome padrão (embora a UI impeça 0 players)
+            const initializedPlayers: Player[] = playerInputs.map((input, index) => ({ id: index, name: input.name.trim() || `Jogador ${index + 1}`, color: input.color || predefinedColors[index % predefinedColors.length], fixedStars: 0, respostasCertas: 0, respostasErradas: 0, respostasSeguidas: 0, progresso: 0, pulosDisponiveis: 0, contadorDeEstrelas: 0, rodadasPreso: 0 }));
              if (initializedPlayers.length === 0) { alert("Erro: Nenhum jogador para iniciar."); return; }
-            gameStateToPass = { players: initializedPlayers, currentPlayerId: initializedPlayers[0]?.id ?? null, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex, activeSourceIds: sourcesForGame.map(s => s.id), activeInternalBaralhosState: activeInternalBaralhosStateForSave, jogoIniciado: true }; console.log("Iniciando novo jogo:", gameStateToPass);
+            gameStateToPass = { players: initializedPlayers, currentPlayerId: initializedPlayers[0]?.id ?? null, categoriasSelecionadas: finalCategoriasSelecionadas, ocultarCarta: ocultarCarta, probabilityIndex: probabilityIndex, activeSourceIds: sourcesForGame.map(s => s.id), activeInternalBaralhosState: activeInternalBaralhosStateForSave, jogoIniciado: true, mostrarSomentePerguntas: false }; // <<-- Começa false por padrão
+            console.log("Iniciando novo jogo:", gameStateToPass);
         }
         onStartGame(gameStateToPass, sourcesForGame);
     };
@@ -230,11 +225,13 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     // --- JSX Tela Inicial ---
     return (
         <Card className="w-full max-w-lg mx-auto mt-8 mb-8 shadow-lg">
+            {/* Header */}
             <CardHeader>
                 <CardTitle className="text-2xl font-bold text-center text-green-700">Eco Challenge</CardTitle>
                 <p className="text-sm text-center text-gray-600">O Jogo da Sustentabilidade</p>
             </CardHeader>
 
+            {/* Content */}
             <CardContent className="space-y-6">
                 {/* Fontes/Baralhos */}
                 <div className="space-y-4">
@@ -338,8 +335,8 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
                 {/* Jogadores */}
                 <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-800">Jogadores</h3>
-                    {/* CORREÇÃO: Aumentada altura e confirmado ScrollArea */}
-                    <ScrollArea className="max-h-128 space-y-2 pr-2 border rounded-md bg-gray-50 p-2">
+                    {/* CORREÇÃO: Revertida altura para max-h-60 */}
+                    <ScrollArea className="max-h-60 space-y-2 pr-2 border rounded-md bg-gray-50 p-2">
                         {playerInputs.map((player, index) => (
                             <div key={player.id} className="border p-3 rounded-md shadow-sm bg-white relative">
                                 <div className="flex items-center space-x-2">
@@ -407,6 +404,7 @@ const EcoChallenge: React.FC = () => {
     const [paresFormados, setParesFormados] = useState<{ aId: number; bId: number }[]>([]);
     const [coordenadasClique, setCoordenadasClique] = useState<{ x: number; y: number } | null>(null);
     const [fragmentosSelecionados, setFragmentosSelecionados] = useState<number[]>([]);
+    // REINTEGRADO: Estado para o filtro de perguntas
     const [mostrarSomentePerguntas, setMostrarSomentePerguntas] = useState(false);
     const [rolledNumber, setRolledNumber] = useState<number | null>(null);
     const [rollingNumber, setRollingNumber] = useState<number | null>(null);
@@ -416,44 +414,82 @@ const EcoChallenge: React.FC = () => {
     const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
 
+    // --- Gerenciamento de Estado ---
     const handleGameStart = useCallback((initialGameState?: Partial<GameState>, sourcesForGame?: SourceInfo[]) => {
         if (initialGameState && initialGameState.jogoIniciado && sourcesForGame && sourcesForGame.length > 0) {
             setGameState(initialGameState as GameState); setCurrentGameSources(sourcesForGame);
+            // REINTEGRADO: Define o estado inicial do filtro
+            setMostrarSomentePerguntas(initialGameState.mostrarSomentePerguntas ?? false);
+            // Reseta o resto
             setCartaAtual(null); setNoCardsAvailable(false); setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setMostrarFontes(false); setOpcoesEliminadas([]); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]); setRolledNumber(null); setIsDieModalOpen(false); setCartaRevelada(!(initialGameState.ocultarCarta ?? true));
-            console.log("Jogo iniciado/continuado. Jogadores:", initialGameState.players);
+            console.log("Jogo iniciado/continuado. Jogadores:", initialGameState.players, "Filtro Perguntas:", initialGameState.mostrarSomentePerguntas);
         } else if (initialGameState?.jogoIniciado && initialGameState.activeSourceIds) {
              console.warn("Reconstruindo fontes (fallback)..."); /* ... */
         } else { console.error("handleGameStart sem dados válidos."); setGameState(null); setCurrentGameSources([]); }
      }, []);
+
     const updateGameState = useCallback((newState: Partial<GameState>) => {
-        setGameState(prev => { if (!prev) return null; const updatedState = { ...prev, ...newState }; if (typeof window !== "undefined") { try { localStorage.setItem(LOCALSTORAGE_KEYS.GAME_STATE, JSON.stringify(updatedState)); } catch (e) { console.error("Erro salvar estado:", e); } } return updatedState; });
-    }, []);
+        setGameState(prev => {
+            if (!prev) return null;
+            // Garante que mostrarSomentePerguntas seja incluído na atualização se não estiver explicitamente em newState
+            const updatedState = {
+                ...prev,
+                ...newState,
+                mostrarSomentePerguntas: newState.mostrarSomentePerguntas ?? prev.mostrarSomentePerguntas
+            };
+            if (typeof window !== "undefined") {
+                try {
+                    // Salva o estado COMPLETO, incluindo mostrarSomentePerguntas
+                    localStorage.setItem(LOCALSTORAGE_KEYS.GAME_STATE, JSON.stringify(updatedState));
+                } catch (e) { console.error("Erro ao salvar estado:", e); }
+            }
+            return updatedState;
+        });
+    }, []); // Removido mostrarSomentePerguntas daqui, pois é gerenciado internamente na função
+
     const updateCurrentPlayer = useCallback((partialPlayerData: Partial<Player>) => {
         if (!gameState || gameState.currentPlayerId === null) return;
         const playerExists = gameState.players.some(p => p.id === gameState.currentPlayerId); if (!playerExists) { console.error(`Jogador ${gameState.currentPlayerId} não encontrado.`); return; }
-        const updatedPlayers = gameState.players.map(p => p.id === gameState.currentPlayerId ? { ...p, ...partialPlayerData } : p ); updateGameState({ players: updatedPlayers });
-    }, [gameState, updateGameState]);
+        const updatedPlayers = gameState.players.map(p => p.id === gameState.currentPlayerId ? { ...p, ...partialPlayerData } : p );
+        // Chama updateGameState que agora salva o estado completo
+        updateGameState({ players: updatedPlayers });
+    }, [gameState, updateGameState]); // Mantém dependência de updateGameState
+
     useEffect(() => { setIsClientReady(true); }, []);
 
+    // --- Lógica de Seleção de Carta (Reintegrado Filtro) ---
     const selecionarCartaAleatoria = useCallback(() => {
         if (!gameState || !gameState.players || gameState.players.length === 0 || currentGameSources.length === 0) { console.error("Impossível selecionar: gameState inválido ou sem fontes."); setNoCardsAvailable(true); setCartaAtual(null); return; }
-        const { categoriasSelecionadas, probabilityIndex, activeInternalBaralhosState } = gameState;
+        // REINTEGRADO: Usa mostrarSomentePerguntas do gameState atual
+        const { categoriasSelecionadas, probabilityIndex, activeInternalBaralhosState, mostrarSomentePerguntas: filtroPerguntasAtivo } = gameState;
         if (!activeInternalBaralhosState) { console.error("activeInternalBaralhosState ausente."); setNoCardsAvailable(true); setCartaAtual(null); return; }
         const probabilidadeExcluirEspecial = probabilitySettings[probabilityIndex].value; const incluirCartasEspeciais = probabilidadeExcluirEspecial === 0 || Math.random() >= probabilidadeExcluirEspecial;
         const cartasFiltradas = currentGameSources.flatMap(source => { const activeBaralhosArray = activeInternalBaralhosState[source.id]; if (!activeBaralhosArray || activeBaralhosArray.length === 0) return []; const activeBaralhoSet = new Set(activeBaralhosArray);
-            return source.cards.filter(card => { const baralhoAtivo = activeBaralhoSet.has(card.baralho || DEFAULT_BARALHO_NAME); if (!baralhoAtivo) return false; const categoriaValida = card.categorias?.some(cat => categoriasSelecionadas.includes(cat)); if (!categoriaValida) return false; const isTipoEspecial = tiposEspeciais.includes(card.tipo); if (!incluirCartasEspeciais && isTipoEspecial) return false; if (mostrarSomentePerguntas && !tiposPergunta.includes(card.tipo)) return false; return true; });
+            return source.cards.filter(card => {
+                const baralhoAtivo = activeBaralhoSet.has(card.baralho || DEFAULT_BARALHO_NAME); if (!baralhoAtivo) return false;
+                const categoriaValida = card.categorias?.some(cat => categoriasSelecionadas.includes(cat)); if (!categoriaValida) return false;
+                const isTipoPergunta = tiposPergunta.includes(card.tipo); // Verifica se é tipo pergunta
+                const isTipoEspecial = tiposEspeciais.includes(card.tipo); // Verifica se é tipo especial
+                // Aplica filtro de perguntas se ativo
+                if (filtroPerguntasAtivo && !isTipoPergunta) return false;
+                // Aplica filtro de probabilidade para tipos especiais
+                if (!incluirCartasEspeciais && isTipoEspecial) return false;
+                return true; // Passou por todos os filtros
+            });
         });
         if (cartasFiltradas.length === 0) { setNoCardsAvailable(true); setCartaAtual(null); setMensagem("Nenhuma carta encontrada com os filtros atuais!"); return; }
         setNoCardsAvailable(false); const idxAleat = Math.floor(Math.random() * cartasFiltradas.length); const novaCarta = cartasFiltradas[idxAleat]; setCartaAtual(novaCarta);
         setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setMostrarFontes(false); setOpcoesEliminadas([]); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]); setRolledNumber(null); setIsDieModalOpen(false); setCartaRevelada(!gameState.ocultarCarta);
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (novaCarta.tipo === "ContraTempo") { setTempoRestante(novaCarta.tempoLimite); }
-    }, [gameState, currentGameSources, mostrarSomentePerguntas]);
+    }, [gameState, currentGameSources]); // Removido mostrarSomentePerguntas daqui, pois está dentro de gameState
 
+    // Efeito selecionar primeira carta
     useEffect(() => {
         if (gameState?.jogoIniciado && gameState.players.length > 0 && currentGameSources.length > 0 && !cartaAtual && !noCardsAvailable) { selecionarCartaAleatoria(); }
     }, [gameState?.jogoIniciado, gameState?.players, currentGameSources, cartaAtual, noCardsAvailable, selecionarCartaAleatoria]);
 
-    useEffect(() => {
+    // Efeito Timer ContraTempo
+    useEffect(() => { /* ... (lógica mantida) ... */
         if (cartaAtual?.tipo === "ContraTempo" && tempoRestante !== null && tempoRestante > 0 && !respondido && gameState?.jogoIniciado && cartaRevelada) {
             timerIntervalRef.current = setInterval(() => {
                 setTempoRestante((prev) => {
@@ -465,6 +501,8 @@ const EcoChallenge: React.FC = () => {
         return () => { if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } };
     }, [cartaAtual, tempoRestante, respondido, gameState?.jogoIniciado, cartaRevelada, gameState?.currentPlayerId]);
 
+
+    // --- Handlers ---
     const handleSelecao = (id: number) => { if (!respondido) setSelecionado(id); };
     const handleSelecaoMultipla = (id: number) => { if (!respondido) { setSelecoesMultiplas((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
     const handleSelecaoOrdem = (id: number) => { if (!respondido) { setOrdemSelecoes((prev) => prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]); } };
@@ -473,12 +511,12 @@ const EcoChallenge: React.FC = () => {
     const handleImagemClick = (event: React.MouseEvent<HTMLDivElement>) => { if (respondido || !cartaAtual || cartaAtual.tipo !== 'PontoCerto') return; const target = event.currentTarget; const rect = target.getBoundingClientRect(); const x = (event.clientX - rect.left) / rect.width; const y = (event.clientY - rect.top) / rect.height; const clampedX = Math.max(0, Math.min(1, x)); const clampedY = Math.max(0, Math.min(1, y)); setCoordenadasClique({ x: clampedX, y: clampedY }); };
     const handleSelecionarFragmento = (id: number) => { if (respondido) return; setFragmentosSelecionados(prev => [...prev, id]); };
     const limparFragmentos = () => { if (!respondido) { setFragmentosSelecionados([]); } };
-    const verificarResposta = () => {
+    const verificarResposta = () => { /* ... (lógica mantida) ... */
         if (!cartaAtual || !gameState || !gameState.players || gameState.currentPlayerId === null || respondido) return;
         const currentPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId); if (!currentPlayer) return;
         let cor = false; let pontosGanhos = 20; let pontosPerdidos = 10; let darPuloDificil = false; let mensagemFinal = ""; let aplicarEfeitoPadrao = false;
         if (cartaAtual.tipo === "ContraTempo" && timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; }
-         switch (cartaAtual.tipo) { // ... (lógica switch mantida) ...
+         switch (cartaAtual.tipo) {
             case "Pergunta": case "ContraTempo": if (cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && tempoRestante <= 0) { cor = false; mensagemFinal = mensagem || `Tempo esgotado! ${cartaAtual.desvantagem || ''}`; } else { cor = selecionado === cartaAtual.respostaCorreta; } aplicarEfeitoPadrao = true; break;
             case "MultiplaEscolha": cor = Array.isArray(cartaAtual.respostaCorreta) && selecoesMultiplas.length === cartaAtual.respostaCorreta.length && selecoesMultiplas.every(sel => cartaAtual.respostaCorreta.includes(sel)) && cartaAtual.respostaCorreta.every(res => selecoesMultiplas.includes(res)); if (cor) pontosGanhos = 25; aplicarEfeitoPadrao = true; break;
             case "Ordem": cor = Array.isArray(cartaAtual.respostaCorreta) && ordemSelecoes.length === cartaAtual.respostaCorreta.length && ordemSelecoes.toString() === cartaAtual.respostaCorreta.toString(); if (cor) pontosGanhos = 30; darPuloDificil = cor; aplicarEfeitoPadrao = true; break;
@@ -509,7 +547,7 @@ const EcoChallenge: React.FC = () => {
     const incrementarContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: cp.contadorDeEstrelas + 1 }); setMensagem("Estrela bônus adicionada."); };
     const diminuirContadorDeEstrelas = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ contadorDeEstrelas: Math.max(0, cp.contadorDeEstrelas - 1) }); setMensagem("Estrela bônus removida."); };
     const incrementarRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: cp.rodadasPreso + 1 }); setMensagem("Rodada preso adicionada."); };
-    const diminuirRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: cp.rodadasPreso - 1 }); setMensagem("Rodada preso removida."); }; // Permite negativo
+    const diminuirRodadasPreso = () => { const cp = gameState?.players.find(p => p.id === gameState?.currentPlayerId); if (!cp) return; updateCurrentPlayer({ rodadasPreso: cp.rodadasPreso - 1 }); setMensagem("Rodada preso removida."); };
     const rolarDado = () => { if (isRolling) return; setIsRolling(true); setIsDieModalOpen(true); setRolledNumber(null); setRollingNumber(Math.floor(Math.random() * 6) + 1); let rollCount = 0; const maxRolls = 15; const rollInterval = setInterval(() => { setRollingNumber(Math.floor(Math.random() * 6) + 1); rollCount++; if (rollCount >= maxRolls) { clearInterval(rollInterval); const finalNumber = Math.floor(Math.random() * 6) + 1; setRolledNumber(finalNumber); setRollingNumber(null); setIsRolling(false); } }, 80); };
     const handleLongPressStart = (action: () => void) => { longPressTimeout.current = setTimeout(() => { rolarDado(); }, 700); };
     const handleLongPressEnd = () => { if (longPressTimeout.current) { clearTimeout(longPressTimeout.current); longPressTimeout.current = null; } };
@@ -521,7 +559,7 @@ const EcoChallenge: React.FC = () => {
         if (typeof window !== "undefined") { const savedStateRaw = localStorage.getItem(LOCALSTORAGE_KEYS.GAME_STATE); try { const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; if (savedState && savedState.jogoIniciado) { hasSaved = true; initialPlayersData = Array.isArray(savedState.players) ? savedState.players : []; initialOcultar = savedState.ocultarCarta ?? true; initialProb = savedState.probabilityIndex ?? 0; } } catch(e) { console.error("Erro ler estado salvo:", e); } }
         return ( <TelaInicial onStartGame={handleGameStart} initialPlayers={initialPlayersData} initialOcultarCarta={initialOcultar} initialProbabilityIndex={initialProb} hasSavedGame={hasSaved} /> );
     }
-    const { players, currentPlayerId, ocultarCarta: isCartaOculta } = gameState;
+    const { players, currentPlayerId, ocultarCarta: isCartaOculta, mostrarSomentePerguntas: filtroPerguntasAtivo } = gameState; // Pega filtro do estado
     const currentPlayer = players.find(p => p.id === currentPlayerId);
     if (noCardsAvailable) { /* ... renderização sem cartas ... */
         return ( <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center"><Card className="p-6 shadow-lg max-w-sm"><CardHeader><CardTitle className="text-xl text-red-600">Sem Cartas!</CardTitle></CardHeader><CardContent><p className="mb-4">Nenhuma carta encontrada.</p><p className="text-sm text-gray-600 mb-4">Ajuste filtros/baralhos na tela inicial.</p></CardContent><CardFooter><Button onClick={voltarTelaInicial} className="w-full">Voltar</Button></CardFooter></Card></div> );
@@ -552,32 +590,51 @@ const EcoChallenge: React.FC = () => {
                 {/* CardHeader */}
                 <CardHeader className="pb-3">
                     <div className="flex justify-between items-start mb-2 gap-2">
-                        <div className="flex-1 min-w-0 pr-2">
-                            <CardTitle
-                                className="text-lg md:text-xl font-bold leading-tight truncate"
-                                title={isCartaOculta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo}
+                        {/* REINTEGRADO: Botão de Filtro + Título/Categoria */}
+                        <div className="flex items-start space-x-2 flex-1 min-w-0">
+                             {/* Botão Filtro */}
+                            <Button
+                                onClick={() => updateGameState({ mostrarSomentePerguntas: !filtroPerguntasAtivo })}
+                                size="sm"
+                                variant={filtroPerguntasAtivo ? "secondary" : "outline"}
+                                title={filtroPerguntasAtivo ? "Mostrar todas as cartas" : "Mostrar somente perguntas"}
+                                className={cn(
+                                    "flex-shrink-0 h-9 w-9 p-0 mt-0.5", // Alinhamento sutil com título
+                                    filtroPerguntasAtivo && "ring-2 ring-offset-1 ring-blue-500 bg-blue-100 border-blue-300"
+                                )}
                             >
-                                {isCartaOculta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo}
-                            </CardTitle>
-                            {(!isCartaOculta || cartaRevelada) && (
-                                <p
-                                    className="text-xs text-gray-500 mt-1 truncate"
-                                    title={(cartaAtual.categorias ? cartaAtual.categorias.join(", ") : 'Sem Categoria') + (cartaAtual.baralho && cartaAtual.baralho !== DEFAULT_BARALHO_NAME ? ` (Baralho: ${cartaAtual.baralho})` : '')}
+                                <Filter className="h-4 w-4" />
+                            </Button>
+                             {/* Título e Categoria/Baralho */}
+                            <div className="flex-1 min-w-0">
+                                <CardTitle
+                                    className="text-lg md:text-xl font-bold leading-tight truncate"
+                                    title={isCartaOculta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo}
                                 >
-                                    {cartaAtual.categorias && cartaAtual.categorias.length > 0 ? cartaAtual.categorias.join(", ") : <span className="italic">Sem Categoria</span>}
-                                    {cartaAtual.baralho && cartaAtual.baralho !== DEFAULT_BARALHO_NAME && (<span className="ml-1 font-medium text-gray-600">({cartaAtual.baralho})</span>)}
-                                </p>
-                            )}
+                                    {isCartaOculta && !cartaRevelada ? "Carta Oculta" : cartaAtual.titulo}
+                                </CardTitle>
+                                {(!isCartaOculta || cartaRevelada) && (
+                                    <p
+                                        className="text-xs text-gray-500 mt-1 truncate"
+                                        title={(cartaAtual.categorias ? cartaAtual.categorias.join(", ") : 'Sem Categoria') + (cartaAtual.baralho && cartaAtual.baralho !== DEFAULT_BARALHO_NAME ? ` (Baralho: ${cartaAtual.baralho})` : '')}
+                                    >
+                                        {cartaAtual.categorias && cartaAtual.categorias.length > 0 ? cartaAtual.categorias.join(", ") : <span className="italic">Sem Categoria</span>}
+                                        {cartaAtual.baralho && cartaAtual.baralho !== DEFAULT_BARALHO_NAME && (<span className="ml-1 font-medium text-gray-600">({cartaAtual.baralho})</span>)}
+                                    </p>
+                                )}
+                            </div>
                         </div>
+                        {/* Badge Dificuldade */}
                         {(!isCartaOculta || cartaRevelada) && (
                             <Badge
                                 variant={ cartaAtual.dificuldade === "facil" ? "secondary" : cartaAtual.dificuldade === "normal" ? "default" : "destructive" }
-                                className="capitalize flex-shrink-0 h-6 px-2.5 text-xs"
+                                className="capitalize flex-shrink-0 h-6 px-2.5 text-xs ml-2" // Adicionado ml-2 para espaçamento
                             >
                                 {cartaAtual.dificuldade}
                             </Badge>
                         )}
                     </div>
+                     {/* Timer */}
                     {cartaAtual.tipo === "ContraTempo" && tempoRestante !== null && !respondido && cartaRevelada && (
                         <div className="mt-2">
                             <Progress
@@ -589,6 +646,7 @@ const EcoChallenge: React.FC = () => {
                             </p>
                         </div>
                     )}
+                     {/* Pergunta / Placeholder */}
                     {(!isCartaOculta || cartaRevelada) ? (
                         <ScrollArea className="h-64 md:h-72 rounded-md border p-3 mt-2 bg-white/80 shadow-inner">
                             <div
@@ -652,7 +710,7 @@ const EcoChallenge: React.FC = () => {
                         <Button onClick={resetarContadoresJogador} variant="outline" size="icon" className="h-9 w-9 text-orange-600 hover:bg-orange-100" title={`Resetar ${currentPlayer.name}`}> <RotateCcw className="h-5 w-5" /> </Button>
                         <Button onClick={voltarTelaInicial} variant="outline" size="icon" className="h-9 w-9 text-indigo-600 hover:bg-indigo-100" title="Voltar (Salva jogo)"> <Home className="h-5 w-5" /> </Button>
                     </div>
-                    {/* Botões Ajuste Manual - ORDEM E ÍCONES CORRIGIDOS */}
+                    {/* Botões Ajuste Manual */}
                     <div className="flex flex-wrap justify-center gap-1.5 w-full mb-3 p-2 border rounded-md bg-gray-100 shadow-inner">
                         <Button onClick={diminuirRodadasPreso} variant="outline" size="icon" className="h-8 w-8" title="Diminuir Rodada Preso (-1)">
                             <ChevronDown className="h-5 w-5 text-purple-600" />
@@ -661,10 +719,10 @@ const EcoChallenge: React.FC = () => {
                             <ChevronUp className="h-5 w-5 text-purple-600" />
                         </Button>
                         <Button onClick={diminuirContadorDeEstrelas} variant="outline" size="icon" className="h-8 w-8" title="Diminuir Estrela Bônus (-1)">
-                            <Star className="h-5 w-5 text-red-500" /> {/* Sem fill-current */}
+                            <Star className="h-5 w-5 text-red-500" /> {/* Sem fill */}
                         </Button>
                         <Button onClick={incrementarContadorDeEstrelas} variant="outline" size="icon" className="h-8 w-8" title="Aumentar Estrela Bônus (+1)">
-                            <Star className="h-5 w-5 text-yellow-500" /> {/* Sem fill-current */}
+                            <Star className="h-5 w-5 text-yellow-500" /> {/* Sem fill */}
                         </Button>
                         <Button onClick={diminuirAcertos} variant="outline" size="icon" className="h-8 w-8" title="Diminuir Acertos (-1)">
                             <ThumbsUp className="h-5 w-5 text-green-600 transform scale-x-[-1]" />
