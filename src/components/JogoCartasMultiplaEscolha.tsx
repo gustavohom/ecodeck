@@ -30,7 +30,7 @@ interface CartaBase {
     id: string | number; tipo: string; titulo: string; pergunta: string;
     dificuldade: "facil" | "normal" | "dificil"; categorias: string[]; fontes: string[];
     vantagem: string; desvantagem: string; dica: string;
-    baralho?: string;
+    baralho?: string[];
 }
 interface CartaPergunta extends CartaBase { tipo: "Pergunta"; opcoes: Opcao[]; respostaCorreta: number; }
 interface CartaMultiplaEscolha extends CartaBase { tipo: "MultiplaEscolha"; opcoes: Opcao[]; respostaCorreta: number[]; }
