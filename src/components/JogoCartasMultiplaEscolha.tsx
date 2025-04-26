@@ -30,7 +30,7 @@ interface CartaBase {
     id: string | number; tipo: string; titulo: string; pergunta: string;
     dificuldade: "facil" | "normal" | "dificil"; categorias: string[]; fontes: string[];
     vantagem: string; desvantagem: string; dica: string;
-    baralho?: string[];
+    baralho?: string;
 }
 interface CartaPergunta extends CartaBase { tipo: "Pergunta"; opcoes: Opcao[]; respostaCorreta: number; }
 interface CartaMultiplaEscolha extends CartaBase { tipo: "MultiplaEscolha"; opcoes: Opcao[]; respostaCorreta: number[]; }
@@ -85,46 +85,16 @@ const LOCALSTORAGE_KEYS = {
 
 // --- Carregamento Inicial e Estruturação ---
 function processCardsAndExtractBaralhos(cards: Carta[]): { processedCards: Carta[], internalBaralhos: Record<string, number>, totalCards: number } {
-    const baralhoCounts: Record<string, number> = {};
-    let totalCards = 0;
-
+    const baralhoCounts: Record<string, number> = {}; let totalCards = 0;
     const processedCards = cards.map((card, index) => {
         const uniqueId = card.id || `card_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`;
-
-        // Determina a lista de baralhos para esta carta
-        let baralhosDaCarta: string[];
-        if (Array.isArray(card.baralho) && card.baralho.length > 0) {
-             // Filtra strings vazias e remove duplicatas, mantendo a ordem original se possível
-             baralhosDaCarta = Array.from(new Set(card.baralho.map(b => b.trim()).filter(Boolean)));
-             if (baralhosDaCarta.length === 0) { // Se após trim/filter ficar vazio, usa default
-                 baralhosDaCarta = [DEFAULT_BARALHO_NAME];
-             }
-        } else {
-             baralhosDaCarta = [DEFAULT_BARALHO_NAME]; // Usa default se não for array ou estiver vazio
-        }
-
-        // Incrementa a contagem para CADA baralho ao qual a carta pertence
-        baralhosDaCarta.forEach(nomeDoBaralho => {
-            baralhoCounts[nomeDoBaralho] = (baralhoCounts[nomeDoBaralho] || 0) + 1;
-        });
-
-        totalCards++;
-
-        // Retorna a carta processada, mantendo o array de baralhos
-        return { ...card, id: uniqueId, baralho: baralhosDaCarta };
+        const baralhoName = card.baralho?.trim() || DEFAULT_BARALHO_NAME;
+        baralhoCounts[baralhoName] = (baralhoCounts[baralhoName] || 0) + 1; totalCards++;
+        return { ...card, id: uniqueId, baralho: baralhoName };
     });
-
-    // Ordena os nomes dos baralhos para a lista final de contagens
-    const sortedBaralhoNames = Object.keys(baralhoCounts).sort((a, b) => {
-        if (a === DEFAULT_BARALHO_NAME) return -1;
-        if (b === DEFAULT_BARALHO_NAME) return 1;
-        return a.localeCompare(b);
-    });
+    const sortedBaralhoNames = Object.keys(baralhoCounts).sort((a, b) => { if (a === DEFAULT_BARALHO_NAME) return -1; if (b === DEFAULT_BARALHO_NAME) return 1; return a.localeCompare(b); });
     const sortedInternalBaralhos: Record<string, number> = {};
-    sortedBaralhoNames.forEach(name => {
-        sortedInternalBaralhos[name] = baralhoCounts[name];
-    });
-
+    sortedBaralhoNames.forEach(name => { sortedInternalBaralhos[name] = baralhoCounts[name]; });
     return { processedCards, internalBaralhos: sortedInternalBaralhos, totalCards };
 }
 const builtInSourcesData: Omit<SourceInfo, 'active' | 'internalBaralhos' | 'totalCards'>[] = [
@@ -147,42 +117,13 @@ function parseJSDeckFile(content: string): Carta[] {
         return rawArray.map((card, index) => ({ ...card, id: card.id || `custom_js_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}` })) as Carta[];
     } catch (error: any) { console.error("Erro parse JS:", error); throw new Error(`Erro processar JS: ${error.message}`); }
 }
-
-function recalcularCategoriasAtivas(
-    allSources: SourceInfo[],
-    activeInternalBaralhos: Record<string, Set<string>> // { sourceId: Set<baralhoName> }
-): { categorias: string[], contagens: Record<string, number> } {
-    const activeCards: Carta[] = [];
-    const categoryCounts: Record<string, number> = {};
-
-    allSources.forEach(source => {
-        if (!source.active) return; // Pula fontes inativas
-
-        const activeBaralhosForSource = activeInternalBaralhos[source.id]; // Pega o Set de baralhos ativos para esta fonte
-        if (!activeBaralhosForSource || activeBaralhosForSource.size === 0) return; // Pula se não houver baralhos ativos
-
-        source.cards.forEach(card => {
-            // Determina os baralhos desta carta (garantindo que seja sempre um array)
-            const baralhosDaCarta = (Array.isArray(card.baralho) && card.baralho.length > 0)
-                ? card.baralho
-                : [DEFAULT_BARALHO_NAME];
-
-            // Verifica se PELO MENOS UM dos baralhos da carta está no Set de baralhos ativos da fonte
-            const pertenceAbaralhoAtivo = baralhosDaCarta.some(b => activeBaralhosForSource.has(b));
-
-            if (pertenceAbaralhoAtivo) {
-                activeCards.push(card);
-                (card.categorias || []).forEach(cat => {
-                    categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
-                });
-            }
-        });
+function recalcularCategoriasAtivas( allSources: SourceInfo[], activeInternalBaralhos: Record<string, Set<string>> ): { categorias: string[], contagens: Record<string, number> } {
+    const activeCards: Carta[] = []; const categoryCounts: Record<string, number> = {};
+    allSources.forEach(source => { if (!source.active) return; const activeBaralhosForSource = activeInternalBaralhos[source.id]; if (!activeBaralhosForSource || activeBaralhosForSource.size === 0) return;
+        source.cards.forEach(card => { if (activeBaralhosForSource.has(card.baralho || DEFAULT_BARALHO_NAME)) { activeCards.push(card); (card.categorias || []).forEach(cat => { categoryCounts[cat] = (categoryCounts[cat] || 0) + 1; }); } });
     });
-
-    const categorias = Array.from(new Set(Object.keys(categoryCounts))).sort();
-    return { categorias, contagens: categoryCounts };
+    const categorias = Array.from(new Set(Object.keys(categoryCounts))).sort(); return { categorias, contagens: categoryCounts };
 }
-
 function isClickInZone(clickCoords: { x: number; y: number } | null, zone: ZonaClicavel): boolean { if (!clickCoords) return false; const { x, y } = clickCoords; return (x >= zone.x && x <= zone.x + zone.largura && y >= zone.y && y <= zone.y + zone.altura); }
 
 // --- Componente TelaInicial ---
@@ -518,46 +459,29 @@ const EcoChallenge: React.FC = () => {
 
     // --- Lógica de Seleção de Carta (Reintegrado Filtro) ---
     const selecionarCartaAleatoria = useCallback(() => {
-        if (!gameState || !gameState.players || gameState.players.length === 0 || currentGameSources.length === 0) { /* ... */ return; }
+        if (!gameState || !gameState.players || gameState.players.length === 0 || currentGameSources.length === 0) { console.error("Impossível selecionar: gameState inválido ou sem fontes."); setNoCardsAvailable(true); setCartaAtual(null); return; }
+        // REINTEGRADO: Usa mostrarSomentePerguntas do gameState atual
         const { categoriasSelecionadas, probabilityIndex, activeInternalBaralhosState, mostrarSomentePerguntas: filtroPerguntasAtivo } = gameState;
-        if (!activeInternalBaralhosState) { /* ... */ return; }
+        if (!activeInternalBaralhosState) { console.error("activeInternalBaralhosState ausente."); setNoCardsAvailable(true); setCartaAtual(null); return; }
         const probabilidadeExcluirEspecial = probabilitySettings[probabilityIndex].value; const incluirCartasEspeciais = probabilidadeExcluirEspecial === 0 || Math.random() >= probabilidadeExcluirEspecial;
-
-        const cartasFiltradas = currentGameSources.flatMap(source => {
-            const activeBaralhosArray = activeInternalBaralhosState[source.id];
-            if (!activeBaralhosArray || activeBaralhosArray.length === 0) return [];
-            const activeBaralhoSet = new Set(activeBaralhosArray); // Set para busca rápida
-
+        const cartasFiltradas = currentGameSources.flatMap(source => { const activeBaralhosArray = activeInternalBaralhosState[source.id]; if (!activeBaralhosArray || activeBaralhosArray.length === 0) return []; const activeBaralhoSet = new Set(activeBaralhosArray);
             return source.cards.filter(card => {
-                // Determina os baralhos desta carta
-                const baralhosDaCarta = (Array.isArray(card.baralho) && card.baralho.length > 0)
-                    ? card.baralho
-                    : [DEFAULT_BARALHO_NAME];
-
-                // Verifica se PELO MENOS UM dos baralhos da carta está ativo
-                const pertenceAbaralhoAtivo = baralhosDaCarta.some(b => activeBaralhoSet.has(b));
-                if (!pertenceAbaralhoAtivo) return false;
-
-                // Verifica categoria
-                const categoriaValida = card.categorias?.some(cat => categoriasSelecionadas.includes(cat));
-                if (!categoriaValida) return false;
-
-                // Verifica tipo (pergunta vs especial) e filtros
-                const isTipoPergunta = tiposPergunta.includes(card.tipo);
-                const isTipoEspecial = tiposEspeciais.includes(card.tipo);
-                if (filtroPerguntasAtivo && !isTipoPergunta) return false; // Filtro "Somente Perguntas"
-                if (!incluirCartasEspeciais && isTipoEspecial) return false; // Filtro de Probabilidade
-
+                const baralhoAtivo = activeBaralhoSet.has(card.baralho || DEFAULT_BARALHO_NAME); if (!baralhoAtivo) return false;
+                const categoriaValida = card.categorias?.some(cat => categoriasSelecionadas.includes(cat)); if (!categoriaValida) return false;
+                const isTipoPergunta = tiposPergunta.includes(card.tipo); // Verifica se é tipo pergunta
+                const isTipoEspecial = tiposEspeciais.includes(card.tipo); // Verifica se é tipo especial
+                // Aplica filtro de perguntas se ativo
+                if (filtroPerguntasAtivo && !isTipoPergunta) return false;
+                // Aplica filtro de probabilidade para tipos especiais
+                if (!incluirCartasEspeciais && isTipoEspecial) return false;
                 return true; // Passou por todos os filtros
             });
         });
-
-        if (cartasFiltradas.length === 0) { /* ... */ return; }
+        if (cartasFiltradas.length === 0) { setNoCardsAvailable(true); setCartaAtual(null); setMensagem("Nenhuma carta encontrada com os filtros atuais!"); return; }
         setNoCardsAvailable(false); const idxAleat = Math.floor(Math.random() * cartasFiltradas.length); const novaCarta = cartasFiltradas[idxAleat]; setCartaAtual(novaCarta);
-        // ... (reset do estado da rodada) ...
         setRespondido(false); setMensagem(""); setMostrarDica(false); setDicaUsada(false); setMostrarFontes(false); setOpcoesEliminadas([]); setSelecionado(null); setSelecoesMultiplas([]); setOrdemSelecoes([]); setTempoRestante(null); setSelecaoColunaA(null); setParesFormados([]); setCoordenadasClique(null); setFragmentosSelecionados([]); setRolledNumber(null); setIsDieModalOpen(false); setCartaRevelada(!gameState.ocultarCarta);
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (novaCarta.tipo === "ContraTempo") { setTempoRestante(novaCarta.tempoLimite); }
-    }, [gameState, currentGameSources]); // Dependências corretas
+    }, [gameState, currentGameSources]); // Removido mostrarSomentePerguntas daqui, pois está dentro de gameState
 
     // Efeito selecionar primeira carta
     useEffect(() => {
