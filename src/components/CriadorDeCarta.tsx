@@ -354,21 +354,90 @@ const CriadorDeCarta: React.FC = () => {
         e.target.value = ''; // Limpa o input
     };
 
+    // Adicionar Baralho à Lista de Edição
     const adicionarBaralho = (baralhoId: number) => {
-        const baralhoParaAdicionar = baralhosCarregados.find(b => b.id === baralhoId);
-        if (!baralhoParaAdicionar || baralhoParaAdicionar.adicionado) return;
-        if (!Array.isArray(baralhoParaAdicionar.cartas)) { console.error("Cartas inválidas no baralho:", baralhoParaAdicionar.nome); return; }
+        console.log(`Tentando adicionar baralho com ID: ${baralhoId}`);
 
-        const newCards: CartaInterna[] = baralhoParaAdicionar.cartas.map((c, index) => {
-            const uniqueId = c.id || `${baralhoParaAdicionar.nome}_added_${index}_${Date.now()}`;
-            return {
-                ...c, id: uniqueId, baralho: c.baralho?.trim() || undefined,
-                categorias: Array.isArray(c.categorias) ? c.categorias : [], fontes: Array.isArray(c.fontes) ? c.fontes : [],
-                vantagem: c.vantagem || "", desvantagem: c.desvantagem || "", dica: c.dica || "",
-                opcoes: Array.isArray(c.opcoes) ? c.opcoes : undefined,
-                origBaralhoId: baralhoParaAdicionar.id, edited: false,
-            };
-        });
+        const baralhoParaAdicionar = baralhosCarregados.find(b => b.id === baralhoId);
+
+        if (!baralhoParaAdicionar) {
+            console.error(`Baralho com ID ${baralhoId} não encontrado.`);
+            setErrorMessage(`Erro: Baralho não encontrado.`);
+            return;
+        }
+
+        if (baralhoParaAdicionar.adicionado) {
+            console.warn(`Baralho "${baralhoParaAdicionar.nome}" já foi adicionado.`);
+            setErrorMessage(`Baralho "${baralhoParaAdicionar.nome}" já está na lista de edição.`);
+            return;
+        }
+
+        if (!Array.isArray(baralhoParaAdicionar.cartas)) {
+             console.error(`Erro: 'cartas' não é um array válido no baralho "${baralhoParaAdicionar.nome}".`);
+             setErrorMessage(`Erro interno ao processar cartas do baralho "${baralhoParaAdicionar.nome}".`);
+             return;
+        }
+
+        console.log(`Encontrado baralho "${baralhoParaAdicionar.nome}" com ${baralhoParaAdicionar.cartas.length} cartas.`);
+
+        try {
+            // CORREÇÃO AQUI: Mapeamento simplificado e mais seguro para tipos
+            const newCards: CartaInterna[] = baralhoParaAdicionar.cartas.map((c, index) => {
+                const uniqueId = c.id || `${baralhoParaAdicionar.nome}_added_${index}_${Date.now()}`;
+
+                // Cria a base da CartaInterna espalhando a carta original
+                // Isso preserva as propriedades específicas do tipo original (opcoes, colunaA, etc.)
+                const cartaInternaBase = {
+                    ...c, // Espalha todas as propriedades de 'c'
+                    id: uniqueId, // Garante um ID único
+                    // Garante defaults para propriedades da CartaBase, caso ausentes em 'c'
+                    tipo: c.tipo || "Pergunta", // Default type se ausente
+                    titulo: c.titulo || "",
+                    pergunta: c.pergunta || "",
+                    dificuldade: c.dificuldade || "facil",
+                    categorias: Array.isArray(c.categorias) ? c.categorias : [],
+                    fontes: Array.isArray(c.fontes) ? c.fontes : [],
+                    vantagem: c.vantagem || "",
+                    desvantagem: c.desvantagem || "",
+                    dica: c.dica || "",
+                    baralho: c.baralho?.trim() || undefined, // Usa undefined se vazio/default
+                    // Adiciona/sobrescreve propriedades internas
+                    origBaralhoId: baralhoParaAdicionar.id,
+                    edited: false,
+                };
+
+                // TypeScript precisa de uma asserção de tipo aqui porque ele não consegue
+                // garantir sozinho que a combinação do spread e das propriedades adicionadas
+                // corresponderá perfeitamente a *uma* das uniões em Carta + as props internas.
+                // Assumimos que a carta 'c' carregada já era uma Carta válida.
+                return cartaInternaBase as CartaInterna;
+            });
+
+            console.log(`Cartas mapeadas para formato interno:`, newCards);
+
+             if (newCards.length === 0 && baralhoParaAdicionar.cartas.length > 0) {
+                 console.warn(`Mapeamento resultou em 0 cartas.`);
+             }
+
+            setCards((oldCards) => {
+                 console.log(`Estado 'cards' ANTES: ${oldCards.length}`);
+                 const updatedCards = [...oldCards, ...newCards];
+                 console.log(`Estado 'cards' DEPOIS: ${updatedCards.length}`);
+                 return updatedCards;
+             });
+
+            setBaralhosCarregados((prev) =>
+                prev.map((b) =>
+                    b.id === baralhoId ? { ...b, adicionado: true } : b
+                )
+            );
+             setErrorMessage(null);
+
+        } catch (error) {
+            console.error("Erro durante o mapeamento ou adição de cartas:", error);
+            setErrorMessage(`Erro ao processar cartas do baralho "${baralhoParaAdicionar.nome}". Verifique console.`);
+        }
+    };
 
         setCards((oldCards) => [...oldCards, ...newCards]);
         setBaralhosCarregados((prev) => prev.map((b) => b.id === baralhoId ? { ...b, adicionado: true } : b ));
