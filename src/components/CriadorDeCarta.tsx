@@ -24,7 +24,7 @@ interface CartaBase {
     id: string | number; tipo: string; titulo: string; pergunta: string;
     dificuldade: "facil" | "normal" | "dificil"; categorias: string[]; fontes: string[];
     vantagem: string; desvantagem: string; dica: string;
-    opcoes?: Opcao[]; baralho?: string;
+    opcoes?: Opcao[]; baralho?: string; // <-- String opcional
 }
 interface CartaComOpcoes extends CartaBase { opcoes: Opcao[]; }
 interface CartaPergunta extends CartaComOpcoes { tipo: "Pergunta"; respostaCorreta: number; }
@@ -38,7 +38,11 @@ interface CartaRelacionarColunas extends CartaBase { tipo: "RelacionarColunas"; 
 interface CartaPontoCerto extends CartaBase { tipo: "PontoCerto"; imagemURL?: string; zonasClicaveis?: ZonaClicavel[]; respostaCorreta?: number; }
 interface CartaCompletarFrase extends CartaBase { tipo: "CompletarFrase"; fraseIncompleta?: string; fragmentos?: FragmentoCompletar[]; respostaCorreta?: number[]; }
 type Carta = | CartaPergunta | CartaMultiplaEscolha | CartaOrdem | CartaVantagem | CartaDesvantagem | CartaOutras | CartaContraTempo | CartaRelacionarColunas | CartaPontoCerto | CartaCompletarFrase;
-type CartaInterna = Carta & { origBaralhoId?: number; edited?: boolean; };
+// Tipo interno para o estado do editor
+type CartaInterna = Carta & {
+    origBaralhoId?: number; // ID do baralho de onde foi carregado
+    edited?: boolean;       // Flag se a carta foi editada
+};
 const CARD_TYPES = [ "Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo", "RelacionarColunas", "PontoCerto", "CompletarFrase" ] as const;
 type TipoCarta = typeof CARD_TYPES[number];
 const DIFFICULTIES = ["facil", "normal", "dificil"] as const;
@@ -70,6 +74,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
     const opcoes = card.opcoes || [];
     const respostaCorreta = card.respostaCorreta;
 
+    // Lógica para renderizar partes específicas de cada tipo
     switch (tipo) {
         case "ContraTempo":
             const cardContraTempo = card as Partial<CartaContraTempo>;
@@ -120,7 +125,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
                             <ul className="pl-4 list-disc">
                                 {cardPontoCerto.zonasClicaveis.map(z =>
                                     <li key={z.id}>
-                                        ID:{z.id} ({z.x},{z.y} - {z.largura}x{z.altura}) {z.descricao || ''}
+                                        ID:{z.id} ({z.x.toFixed(2)},{z.y.toFixed(2)} - {z.largura.toFixed(2)}x{z.altura.toFixed(2)}) {z.descricao || ''}
                                     </li>
                                 )}
                             </ul>
@@ -136,7 +141,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
         case "CompletarFrase":
             const cardCompFrase = card as Partial<CartaCompletarFrase>;
-            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: &quot;{cardCompFrase.fraseIncompleta || '...'}&quot;</p>;
+            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: "{cardCompFrase.fraseIncompleta || '...'}"</p>;
             renderedOptions = (
                 <>
                  {cardCompFrase.fragmentos && cardCompFrase.fragmentos.length > 0 && (
@@ -157,6 +162,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
     }
 
+     // Lógica para renderizar opções e respostas corretas
      if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo)) {
         const correctSet = new Set<number>();
         const currentOptions = opcoes || [];
@@ -277,187 +283,68 @@ const CriadorDeCarta: React.FC = () => {
     useEffect(() => { /* Preview Ponto Certo */
         if (tipo === 'PontoCerto' && previewImageRefPontoCerto.current) {
             const updateSize = () => { if (previewImageRefPontoCerto.current) { setPreviewImageSize({ width: previewImageRefPontoCerto.current.offsetWidth, height: previewImageRefPontoCerto.current.offsetHeight }); } };
-            const img = previewImageRefPontoCerto.current;
-            img.onload = updateSize;
-            if (img.complete) updateSize();
-            const observer = new ResizeObserver(updateSize);
-            observer.observe(img);
-            window.addEventListener('resize', updateSize);
-            return () => { window.removeEventListener('resize', updateSize); observer.disconnect(); img.onload = null; };
+            const img = previewImageRefPontoCerto.current; img.onload = updateSize; if (img.complete) updateSize(); const observer = new ResizeObserver(updateSize); observer.observe(img); window.addEventListener('resize', updateSize); return () => { window.removeEventListener('resize', updateSize); observer.disconnect(); img.onload = null;};
         }
     }, [tipo, imagemURLPontoCerto]);
     useEffect(() => { /* Botão Voltar ao Topo */
         const handleScroll = () => { setShowScrollTop(window.scrollY > 200); };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll); return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // --- Funções Auxiliares Reintegradas ---
-    const parseJSDeckFileLocal = (content: string): Carta[] => {
-        try {
-            const match = content.match(/export default\s+(\[[\s\S]*?\]);?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?\s*export default\s+\w+;?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?/m);
-            if (!match || !match[1]) { throw new Error("Array não encontrado."); }
-            const arrayStr = match[1]; const rawArray = new Function(`return ${arrayStr};`)() as any[];
-            if (!Array.isArray(rawArray)) { throw new Error("Conteúdo não é array."); }
-            // Garante ID único ao carregar
-            return rawArray.map((card, index) => ({ ...card, id: card.id || `loaded_${Date.now()}_${index}` })) as Carta[];
-        } catch (error: any) {
-            console.error("Erro parse JS:", error);
-            throw new Error(`Erro processar JS: ${error.message}`);
-        }
-    };
-
+    // --- Funções de Gerenciamento de Baralhos Carregados ---
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (!files) return;
-        setIsLoading(true);
-        setErrorMessage(null);
-        let loadErrors: string[] = [];
-        const newBaralhos: BaralhoCarregado[] = [];
-
+        const files = e.target.files; if (!files) return;
+        setIsLoading(true); setErrorMessage(null); let loadErrors: string[] = []; const newBaralhos: BaralhoCarregado[] = [];
         for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const content = await file.text();
+            const file = files[i]; const content = await file.text();
             try {
-                let newCards: Carta[] = [];
-                const nome = file.name.replace(/\.(js|json)$/, "");
-                if (baralhosCarregados.some(b => b.nome === nome)) {
-                    loadErrors.push(`Baralho "${nome}" já carregado.`);
-                    continue;
-                }
-                if (file.name.endsWith(".js")) {
-                    newCards = parseJSDeckFileLocal(content);
-                } else if (file.name.endsWith(".json")) {
-                    newCards = JSON.parse(content) as Carta[];
-                } else {
-                    loadErrors.push(`Formato ${file.name} não suportado.`);
-                    continue;
-                }
-                if (!Array.isArray(newCards) || newCards.length === 0) {
-                    loadErrors.push(`Nenhuma carta válida em "${nome}".`);
-                    continue;
-                }
-                // Garante ID único para cada carta carregada
+                let newCards: Carta[] = []; const nome = file.name.replace(/\.(js|json)$/, "");
+                if (baralhosCarregados.some(b => b.nome === nome)) { loadErrors.push(`Baralho "${nome}" já carregado.`); continue; }
+                if (file.name.endsWith(".js")) { newCards = parseJSDeckFileLocal(content); }
+                else if (file.name.endsWith(".json")) { newCards = JSON.parse(content) as Carta[]; }
+                else { loadErrors.push(`Formato ${file.name} não suportado.`); continue; }
+                if (!Array.isArray(newCards) || newCards.length === 0) { loadErrors.push(`Nenhuma carta válida em "${nome}".`); continue; }
                 newCards = newCards.map((c, idx) => ({...c, id: c.id || `${nome}_loaded_${idx}`}));
                 newBaralhos.push({ id: Date.now() + Math.random(), nome, cartas: newCards, adicionado: false });
-            } catch (error: any) {
-                loadErrors.push(`Erro ao ler ${file.name}: ${error.message}`);
-            }
+            } catch (error: any) { loadErrors.push(`Erro ao ler ${file.name}: ${error.message}`); }
         }
-        if (newBaralhos.length > 0) {
-            setBaralhosCarregados((prev) => [...prev, ...newBaralhos]);
-        }
-        if (loadErrors.length > 0) {
-            setErrorMessage(loadErrors.join(" "));
-        }
-        setIsLoading(false);
-        e.target.value = ''; // Limpa o input
+        if (newBaralhos.length > 0) { setBaralhosCarregados((prev) => [...prev, ...newBaralhos]); }
+        if (loadErrors.length > 0) { setErrorMessage(loadErrors.join(" ")); }
+        setIsLoading(false); e.target.value = '';
     };
 
-    // Adicionar Baralho à Lista de Edição
     const adicionarBaralho = (baralhoId: number) => {
-        console.log(`Tentando adicionar baralho com ID: ${baralhoId}`);
-
         const baralhoParaAdicionar = baralhosCarregados.find(b => b.id === baralhoId);
-
-        if (!baralhoParaAdicionar) {
-            console.error(`Baralho com ID ${baralhoId} não encontrado.`);
-            setErrorMessage(`Erro: Baralho não encontrado.`);
-            return;
-        }
-
-        if (baralhoParaAdicionar.adicionado) {
-            console.warn(`Baralho "${baralhoParaAdicionar.nome}" já foi adicionado.`);
-            setErrorMessage(`Baralho "${baralhoParaAdicionar.nome}" já está na lista de edição.`);
-            return;
-        }
-
-        if (!Array.isArray(baralhoParaAdicionar.cartas)) {
-             console.error(`Erro: 'cartas' não é um array válido no baralho "${baralhoParaAdicionar.nome}".`);
-             setErrorMessage(`Erro interno ao processar cartas do baralho "${baralhoParaAdicionar.nome}".`);
-             return;
-        }
-
-        console.log(`Encontrado baralho "${baralhoParaAdicionar.nome}" com ${baralhoParaAdicionar.cartas.length} cartas.`);
+        if (!baralhoParaAdicionar || baralhoParaAdicionar.adicionado) return;
+        if (!Array.isArray(baralhoParaAdicionar.cartas)) { console.error("Cartas inválidas:", baralhoParaAdicionar.nome); return; }
 
         try {
-            // CORREÇÃO AQUI: Mapeamento simplificado e mais seguro para tipos
             const newCards: CartaInterna[] = baralhoParaAdicionar.cartas.map((c, index) => {
                 const uniqueId = c.id || `${baralhoParaAdicionar.nome}_added_${index}_${Date.now()}`;
-
-                // Cria a base da CartaInterna espalhando a carta original
-                // Isso preserva as propriedades específicas do tipo original (opcoes, colunaA, etc.)
                 const cartaInternaBase = {
-                    ...c, // Espalha todas as propriedades de 'c'
-                    id: uniqueId, // Garante um ID único
-                    // Garante defaults para propriedades da CartaBase, caso ausentes em 'c'
-                    tipo: c.tipo || "Pergunta", // Default type se ausente
-                    titulo: c.titulo || "",
-                    pergunta: c.pergunta || "",
-                    dificuldade: c.dificuldade || "facil",
-                    categorias: Array.isArray(c.categorias) ? c.categorias : [],
-                    fontes: Array.isArray(c.fontes) ? c.fontes : [],
-                    vantagem: c.vantagem || "",
-                    desvantagem: c.desvantagem || "",
-                    dica: c.dica || "",
-                    baralho: c.baralho?.trim() || undefined, // Usa undefined se vazio/default
-                    // Adiciona/sobrescreve propriedades internas
-                    origBaralhoId: baralhoParaAdicionar.id,
-                    edited: false,
+                    ...c, id: uniqueId, tipo: c.tipo || "Pergunta", titulo: c.titulo || "", pergunta: c.pergunta || "",
+                    dificuldade: c.dificuldade || "facil", categorias: Array.isArray(c.categorias) ? c.categorias : [],
+                    fontes: Array.isArray(c.fontes) ? c.fontes : [], vantagem: c.vantagem || "", desvantagem: c.desvantagem || "",
+                    dica: c.dica || "", baralho: c.baralho?.trim() || undefined,
+                    origBaralhoId: baralhoParaAdicionar.id, edited: false,
                 };
-
-                // TypeScript precisa de uma asserção de tipo aqui porque ele não consegue
-                // garantir sozinho que a combinação do spread e das propriedades adicionadas
-                // corresponderá perfeitamente a *uma* das uniões em Carta + as props internas.
-                // Assumimos que a carta 'c' carregada já era uma Carta válida.
-                return cartaInternaBase as CartaInterna;
+                return cartaInternaBase as CartaInterna; // Asserção de tipo
             });
-
-            console.log(`Cartas mapeadas para formato interno:`, newCards);
-
-             if (newCards.length === 0 && baralhoParaAdicionar.cartas.length > 0) {
-                 console.warn(`Mapeamento resultou em 0 cartas.`);
-             }
-
-            setCards((oldCards) => {
-                 console.log(`Estado 'cards' ANTES: ${oldCards.length}`);
-                 const updatedCards = [...oldCards, ...newCards];
-                 console.log(`Estado 'cards' DEPOIS: ${updatedCards.length}`);
-                 return updatedCards;
-             });
-
-            setBaralhosCarregados((prev) =>
-                prev.map((b) =>
-                    b.id === baralhoId ? { ...b, adicionado: true } : b
-                )
-            );
-             setErrorMessage(null);
-
-        } catch (error) {
-            console.error("Erro durante o mapeamento ou adição de cartas:", error);
-            setErrorMessage(`Erro ao processar cartas do baralho "${baralhoParaAdicionar.nome}". Verifique console.`);
-        }
-    };
-
-        setCards((oldCards) => [...oldCards, ...newCards]);
-        setBaralhosCarregados((prev) => prev.map((b) => b.id === baralhoId ? { ...b, adicionado: true } : b ));
-        setErrorMessage(null);
+            setCards((oldCards) => [...oldCards, ...newCards]);
+            setBaralhosCarregados((prev) => prev.map((b) => b.id === baralhoId ? { ...b, adicionado: true } : b ));
+            setErrorMessage(null);
+        } catch (error) { console.error("Erro ao adicionar cartas:", error); setErrorMessage(`Erro ao processar cartas de "${baralhoParaAdicionar.nome}".`); }
     };
 
     const removerBaralho = (baralhoId: number) => {
         const baralhoParaRemover = baralhosCarregados.find(b => b.id === baralhoId);
         if (!baralhoParaRemover || !baralhoParaRemover.adicionado) return;
-
-        setCards((oldCards) => oldCards.filter((c) => {
-            // Mantém a carta se NÃO pertencer ao baralho OU se pertence E foi editada E a opção está marcada
-            return c.origBaralhoId !== baralhoId || (c.edited && manterCartasEditadas);
-        }));
-
+        setCards((oldCards) => oldCards.filter((c) => c.origBaralhoId !== baralhoId || (c.edited && manterCartasEditadas) ));
         setBaralhosCarregados((prev) => prev.map((b) => b.id === baralhoId ? { ...b, adicionado: false } : b ));
         setErrorMessage(null);
     };
 
-    // --- Handlers dos campos (mantidos e atualizados) ---
+    // --- Handlers dos campos ---
     const handleAddOpcao = () => { if (novaOpcao.trim() !== "") { const newId = opcoes.length > 0 ? Math.max(...opcoes.map(o => o.id)) + 1 : 1; setOpcoes(prev => [...prev, { id: newId, texto: novaOpcao, ordemTemp: tipo === 'Ordem' ? '' : undefined }]); setNovaOpcao(""); }};
     const handleRemoveOpcao = (id: number) => { setOpcoes((prev) => prev.filter(o => o.id !== id)); setRespostaCorreta((prev) => prev.filter(rcId => rcId !== id)); };
     const handleToggleRespostaCorreta = (id: number) => { if (tipo === "Pergunta" || tipo === "ContraTempo") { setRespostaCorreta(prev => prev.includes(id) ? [] : [id]); } else if (tipo === "MultiplaEscolha" || tipo === "Outras") { setRespostaCorreta(prev => prev.includes(id) ? prev.filter(rcId => rcId !== id) : [...prev, id]); }};
@@ -466,7 +353,7 @@ const CriadorDeCarta: React.FC = () => {
     const handleRemoveColunaA = (id: number) => setColunaAItems(prev => prev.filter(i => i.id !== id));
     const handleAddColunaB = () => { if (novaColunaB.trim()) { const newId = colunaBItems.length > 0 ? Math.max(...colunaBItems.map(i => i.id), 100) + 1 : 101; setColunaBItems(prev => [...prev, { id: newId, texto: novaColunaB }]); setNovaColunaB(""); }};
     const handleRemoveColunaB = (id: number) => setColunaBItems(prev => prev.filter(i => i.id !== id));
-    const handleAddZona = () => { const id = zonasClicaveis.length > 0 ? Math.max(...zonasClicaveis.map(z => z.id)) + 1 : 1; const x = parseFloat(String(novaZona.x || 0).replace(',', '.')); const y = parseFloat(String(novaZona.y || 0).replace(',', '.')); const w = parseFloat(String(novaZona.largura || 0.1).replace(',', '.')); const h = parseFloat(String(novaZona.altura || 0.1).replace(',', '.')); if (!isNaN(x) && !isNaN(y) && !isNaN(w) && !isNaN(h) && w > 0 && h > 0 && x>=0 && x<=1 && y>=0 && y<=1 && w+x<=1 && h+y<=1) { setZonasClicaveis(prev => [...prev, { id, x, y, largura: w, altura: h, descricao: novaZona.descricao || "" }]); setNovaZona({x:0, y:0, largura: 0.1, altura: 0.1}); } else { alert("Valores inválidos para a zona (X, Y, Largura, Altura devem ser números entre 0 e 1, e X+Largura <= 1, Y+Altura <= 1). Use ponto ou vírgula."); } };
+    const handleAddZona = () => { const id = zonasClicaveis.length > 0 ? Math.max(...zonasClicaveis.map(z => z.id)) + 1 : 1; const x = parseFloat(String(novaZona.x || 0).replace(',', '.')); const y = parseFloat(String(novaZona.y || 0).replace(',', '.')); const w = parseFloat(String(novaZona.largura || 0.1).replace(',', '.')); const h = parseFloat(String(novaZona.altura || 0.1).replace(',', '.')); if (!isNaN(x) && !isNaN(y) && !isNaN(w) && !isNaN(h) && w > 0 && h > 0 && x>=0 && x<=1 && y>=0 && y<=1 && w+x<=1 && h+y<=1) { setZonasClicaveis(prev => [...prev, { id, x, y, largura: w, altura: h, descricao: novaZona.descricao || "" }]); setNovaZona({x:0, y:0, largura: 0.1, altura: 0.1}); } else { alert("Valores inválidos para a zona."); } };
     const handleRemoveZona = (id: number) => { setZonasClicaveis(prev => prev.filter(z => z.id !== id)); if (respostaCorretaPontoCerto === id) setRespostaCorretaPontoCerto(null); };
     const handleNovaZonaChange = (field: keyof Partial<ZonaClicavel>, value: string) => { setNovaZona(prev => ({ ...prev, [field]: value })); };
     const handleSetRespostaPontoCerto = (id: number) => setRespostaCorretaPontoCerto(id);
@@ -476,10 +363,45 @@ const CriadorDeCarta: React.FC = () => {
     const handleRemoveCategoria = (cat: string) => { setCategorias((old) => old.filter((c) => c !== cat)); };
     const handleAddFonte = () => { if (novaFonte.trim() !== "" && !fontes.includes(novaFonte)) { setFontes((old) => [...old, novaFonte]); setNovaFonte(""); } };
     const handleRemoveFonte = (f: string) => { setFontes((old) => old.filter((fon) => fon !== f)); };
-    const inserirTemplatePopup = (tipoPopup: 'imagem' | 'video') => { /* ... (mantida) ... */ };
-    const inserirTemplatePopupYouTube = () => { /* ... (mantida) ... */ };
 
-    // Reset Carta (Considera campos bloqueados)
+    // Inserir Popup (Funções mantidas, com indentação melhorada)
+    const inserirTemplatePopup = (tipoPopup: 'imagem' | 'video') => {
+        const idUnico = `popup-${Date.now()}`; let urlPrincipal = ''; let urlThumb = ''; let desc = ''; let thumbHtml = '';
+        const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { /* ... */ }\n.popup-overlay-${idUnico}:target { /* ... */ }\n.popup-content-${idUnico} { /* ... */ }\n.popup-content-${idUnico} img, .popup-content-${idUnico} video { /* ... */ }\n.popup-close-${idUnico} { /* ... */ }\n.popup-close-${idUnico}:hover { /* ... */ }\n.thumb-link-${idUnico} { /* ... */ }\n.thumb-link-${idUnico} img, .thumb-link-${idUnico} span { /* ... */ }\n.thumb-link-${idUnico} span{ /* ... */ }\n</style>\n`;
+        let templateElemento: string; let scriptStop: string = "";
+        if (tipoPopup === 'imagem') {
+            if (!popupImageUrl.trim()) { alert("Insira a URL da Imagem."); return; }
+            urlPrincipal = popupImageUrl; urlThumb = popupImageUrl; desc = 'Descrição da Imagem';
+            thumbHtml = `<img src="${urlThumb}" alt="Clique para ampliar"/>`;
+            templateElemento = `\n<!-- Link/Thumb Img -->\n<a href="#${idUnico}" class="thumb-link-${idUnico}">${thumbHtml}</a>\n<!-- Popup Img -->\n<div id="${idUnico}" class="popup-overlay-${idUnico}"><div class="popup-content-${idUnico}"><a href="#" class="popup-close-${idUnico}" title="Fechar">×</a><img src="${urlPrincipal}" alt="Imagem Ampliada"/><p style="text-align: center; font-size: 0.9em; color: #666;">${desc}</p></div></div>\n`;
+        } else {
+            if (!popupVideoUrl.trim()) { alert("Insira a URL do Vídeo (.mp4)."); return; }
+            urlPrincipal = popupVideoUrl; desc = 'Descrição do Vídeo';
+            thumbHtml = `<span>🎬 Clique para ver o vídeo</span>`;
+            templateElemento = `\n<!-- Link/Thumb Vídeo -->\n<a href="#${idUnico}" class="thumb-link-${idUnico}" style="border:none; background:none; padding:0;">${thumbHtml}</a>\n<!-- Popup Vídeo -->\n<div id="${idUnico}" class="popup-overlay-${idUnico}"><div class="popup-content-${idUnico}"><a href="#" id="close-btn-${idUnico}" class="popup-close-${idUnico}" title="Fechar">×</a><video controls width="100%" style="max-width: 700px; max-height: 70vh;" id="video-${idUnico}"><source src="${urlPrincipal}" type="video/mp4">Seu navegador não suporta vídeo.</video><p style="text-align: center; font-size: 0.9em; color: #666;">${desc}</p></div></div>\n`;
+            scriptStop = `\n<script>(function() { var c=document.getElementById('close-btn-${idUnico}'),v=document.getElementById('video-${idUnico}');if(c&&v){c.addEventListener('mousedown',function(){if(!v.paused)v.pause();setTimeout(function(){window.location.hash='#_';},10);});}})();</script>\n`;
+        }
+        const htmlParaInserir = `\n<br>${templateCSS}${templateElemento}${scriptStop}<br>\n`;
+        const textarea = perguntaTextareaRef.current;
+        if (textarea) { const start = textarea.selectionStart; const end = textarea.selectionEnd; const textoAtual = textarea.value; const novoTexto = textoAtual.substring(0, start) + htmlParaInserir + textoAtual.substring(end); setPergunta(novoTexto); if(tipoPopup === 'imagem') { setPopupImageUrl(""); } else { setPopupVideoUrl(""); } textarea.focus(); textarea.selectionStart = start + htmlParaInserir.length; textarea.selectionEnd = start + htmlParaInserir.length; }
+        else { setPergunta(prev => prev + htmlParaInserir); if(tipoPopup === 'imagem') { setPopupImageUrl(""); } else { setPopupVideoUrl(""); } }
+    };
+    const inserirTemplatePopupYouTube = () => {
+        if (!popupYouTubeUrl.trim()) { alert("Insira a URL do vídeo do YouTube."); return; }
+        let videoId = ''; const url = popupYouTubeUrl; const patterns = [ /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/ ];
+        for (const pattern of patterns) { const match = url.match(pattern); if (match && match[1]) { videoId = match[1]; break; } }
+        if (!videoId) { alert("URL do YouTube inválida."); return; }
+        const idUnico = `popup-yt-${Date.now()}`; const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { /* ... */ }\n.popup-overlay-${idUnico}:target { /* ... */ }\n.popup-content-${idUnico} { /* ... */ }\n.popup-content-${idUnico} iframe { /* ... */ }\n.popup-close-${idUnico} { /* ... */ }\n.popup-close-${idUnico}:hover { /* ... */ }\n.thumb-link-${idUnico} { /* ... */ }\n.thumb-link-${idUnico} span { /* ... */ }\n</style>\n`;
+        const templateElemento = `\n<!-- Link/Thumb YouTube -->\n<a href="#${idUnico}" class="thumb-link-${idUnico}">\n  <span><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 5px;"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg> Ver Vídeo YouTube</span>\n</a>\n<!-- Popup YouTube -->\n<div id="${idUnico}" class="popup-overlay-${idUnico}"><div class="popup-content-${idUnico}"><a href="#" id="close-btn-yt-${idUnico}" class="popup-close-${idUnico}" title="Fechar">×</a><iframe id="iframe-yt-${idUnico}" src="${embedUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div></div>\n`;
+        const scriptStopYouTube = `\n<script>(function() { var c=document.getElementById('close-btn-yt-${idUnico}'), i=document.getElementById('iframe-yt-${idUnico}'); if(c&&i){ var o=i.src; c.addEventListener('mousedown',function(){i.src='';i.src=o;setTimeout(function(){window.location.hash='#_';},10);}); } })();</script>\n`;
+        const htmlParaInserir = `\n<br>${templateCSS}${templateElemento}${scriptStopYouTube}<br>\n`;
+        const textarea = perguntaTextareaRef.current;
+        if (textarea) { const start = textarea.selectionStart; const end = textarea.selectionEnd; const textoAtual = textarea.value; const novoTexto = textoAtual.substring(0, start) + htmlParaInserir + textoAtual.substring(end); setPergunta(novoTexto); setPopupYouTubeUrl(""); textarea.focus(); textarea.selectionStart = start + htmlParaInserir.length; textarea.selectionEnd = start + htmlParaInserir.length; }
+        else { setPergunta(prev => prev + htmlParaInserir); setPopupYouTubeUrl(""); }
+    };
+
+    // Reset Carta
     const resetCarta = () => {
         setTipo("Pergunta"); setTitulo(""); setPergunta(""); setOpcoes([]); setNovaOpcao("");
         setRespostaCorreta([]); setDificuldade("facil");
@@ -487,7 +409,7 @@ const CriadorDeCarta: React.FC = () => {
         setTempoLimite(30); setColunaAItems([]); setNovaColunaA(""); setColunaBItems([]); setNovaColunaB("");
         setParesCorretosInput(""); setImagemURLPontoCerto(""); setZonasClicaveis([]); setNovaZona({x:0, y:0, largura: 0.1, altura: 0.1}); setRespostaCorretaPontoCerto(null);
         setFraseIncompleta(""); setFragmentos([]); setNovoFragmento(""); setOrdemFragmentos("");
-        if (!baralhoBloqueado) setBaralhoCartaAtual("");
+        if (!baralhoBloqueado) setBaralhoCartaAtual(""); // Só reseta se não estiver bloqueado
         if (!categoriasBloqueadas) setCategorias([]);
         if (!fontesBloqueadas) setFontes([]);
         setEditIndex(null);
@@ -542,7 +464,7 @@ const CriadorDeCarta: React.FC = () => {
         const cartaBaseProps = {
              id: editIndex !== null ? cards[editIndex].id : `new_${Date.now()}_${Math.random().toString(16).slice(2)}`,
              tipo, titulo, pergunta, dificuldade, categorias, fontes, vantagem, desvantagem, dica,
-             baralho: nomeBaralhoFinal, // Adiciona o baralho
+             baralho: nomeBaralhoFinal,
              respostaCorreta: finalRespostaCorreta, edited: true,
              origBaralhoId: editIndex !== null ? cards[editIndex].origBaralhoId : undefined
         };
@@ -555,17 +477,16 @@ const CriadorDeCarta: React.FC = () => {
     // Carregar Carta para Edição
     const loadCardForEdit = (index: number) => {
         resetCarta(); const carta = cards[index]; setEditIndex(index); setTipo(carta.tipo as TipoCarta); setTitulo(carta.titulo);
-        setBaralhoCartaAtual(carta.baralho || ""); // Carrega baralho
+        setBaralhoCartaAtual(carta.baralho || "");
         setPergunta(carta.pergunta); setDificuldade(carta.dificuldade as Dificuldade); setCategorias([...carta.categorias]); setFontes([...carta.fontes]); setVantagem(carta.vantagem); setDesvantagem(carta.desvantagem); setDica(carta.dica);
-        // ... (switch case mantido) ...
-         switch (carta.tipo) { case "Pergunta": case "MultiplaEscolha": case "Vantagem": case "Desvantagem": case "Outras": case "ContraTempo": setOpcoes(carta.opcoes ? [...carta.opcoes] : []); const rcArray = Array.isArray(carta.respostaCorreta) ? carta.respostaCorreta : (typeof carta.respostaCorreta === 'number' ? [carta.respostaCorreta] : []); setRespostaCorreta(rcArray.filter(id => typeof id === 'number')); if(carta.tipo === 'ContraTempo') setTempoLimite((carta as CartaContraTempo).tempoLimite || 30); break; case "Ordem": setOpcoes((carta as CartaOrdem).opcoes?.map(op => ({...op})) || []); if (Array.isArray(carta.respostaCorreta) && carta.opcoes) { const ordemCorreta = carta.respostaCorreta as number[]; setOpcoes(currentOpts => currentOpts.map(op => ({...op, ordemTemp: ordemCorreta.indexOf(op.id) >= 0 ? String(ordemCorreta.indexOf(op.id) + 1) : "" }))); } setRespostaCorreta([]); break; case "RelacionarColunas": const cRel = carta as CartaRelacionarColunas; setColunaAItems(cRel.colunaA ? [...cRel.colunaA] : []); setColunaBItems(cRel.colunaB ? [...cRel.colunaB] : []); const paresStringFormat = Array.isArray(cRel.respostaCorreta) ? cRel.respostaCorreta.map(p => `${p.aId}-${p.bId}`).join(', ') : ""; setParesCorretosInput(paresStringFormat); break; case "PontoCerto": const cPonto = carta as CartaPontoCerto; setImagemURLPontoCerto(cPonto.imagemURL || ""); setZonasClicaveis(cPonto.zonasClicaveis ? [...cPonto.zonasClicaveis] : []); setRespostaCorretaPontoCerto(typeof cPonto.respostaCorreta === 'number' ? cPonto.respostaCorreta : null); break; case "CompletarFrase": const cFrase = carta as CartaCompletarFrase; setFraseIncompleta(cFrase.fraseIncompleta || ""); setFragmentos(cFrase.fragmentos ? [...cFrase.fragmentos] : []); setOrdemFragmentos(Array.isArray(cFrase.respostaCorreta) ? cFrase.respostaCorreta.join(', ') : ""); break; }
+        switch (carta.tipo) { case "Pergunta": case "MultiplaEscolha": case "Vantagem": case "Desvantagem": case "Outras": case "ContraTempo": setOpcoes(carta.opcoes ? [...carta.opcoes] : []); const rcArray = Array.isArray(carta.respostaCorreta) ? carta.respostaCorreta : (typeof carta.respostaCorreta === 'number' ? [carta.respostaCorreta] : []); setRespostaCorreta(rcArray.filter(id => typeof id === 'number')); if(carta.tipo === 'ContraTempo') setTempoLimite((carta as CartaContraTempo).tempoLimite || 30); break; case "Ordem": setOpcoes((carta as CartaOrdem).opcoes?.map(op => ({...op})) || []); if (Array.isArray(carta.respostaCorreta) && carta.opcoes) { const ordemCorreta = carta.respostaCorreta as number[]; setOpcoes(currentOpts => currentOpts.map(op => ({...op, ordemTemp: ordemCorreta.indexOf(op.id) >= 0 ? String(ordemCorreta.indexOf(op.id) + 1) : "" }))); } setRespostaCorreta([]); break; case "RelacionarColunas": const cRel = carta as CartaRelacionarColunas; setColunaAItems(cRel.colunaA ? [...cRel.colunaA] : []); setColunaBItems(cRel.colunaB ? [...cRel.colunaB] : []); const paresStringFormat = Array.isArray(cRel.respostaCorreta) ? cRel.respostaCorreta.map(p => `${p.aId}-${p.bId}`).join(', ') : ""; setParesCorretosInput(paresStringFormat); break; case "PontoCerto": const cPonto = carta as CartaPontoCerto; setImagemURLPontoCerto(cPonto.imagemURL || ""); setZonasClicaveis(cPonto.zonasClicaveis ? [...cPonto.zonasClicaveis] : []); setRespostaCorretaPontoCerto(typeof cPonto.respostaCorreta === 'number' ? cPonto.respostaCorreta : null); break; case "CompletarFrase": const cFrase = carta as CartaCompletarFrase; setFraseIncompleta(cFrase.fraseIncompleta || ""); setFragmentos(cFrase.fragmentos ? [...cFrase.fragmentos] : []); setOrdemFragmentos(Array.isArray(cFrase.respostaCorreta) ? cFrase.respostaCorreta.join(', ') : ""); break; }
     };
-    const deleteCard = (index: number) => { /* ... */ setCards((old) => old.filter((_, i) => i !== index)); if (editIndex === index) { resetCarta(); } };
-    const handleRemoveAllCards = () => { /* ... */ if (window.confirm(`Remover TODAS as ${cards.length} cartas?`)) { setCards([]); setEditIndex(null); resetCarta(); } };
+    const deleteCard = (index: number) => { setCards((old) => old.filter((_, i) => i !== index)); if (editIndex === index) { resetCarta(); } };
+    const handleRemoveAllCards = () => { if (window.confirm(`Remover TODAS as ${cards.length} cartas?`)) { setCards([]); setEditIndex(null); resetCarta(); } };
     const cancelEdit = () => { resetCarta(); };
-    const prepareForDownload = (): Partial<Carta>[] => { /* ... (mantida com remoção de baralho default) ... */ return cards.map(({ origBaralhoId, edited, ...rest }: CartaInterna) => { const cardData: Partial<Carta> = { ...rest }; if (rest.tipo !== "ContraTempo") delete (cardData as Partial<CartaContraTempo>).tempoLimite; if (rest.tipo !== "RelacionarColunas") { delete (cardData as Partial<CartaRelacionarColunas>).colunaA; delete (cardData as Partial<CartaRelacionarColunas>).colunaB; } if (rest.tipo !== "PontoCerto") { delete (cardData as Partial<CartaPontoCerto>).imagemURL; delete (cardData as Partial<CartaPontoCerto>).zonasClicaveis; } if (rest.tipo !== "CompletarFrase") { delete (cardData as Partial<CartaCompletarFrase>).fraseIncompleta; delete (cardData as Partial<CartaCompletarFrase>).fragmentos; } if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo) || cardData.opcoes === undefined ) { delete cardData.opcoes; } else if (rest.tipo === "Ordem" && cardData.opcoes) { cardData.opcoes = cardData.opcoes.map(({ ordemTemp, ...o }) => o); } if (!cardData.baralho || cardData.baralho === DEFAULT_BARALHO_NAME) { delete cardData.baralho; } return cardData; }); };
-    const generateCode = (format: 'js' | 'json') => { /* ... */ const deckFinal = prepareForDownload(); if (format === 'json') { return JSON.stringify(deckFinal, null, 2); } else { const deck = JSON.stringify(deckFinal, null, 2); return `const ${deckName || 'meu_baralho'} = ${deck};\n\nexport default ${deckName || 'meu_baralho'};`; } };
-    const downloadCode = (format: 'js' | 'json') => { /* ... */ const element = document.createElement("a"); const fileContent = generateCode(format); const fileType = format === 'js' ? 'text/javascript' : 'application/json'; const fileName = `${deckName || 'meu_baralho'}.${format}`; const file = new Blob([fileContent], { type: fileType }); element.href = URL.createObjectURL(file); element.download = fileName; document.body.appendChild(element); element.click(); document.body.removeChild(element); };
+    const prepareForDownload = (): Partial<Carta>[] => { return cards.map(({ origBaralhoId, edited, ...rest }: CartaInterna) => { const cardData: Partial<Carta> = { ...rest }; if (rest.tipo !== "ContraTempo") delete (cardData as Partial<CartaContraTempo>).tempoLimite; if (rest.tipo !== "RelacionarColunas") { delete (cardData as Partial<CartaRelacionarColunas>).colunaA; delete (cardData as Partial<CartaRelacionarColunas>).colunaB; } if (rest.tipo !== "PontoCerto") { delete (cardData as Partial<CartaPontoCerto>).imagemURL; delete (cardData as Partial<CartaPontoCerto>).zonasClicaveis; } if (rest.tipo !== "CompletarFrase") { delete (cardData as Partial<CartaCompletarFrase>).fraseIncompleta; delete (cardData as Partial<CartaCompletarFrase>).fragmentos; } if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(rest.tipo) || cardData.opcoes === undefined ) { delete cardData.opcoes; } else if (rest.tipo === "Ordem" && cardData.opcoes) { cardData.opcoes = cardData.opcoes.map(({ ordemTemp, ...o }) => o); } if (!cardData.baralho || cardData.baralho === DEFAULT_BARALHO_NAME) { delete cardData.baralho; } return cardData; }); };
+    const generateCode = (format: 'js' | 'json') => { const deckFinal = prepareForDownload(); if (format === 'json') { return JSON.stringify(deckFinal, null, 2); } else { const deck = JSON.stringify(deckFinal, null, 2); return `const ${deckName || 'meu_baralho'} = ${deck};\n\nexport default ${deckName || 'meu_baralho'};`; } };
+    const downloadCode = (format: 'js' | 'json') => { const element = document.createElement("a"); const fileContent = generateCode(format); const fileType = format === 'js' ? 'text/javascript' : 'application/json'; const fileName = `${deckName || 'meu_baralho'}.${format}`; const file = new Blob([fileContent], { type: fileType }); element.href = URL.createObjectURL(file); element.download = fileName; document.body.appendChild(element); element.click(); document.body.removeChild(element); };
     const scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
     // --- JSX do Criador ---
@@ -573,9 +494,9 @@ const CriadorDeCarta: React.FC = () => {
         <div className="p-4 max-w-7xl mx-auto relative">
             <h1 className="text-3xl font-bold mb-6 text-center">Criador de Cartas Eco Challenge</h1>
 
-            {/* Seção Superior */}
+            {/* Seção Superior: Nome Baralho e Gerenciamento */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {/* Nome do Baralho & Download */}
+                {/* Card: Nome do Baralho & Download */}
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-xl">Nome do Baralho & Download</CardTitle>
@@ -601,7 +522,8 @@ const CriadorDeCarta: React.FC = () => {
                          )}
                     </CardContent>
                 </Card>
-                 {/* Carregar/Gerenciar Baralhos */}
+
+                 {/* Card: Carregar/Gerenciar Baralhos */}
                  <Card>
                     <CardHeader>
                         <CardTitle className="text-xl">Carregar/Gerenciar Baralhos Existentes</CardTitle>
@@ -659,6 +581,7 @@ const CriadorDeCarta: React.FC = () => {
                          {/* Card: Campos Comuns Base */}
                         <Card className="border bg-slate-50 p-4 rounded-lg shadow-sm">
                              <CardContent className="p-0 space-y-4">
+                                 {/* Linha: Tipo e Dificuldade */}
                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="card-tipo" className="block text-sm font-medium mb-1">Tipo*</label>
@@ -679,6 +602,7 @@ const CriadorDeCarta: React.FC = () => {
                                         </Select>
                                     </div>
                                 </div>
+                                {/* Linha: Título */}
                                 <div>
                                      <label htmlFor="card-titulo" className="block text-sm font-medium mb-1">Título*</label>
                                      <Input id="card-titulo" type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} />
@@ -694,71 +618,38 @@ const CriadorDeCarta: React.FC = () => {
                                         Pergunta/Descrição* (HTML permitido)
                                     </label>
                                     <Textarea
-                                        ref={perguntaTextareaRef}
-                                        id="card-pergunta"
-                                        value={pergunta}
+                                        ref={perguntaTextareaRef} id="card-pergunta" value={pergunta}
                                         onChange={(e) => setPergunta(e.target.value)}
-                                        className="h-40 font-mono text-sm"
-                                        placeholder="Escreva a pergunta ou descrição aqui..."
+                                        className="h-40 font-mono text-sm" placeholder="Escreva aqui..."
                                     />
                                 </div>
                                 <Card className="border-dashed bg-gray-50">
                                     <CardHeader className="p-2">
-                                        <CardTitle className="text-sm font-medium">Inserir Popup de Mídia na Pergunta</CardTitle>
+                                        <CardTitle className="text-sm font-medium">Inserir Popup de Mídia</CardTitle>
                                     </CardHeader>
                                     <CardContent className="p-2 space-y-2">
                                         <div className="flex items-center gap-2">
                                             <ImageIcon className="h-4 w-4 text-gray-500 shrink-0"/>
-                                            <Input
-                                                type="text" value={popupImageUrl}
-                                                onChange={e => setPopupImageUrl(e.target.value)}
-                                                placeholder="URL Imagem" className="text-xs h-8 flex-1"
-                                            />
-                                            <Button
-                                                type="button" size="sm" variant="outline"
-                                                onClick={() => inserirTemplatePopup('imagem')}
-                                                className="h-8 text-xs px-2 shrink-0"
-                                            >
-                                                Add Img Popup
-                                            </Button>
+                                            <Input type="text" value={popupImageUrl} onChange={e => setPopupImageUrl(e.target.value)} placeholder="URL Imagem" className="text-xs h-8 flex-1"/>
+                                            <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('imagem')} className="h-8 text-xs px-2 shrink-0">Add Img Popup</Button>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Video className="h-4 w-4 text-gray-500 shrink-0"/>
-                                            <Input
-                                                type="text" value={popupVideoUrl}
-                                                onChange={e => setPopupVideoUrl(e.target.value)}
-                                                placeholder="URL Vídeo (.mp4)" className="text-xs h-8 flex-1"
-                                            />
-                                            <Button
-                                                type="button" size="sm" variant="outline"
-                                                onClick={() => inserirTemplatePopup('video')}
-                                                className="h-8 text-xs px-2 shrink-0"
-                                            >
-                                                Add Vídeo Popup
-                                            </Button>
+                                            <Input type="text" value={popupVideoUrl} onChange={e => setPopupVideoUrl(e.target.value)} placeholder="URL Vídeo (.mp4)" className="text-xs h-8 flex-1"/>
+                                            <Button type="button" size="sm" variant="outline" onClick={() => inserirTemplatePopup('video')} className="h-8 text-xs px-2 shrink-0">Add Vídeo Popup</Button>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Youtube className="h-4 w-4 text-red-600 shrink-0"/>
-                                            <Input
-                                                type="text" value={popupYouTubeUrl}
-                                                onChange={e => setPopupYouTubeUrl(e.target.value)}
-                                                placeholder="URL YouTube (Completa)" className="text-xs h-8 flex-1"
-                                            />
-                                            <Button
-                                                type="button" size="sm" variant="outline"
-                                                onClick={inserirTemplatePopupYouTube}
-                                                className="h-8 text-xs px-2 shrink-0"
-                                            >
-                                                Add YouTube Popup
-                                            </Button>
+                                            <Input type="text" value={popupYouTubeUrl} onChange={e => setPopupYouTubeUrl(e.target.value)} placeholder="URL YouTube (Completa)" className="text-xs h-8 flex-1"/>
+                                            <Button type="button" size="sm" variant="outline" onClick={inserirTemplatePopupYouTube} className="h-8 text-xs px-2 shrink-0">Add YouTube Popup</Button>
                                         </div>
                                     </CardContent>
                                  </Card>
                             </CardContent>
                         </Card>
 
-                        {/* --- Campos Condicionais (Envolvidos em Cards com Estilos) --- */}
-                         {["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo) && (
+                        {/* --- Campos Condicionais por Tipo --- */}
+                        {["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo) && (
                             <Card className="border bg-gray-50 p-4 rounded-lg shadow-sm">
                                 <CardHeader className="p-0 mb-3">
                                     <CardTitle className="text-lg">Opções</CardTitle>
@@ -790,11 +681,9 @@ const CriadorDeCarta: React.FC = () => {
                                                     )}
                                                     {(tipo === "Pergunta" || tipo === "MultiplaEscolha" || tipo === "Outras" || tipo === "ContraTempo") && (
                                                         <Button
-                                                            type="button"
-                                                            onClick={() => handleToggleRespostaCorreta(o.id)}
+                                                            type="button" onClick={() => handleToggleRespostaCorreta(o.id)}
                                                             variant={respostaCorreta.includes(o.id) ? "default" : "outline"}
-                                                            size="sm"
-                                                            className={cn("h-8 shrink-0", respostaCorreta.includes(o.id) && "bg-green-600 hover:bg-green-700")}
+                                                            size="sm" className={cn("h-8 shrink-0", respostaCorreta.includes(o.id) && "bg-green-600 hover:bg-green-700")}
                                                         >
                                                             {respostaCorreta.includes(o.id) ? "Correta" : "Marcar"}
                                                         </Button>
@@ -911,7 +800,7 @@ const CriadorDeCarta: React.FC = () => {
                                          <h4 className="text-md font-semibold mb-1 mt-3">Zonas (Selecione a correta)</h4>
                                          <ScrollArea className="h-32 border rounded p-1 bg-white">
                                             <ul className="text-sm space-y-1">
-                                                {zonasClicaveis.map(z => ( <li key={z.id} className="flex justify-between items-center odd:bg-gray-50 even:bg-white px-1 py-0.5"> <span>ID:{z.id} ({z.x},{z.y} {z.largura}x{z.altura}) {z.descricao}</span> <div className="flex items-center gap-1"> <Button type="button" variant={respostaCorretaPontoCerto === z.id ? "default" : "outline"} className={cn("h-6 px-1.5 text-xs", respostaCorretaPontoCerto === z.id && "bg-green-600")} onClick={() => handleSetRespostaPontoCerto(z.id)}>Correta</Button> <Button type="button" variant="ghost" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveZona(z.id)}>X</Button> </div> </li> ))}
+                                                {zonasClicaveis.map(z => ( <li key={z.id} className="flex justify-between items-center odd:bg-gray-50 even:bg-white px-1 py-0.5"> <span>ID:{z.id} ({z.x.toFixed(2)},{z.y.toFixed(2)} {z.largura.toFixed(2)}x{z.altura.toFixed(2)}) {z.descricao}</span> <div className="flex items-center gap-1"> <Button type="button" variant={respostaCorretaPontoCerto === z.id ? "default" : "outline"} className={cn("h-6 px-1.5 text-xs", respostaCorretaPontoCerto === z.id && "bg-green-600")} onClick={() => handleSetRespostaPontoCerto(z.id)}>Correta</Button> <Button type="button" variant="ghost" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveZona(z.id)}>X</Button> </div> </li> ))}
                                                 {zonasClicaveis.length === 0 && <p className="text-xs text-center text-gray-500 py-2">Nenhuma zona.</p>}
                                             </ul>
                                         </ScrollArea>
@@ -950,7 +839,7 @@ const CriadorDeCarta: React.FC = () => {
                             </Card>
                         )}
 
-                        {/* Card: Metadados (Categorias, Fontes, Baralho) */}
+                        {/* Card: Metadados */}
                          <Card className="border bg-slate-100 p-4 rounded-lg shadow-sm">
                             <CardHeader className="p-0 mb-3">
                                 <CardTitle className="text-lg">Metadados</CardTitle>
@@ -972,12 +861,7 @@ const CriadorDeCarta: React.FC = () => {
                                     </div>
                                     <ScrollArea className="h-24 border rounded p-1 bg-white">
                                         <ul className="space-y-1 text-sm">
-                                            {categorias.map((c, i) =>
-                                                <li key={i} className="flex justify-between items-center">
-                                                    <span>{c}</span>
-                                                    <Button type="button" variant="ghost" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveCategoria(c)}>X</Button>
-                                                </li>
-                                            )}
+                                            {categorias.map((c, i) => <li key={i} className="flex justify-between items-center px-1"><span>{c}</span><Button type="button" variant="ghost" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveCategoria(c)}>X</Button></li>)}
                                         </ul>
                                     </ScrollArea>
                                 </div>
@@ -997,12 +881,7 @@ const CriadorDeCarta: React.FC = () => {
                                     </div>
                                     <ScrollArea className="h-24 border rounded p-1 bg-white">
                                         <ul className="space-y-1 text-sm">
-                                            {fontes.map((f, i) =>
-                                                <li key={i} className="flex justify-between items-center">
-                                                    <span>{f}</span>
-                                                    <Button type="button" variant="ghost" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveFonte(f)}>X</Button>
-                                                </li>
-                                            )}
+                                            {fontes.map((f, i) => <li key={i} className="flex justify-between items-center px-1"><span>{f}</span><Button type="button" variant="ghost" className="text-red-500 h-6 w-6 p-0" onClick={() => handleRemoveFonte(f)}>X</Button></li>)}
                                         </ul>
                                     </ScrollArea>
                                 </div>
@@ -1021,24 +900,33 @@ const CriadorDeCarta: React.FC = () => {
                                           value={baralhoCartaAtual} onChange={(e) => setBaralhoCartaAtual(e.target.value)}
                                           placeholder={DEFAULT_BARALHO_NAME} className="h-9"
                                        />
-                                      <p className="text-xs text-gray-500 mt-1">Deixe em branco para &quot;{DEFAULT_BARALHO_NAME}&quot;.</p>
+                                      <p className="text-xs text-gray-500 mt-1">Deixe em branco para "{DEFAULT_BARALHO_NAME}".</p>
                                  </div>
                             </CardContent>
                          </Card>
 
                         {/* Card: Feedback (Vantagem, Desvantagem, Dica) */}
                         <Card className="border bg-slate-50 p-4 rounded-lg shadow-sm">
+                            <CardHeader className="p-0 mb-3">
+                                <CardTitle className="text-lg">Feedback da Carta</CardTitle>
+                            </CardHeader>
                              <CardContent className="p-0 space-y-3">
                                 <div className="relative">
-                                    <label htmlFor="card-vantagem" className="block text-sm font-medium mb-1 text-green-700">Vantagem (Msg Acerto)</label>
+                                    <label htmlFor="card-vantagem" className="block text-sm font-medium mb-1 text-green-700">
+                                        Vantagem (Mensagem de Acerto)
+                                    </label>
                                     <Input id="card-vantagem" type="text" value={vantagem} onChange={(e) => setVantagem(e.target.value)} className="border-green-300 focus:ring-green-500"/>
                                 </div>
                                 <div className="relative">
-                                    <label htmlFor="card-desvantagem" className="block text-sm font-medium mb-1 text-red-700">Desvantagem (Msg Erro)</label>
+                                    <label htmlFor="card-desvantagem" className="block text-sm font-medium mb-1 text-red-700">
+                                        Desvantagem (Mensagem de Erro)
+                                    </label>
                                     <Input id="card-desvantagem" type="text" value={desvantagem} onChange={(e) => setDesvantagem(e.target.value)} className="border-red-300 focus:ring-red-500"/>
                                 </div>
                                 <div className="relative">
-                                    <label htmlFor="card-dica" className="block text-sm font-medium mb-1 text-blue-700">Dica</label>
+                                    <label htmlFor="card-dica" className="block text-sm font-medium mb-1 text-blue-700">
+                                        Dica
+                                    </label>
                                     <Input id="card-dica" type="text" value={dica} onChange={(e) => setDica(e.target.value)} className="border-blue-300 focus:ring-blue-500"/>
                                 </div>
                             </CardContent>
@@ -1101,7 +989,10 @@ const CriadorDeCarta: React.FC = () => {
                                         {cards.map((c, index) => (
                                             <Card
                                                 key={`card-display-${c.id || index}`}
-                                                className={cn("hover:shadow-md transition-shadow cursor-pointer border", editIndex === index && "ring-2 ring-blue-500 border-blue-400")}
+                                                className={cn(
+                                                    "hover:shadow-md transition-shadow cursor-pointer border",
+                                                    editIndex === index && "ring-2 ring-blue-500 border-blue-400"
+                                                )}
                                                 onClick={() => loadCardForEdit(index)}
                                             >
                                                 <CardContent className="p-2 flex items-center justify-between gap-2">
