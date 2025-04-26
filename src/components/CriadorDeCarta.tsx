@@ -136,7 +136,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
             break;
         case "CompletarFrase":
             const cardCompFrase = card as Partial<CartaCompletarFrase>;
-            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: "{cardCompFrase.fraseIncompleta || '...'}"</p>;
+            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: &quot;{cardCompFrase.fraseIncompleta || '...'}&quot;</p>;
             renderedOptions = (
                 <>
                  {cardCompFrase.fragmentos && cardCompFrase.fragmentos.length > 0 && (
@@ -952,7 +952,7 @@ const CriadorDeCarta: React.FC = () => {
                                           value={baralhoCartaAtual} onChange={(e) => setBaralhoCartaAtual(e.target.value)}
                                           placeholder={DEFAULT_BARALHO_NAME} className="h-9"
                                        />
-                                      <p className="text-xs text-gray-500 mt-1">Deixe em branco para "{DEFAULT_BARALHO_NAME}".</p>
+                                      <p className="text-xs text-gray-500 mt-1">Deixe em branco para &quot;{DEFAULT_BARALHO_NAME}&quot;.</p>
                                  </div>
                             </CardContent>
                          </Card>
