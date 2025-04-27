@@ -225,7 +225,7 @@ const TelaInicial: React.FC<TelaInicialProps> = ({
     const handleStartGame = (continueGame = false) => {
         let gameStateToStart: Partial<GameState>;
         if (continueGame && typeof window !== "undefined") {
-             const savedStateRaw = localStorage.getItem(LOCALSTORAGE_KEYS.GAME_STATE); // Usa constante
+             const savedStateRaw = localStorage.getItem("estadoEcoChallenge"); // Usa constante
              try {
                  const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
                  if (savedState && savedState.jogoIniciado) {
@@ -504,7 +504,7 @@ const EcoChallenge: React.FC = () => {
     const saveGameState = useCallback((stateToSave: GameState | null) => {
         if (stateToSave && typeof window !== "undefined") {
             try {
-                localStorage.setItem(LOCALSTORAGE_KEYS.GAME_STATE, JSON.stringify(stateToSave));
+                localStorage.setItem("estadoEcoChallenge", JSON.stringify(stateToSave));
             } catch (e) { console.error("Erro ao salvar estado:", e); }
         }
     }, []);
@@ -533,7 +533,7 @@ const EcoChallenge: React.FC = () => {
     useEffect(() => {
         setIsClientReady(true); // Indica que estamos no cliente
         if (typeof window !== "undefined") {
-            const savedStateRaw = localStorage.getItem(LOCALSTORAGE_KEYS.GAME_STATE);
+            const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
             try {
                 const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null;
                 if (savedState && savedState.jogoIniciado) {
@@ -548,7 +548,7 @@ const EcoChallenge: React.FC = () => {
                 }
             } catch (e) {
                 console.error("Erro ao carregar estado:", e);
-                localStorage.removeItem(LOCALSTORAGE_KEYS.GAME_STATE); // Limpa estado inválido
+                localStorage.removeItem("estadoEcoChallenge"); // Limpa estado inválido
             }
         }
     }, []); // Roda apenas na montagem inicial do cliente
@@ -687,7 +687,7 @@ const EcoChallenge: React.FC = () => {
         // Lógica para buscar dados iniciais para TelaInicial (se necessário)
         let hasSaved = false; let initialPlayersData: Player[] = []; let initialOcultar = true; let initialProb = 0; let initialCategorias: string[] = [];
         if (typeof window !== "undefined") {
-            const savedStateRaw = localStorage.getItem(LOCALSTORAGE_KEYS.GAME_STATE);
+            const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
             const savedUISettingsRaw = localStorage.getItem(LOCALSTORAGE_KEYS.UI_SETTINGS);
             try { const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; if (savedState && savedState.jogoIniciado) { hasSaved = true; initialPlayersData = savedState.players || []; } } catch(e) { console.error("Erro ler estado salvo (jogo):", e); }
             try { const loadedUISettings = savedUISettingsRaw ? JSON.parse(savedUISettingsRaw) : {}; initialCategorias = loadedUISettings.categoriasSelecionadas ?? []; initialOcultar = loadedUISettings.ocultarCarta ?? true; initialProb = loadedUISettings.probabilityIndex ?? 0; } catch(e) { console.error("Erro ler estado salvo (UI):", e); }
