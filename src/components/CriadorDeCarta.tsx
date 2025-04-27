@@ -12,13 +12,14 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import {
     Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
-} from "@/components/ui/dialog"; // Certifique-se que este componente existe!
+} from "@/components/ui/dialog";
 import {
     Trash, Youtube, Image as ImageIcon, Video, ArrowUpCircle, Lock, LockOpen, X,
     Edit, ListChecks, ChevronLeft, ChevronRight, CheckSquare, Square
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Tipos de Dados
 interface Opcao { id: number; texto: string; ordemTemp?: string; }
 interface ItemRelacionar { id: number; texto: string; }
 interface ZonaClicavel { id: number; x: number; y: number; largura: number; altura: number; descricao?: string; }
@@ -198,13 +199,15 @@ const CardStaticView: React.FC<{ card: Partial<Carta>, small?: boolean }> = ({ c
             </CardHeader>
             <CardContent className={cn("pt-2 pb-3 space-y-2", small && "p-1.5 space-y-1")}>
                 {renderedSpecifics}
-                 {(!small || (pergunta && pergunta.length > 100)) ? (
-                    <ScrollArea className={cn("h-auto max-h-60 rounded-md border p-3 mt-2 bg-white/80 shadow-inner min-h-[100px]", small && "max-h-24 p-1.5 mt-1 min-h-[40px]")}>
-                         <div className={cn("text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-1 prose-ul:my-1 prose-ol:my-1 overflow-hidden", small && "text-xs prose-xs prose-p:my-0.5 prose-img:my-0.5 prose-ul:my-0.5 prose-ol:my-0.5")} dangerouslySetInnerHTML={{ __html: pergunta || `<p class="italic text-gray-500">${small ? '(sem desc.)' : '(Sem Pergunta)'}</p>` }} />
-                    </ScrollArea>
-                 ) : (
-                     <div className={cn("text-sm prose prose-sm max-w-none prose-p:my-1 overflow-hidden p-1.5 mt-1 border rounded bg-white/80 shadow-inner", small && "text-xs prose-xs prose-p:my-0.5")} dangerouslySetInnerHTML={{ __html: pergunta || `<p class="italic text-gray-500">${small ? '(sem desc.)' : '(Sem Pergunta)'}</p>` }} />
-                 )}
+                <ScrollArea className={cn(
+                    "h-auto rounded-md border p-3 mt-2 bg-white/80 shadow-inner",
+                    small ? "max-h-40 min-h-[50px] p-1.5 mt-1" : "max-h-80 min-h-[120px]" // Alturas ajustadas
+                )}>
+                     <div
+                        className={cn("prose prose-sm max-w-none prose-p:my-1 prose-img:my-1 prose-ul:my-1 prose-ol:my-1 overflow-hidden", small && "text-xs prose-xs prose-p:my-0.5 prose-img:my-0.5 prose-ul:my-0.5 prose-ol:my-0.5")}
+                        dangerouslySetInnerHTML={{ __html: pergunta || `<p class="italic text-gray-500">${small ? '(sem desc.)' : '(Sem Pergunta)'}</p>` }}
+                     />
+                </ScrollArea>
                 {renderedOptions}
             </CardContent>
             {!small && (categorias.length > 0 || fontes.length > 0 || dica || vantagem || desvantagem) && (
@@ -347,7 +350,7 @@ const CriadorDeCarta: React.FC = () => {
         if (window.confirm(`Remover ${selectedCardIndices.size} carta(s) selecionada(s)?`)) {
             const indicesToRemove = Array.from(selectedCardIndices);
             const newCards = cards.filter((_, index) => !indicesToRemove.includes(index));
-            const newTotalCards = newCards.length; // Total após remover
+            const newTotalCards = newCards.length;
             setCards(newCards);
 
             if (editIndex !== null && indicesToRemove.includes(editIndex)) {
@@ -363,7 +366,6 @@ const CriadorDeCarta: React.FC = () => {
                 setModalCurrentPage(1);
             }
              else {
-                // Verifica se a página atual ficou vazia após a remoção
                  const currentStartIndexAfterDelete = (modalCurrentPage - 1) * modalItemsPerPage;
                  if (currentStartIndexAfterDelete >= newTotalCards && modalCurrentPage > 1) {
                       setModalCurrentPage(modalCurrentPage - 1);
@@ -759,6 +761,74 @@ const CriadorDeCarta: React.FC = () => {
     };
     const generateCode = (format: 'js' | 'json') => { const deckFinal = prepareForDownload(); if (format === 'json') { return JSON.stringify(deckFinal, null, 2); } else { const deck = JSON.stringify(deckFinal, null, 2); return `const ${deckName || 'meu_baralho'} = ${deck};\n\nexport default ${deckName || 'meu_baralho'};`; } };
     const downloadCode = (format: 'js' | 'json') => { const element = document.createElement("a"); const fileContent = generateCode(format); const fileType = format === 'js' ? 'text/javascript' : 'application/json'; const fileName = `${deckName || 'meu_baralho'}.${format}`; const file = new Blob([fileContent], { type: fileType }); element.href = URL.createObjectURL(file); element.download = fileName; document.body.appendChild(element); element.click(); document.body.removeChild(element); };
+
+     // Função para calcular o preview da resposta em tempo real
+     const calculatePreviewAnswer = () => {
+        try {
+            if (tipo === 'Pergunta' || tipo === 'ContraTempo') return respostaCorreta[0];
+            if (tipo === 'PontoCerto') return respostaCorretaPontoCerto ?? undefined;
+            if (tipo === 'RelacionarColunas') return parseParesRelacionar(paresCorretosInput);
+            if (tipo === 'CompletarFrase') return ordemFragmentos.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+            if (tipo === 'Ordem') {
+                const sorted = [...opcoes].sort((a, b) => (parseInt(a.ordemTemp || '999', 10) - parseInt(b.ordemTemp || '999', 10)));
+                return sorted.map(o => o.id);
+            }
+            if (tipo === 'Vantagem') return opcoes.map(o => o.id);
+            if (tipo === 'Desvantagem') return [];
+            return respostaCorreta; // Para MultiplaEscolha/Outras
+        } catch (e) {
+            // Em caso de erro no parse (ex: formato inválido em Relacionar), retorna indefinido ou vazio
+            console.warn("Erro ao calcular preview da resposta:", e);
+            if (tipo === 'RelacionarColunas') return [];
+            if (tipo === 'CompletarFrase') return [];
+            if (tipo === 'Ordem') return [];
+            return undefined;
+        }
+    };
+
+    // Constrói o objeto de preview dinamicamente
+    const previewCardData = useMemo(() => {
+        if (editIndex !== null) {
+            return cards[editIndex];
+        }
+
+        const finalRespostaCorretaPreview = calculatePreviewAnswer();
+        const previewCard: Partial<Carta> = {
+            tipo, titulo, baralho: baralhoCartaAtual.trim() || undefined,
+            pergunta, dificuldade, categorias, fontes,
+            vantagem, desvantagem, dica,
+            respostaCorreta: finalRespostaCorretaPreview as any,
+        };
+
+        switch (tipo) {
+            case "Pergunta":
+            case "MultiplaEscolha":
+            case "Ordem":
+            case "Vantagem":
+            case "Desvantagem":
+            case "Outras":
+                previewCard.opcoes = opcoes;
+                break;
+            case "ContraTempo":
+                 previewCard.opcoes = opcoes;
+                 (previewCard as Partial<CartaContraTempo>).tempoLimite = tempoLimite;
+                 break;
+            case "RelacionarColunas":
+                 (previewCard as Partial<CartaRelacionarColunas>).colunaA = colunaAItems;
+                 (previewCard as Partial<CartaRelacionarColunas>).colunaB = colunaBItems;
+                 break;
+            case "PontoCerto":
+                 (previewCard as Partial<CartaPontoCerto>).imagemURL = imagemURLPontoCerto;
+                 (previewCard as Partial<CartaPontoCerto>).zonasClicaveis = zonasClicaveis;
+                 break;
+            case "CompletarFrase":
+                 (previewCard as Partial<CartaCompletarFrase>).fraseIncompleta = fraseIncompleta;
+                 (previewCard as Partial<CartaCompletarFrase>).fragmentos = fragmentos;
+                 break;
+        }
+        return previewCard;
+    }, [editIndex, cards, tipo, titulo, baralhoCartaAtual, pergunta, dificuldade, categorias, fontes, vantagem, desvantagem, dica, respostaCorreta, opcoes, tempoLimite, colunaAItems, colunaBItems, paresCorretosInput, imagemURLPontoCerto, zonasClicaveis, respostaCorretaPontoCerto, fraseIncompleta, fragmentos, ordemFragmentos]);
+
 
     return (
         <div className="p-4 max-w-7xl mx-auto relative">
@@ -1165,36 +1235,7 @@ const CriadorDeCarta: React.FC = () => {
                              <CardTitle className="text-lg text-center font-semibold">Preview da Carta</CardTitle>
                          </CardHeader>
                          <CardContent className="p-2">
-                             <CardStaticView card={
-                                editIndex !== null
-                                ? cards[editIndex]
-                                : (() => {
-                                    const finalRespostaCorretaPreview = (() => {
-                                         if (tipo === 'Pergunta' || tipo === 'ContraTempo') return respostaCorreta[0];
-                                         if (tipo === 'PontoCerto') return respostaCorretaPontoCerto ?? undefined;
-                                         if (tipo === 'RelacionarColunas') { try { return parseParesRelacionar(paresCorretosInput); } catch { return []; } }
-                                         if (tipo === 'CompletarFrase') return ordemFragmentos.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
-                                         if (tipo === 'Ordem') { const sorted = [...opcoes].sort((a, b) => (parseInt(a.ordemTemp || '999', 10) - parseInt(b.ordemTemp || '999', 10))); return sorted.map(o => o.id); }
-                                         if (tipo === 'Vantagem') return opcoes.map(o => o.id);
-                                         if (tipo === 'Desvantagem') return [];
-                                         return respostaCorreta;
-                                    })();
-                                    const previewCard: Partial<Carta> = {
-                                        tipo, titulo, baralho: baralhoCartaAtual.trim() || undefined,
-                                        pergunta, dificuldade, categorias, fontes,
-                                        vantagem, desvantagem, dica,
-                                        respostaCorreta: finalRespostaCorretaPreview as any,
-                                    };
-                                    switch (tipo) {
-                                        case "Pergunta": case "MultiplaEscolha": case "Ordem": case "Vantagem": case "Desvantagem": case "Outras": previewCard.opcoes = opcoes; break;
-                                        case "ContraTempo": previewCard.opcoes = opcoes; (previewCard as Partial<CartaContraTempo>).tempoLimite = tempoLimite; break;
-                                        case "RelacionarColunas": (previewCard as Partial<CartaRelacionarColunas>).colunaA = colunaAItems; (previewCard as Partial<CartaRelacionarColunas>).colunaB = colunaBItems; break;
-                                        case "PontoCerto": (previewCard as Partial<CartaPontoCerto>).imagemURL = imagemURLPontoCerto; (previewCard as Partial<CartaPontoCerto>).zonasClicaveis = zonasClicaveis; break;
-                                        case "CompletarFrase": (previewCard as Partial<CartaCompletarFrase>).fraseIncompleta = fraseIncompleta; (previewCard as Partial<CartaCompletarFrase>).fragmentos = fragmentos; break;
-                                    }
-                                    return previewCard;
-                                })()
-                             }/>
+                             <CardStaticView card={previewCardData}/>
                          </CardContent>
                      </Card>
 
@@ -1283,7 +1324,7 @@ const CriadorDeCarta: React.FC = () => {
                                 </Dialog>
                             </div>
                             <AlertDescription>
-                                Visualize no Preview ou use &quot;Gerenciar&quot; para editar/remover.
+                                Clique em uma carta abaixo ou use "Gerenciar" para editar/remover.
                             </AlertDescription>
                         </CardHeader>
                         <CardContent>
@@ -1293,7 +1334,11 @@ const CriadorDeCarta: React.FC = () => {
                                 <ScrollArea className="h-72 min-h-[150px] pr-3 border rounded-md bg-gray-50 p-2">
                                     <div className="space-y-2">
                                         {cards.map((c, index) => (
-                                            <Card key={`card-display-${c.id || index}`} className={cn( "hover:shadow-md transition-shadow border", editIndex === index && "ring-2 ring-blue-500 border-blue-400" )}>
+                                            <Card
+                                                key={`card-display-${c.id || index}`}
+                                                className={cn( "hover:shadow-md transition-shadow cursor-pointer border", editIndex === index && "ring-2 ring-blue-500 border-blue-400" )}
+                                                onClick={() => loadCardForEdit(index)} // <-- onClick RESTAURADO
+                                            >
                                                 <CardContent className="p-2 flex items-center justify-between gap-2">
                                                     <div className="flex-1 overflow-hidden">
                                                         <p className="text-xs font-semibold text-blue-700">
