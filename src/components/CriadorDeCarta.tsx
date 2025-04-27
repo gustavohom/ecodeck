@@ -19,13 +19,20 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// --- Tipos de Dados --- (sem alterações)
 interface Opcao { id: number; texto: string; ordemTemp?: string; }
 interface ItemRelacionar { id: number; texto: string; }
 interface ZonaClicavel { id: number; x: number; y: number; largura: number; altura: number; descricao?: string; }
 interface FragmentoCompletar { id: number; texto: string; }
-interface CartaBase { id: string | number; tipo: string; titulo: string; pergunta: string; dificuldade: "facil" | "normal" | "dificil"; categorias: string[]; fontes: string[]; vantagem: string; desvantagem: string; dica: string; baralho?: string; opcoes?: Opcao[]; }
+
+interface CartaBase {
+    id: string | number; tipo: string; titulo: string; pergunta: string;
+    dificuldade: "facil" | "normal" | "dificil"; categorias: string[]; fontes: string[];
+    vantagem: string; desvantagem: string; dica: string;
+    baralho?: string;
+    opcoes?: Opcao[];
+}
 interface CartaComOpcoes extends CartaBase { opcoes: Opcao[]; }
+
 interface CartaPergunta extends CartaComOpcoes { tipo: "Pergunta"; respostaCorreta: number; }
 interface CartaMultiplaEscolha extends CartaComOpcoes { tipo: "MultiplaEscolha"; respostaCorreta: number[]; }
 interface CartaOrdem extends CartaComOpcoes { tipo: "Ordem"; respostaCorreta: number[]; }
@@ -36,21 +43,57 @@ interface CartaContraTempo extends CartaComOpcoes { tipo: "ContraTempo"; respost
 interface CartaRelacionarColunas extends CartaBase { tipo: "RelacionarColunas"; colunaA: ItemRelacionar[]; colunaB: ItemRelacionar[]; respostaCorreta: { aId: number; bId: number }[]; }
 interface CartaPontoCerto extends CartaBase { tipo: "PontoCerto"; imagemURL?: string; zonasClicaveis?: ZonaClicavel[]; respostaCorreta?: number; }
 interface CartaCompletarFrase extends CartaBase { tipo: "CompletarFrase"; fraseIncompleta?: string; fragmentos?: FragmentoCompletar[]; respostaCorreta?: number[]; }
-type Carta = | CartaPergunta | CartaMultiplaEscolha | CartaOrdem | CartaVantagem | CartaDesvantagem | CartaOutras | CartaContraTempo | CartaRelacionarColunas | CartaPontoCerto | CartaCompletarFrase;
-type CartaInterna = Carta & { origBaralhoId?: number; edited?: boolean; };
 
-const CARD_TYPES = [ "Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo", "RelacionarColunas", "PontoCerto", "CompletarFrase" ] as const;
+type Carta =
+    | CartaPergunta | CartaMultiplaEscolha | CartaOrdem | CartaVantagem | CartaDesvantagem | CartaOutras
+    | CartaContraTempo | CartaRelacionarColunas | CartaPontoCerto | CartaCompletarFrase;
+
+type CartaInterna = Carta & {
+    origBaralhoId?: number;
+    edited?: boolean;
+};
+
+const CARD_TYPES = [
+    "Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras",
+    "ContraTempo", "RelacionarColunas", "PontoCerto", "CompletarFrase"
+] as const;
 type TipoCarta = typeof CARD_TYPES[number];
+
 const DIFFICULTIES = ["facil", "normal", "dificil"] as const;
 type Dificuldade = typeof DIFFICULTIES[number];
+
 interface BaralhoCarregado { id: number; nome: string; cartas: Carta[]; adicionado: boolean; }
+
 const DEFAULT_BARALHO_NAME = "Padrão";
 
-// --- Funções Utilitárias --- (sem alterações)
-function parseJSDeckFileLocal(content: string): Carta[] { try { const match = content.match(/export default\s+(\[[\s\S]*?\]);?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?\s*export default\s+\w+;?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?/m); if (!match || !match[1]) { throw new Error("Array não encontrado no arquivo JS."); } const arrayStr = match[1]; const rawArray = new Function(`return ${arrayStr};`)() as any[]; if (!Array.isArray(rawArray)) { throw new Error("Conteúdo não é array."); } return rawArray.map((card, index) => ({ ...card, id: card.id || `custom_js_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`, baralho: card.baralho?.trim() || DEFAULT_BARALHO_NAME })) as Carta[]; } catch (error: any) { console.error("Erro parse JS:", error); throw new Error(`Erro processar JS: ${error.message}`); } }
-function parseParesRelacionar(input: string): { aId: number; bId: number }[] { const paresFormatados: { aId: number; bId: number }[] = []; if (!input || !input.trim()) { return paresFormatados; } const paresString = input.split(','); for (const parStr of paresString) { const partes = parStr.trim().split('-'); if (partes.length !== 2) { throw new Error(`Formato inválido no par "${parStr.trim()}". Use IDa-IDb.`); } const aId = parseInt(partes[0].trim(), 10); const bId = parseInt(partes[1].trim(), 10); if (isNaN(aId) || isNaN(bId)) { throw new Error(`IDs não numéricos no par "${parStr.trim()}".`); } paresFormatados.push({ aId, bId }); } return paresFormatados; }
+function parseJSDeckFileLocal(content: string): Carta[] {
+    try {
+        const match = content.match(/export default\s+(\[[\s\S]*?\]);?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?\s*export default\s+\w+;?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?/m);
+        if (!match || !match[1]) { throw new Error("Array não encontrado no arquivo JS."); }
+        const arrayStr = match[1]; const rawArray = new Function(`return ${arrayStr};`)() as any[];
+        if (!Array.isArray(rawArray)) { throw new Error("Conteúdo não é array."); }
+        return rawArray.map((card, index) => ({
+            ...card,
+            id: card.id || `custom_js_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`,
+            baralho: card.baralho?.trim() || DEFAULT_BARALHO_NAME
+        })) as Carta[];
+    } catch (error: any) { console.error("Erro parse JS:", error); throw new Error(`Erro processar JS: ${error.message}`); }
+}
 
-// --- Componente de Preview Estático --- (Altura da ScrollArea ajustada)
+function parseParesRelacionar(input: string): { aId: number; bId: number }[] {
+    const paresFormatados: { aId: number; bId: number }[] = [];
+    if (!input || !input.trim()) { return paresFormatados; }
+    const paresString = input.split(',');
+    for (const parStr of paresString) {
+        const partes = parStr.trim().split('-');
+        if (partes.length !== 2) { throw new Error(`Formato inválido no par "${parStr.trim()}". Use IDa-IDb.`); }
+        const aId = parseInt(partes[0].trim(), 10); const bId = parseInt(partes[1].trim(), 10);
+        if (isNaN(aId) || isNaN(bId)) { throw new Error(`IDs não numéricos no par "${parStr.trim()}".`); }
+        paresFormatados.push({ aId, bId });
+    }
+    return paresFormatados;
+}
+
 const CardStaticView: React.FC<{ card: Partial<Carta>, small?: boolean }> = ({ card, small = false }) => {
     const { tipo = "Pergunta", titulo = "", pergunta = "", dificuldade = "facil", categorias = [], fontes = [], vantagem = "", desvantagem = "", dica = "", baralho } = card;
     let renderedSpecifics: React.ReactNode = null;
@@ -157,7 +200,6 @@ const CardStaticView: React.FC<{ card: Partial<Carta>, small?: boolean }> = ({ c
                 {renderedSpecifics}
                 <ScrollArea className={cn(
                     "h-auto rounded-md border p-3 mt-2 bg-white/80 shadow-inner",
-                    // ALTURAS AJUSTADAS AQUI
                     small ? "max-h-52 min-h-[60px] p-1.5 mt-1" : "max-h-80 min-h-[120px]"
                 )}>
                      <div
@@ -180,9 +222,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta>, small?: boolean }> = ({ c
     );
 };
 
-// --- Componente Criador Principal ---
 const CriadorDeCarta: React.FC = () => {
-    // --- Estados --- (sem alterações na declaração)
     const [deckName, setDeckName] = useState("meu_baralho");
     const [cards, setCards] = useState<CartaInterna[]>([]);
     const [tipo, setTipo] = useState<TipoCarta>("Pergunta");
@@ -231,32 +271,166 @@ const CriadorDeCarta: React.FC = () => {
     const [modalItemsPerPage] = useState(6);
     const [selectedCardIndices, setSelectedCardIndices] = useState<Set<number>>(new Set());
 
-    // --- Refs --- (sem alterações)
     const perguntaTextareaRef = useRef<HTMLTextAreaElement>(null);
     const previewImageRefPontoCerto = useRef<HTMLImageElement>(null);
     const [previewImageSize, setPreviewImageSize] = useState({ width: 0, height: 0 });
 
-    // --- UseEffects --- (sem alterações)
-    useEffect(() => { if (tipo === 'PontoCerto' && previewImageRefPontoCerto.current) { const updateSize = () => { if (previewImageRefPontoCerto.current) { setPreviewImageSize({ width: previewImageRefPontoCerto.current.offsetWidth, height: previewImageRefPontoCerto.current.offsetHeight }); } }; const img = previewImageRefPontoCerto.current; img.onload = updateSize; if (img.complete) updateSize(); const observer = new ResizeObserver(updateSize); observer.observe(img); window.addEventListener('resize', updateSize); return () => { window.removeEventListener('resize', updateSize); observer.disconnect(); img.onload = null;}; } }, [tipo, imagemURLPontoCerto]);
-    useEffect(() => { const handleScroll = () => { setShowScrollTop(window.scrollY > 200); }; window.addEventListener('scroll', handleScroll); return () => window.removeEventListener('scroll', handleScroll); }, []);
+    useEffect(() => {
+        if (tipo === 'PontoCerto' && previewImageRefPontoCerto.current) {
+            const updateSize = () => {
+                if (previewImageRefPontoCerto.current) {
+                    setPreviewImageSize({ width: previewImageRefPontoCerto.current.offsetWidth, height: previewImageRefPontoCerto.current.offsetHeight });
+                }
+            };
+            const img = previewImageRefPontoCerto.current;
+            img.onload = updateSize;
+            if (img.complete) updateSize();
+            const observer = new ResizeObserver(updateSize);
+            observer.observe(img);
+            window.addEventListener('resize', updateSize);
+            return () => {
+                window.removeEventListener('resize', updateSize);
+                observer.disconnect();
+                img.onload = null;
+            };
+        }
+    }, [tipo, imagemURLPontoCerto]);
 
-    // --- Lógica do Modal --- (sem alterações)
+    useEffect(() => {
+        const handleScroll = () => { setShowScrollTop(window.scrollY > 200); };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     const totalPages = Math.ceil(cards.length / modalItemsPerPage);
     const startIndex = (modalCurrentPage - 1) * modalItemsPerPage;
     const endIndex = startIndex + modalItemsPerPage;
     const cardsToShowInModal = useMemo(() => cards.slice(startIndex, endIndex), [cards, startIndex, endIndex]);
     const currentIndicesOnPage = useMemo(() => cardsToShowInModal.map((_, i) => startIndex + i), [cardsToShowInModal, startIndex]);
-    const handleModalPageChange = (direction: 'prev' | 'next') => { setModalCurrentPage(prev => { const nextPage = direction === 'next' ? prev + 1 : prev - 1; setSelectedCardIndices(new Set()); return Math.max(1, Math.min(nextPage, totalPages)); }); };
-    const handleToggleSelectCard = (index: number) => { setSelectedCardIndices(prev => { const newSet = new Set(prev); if (newSet.has(index)) { newSet.delete(index); } else { newSet.add(index); } return newSet; }); };
-    const handleSelectPage = () => { setSelectedCardIndices(prev => { const newSet = new Set(prev); currentIndicesOnPage.forEach(index => newSet.add(index)); return newSet; }); };
-    const handleDeselectPage = () => { setSelectedCardIndices(prev => { const newSet = new Set(prev); currentIndicesOnPage.forEach(index => newSet.delete(index)); return newSet; }); };
-    const handleDeleteSelectedCards = () => { if (selectedCardIndices.size === 0) return; if (window.confirm(`Remover ${selectedCardIndices.size} carta(s) selecionada(s)?`)) { const indicesToRemove = Array.from(selectedCardIndices); const newCards = cards.filter((_, index) => !indicesToRemove.includes(index)); const newTotalCards = newCards.length; setCards(newCards); if (editIndex !== null && indicesToRemove.includes(editIndex)) { resetCarta(); } setSelectedCardIndices(new Set()); const newTotalPages = Math.ceil(newTotalCards / modalItemsPerPage); if (modalCurrentPage > newTotalPages && newTotalPages > 0) { setModalCurrentPage(newTotalPages); } else if (newTotalCards === 0) { setModalCurrentPage(1); } else { const currentStartIndexAfterDelete = (modalCurrentPage - 1) * modalItemsPerPage; if (currentStartIndexAfterDelete >= newTotalCards && modalCurrentPage > 1) { setModalCurrentPage(modalCurrentPage - 1); } } } };
-    const handleEditSelectedCard = () => { if (selectedCardIndices.size !== 1) return; const indexToEdit = Array.from(selectedCardIndices)[0]; loadCardForEdit(indexToEdit); setIsManageModalOpen(false); setSelectedCardIndices(new Set()); };
 
-    // --- Funções Auxiliares --- (sem alterações)
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => { const files = e.target.files; if (!files) return; setIsLoading(true); setErrorMessage(null); let loadErrors: string[] = []; const newBaralhos: BaralhoCarregado[] = []; for (let i = 0; i < files.length; i++) { const file = files[i]; const content = await file.text(); try { let newCards: Carta[] = []; const nome = file.name.replace(/\.(js|json)$/, ""); if (baralhosCarregados.some(b => b.nome === nome)) { loadErrors.push(`Baralho "${nome}" já carregado.`); continue; } if (file.name.endsWith(".js")) { newCards = parseJSDeckFileLocal(content); } else if (file.name.endsWith(".json")) { const raw = JSON.parse(content) as any[]; if (!Array.isArray(raw)) throw new Error("JSON não é array."); newCards = raw.map((card, index) => ({ ...card, id: card.id || `custom_json_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`, baralho: card.baralho?.trim() || DEFAULT_BARALHO_NAME })) as Carta[]; } else { loadErrors.push(`Formato ${file.name} não suportado.`); continue; } if (!Array.isArray(newCards) || newCards.length === 0) { loadErrors.push(`Nenhuma carta válida em "${nome}".`); continue; } newBaralhos.push({ id: Date.now() + Math.random(), nome, cartas: newCards, adicionado: false }); } catch (error: any) { loadErrors.push(`Erro ao ler ${file.name}: ${error.message}`); } } if (newBaralhos.length > 0) { setBaralhosCarregados((prev) => [...prev, ...newBaralhos]); } if (loadErrors.length > 0) { setErrorMessage(loadErrors.join(" ")); } setIsLoading(false); e.target.value = ''; };
-    const adicionarBaralho = (baralhoId: number) => { setBaralhosCarregados((prev) => prev.map((b) => { if (b.id === baralhoId && !b.adicionado) { const newCards: CartaInterna[] = b.cartas.map((c) => ({ ...c, id: c.id || `${b.nome}_${Math.random().toString(16).slice(2)}`, baralho: c.baralho || DEFAULT_BARALHO_NAME, origBaralhoId: b.id, edited: false })); setCards((oldCards) => [...oldCards, ...newCards]); return { ...b, adicionado: true }; } return b; })); };
-    const removerBaralho = (baralhoId: number) => { setBaralhosCarregados((prev) => prev.map((b) => { if (b.id === baralhoId && b.adicionado) { setCards((oldCards) => oldCards.filter((c) => { if (c.origBaralhoId === baralhoId) { return c.edited && manterCartasEditadas; } return true; })); return { ...b, adicionado: false }; } return b; })); };
+    const handleModalPageChange = (direction: 'prev' | 'next') => {
+        setModalCurrentPage(prev => {
+            const nextPage = direction === 'next' ? prev + 1 : prev - 1;
+            setSelectedCardIndices(new Set());
+            return Math.max(1, Math.min(nextPage, totalPages));
+        });
+    };
+
+    const handleToggleSelectCard = (index: number) => {
+        setSelectedCardIndices(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(index)) {
+                newSet.delete(index);
+            } else {
+                newSet.add(index);
+            }
+            return newSet;
+        });
+    };
+
+    const handleSelectPage = () => {
+        setSelectedCardIndices(prev => {
+            const newSet = new Set(prev);
+            currentIndicesOnPage.forEach(index => newSet.add(index));
+            return newSet;
+        });
+    };
+
+    const handleDeselectPage = () => {
+        setSelectedCardIndices(prev => {
+            const newSet = new Set(prev);
+            currentIndicesOnPage.forEach(index => newSet.delete(index));
+            return newSet;
+        });
+    };
+
+    const handleDeleteSelectedCards = () => {
+        if (selectedCardIndices.size === 0) return;
+        if (window.confirm(`Remover ${selectedCardIndices.size} carta(s) selecionada(s)?`)) {
+            const indicesToRemove = Array.from(selectedCardIndices);
+            const newCards = cards.filter((_, index) => !indicesToRemove.includes(index));
+            const newTotalCards = newCards.length;
+            setCards(newCards);
+
+            if (editIndex !== null && indicesToRemove.includes(editIndex)) {
+                resetCarta();
+            }
+
+            setSelectedCardIndices(new Set());
+
+            const newTotalPages = Math.ceil(newTotalCards / modalItemsPerPage);
+            if (modalCurrentPage > newTotalPages && newTotalPages > 0) {
+                setModalCurrentPage(newTotalPages);
+            } else if (newTotalCards === 0) {
+                setModalCurrentPage(1);
+            }
+             else {
+                 const currentStartIndexAfterDelete = (modalCurrentPage - 1) * modalItemsPerPage;
+                 if (currentStartIndexAfterDelete >= newTotalCards && modalCurrentPage > 1) {
+                      setModalCurrentPage(modalCurrentPage - 1);
+                 }
+             }
+        }
+    };
+
+
+    const handleEditSelectedCard = () => {
+        if (selectedCardIndices.size !== 1) return;
+        const indexToEdit = Array.from(selectedCardIndices)[0];
+        loadCardForEdit(indexToEdit);
+        setIsManageModalOpen(false);
+        setSelectedCardIndices(new Set());
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files; if (!files) return; setIsLoading(true); setErrorMessage(null); let loadErrors: string[] = [];
+        const newBaralhos: BaralhoCarregado[] = [];
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i]; const content = await file.text();
+            try {
+                let newCards: Carta[] = []; const nome = file.name.replace(/\.(js|json)$/, "");
+                if (baralhosCarregados.some(b => b.nome === nome)) { loadErrors.push(`Baralho "${nome}" já carregado.`); continue; }
+                if (file.name.endsWith(".js")) { newCards = parseJSDeckFileLocal(content); }
+                else if (file.name.endsWith(".json")) {
+                     const raw = JSON.parse(content) as any[]; if (!Array.isArray(raw)) throw new Error("JSON não é array.");
+                     newCards = raw.map((card, index) => ({
+                         ...card,
+                         id: card.id || `custom_json_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`,
+                         baralho: card.baralho?.trim() || DEFAULT_BARALHO_NAME
+                     })) as Carta[];
+                }
+                else { loadErrors.push(`Formato ${file.name} não suportado.`); continue; }
+                if (!Array.isArray(newCards) || newCards.length === 0) { loadErrors.push(`Nenhuma carta válida em "${nome}".`); continue; }
+                newBaralhos.push({ id: Date.now() + Math.random(), nome, cartas: newCards, adicionado: false });
+            } catch (error: any) { loadErrors.push(`Erro ao ler ${file.name}: ${error.message}`); }
+        }
+        if (newBaralhos.length > 0) { setBaralhosCarregados((prev) => [...prev, ...newBaralhos]); }
+        if (loadErrors.length > 0) { setErrorMessage(loadErrors.join(" ")); }
+        setIsLoading(false); e.target.value = '';
+     };
+    const adicionarBaralho = (baralhoId: number) => {
+        setBaralhosCarregados((prev) => prev.map((b) => {
+            if (b.id === baralhoId && !b.adicionado) {
+                const newCards: CartaInterna[] = b.cartas.map((c) => ({
+                    ...c,
+                    id: c.id || `${b.nome}_${Math.random().toString(16).slice(2)}`,
+                    baralho: c.baralho || DEFAULT_BARALHO_NAME,
+                    origBaralhoId: b.id,
+                    edited: false
+                }));
+                setCards((oldCards) => [...oldCards, ...newCards]); return { ...b, adicionado: true };
+            } return b;
+        }));
+     };
+    const removerBaralho = (baralhoId: number) => {
+         setBaralhosCarregados((prev) => prev.map((b) => {
+            if (b.id === baralhoId && b.adicionado) {
+                setCards((oldCards) => oldCards.filter((c) => {
+                    if (c.origBaralhoId === baralhoId) { return c.edited && manterCartasEditadas; } return true;
+                })); return { ...b, adicionado: false };
+            } return b;
+         }));
+     };
     const handleAddOpcao = () => { if (novaOpcao.trim() !== "") { const newId = opcoes.length > 0 ? Math.max(...opcoes.map(o => o.id)) + 1 : 1; setOpcoes(prev => [...prev, { id: newId, texto: novaOpcao, ordemTemp: tipo === 'Ordem' ? '' : undefined }]); setNovaOpcao(""); }};
     const handleRemoveOpcao = (id: number) => { setOpcoes((prev) => prev.filter(o => o.id !== id)); setRespostaCorreta((prev) => prev.filter(rcId => rcId !== id)); };
     const handleToggleRespostaCorreta = (id: number) => { if (tipo === "Pergunta" || tipo === "ContraTempo") { setRespostaCorreta(prev => prev.includes(id) ? [] : [id]); } else if (tipo === "MultiplaEscolha" || tipo === "Outras") { setRespostaCorreta(prev => prev.includes(id) ? prev.filter(rcId => rcId !== id) : [...prev, id]); }};
@@ -276,6 +450,7 @@ const CriadorDeCarta: React.FC = () => {
     const handleAddFonte = () => { if (novaFonte.trim() !== "" && !fontes.includes(novaFonte)) { setFontes((old) => [...old, novaFonte]); setNovaFonte(""); } };
     const handleRemoveFonte = (f: string) => { setFontes((old) => old.filter((fon) => fon !== f)); };
     const scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
     const inserirTemplatePopup = (tipoPopup: 'imagem' | 'video') => { const idUnico = `popup-${Date.now()}`; let urlPrincipal = ''; let urlThumb = ''; let desc = ''; let thumbHtml = ''; const templateCSS = `<style> .popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; } .popup-overlay-${idUnico}:target { display: flex; } .popup-content-${idUnico} { position: relative; background-color: #fff; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; overflow: auto; } .popup-content-${idUnico} img, .popup-content-${idUnico} video { display: block; max-width: 100%; max-height: 80vh; height: auto; margin: 0 auto 15px auto; border-radius: 4px; } .popup-close-${idUnico} { position: absolute; top: 10px; right: 15px; font-size: 24px; font-weight: bold; color: #555; text-decoration: none; line-height: 1; } .popup-close-${idUnico}:hover { color: #000; } .thumb-link-${idUnico} { display: block; margin: 10px auto; width: fit-content; cursor: zoom-in; border: 1px solid #ccc; padding: 3px; border-radius: 4px; background: white; } .thumb-link-${idUnico} img, .thumb-link-${idUnico} span { max-width: 180px; height: auto; display: block; } .thumb-link-${idUnico} span{padding:10px; color:blue; text-decoration:underline} </style>`; let templateElemento: string; let scriptStop: string = ""; if (tipoPopup === 'imagem') { if (!popupImageUrl.trim()) { alert("Insira a URL da Imagem."); return; } urlPrincipal = popupImageUrl; urlThumb = popupImageUrl; desc = 'Descrição da Imagem'; thumbHtml = `<img src="${urlThumb}" alt="Clique para ampliar"/>`; templateElemento = `\n<!-- Link/Thumb da Imagem -->\n<a href="#${idUnico}" class="thumb-link-${idUnico}">\n  ${thumbHtml}\n</a>\n<!-- Popup da Imagem -->\n<div id="${idUnico}" class="popup-overlay-${idUnico}">\n  <div class="popup-content-${idUnico}">\n    <a href="#" class="popup-close-${idUnico}" title="Fechar">×</a>\n    <img src="${urlPrincipal}" alt="Imagem Ampliada"/>\n    <p style="text-align: center; font-size: 0.9em; color: #666;">${desc}</p>\n  </div>\n</div>\n`; } else { if (!popupVideoUrl.trim()) { alert("Insira a URL do Vídeo (.mp4)."); return; } urlPrincipal = popupVideoUrl; desc = 'Descrição do Vídeo'; thumbHtml = `<span>🎬 Clique para ver o vídeo</span>`; templateElemento = `\n<!-- Link/Thumb do Vídeo -->\n<a href="#${idUnico}" class="thumb-link-${idUnico}" style="border:none; background:none; padding:0;">\n  ${thumbHtml}\n</a>\n<!-- Popup do Vídeo -->\n<div id="${idUnico}" class="popup-overlay-${idUnico}">\n  <div class="popup-content-${idUnico}">\n    <a href="#" id="close-btn-${idUnico}" class="popup-close-${idUnico}" title="Fechar">×</a>\n    <video controls width="100%" style="max-width: 700px; max-height: 70vh;" id="video-${idUnico}">\n      <source src="${urlPrincipal}" type="video/mp4"> Seu navegador não suporta vídeo.\n    </video>\n    <p style="text-align: center; font-size: 0.9em; color: #666;">${desc}</p>\n  </div>\n</div>\n`; scriptStop = `\n<script>\n(function() {\n  var closeBtn = document.getElementById('close-btn-${idUnico}');\n  var videoElement = document.getElementById('video-${idUnico}');\n  if (closeBtn && videoElement) {\n    closeBtn.addEventListener('mousedown', function() {\n      if (!videoElement.paused) { videoElement.pause(); }\n      setTimeout(function() { window.location.hash = '#_'; }, 10);\n    });\n  }\n})();\n</script>\n`; } const htmlParaInserir = `\n<br>${templateCSS}${templateElemento}${scriptStop}<br>\n`; const textarea = perguntaTextareaRef.current; if (textarea) { const start = textarea.selectionStart; const end = textarea.selectionEnd; const textoAtual = textarea.value; const novoTexto = textoAtual.substring(0, start) + htmlParaInserir + textoAtual.substring(end); setPergunta(novoTexto); if(tipoPopup === 'imagem') { setPopupImageUrl(""); } else { setPopupVideoUrl(""); } textarea.focus(); textarea.selectionStart = start + htmlParaInserir.length; textarea.selectionEnd = start + htmlParaInserir.length; } else { setPergunta(prev => prev + htmlParaInserir); if(tipoPopup === 'imagem') { setPopupImageUrl(""); } else { setPopupVideoUrl(""); } } };
     const inserirTemplatePopupYouTube = () => { if (!popupYouTubeUrl.trim()) { alert("Insira a URL do vídeo do YouTube."); return; } let videoId = ''; const url = popupYouTubeUrl; const patterns = [ /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/ ]; for (const pattern of patterns) { const match = url.match(pattern); if (match && match[1]) { videoId = match[1]; break; } } if (!videoId) { alert("URL do YouTube inválida. Use o link completo (watch?v=..., youtu.be/... ou embed/...)."); return; } const idUnico = `popup-yt-${Date.now()}`; const embedUrl = `https://www.youtube.com/embed/${videoId}`; const templateCSS = `\n<style>\n.popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }\n.popup-overlay-${idUnico}:target { display: flex; }\n.popup-content-${idUnico} { position: relative; background-color: #000; padding: 10px; border-radius: 8px; width: 90%; max-width: 800px; aspect-ratio: 16 / 9; }\n.popup-content-${idUnico} iframe { display: block; width: 100%; height: 100%; border: none; }\n.popup-close-${idUnico} { position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; background: white; border-radius: 50%; font-size: 20px; font-weight: bold; color: #333; text-decoration: none; line-height: 30px; text-align: center; box-shadow: 0 0 5px black; cursor: pointer; }\n.popup-close-${idUnico}:hover { color: #000; background: #eee; }\n.thumb-link-${idUnico} { display: block; margin: 10px auto; width: fit-content; cursor: pointer; }\n.thumb-link-${idUnico} span { background:#eee; border: 1px solid #ccc; padding: 10px 15px; border-radius:5px; color: #c4302b; font-weight: bold; display: flex; align-items: center; gap: 5px; }\n</style>\n`; const templateElemento = `\n<!-- Link/Thumb YouTube -->\n<a href="#${idUnico}" class="thumb-link-${idUnico}">\n  <span><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 5px;"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg> Ver Vídeo YouTube</span>\n</a>\n<!-- Popup YouTube -->\n<div id="${idUnico}" class="popup-overlay-${idUnico}">\n  <div class="popup-content-${idUnico}">\n    <a href="#" id="close-btn-yt-${idUnico}" class="popup-close-${idUnico}" title="Fechar">×</a>\n    <iframe id="iframe-yt-${idUnico}" src="${embedUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>\n  </div>\n</div>\n`; const scriptStopYouTube = `\n<script>\n(function() {\n  var closeBtn = document.getElementById('close-btn-yt-${idUnico}');\n  var iframe = document.getElementById('iframe-yt-${idUnico}');\n  if (closeBtn && iframe) {\n    var originalSrc = iframe.src;\n    closeBtn.addEventListener('mousedown', function() {\n      iframe.src = ''; iframe.src = originalSrc;\n      setTimeout(function() { window.location.hash = '#_'; }, 10);\n    });\n  }\n})();\n</script>\n`; const htmlParaInserir = `\n<br>${templateCSS}${templateElemento}${scriptStopYouTube}<br>\n`; const textarea = perguntaTextareaRef.current; if (textarea) { const start = textarea.selectionStart; const end = textarea.selectionEnd; const textoAtual = textarea.value; const novoTexto = textoAtual.substring(0, start) + htmlParaInserir + textoAtual.substring(end); setPergunta(novoTexto); setPopupYouTubeUrl(""); textarea.focus(); textarea.selectionStart = start + htmlParaInserir.length; textarea.selectionEnd = start + htmlParaInserir.length; } else { setPergunta(prev => prev + htmlParaInserir); setPopupYouTubeUrl(""); } };
 
@@ -462,10 +637,12 @@ const CriadorDeCarta: React.FC = () => {
             if (tipo === 'RelacionarColunas') return parseParesRelacionar(paresCorretosInput);
             if (tipo === 'CompletarFrase') return ordemFragmentos.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
             if (tipo === 'Ordem') {
-                const sorted = [...opcoes].sort((a, b) => (parseInt(a.ordemTemp || '999', 10) - parseInt(b.ordemTemp || '999', 10)));
+                // Certifica que 'opcoes' é um array antes de tentar ordenar
+                const currentOptions = Array.isArray(opcoes) ? [...opcoes] : [];
+                const sorted = currentOptions.sort((a, b) => (parseInt(a.ordemTemp || '999', 10) - parseInt(b.ordemTemp || '999', 10)));
                 return sorted.map(o => o.id);
             }
-            if (tipo === 'Vantagem') return opcoes.map(o => o.id);
+            if (tipo === 'Vantagem') return Array.isArray(opcoes) ? opcoes.map(o => o.id) : [];
             if (tipo === 'Desvantagem') return [];
             return respostaCorreta;
         } catch (e) {
@@ -477,17 +654,20 @@ const CriadorDeCarta: React.FC = () => {
         }
     };
 
-    // Recalcula o preview a cada render, sem useMemo
+    // Calcula os dados do preview a cada render
     const previewCardData = (() => {
-        if (editIndex !== null) {
-            return cards[editIndex];
-        }
-
         const finalRespostaCorretaPreview = calculatePreviewAnswer();
-        const previewCard: Partial<Carta> = {
-            tipo, titulo, baralho: baralhoCartaAtual.trim() || undefined,
-            pergunta, dificuldade, categorias, fontes,
-            vantagem, desvantagem, dica,
+        const currentPreviewCard: Partial<Carta> = {
+            tipo,
+            titulo,
+            baralho: baralhoCartaAtual.trim() || undefined,
+            pergunta,
+            dificuldade,
+            categorias,
+            fontes,
+            vantagem,
+            desvantagem,
+            dica,
             respostaCorreta: finalRespostaCorretaPreview as any,
         };
 
@@ -498,27 +678,27 @@ const CriadorDeCarta: React.FC = () => {
             case "Vantagem":
             case "Desvantagem":
             case "Outras":
-                previewCard.opcoes = opcoes;
+                currentPreviewCard.opcoes = opcoes;
                 break;
             case "ContraTempo":
-                 previewCard.opcoes = opcoes;
-                 (previewCard as Partial<CartaContraTempo>).tempoLimite = tempoLimite;
-                 break;
+                currentPreviewCard.opcoes = opcoes;
+                (currentPreviewCard as Partial<CartaContraTempo>).tempoLimite = tempoLimite;
+                break;
             case "RelacionarColunas":
-                 (previewCard as Partial<CartaRelacionarColunas>).colunaA = colunaAItems;
-                 (previewCard as Partial<CartaRelacionarColunas>).colunaB = colunaBItems;
-                 break;
+                (currentPreviewCard as Partial<CartaRelacionarColunas>).colunaA = colunaAItems;
+                (currentPreviewCard as Partial<CartaRelacionarColunas>).colunaB = colunaBItems;
+                break;
             case "PontoCerto":
-                 (previewCard as Partial<CartaPontoCerto>).imagemURL = imagemURLPontoCerto;
-                 (previewCard as Partial<CartaPontoCerto>).zonasClicaveis = zonasClicaveis;
-                 break;
+                (currentPreviewCard as Partial<CartaPontoCerto>).imagemURL = imagemURLPontoCerto;
+                (currentPreviewCard as Partial<CartaPontoCerto>).zonasClicaveis = zonasClicaveis;
+                break;
             case "CompletarFrase":
-                 (previewCard as Partial<CartaCompletarFrase>).fraseIncompleta = fraseIncompleta;
-                 (previewCard as Partial<CartaCompletarFrase>).fragmentos = fragmentos;
-                 break;
+                (currentPreviewCard as Partial<CartaCompletarFrase>).fraseIncompleta = fraseIncompleta;
+                (currentPreviewCard as Partial<CartaCompletarFrase>).fragmentos = fragmentos;
+                break;
         }
-        return previewCard;
-    })(); // IIFE para calcular diretamente
+        return currentPreviewCard;
+    })();
 
     return (
         <div className="p-4 max-w-7xl mx-auto relative">
