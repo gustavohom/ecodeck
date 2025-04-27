@@ -1324,7 +1324,7 @@ const CriadorDeCarta: React.FC = () => {
                                 </Dialog>
                             </div>
                             <AlertDescription>
-                                Clique em uma carta abaixo ou use "Gerenciar" para editar/remover.
+                                Clique em uma carta abaixo ou use &quot;Gerenciar&quot; para editar/remover.
                             </AlertDescription>
                         </CardHeader>
                         <CardContent>
