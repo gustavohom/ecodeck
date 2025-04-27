@@ -1,3 +1,25 @@
+import React, { useState, useRef, useEffect, useMemo } from "react"; // useMemo não era usado, removi se não precisar
+import {
+    Card, CardContent, CardFooter, CardHeader, CardTitle,
+} from "@/components/ui/card"; // Importa Card e seus subcomponentes
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+    CheckCircle2, XCircle, ThumbsUp, ThumbsDown, RotateCcw, HelpCircle,
+    BookOpen, Home, SkipForward, Star, Award, MinusCircle, ChevronUp, ChevronDown, Zap, Filter,
+    Trash, EyeOff, Eye, Dice6, X as XIcon, Timer, Link2, MousePointerClick, Check, TextSelect,
+    ChevronRight, Lock, LockOpen, ArrowUpCircle // Adiciona Lock, LockOpen, ArrowUpCircle se não estiverem
+} from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+// Progress não é usado no Criador, removido
+// import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea"; // Adiciona Textarea
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Adiciona Select
+import { cn } from "@/lib/utils";
+
 // --- Componente Criador Principal ---
 const CriadorDeCarta: React.FC = () => {
     // --- Estados ---
