@@ -1283,7 +1283,7 @@ const CriadorDeCarta: React.FC = () => {
                                 </Dialog>
                             </div>
                             <AlertDescription>
-                                Visualize no Preview ou use "Gerenciar" para editar/remover.
+                                Visualize no Preview ou use &quot;Gerenciar&quot; para editar/remover.
                             </AlertDescription>
                         </CardHeader>
                         <CardContent>
