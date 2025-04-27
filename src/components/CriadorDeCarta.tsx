@@ -757,7 +757,7 @@ const EcoChallenge: React.FC = () => {
         let hasSaved = false; let initialPlayersData: Player[] = []; let initialOcultar = true; let initialProb = 0; let initialCategorias: string[] = [];
         if (typeof window !== "undefined") {
             const savedStateRaw = localStorage.getItem("estadoEcoChallenge");
-            const savedUISettingsRaw = localStorage.getItem(LOCALSTORAGE_KEYS.UI_SETTINGS);
+            const savedUISettingsRaw = localStorage.getItem("estadoEcoChallenge");
             try { const savedState = savedStateRaw ? JSON.parse(savedStateRaw) as GameState : null; if (savedState && savedState.jogoIniciado) { hasSaved = true; initialPlayersData = savedState.players || []; } } catch(e) { console.error("Erro ler estado salvo (jogo):", e); }
             try { const loadedUISettings = savedUISettingsRaw ? JSON.parse(savedUISettingsRaw) : {}; initialCategorias = loadedUISettings.categoriasSelecionadas ?? []; initialOcultar = loadedUISettings.ocultarCarta ?? true; initialProb = loadedUISettings.probabilityIndex ?? 0; } catch(e) { console.error("Erro ler estado salvo (UI):", e); }
         }
