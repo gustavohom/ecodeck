@@ -1,3 +1,5 @@
+// src/components/CriadorDeCarta.tsx
+
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,14 +12,13 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import {
     Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"; // Certifique-se que este componente existe!
 import {
     Trash, Youtube, Image as ImageIcon, Video, ArrowUpCircle, Lock, LockOpen, X,
     Edit, ListChecks, ChevronLeft, ChevronRight, CheckSquare, Square
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Tipos de Dados
 interface Opcao { id: number; texto: string; ordemTemp?: string; }
 interface ItemRelacionar { id: number; texto: string; }
 interface ZonaClicavel { id: number; x: number; y: number; largura: number; altura: number; descricao?: string; }
@@ -65,7 +66,6 @@ interface BaralhoCarregado { id: number; nome: string; cartas: Carta[]; adiciona
 
 const DEFAULT_BARALHO_NAME = "Padrão";
 
-// Funções Utilitárias
 function parseJSDeckFileLocal(content: string): Carta[] {
     try {
         const match = content.match(/export default\s+(\[[\s\S]*?\]);?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?\s*export default\s+\w+;?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?/m);
@@ -94,7 +94,6 @@ function parseParesRelacionar(input: string): { aId: number; bId: number }[] {
     return paresFormatados;
 }
 
-// Componente de Preview Estático
 const CardStaticView: React.FC<{ card: Partial<Carta>, small?: boolean }> = ({ card, small = false }) => {
     const { tipo = "Pergunta", titulo = "", pergunta = "", dificuldade = "facil", categorias = [], fontes = [], vantagem = "", desvantagem = "", dica = "", baralho } = card;
     let renderedSpecifics: React.ReactNode = null;
@@ -172,7 +171,7 @@ const CardStaticView: React.FC<{ card: Partial<Carta>, small?: boolean }> = ({ c
                 {currentOptions.map((op) => {
                     const isCorrect = correctSet.has(op.id);
                     const orderIndex = (tipo === 'Ordem' && Array.isArray(respostaCorreta)) ? (respostaCorreta as number[]).indexOf(op.id) : -1;
-                    const orderInfo = tipo === 'Ordem' ? (orderIndex !== -1 ? ` (Pos: ${orderIndex + 1})` : ` (X)`) : ''; // Simplificado para small
+                    const orderInfo = tipo === 'Ordem' ? (orderIndex !== -1 ? ` (Pos: ${orderIndex + 1})` : ` (X)`) : '';
 
                     return (
                         <li key={op.id} className={cn("mb-1 text-sm", isCorrect && tipo !== 'Ordem' && "text-green-700 font-semibold", small && "mb-0.5")}>
@@ -221,8 +220,6 @@ const CardStaticView: React.FC<{ card: Partial<Carta>, small?: boolean }> = ({ c
     );
 };
 
-
-// Componente Criador Principal
 const CriadorDeCarta: React.FC = () => {
     const [deckName, setDeckName] = useState("meu_baralho");
     const [cards, setCards] = useState<CartaInterna[]>([]);
@@ -348,8 +345,10 @@ const CriadorDeCarta: React.FC = () => {
     const handleDeleteSelectedCards = () => {
         if (selectedCardIndices.size === 0) return;
         if (window.confirm(`Remover ${selectedCardIndices.size} carta(s) selecionada(s)?`)) {
-            const indicesToRemove = Array.from(selectedCardIndices); // Copia os índices
-            setCards(prevCards => prevCards.filter((_, index) => !indicesToRemove.includes(index)));
+            const indicesToRemove = Array.from(selectedCardIndices);
+            const newCards = cards.filter((_, index) => !indicesToRemove.includes(index));
+            const newTotalCards = newCards.length; // Total após remover
+            setCards(newCards);
 
             if (editIndex !== null && indicesToRemove.includes(editIndex)) {
                 resetCarta();
@@ -357,18 +356,18 @@ const CriadorDeCarta: React.FC = () => {
 
             setSelectedCardIndices(new Set());
 
-            // Recalcula o número total de cartas APÓS a remoção
-            const newTotalCards = cards.length - indicesToRemove.length;
             const newTotalPages = Math.ceil(newTotalCards / modalItemsPerPage);
             if (modalCurrentPage > newTotalPages && newTotalPages > 0) {
                 setModalCurrentPage(newTotalPages);
             } else if (newTotalCards === 0) {
-                setModalCurrentPage(1); // Volta para a página 1 se não houver mais cartas
+                setModalCurrentPage(1);
             }
-            // Se a página atual ainda for válida, mas a última carta foi removida
-            // e a página ficou vazia, volta uma página (se possível)
-             else if (modalCurrentPage > 1 && startIndex >= newTotalCards) {
-                 setModalCurrentPage(modalCurrentPage - 1);
+             else {
+                // Verifica se a página atual ficou vazia após a remoção
+                 const currentStartIndexAfterDelete = (modalCurrentPage - 1) * modalItemsPerPage;
+                 if (currentStartIndexAfterDelete >= newTotalCards && modalCurrentPage > 1) {
+                      setModalCurrentPage(modalCurrentPage - 1);
+                 }
              }
         }
     };
@@ -1284,7 +1283,7 @@ const CriadorDeCarta: React.FC = () => {
                                 </Dialog>
                             </div>
                             <AlertDescription>
-                                Visualize no Preview ou use &quot;Gerenciar&quot; para editar/remover.
+                                Visualize no Preview ou use "Gerenciar" para editar/remover.
                             </AlertDescription>
                         </CardHeader>
                         <CardContent>
