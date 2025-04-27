@@ -1,6 +1,4 @@
-// src/components/CriadorDeCarta.tsx
-
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,11 +9,15 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-    Trash, Youtube, Image as ImageIcon, Video, ArrowUpCircle, Lock, LockOpen, X
-} from "lucide-react"; // Importar Ícones incluindo Lock/LockOpen/ArrowUp
-import { cn } from "@/lib/utils"; // Assumindo que você tem este utilitário
+    Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+    Trash, Youtube, Image as ImageIcon, Video, ArrowUpCircle, Lock, LockOpen, X,
+    Edit, ListChecks, ChevronLeft, ChevronRight, CheckSquare, Square
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-// --- Tipos de Dados (com adição de 'baralho') ---
+// Tipos de Dados
 interface Opcao { id: number; texto: string; ordemTemp?: string; }
 interface ItemRelacionar { id: number; texto: string; }
 interface ZonaClicavel { id: number; x: number; y: number; largura: number; altura: number; descricao?: string; }
@@ -25,12 +27,11 @@ interface CartaBase {
     id: string | number; tipo: string; titulo: string; pergunta: string;
     dificuldade: "facil" | "normal" | "dificil"; categorias: string[]; fontes: string[];
     vantagem: string; desvantagem: string; dica: string;
-    baralho?: string; // <-- ADICIONADO: Nome do baralho interno da carta
-    opcoes?: Opcao[]; // <-- Opcional na base
+    baralho?: string;
+    opcoes?: Opcao[];
 }
 interface CartaComOpcoes extends CartaBase { opcoes: Opcao[]; }
 
-// Tipos específicos continuam iguais...
 interface CartaPergunta extends CartaComOpcoes { tipo: "Pergunta"; respostaCorreta: number; }
 interface CartaMultiplaEscolha extends CartaComOpcoes { tipo: "MultiplaEscolha"; respostaCorreta: number[]; }
 interface CartaOrdem extends CartaComOpcoes { tipo: "Ordem"; respostaCorreta: number[]; }
@@ -42,18 +43,14 @@ interface CartaRelacionarColunas extends CartaBase { tipo: "RelacionarColunas"; 
 interface CartaPontoCerto extends CartaBase { tipo: "PontoCerto"; imagemURL?: string; zonasClicaveis?: ZonaClicavel[]; respostaCorreta?: number; }
 interface CartaCompletarFrase extends CartaBase { tipo: "CompletarFrase"; fraseIncompleta?: string; fragmentos?: FragmentoCompletar[]; respostaCorreta?: number[]; }
 
-// União final (inalterada)
 type Carta =
     | CartaPergunta | CartaMultiplaEscolha | CartaOrdem | CartaVantagem | CartaDesvantagem | CartaOutras
     | CartaContraTempo | CartaRelacionarColunas | CartaPontoCerto | CartaCompletarFrase;
 
-// Tipo interno para o estado (inalterado)
 type CartaInterna = Carta & {
     origBaralhoId?: number;
     edited?: boolean;
 };
-
-// --- Fim dos Tipos ---
 
 const CARD_TYPES = [
     "Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras",
@@ -66,20 +63,19 @@ type Dificuldade = typeof DIFFICULTIES[number];
 
 interface BaralhoCarregado { id: number; nome: string; cartas: Carta[]; adicionado: boolean; }
 
-const DEFAULT_BARALHO_NAME = "Padrão"; // <-- ADICIONADO: Constante para nome padrão
+const DEFAULT_BARALHO_NAME = "Padrão";
 
-// --- Funções Utilitárias (Parse JS e Relacionar Colunas mantidas do original) ---
+// Funções Utilitárias
 function parseJSDeckFileLocal(content: string): Carta[] {
     try {
         const match = content.match(/export default\s+(\[[\s\S]*?\]);?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?\s*export default\s+\w+;?/m) || content.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);?/m);
         if (!match || !match[1]) { throw new Error("Array não encontrado no arquivo JS."); }
         const arrayStr = match[1]; const rawArray = new Function(`return ${arrayStr};`)() as any[];
         if (!Array.isArray(rawArray)) { throw new Error("Conteúdo não é array."); }
-        // Adiciona ID único e baralho padrão se não existir ao carregar
         return rawArray.map((card, index) => ({
             ...card,
             id: card.id || `custom_js_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`,
-            baralho: card.baralho?.trim() || DEFAULT_BARALHO_NAME // Garante baralho ao carregar
+            baralho: card.baralho?.trim() || DEFAULT_BARALHO_NAME
         })) as Carta[];
     } catch (error: any) { console.error("Erro parse JS:", error); throw new Error(`Erro processar JS: ${error.message}`); }
 }
@@ -98,77 +94,69 @@ function parseParesRelacionar(input: string): { aId: number; bId: number }[] {
     return paresFormatados;
 }
 
-// --- Componente de Preview Estático (Atualizado para mostrar Baralho) ---
-const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
-    const {
-        tipo = "Pergunta", titulo = "", pergunta = "",
-        dificuldade = "facil", categorias = [], fontes = [],
-        vantagem = "", desvantagem = "", dica = "",
-        baralho // <-- Pega o baralho
-    } = card;
-
+// Componente de Preview Estático
+const CardStaticView: React.FC<{ card: Partial<Carta>, small?: boolean }> = ({ card, small = false }) => {
+    const { tipo = "Pergunta", titulo = "", pergunta = "", dificuldade = "facil", categorias = [], fontes = [], vantagem = "", desvantagem = "", dica = "", baralho } = card;
     let renderedSpecifics: React.ReactNode = null;
     let renderedOptions: React.ReactNode = null;
     const opcoes = card.opcoes || [];
     const respostaCorreta = card.respostaCorreta;
 
-    // Lógica switch case mantida... (igual ao original)
     switch (tipo) {
         case "ContraTempo":
             const cardContraTempo = card as Partial<CartaContraTempo>;
-            renderedSpecifics = <p className="text-xs text-orange-600">Tempo Limite: {cardContraTempo.tempoLimite || '?'}s</p>;
+            renderedSpecifics = <p className={cn("text-xs text-orange-600", small && "text-[10px]")}>Tempo Limite: {cardContraTempo.tempoLimite || '?'}s</p>;
             break;
         case "RelacionarColunas":
             const cardRelCol = card as Partial<CartaRelacionarColunas>;
             renderedSpecifics = (
-                <div className="flex gap-4 text-xs mt-2">
-                    <div className="flex-1"><strong>Coluna A:</strong><ul>{cardRelCol.colunaA?.map(i => <li key={`a-${i.id}`}>{i.id}: {i.texto}</li>)}</ul></div>
-                    <div className="flex-1"><strong>Coluna B:</strong><ul>{cardRelCol.colunaB?.map(i => <li key={`b-${i.id}`}>{i.id}: {i.texto}</li>)}</ul></div>
+                <div className={cn("flex gap-4 text-xs mt-2", small && "gap-2 text-[10px] mt-1")}>
+                    <div className="flex-1"><strong>Col A:</strong><ul className="list-none pl-1">{cardRelCol.colunaA?.map(i => <li key={`a-${i.id}`}>{i.id}: {i.texto}</li>)}</ul></div>
+                    <div className="flex-1"><strong>Col B:</strong><ul className="list-none pl-1">{cardRelCol.colunaB?.map(i => <li key={`b-${i.id}`}>{i.id}: {i.texto}</li>)}</ul></div>
                 </div>
             );
              const pairsPreview = Array.isArray(cardRelCol.respostaCorreta) ? cardRelCol.respostaCorreta.map(p => `${p.aId}-${p.bId}`).join(', ') : '(Inválida)';
-             renderedOptions = <p className="text-xs mt-1">Pares Corretos: [{pairsPreview}]</p>;
+             renderedOptions = <p className={cn("text-xs mt-1", small && "text-[10px] mt-0.5")}>Pares: [{pairsPreview}]</p>;
             break;
         case "PontoCerto":
             const cardPontoCerto = card as Partial<CartaPontoCerto>;
             renderedSpecifics = (
                 <>
-                    <p className="text-xs">Imagem URL: <span className="font-mono bg-gray-100 px-1 rounded break-all">{cardPontoCerto.imagemURL || '(Nenhuma)'}</span></p>
-                    {cardPontoCerto.imagemURL && (
+                    <p className={cn("text-xs", small && "text-[10px]")}>Img: <span className="font-mono bg-gray-100 px-1 rounded break-all">{cardPontoCerto.imagemURL || '(Nenhuma)'}</span></p>
+                    {cardPontoCerto.imagemURL && !small && (
                          <img src={cardPontoCerto.imagemURL} alt="Preview Ponto Certo" className="my-2 max-w-full h-auto max-h-40 object-contain border rounded"/>
                     )}
                     {cardPontoCerto.zonasClicaveis && cardPontoCerto.zonasClicaveis.length > 0 && (
-                        <details className="text-xs mt-1">
-                            <summary className="cursor-pointer font-medium">Zonas Clicáveis ({cardPontoCerto.zonasClicaveis.length})</summary>
+                        <details className={cn("text-xs mt-1", small && "text-[10px] mt-0.5")}>
+                            <summary className="cursor-pointer font-medium">Zonas ({cardPontoCerto.zonasClicaveis.length})</summary>
                             <ul className="pl-4 list-disc">
-                                {cardPontoCerto.zonasClicaveis.map(z => <li key={z.id}>ID:{z.id} ({z.x},{z.y} - {z.largura}x{z.altura}) {z.descricao || ''}</li>)}
+                                {cardPontoCerto.zonasClicaveis.map(z => <li key={z.id}>ID:{z.id} ({z.x},{z.y}) {z.descricao || ''}</li>)}
                             </ul>
                         </details>
                     )}
                 </>
             );
-            renderedOptions = <p className="text-xs mt-1">Zona Correta ID: {typeof cardPontoCerto.respostaCorreta === 'number' ? cardPontoCerto.respostaCorreta : '(Inválido)'}</p>;
+            renderedOptions = <p className={cn("text-xs mt-1", small && "text-[10px] mt-0.5")}>Zona ID: {typeof cardPontoCerto.respostaCorreta === 'number' ? cardPontoCerto.respostaCorreta : '(Inválido)'}</p>;
             break;
         case "CompletarFrase":
             const cardCompFrase = card as Partial<CartaCompletarFrase>;
-            renderedSpecifics = <p className="text-xs mt-1 italic">Frase: &quot;{cardCompFrase.fraseIncompleta || '...'}&quot;</p>;
+            renderedSpecifics = <p className={cn("text-xs mt-1 italic", small && "text-[10px] mt-0.5")}>Frase: &quot;{cardCompFrase.fraseIncompleta || '...'}&quot;</p>;
             renderedOptions = (
                 <>
                  {cardCompFrase.fragmentos && cardCompFrase.fragmentos.length > 0 && (
-                    <details className="text-xs mt-1">
-                        <summary className="cursor-pointer font-medium">Fragmentos ({cardCompFrase.fragmentos.length})</summary>
+                    <details className={cn("text-xs mt-1", small && "text-[10px] mt-0.5")}>
+                        <summary className="cursor-pointer font-medium">Frags ({cardCompFrase.fragmentos.length})</summary>
                         <ul className="pl-4 list-disc">
                             {cardCompFrase.fragmentos.map(f => <li key={f.id}>{f.id}: {f.texto}</li>)}
                         </ul>
                     </details>
                   )}
-                 <p className="text-xs mt-1">Ordem Correta IDs: [{(Array.isArray(cardCompFrase.respostaCorreta) ? cardCompFrase.respostaCorreta.join(', ') : '(Inválida)')}]</p>
+                 <p className={cn("text-xs mt-1", small && "text-[10px] mt-0.5")}>Ordem IDs: [{(Array.isArray(cardCompFrase.respostaCorreta) ? cardCompFrase.respostaCorreta.join(', ') : '(Inválida)')}]</p>
                 </>
             );
             break;
     }
 
-    // Lógica para renderedOptions mantida... (igual ao original)
      if (["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo)) {
         const correctSet = new Set<number>();
         const currentOptions = opcoes || [];
@@ -180,75 +168,68 @@ const CardStaticView: React.FC<{ card: Partial<Carta> }> = ({ card }) => {
         }
 
         renderedOptions = (
-            <ul className="mt-2 pl-5 list-decimal space-y-1">
+            <ul className={cn("mt-2 pl-5 list-decimal space-y-1", small && "mt-1 pl-3 text-xs space-y-0.5")}>
                 {currentOptions.map((op) => {
                     const isCorrect = correctSet.has(op.id);
                     const orderIndex = (tipo === 'Ordem' && Array.isArray(respostaCorreta)) ? (respostaCorreta as number[]).indexOf(op.id) : -1;
-                    const orderInfo = tipo === 'Ordem' ? (orderIndex !== -1 ? ` (Pos: ${orderIndex + 1})` : ` (Não na ordem)`) : '';
+                    const orderInfo = tipo === 'Ordem' ? (orderIndex !== -1 ? ` (Pos: ${orderIndex + 1})` : ` (X)`) : ''; // Simplificado para small
 
                     return (
-                        <li key={op.id} className={cn("mb-1 text-sm", isCorrect && tipo !== 'Ordem' && "text-green-700 font-semibold")}>
+                        <li key={op.id} className={cn("mb-1 text-sm", isCorrect && tipo !== 'Ordem' && "text-green-700 font-semibold", small && "mb-0.5")}>
                             {op.texto}
-                            {isCorrect && tipo !== 'Vantagem' && tipo !== 'Ordem' && <span className="text-green-600 text-xs font-normal"> (Correta)</span>}
+                            {isCorrect && tipo !== 'Vantagem' && tipo !== 'Ordem' && <span className="text-green-600 text-xs font-normal"> (✓)</span>}
                             {tipo === 'Ordem' && <span className="text-blue-600 text-xs font-normal">{orderInfo}</span>}
                         </li>
                     );
                 })}
-                {currentOptions.length === 0 && <li className="text-xs italic text-gray-500 list-none">Nenhuma opção definida.</li>}
+                {currentOptions.length === 0 && <li className="text-xs italic text-gray-500 list-none">(-)</li>}
             </ul>
         );
     }
 
-    // Retorno do JSX do Preview (com estilo e baralho)
     return (
-        <Card className="max-w-md mx-auto my-4 shadow-md border border-gray-300"> {/* Estilo Borda do 2º código */}
-            <CardHeader className="pb-2 bg-slate-50 rounded-t-lg"> {/* Estilo Header do 2º código */}
-                <CardTitle className="text-lg font-bold">{titulo || "(Sem Título)"}</CardTitle>
-                 {/* Div para Tipo, Baralho, Dificuldade (layout do 2º código) */}
-                <div className="flex justify-between items-center text-xs text-gray-500 pt-1 flex-wrap gap-x-2">
-                    <span>Tipo: <Badge variant="secondary" className="ml-1">{tipo}</Badge></span>
-                    {/* ADICIONADO: Mostrar baralho se existir e não for padrão */}
-                    {baralho && baralho !== DEFAULT_BARALHO_NAME && (
-                        <span>Baralho: <Badge variant="outline" className="ml-1">{baralho}</Badge></span>
-                    )}
-                    <span>Dific.: <Badge variant={dificuldade === 'facil' ? 'default' : dificuldade === 'normal' ? 'outline' : 'destructive'} className="ml-1 capitalize">{dificuldade}</Badge></span>
+        <Card className={cn("max-w-md mx-auto shadow-md border border-gray-300", small ? "my-1 shadow-sm max-w-xs" : "my-4")}>
+            <CardHeader className={cn("pb-2 bg-slate-50 rounded-t-lg", small && "p-1.5")}>
+                <CardTitle className={cn("text-lg font-bold", small && "text-sm leading-tight")}>{titulo || "(Sem Título)"}</CardTitle>
+                <div className={cn("flex justify-between items-center text-xs text-gray-500 pt-1 flex-wrap gap-x-2", small && "text-[10px] gap-x-1 pt-0.5")}>
+                    <span><Badge variant="secondary" className={cn("ml-1", small && "px-1 h-4 text-[9px]")}>{tipo}</Badge></span>
+                    {baralho && baralho !== DEFAULT_BARALHO_NAME && ( <span><Badge variant="outline" className={cn("ml-1", small && "px-1 h-4 text-[9px]")}>{baralho}</Badge></span> )}
+                    <span><Badge variant={dificuldade === 'facil' ? 'default' : dificuldade === 'normal' ? 'outline' : 'destructive'} className={cn("ml-1 capitalize", small && "px-1 h-4 text-[9px]")}>{dificuldade}</Badge></span>
                 </div>
             </CardHeader>
-            <CardContent className="pt-2 pb-3 space-y-2">
+            <CardContent className={cn("pt-2 pb-3 space-y-2", small && "p-1.5 space-y-1")}>
                 {renderedSpecifics}
-                {/* Estilo ScrollArea do 2º código */}
-                <ScrollArea className="h-auto max-h-60 rounded-md border p-3 mt-2 bg-white/80 shadow-inner min-h-[100px]">
-                     <div
-                        className="text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-2 prose-ul:my-1 prose-ol:my-1 overflow-hidden"
-                        // Mantido dangerouslySetInnerHTML
-                        dangerouslySetInnerHTML={{ __html: pergunta || '<p class="italic text-gray-500">(Sem Pergunta)</p>' }}
-                    />
-                </ScrollArea>
+                 {(!small || (pergunta && pergunta.length > 100)) ? (
+                    <ScrollArea className={cn("h-auto max-h-60 rounded-md border p-3 mt-2 bg-white/80 shadow-inner min-h-[100px]", small && "max-h-24 p-1.5 mt-1 min-h-[40px]")}>
+                         <div className={cn("text-sm prose prose-sm max-w-none prose-p:my-1 prose-img:my-1 prose-ul:my-1 prose-ol:my-1 overflow-hidden", small && "text-xs prose-xs prose-p:my-0.5 prose-img:my-0.5 prose-ul:my-0.5 prose-ol:my-0.5")} dangerouslySetInnerHTML={{ __html: pergunta || `<p class="italic text-gray-500">${small ? '(sem desc.)' : '(Sem Pergunta)'}</p>` }} />
+                    </ScrollArea>
+                 ) : (
+                     <div className={cn("text-sm prose prose-sm max-w-none prose-p:my-1 overflow-hidden p-1.5 mt-1 border rounded bg-white/80 shadow-inner", small && "text-xs prose-xs prose-p:my-0.5")} dangerouslySetInnerHTML={{ __html: pergunta || `<p class="italic text-gray-500">${small ? '(sem desc.)' : '(Sem Pergunta)'}</p>` }} />
+                 )}
                 {renderedOptions}
             </CardContent>
-            {(categorias.length > 0 || fontes.length > 0 || dica || vantagem || desvantagem) && (
-                 <CardFooter className="flex flex-col items-start text-xs text-gray-600 border-t pt-2 pb-2 space-y-1 bg-slate-50 rounded-b-lg"> {/* Estilo Footer do 2º código */}
-                    {categorias.length > 0 && <p><strong>Categorias:</strong> {categorias.join(", ")}</p>}
+            {!small && (categorias.length > 0 || fontes.length > 0 || dica || vantagem || desvantagem) && (
+                 <CardFooter className="flex flex-col items-start text-xs text-gray-600 border-t pt-2 pb-2 space-y-1 bg-slate-50 rounded-b-lg">
+                    {categorias.length > 0 && <p><strong>Cat:</strong> {categorias.join(", ")}</p>}
                     {fontes.length > 0 && <p><strong>Fontes:</strong> {fontes.join(", ")}</p>}
                     {dica && <p className="text-blue-600"><strong>Dica:</strong> {dica}</p>}
                     {vantagem && <p className="text-green-600"><strong>Vantagem:</strong> {vantagem}</p>}
-                    {desvantagem && <p className="text-red-600"><strong>Desvantagem:</strong> {desvantagem}</p>}
+                    {desvantagem && <p className="text-red-600"><strong>Desv:</strong> {desvantagem}</p>}
                  </CardFooter>
             )}
         </Card>
     );
 };
 
-// --- Componente Criador Principal ---
+
+// Componente Criador Principal
 const CriadorDeCarta: React.FC = () => {
-    // --- Estados (adicionados baralhoCartaAtual, baralhoBloqueado, showScrollTop) ---
     const [deckName, setDeckName] = useState("meu_baralho");
     const [cards, setCards] = useState<CartaInterna[]>([]);
-    // Campos da carta atual
     const [tipo, setTipo] = useState<TipoCarta>("Pergunta");
     const [titulo, setTitulo] = useState("");
-    const [baralhoCartaAtual, setBaralhoCartaAtual] = useState(""); // <-- Estado para o baralho da carta
-    const [baralhoBloqueado, setBaralhoBloqueado] = useState(false); // <-- Estado para travar baralho
+    const [baralhoCartaAtual, setBaralhoCartaAtual] = useState("");
+    const [baralhoBloqueado, setBaralhoBloqueado] = useState(false);
     const [pergunta, setPergunta] = useState("");
     const [opcoes, setOpcoes] = useState<Opcao[]>([]);
     const [novaOpcao, setNovaOpcao] = useState("");
@@ -263,7 +244,6 @@ const CriadorDeCarta: React.FC = () => {
     const [vantagem, setVantagem] = useState("");
     const [desvantagem, setDesvantagem] = useState("");
     const [dica, setDica] = useState("");
-    // Estados específicos por tipo (mantidos do original)
     const [tempoLimite, setTempoLimite] = useState<number>(30);
     const [colunaAItems, setColunaAItems] = useState<ItemRelacionar[]>([]);
     const [novaColunaA, setNovaColunaA] = useState("");
@@ -278,7 +258,6 @@ const CriadorDeCarta: React.FC = () => {
     const [fragmentos, setFragmentos] = useState<FragmentoCompletar[]>([]);
     const [novoFragmento, setNovoFragmento] = useState("");
     const [ordemFragmentos, setOrdemFragmentos] = useState("");
-    // Controle de edição e UI (mantidos do original + showScrollTop)
     const [editIndex, setEditIndex] = useState<number | null>(null);
     const [popupImageUrl, setPopupImageUrl] = useState("");
     const [popupVideoUrl, setPopupVideoUrl] = useState("");
@@ -287,17 +266,122 @@ const CriadorDeCarta: React.FC = () => {
     const [manterCartasEditadas, setManterCartasEditadas] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [showScrollTop, setShowScrollTop] = useState(false); // <-- Estado para botão Voltar ao Topo
-    // Refs (mantidas do original)
+    const [showScrollTop, setShowScrollTop] = useState(false);
+    const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+    const [modalCurrentPage, setModalCurrentPage] = useState(1);
+    const [modalItemsPerPage] = useState(6);
+    const [selectedCardIndices, setSelectedCardIndices] = useState<Set<number>>(new Set());
+
     const perguntaTextareaRef = useRef<HTMLTextAreaElement>(null);
     const previewImageRefPontoCerto = useRef<HTMLImageElement>(null);
     const [previewImageSize, setPreviewImageSize] = useState({ width: 0, height: 0 });
 
-    // --- UseEffects (mantidos do original + scroll) ---
-    useEffect(() => { /* Preview Ponto Certo */ if (tipo === 'PontoCerto' && previewImageRefPontoCerto.current) { const updateSize = () => { if (previewImageRefPontoCerto.current) { setPreviewImageSize({ width: previewImageRefPontoCerto.current.offsetWidth, height: previewImageRefPontoCerto.current.offsetHeight }); } }; const img = previewImageRefPontoCerto.current; img.onload = updateSize; if (img.complete) updateSize(); const observer = new ResizeObserver(updateSize); observer.observe(img); window.addEventListener('resize', updateSize); return () => { window.removeEventListener('resize', updateSize); observer.disconnect(); img.onload = null;}; } }, [tipo, imagemURLPontoCerto]);
-    useEffect(() => { /* Botão Voltar ao Topo */ const handleScroll = () => { setShowScrollTop(window.scrollY > 200); }; window.addEventListener('scroll', handleScroll); return () => window.removeEventListener('scroll', handleScroll); }, []); // <-- Effect para scroll do 2º código
+    useEffect(() => {
+        if (tipo === 'PontoCerto' && previewImageRefPontoCerto.current) {
+            const updateSize = () => {
+                if (previewImageRefPontoCerto.current) {
+                    setPreviewImageSize({ width: previewImageRefPontoCerto.current.offsetWidth, height: previewImageRefPontoCerto.current.offsetHeight });
+                }
+            };
+            const img = previewImageRefPontoCerto.current;
+            img.onload = updateSize;
+            if (img.complete) updateSize();
+            const observer = new ResizeObserver(updateSize);
+            observer.observe(img);
+            window.addEventListener('resize', updateSize);
+            return () => {
+                window.removeEventListener('resize', updateSize);
+                observer.disconnect();
+                img.onload = null;
+            };
+        }
+    }, [tipo, imagemURLPontoCerto]);
 
-    // --- Funções Auxiliares (mantidas do original) ---
+    useEffect(() => {
+        const handleScroll = () => { setShowScrollTop(window.scrollY > 200); };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const totalPages = Math.ceil(cards.length / modalItemsPerPage);
+    const startIndex = (modalCurrentPage - 1) * modalItemsPerPage;
+    const endIndex = startIndex + modalItemsPerPage;
+    const cardsToShowInModal = useMemo(() => cards.slice(startIndex, endIndex), [cards, startIndex, endIndex]);
+    const currentIndicesOnPage = useMemo(() => cardsToShowInModal.map((_, i) => startIndex + i), [cardsToShowInModal, startIndex]);
+
+    const handleModalPageChange = (direction: 'prev' | 'next') => {
+        setModalCurrentPage(prev => {
+            const nextPage = direction === 'next' ? prev + 1 : prev - 1;
+            setSelectedCardIndices(new Set());
+            return Math.max(1, Math.min(nextPage, totalPages));
+        });
+    };
+
+    const handleToggleSelectCard = (index: number) => {
+        setSelectedCardIndices(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(index)) {
+                newSet.delete(index);
+            } else {
+                newSet.add(index);
+            }
+            return newSet;
+        });
+    };
+
+    const handleSelectPage = () => {
+        setSelectedCardIndices(prev => {
+            const newSet = new Set(prev);
+            currentIndicesOnPage.forEach(index => newSet.add(index));
+            return newSet;
+        });
+    };
+
+    const handleDeselectPage = () => {
+        setSelectedCardIndices(prev => {
+            const newSet = new Set(prev);
+            currentIndicesOnPage.forEach(index => newSet.delete(index));
+            return newSet;
+        });
+    };
+
+    const handleDeleteSelectedCards = () => {
+        if (selectedCardIndices.size === 0) return;
+        if (window.confirm(`Remover ${selectedCardIndices.size} carta(s) selecionada(s)?`)) {
+            const indicesToRemove = Array.from(selectedCardIndices); // Copia os índices
+            setCards(prevCards => prevCards.filter((_, index) => !indicesToRemove.includes(index)));
+
+            if (editIndex !== null && indicesToRemove.includes(editIndex)) {
+                resetCarta();
+            }
+
+            setSelectedCardIndices(new Set());
+
+            // Recalcula o número total de cartas APÓS a remoção
+            const newTotalCards = cards.length - indicesToRemove.length;
+            const newTotalPages = Math.ceil(newTotalCards / modalItemsPerPage);
+            if (modalCurrentPage > newTotalPages && newTotalPages > 0) {
+                setModalCurrentPage(newTotalPages);
+            } else if (newTotalCards === 0) {
+                setModalCurrentPage(1); // Volta para a página 1 se não houver mais cartas
+            }
+            // Se a página atual ainda for válida, mas a última carta foi removida
+            // e a página ficou vazia, volta uma página (se possível)
+             else if (modalCurrentPage > 1 && startIndex >= newTotalCards) {
+                 setModalCurrentPage(modalCurrentPage - 1);
+             }
+        }
+    };
+
+
+    const handleEditSelectedCard = () => {
+        if (selectedCardIndices.size !== 1) return;
+        const indexToEdit = Array.from(selectedCardIndices)[0];
+        loadCardForEdit(indexToEdit);
+        setIsManageModalOpen(false);
+        setSelectedCardIndices(new Set());
+    };
+
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files; if (!files) return; setIsLoading(true); setErrorMessage(null); let loadErrors: string[] = [];
         const newBaralhos: BaralhoCarregado[] = [];
@@ -309,7 +393,6 @@ const CriadorDeCarta: React.FC = () => {
                 if (file.name.endsWith(".js")) { newCards = parseJSDeckFileLocal(content); }
                 else if (file.name.endsWith(".json")) {
                      const raw = JSON.parse(content) as any[]; if (!Array.isArray(raw)) throw new Error("JSON não é array.");
-                     // Adiciona ID e baralho padrão ao carregar JSON também
                      newCards = raw.map((card, index) => ({
                          ...card,
                          id: card.id || `custom_json_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`,
@@ -318,7 +401,6 @@ const CriadorDeCarta: React.FC = () => {
                 }
                 else { loadErrors.push(`Formato ${file.name} não suportado.`); continue; }
                 if (!Array.isArray(newCards) || newCards.length === 0) { loadErrors.push(`Nenhuma carta válida em "${nome}".`); continue; }
-                // ID e Baralho já foram garantidos no parse
                 newBaralhos.push({ id: Date.now() + Math.random(), nome, cartas: newCards, adicionado: false });
             } catch (error: any) { loadErrors.push(`Erro ao ler ${file.name}: ${error.message}`); }
         }
@@ -329,11 +411,10 @@ const CriadorDeCarta: React.FC = () => {
     const adicionarBaralho = (baralhoId: number) => {
         setBaralhosCarregados((prev) => prev.map((b) => {
             if (b.id === baralhoId && !b.adicionado) {
-                // Garante que cartas carregadas tenham baralho (já feito no parse, mas reforça)
                 const newCards: CartaInterna[] = b.cartas.map((c) => ({
                     ...c,
                     id: c.id || `${b.nome}_${Math.random().toString(16).slice(2)}`,
-                    baralho: c.baralho || DEFAULT_BARALHO_NAME, // Garante aqui também
+                    baralho: c.baralho || DEFAULT_BARALHO_NAME,
                     origBaralhoId: b.id,
                     edited: false
                 }));
@@ -376,12 +457,10 @@ const CriadorDeCarta: React.FC = () => {
     const handleRemoveCategoria = (cat: string) => { setCategorias((old) => old.filter((c) => c !== cat)); };
     const handleAddFonte = () => { if (novaFonte.trim() !== "" && !fontes.includes(novaFonte)) { setFontes((old) => [...old, novaFonte]); setNovaFonte(""); } };
     const handleRemoveFonte = (f: string) => { setFontes((old) => old.filter((fon) => fon !== f)); };
-    const scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); }; // <-- Função scroll do 2º código
+    const scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
-    // --- Funções de Inserir Popup (mantidas do original) ---
     const inserirTemplatePopup = (tipoPopup: 'imagem' | 'video') => {
         const idUnico = `popup-${Date.now()}`; let urlPrincipal = ''; let urlThumb = ''; let desc = ''; let thumbHtml = '';
-        // CSS com indentação melhorada
         const templateCSS = `
 <style>
 .popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }
@@ -400,7 +479,6 @@ const CriadorDeCarta: React.FC = () => {
             if (!popupImageUrl.trim()) { alert("Insira a URL da Imagem."); return; }
             urlPrincipal = popupImageUrl; urlThumb = popupImageUrl; desc = 'Descrição da Imagem';
             thumbHtml = `<img src="${urlThumb}" alt="Clique para ampliar"/>`;
-            // HTML com indentação
             templateElemento = `
 <!-- Link/Thumb da Imagem -->
 <a href="#${idUnico}" class="thumb-link-${idUnico}">
@@ -415,11 +493,10 @@ const CriadorDeCarta: React.FC = () => {
   </div>
 </div>
 `;
-        } else { // tipoPopup === 'video'
+        } else {
             if (!popupVideoUrl.trim()) { alert("Insira a URL do Vídeo (.mp4)."); return; }
             urlPrincipal = popupVideoUrl; desc = 'Descrição do Vídeo';
             thumbHtml = `<span>🎬 Clique para ver o vídeo</span>`;
-            // HTML com indentação
             templateElemento = `
 <!-- Link/Thumb do Vídeo -->
 <a href="#${idUnico}" class="thumb-link-${idUnico}" style="border:none; background:none; padding:0;">
@@ -436,7 +513,6 @@ const CriadorDeCarta: React.FC = () => {
   </div>
 </div>
 `;
-            // Script com indentação
             scriptStop = `
 <script>
 (function() {
@@ -463,7 +539,6 @@ const CriadorDeCarta: React.FC = () => {
         for (const pattern of patterns) { const match = url.match(pattern); if (match && match[1]) { videoId = match[1]; break; } }
         if (!videoId) { alert("URL do YouTube inválida. Use o link completo (watch?v=..., youtu.be/... ou embed/...)."); return; }
         const idUnico = `popup-yt-${Date.now()}`; const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-        // CSS com indentação
         const templateCSS = `
 <style>
 .popup-overlay-${idUnico} { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box; }
@@ -476,7 +551,6 @@ const CriadorDeCarta: React.FC = () => {
 .thumb-link-${idUnico} span { background:#eee; border: 1px solid #ccc; padding: 10px 15px; border-radius:5px; color: #c4302b; font-weight: bold; display: flex; align-items: center; gap: 5px; }
 </style>
 `;
-        // HTML com indentação
         const templateElemento = `
 <!-- Link/Thumb YouTube -->
 <a href="#${idUnico}" class="thumb-link-${idUnico}">
@@ -490,7 +564,6 @@ const CriadorDeCarta: React.FC = () => {
   </div>
 </div>
 `;
-        // Script com indentação
         const scriptStopYouTube = `
 <script>
 (function() {
@@ -499,7 +572,7 @@ const CriadorDeCarta: React.FC = () => {
   if (closeBtn && iframe) {
     var originalSrc = iframe.src;
     closeBtn.addEventListener('mousedown', function() {
-      iframe.src = ''; iframe.src = originalSrc; // Reload para parar
+      iframe.src = ''; iframe.src = originalSrc;
       setTimeout(function() { window.location.hash = '#_'; }, 10);
     });
   }
@@ -512,7 +585,6 @@ const CriadorDeCarta: React.FC = () => {
         else { setPergunta(prev => prev + htmlParaInserir); setPopupYouTubeUrl(""); }
     };
 
-    // Reset Carta (atualizado para incluir baralho)
     const resetCarta = () => {
         setTipo("Pergunta"); setTitulo(""); setPergunta(""); setOpcoes([]); setNovaOpcao("");
         setRespostaCorreta([]); setDificuldade("facil");
@@ -521,7 +593,6 @@ const CriadorDeCarta: React.FC = () => {
         setParesCorretosInput("");
         setImagemURLPontoCerto(""); setZonasClicaveis([]); setNovaZona({x:0, y:0, largura: 0.1, altura: 0.1}); setRespostaCorretaPontoCerto(null);
         setFraseIncompleta(""); setFragmentos([]); setNovoFragmento(""); setOrdemFragmentos("");
-        // Reseta baralho apenas se não estiver bloqueado
         if (!baralhoBloqueado) setBaralhoCartaAtual("");
         if (!categoriasBloqueadas) setCategorias([]);
         if (!fontesBloqueadas) setFontes([]);
@@ -529,23 +600,25 @@ const CriadorDeCarta: React.FC = () => {
         setPopupImageUrl(""); setPopupVideoUrl(""); setPopupYouTubeUrl("");
     };
 
-    // Adicionar/Atualizar Carta (atualizado para incluir baralho)
     const handleAddOrUpdateCard = () => {
         if (!titulo.trim() || !tipo) { alert("Título e Tipo são obrigatórios."); return; }
         let finalRespostaCorreta: number | number[] | { aId: number; bId: number }[] = [];
         let cartaEspecificaProps: any = {};
-        // Define o nome do baralho a ser salvo (usa Padrão se vazio)
         const nomeBaralhoFinal = baralhoCartaAtual.trim() || DEFAULT_BARALHO_NAME;
 
-        try { // Switch case mantido do original...
+        try {
             switch (tipo) {
-                case "Pergunta": case "ContraTempo":
+                case "Pergunta":
+                case "ContraTempo":
                     if (respostaCorreta.length !== 1) throw new Error(`Tipo ${tipo} exige uma resposta correta.`);
                     finalRespostaCorreta = respostaCorreta[0];
                     cartaEspecificaProps.opcoes = opcoes;
                     if(tipo === 'ContraTempo') cartaEspecificaProps.tempoLimite = tempoLimite;
                     break;
-                case "MultiplaEscolha": case "Outras": case "Vantagem": case "Desvantagem":
+                case "MultiplaEscolha":
+                case "Outras":
+                case "Vantagem":
+                case "Desvantagem":
                     finalRespostaCorreta = (tipo === "Vantagem") ? opcoes.map(o => o.id) : (tipo === "Desvantagem" ? [] : respostaCorreta);
                     cartaEspecificaProps.opcoes = opcoes;
                     break;
@@ -560,7 +633,7 @@ const CriadorDeCarta: React.FC = () => {
                     if (!ordemValida || posicoes.size !== opcoes.length || maxPos !== opcoes.length) { throw new Error("Erro na ordem: posições devem ser únicas de 1 a N."); }
                     for (let i = 1; i <= maxPos; i++) { ordemIds.push(posicoes.get(i)!); }
                     finalRespostaCorreta = ordemIds;
-                    cartaEspecificaProps.opcoes = opcoes.map(({ordemTemp, ...rest}) => rest); // Remove ordemTemp
+                    cartaEspecificaProps.opcoes = opcoes.map(({ordemTemp, ...rest}) => rest);
                     break;
                 case "RelacionarColunas":
                     try {
@@ -592,18 +665,16 @@ const CriadorDeCarta: React.FC = () => {
             }
         } catch (error: any) { alert(`Erro ao preparar carta: ${error.message}`); return; }
 
-        // Props base incluem o 'baralho'
         const cartaBaseProps = {
              id: editIndex !== null ? cards[editIndex].id : `new_${Date.now()}_${Math.random().toString(16).slice(2)}`,
              tipo, titulo, pergunta, dificuldade, categorias, fontes,
              vantagem, desvantagem, dica,
-             baralho: nomeBaralhoFinal, // <-- ADICIONADO: Inclui o baralho
+             baralho: nomeBaralhoFinal,
              respostaCorreta: finalRespostaCorreta,
              edited: true,
              origBaralhoId: editIndex !== null ? cards[editIndex].origBaralhoId : undefined
         };
 
-        // Lógica para deletar/garantir 'opcoes' mantida
         if (!["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo)) {
             delete cartaEspecificaProps.opcoes;
         } else if (cartaEspecificaProps.opcoes === undefined) {
@@ -617,20 +688,18 @@ const CriadorDeCarta: React.FC = () => {
         } else {
             setCards((oldCards) => [...oldCards, novaCarta]);
         }
-        resetCarta(); // Reseta o formulário
+        resetCarta();
     };
 
-    // Carregar Carta para Edição (atualizado para incluir baralho)
     const loadCardForEdit = (index: number) => {
-        resetCarta(); // Chama primeiro para limpar tudo
+        resetCarta();
         const carta = cards[index];
         setEditIndex(index); setTipo(carta.tipo as TipoCarta); setTitulo(carta.titulo);
-        setBaralhoCartaAtual(carta.baralho || ""); // <-- ADICIONADO: Carrega o baralho da carta
+        setBaralhoCartaAtual(carta.baralho || "");
         setPergunta(carta.pergunta);
         setDificuldade(carta.dificuldade as Dificuldade); setCategorias([...carta.categorias]); setFontes([...carta.fontes]);
         setVantagem(carta.vantagem); setDesvantagem(carta.desvantagem); setDica(carta.dica);
 
-        // Switch case mantido do original...
         switch (carta.tipo) {
             case "Pergunta": case "MultiplaEscolha": case "Vantagem": case "Desvantagem": case "Outras": case "ContraTempo":
                 setOpcoes(carta.opcoes ? [...carta.opcoes] : []);
@@ -658,7 +727,6 @@ const CriadorDeCarta: React.FC = () => {
             case "CompletarFrase":
                 const cFrase = carta as CartaCompletarFrase; setFraseIncompleta(cFrase.fraseIncompleta || ""); setFragmentos(cFrase.fragmentos ? [...cFrase.fragmentos] : []); setOrdemFragmentos(Array.isArray(cFrase.respostaCorreta) ? cFrase.respostaCorreta.join(', ') : ""); break;
         }
-         // Rola a página para o topo do formulário ao editar
         document.querySelector('.form-scroll-container')?.scrollTo(0, 0);
     };
     const deleteCard = (index: number) => {
@@ -672,11 +740,9 @@ const CriadorDeCarta: React.FC = () => {
     };
     const cancelEdit = () => { resetCarta(); };
 
-    // --- Download (atualizado para remover baralho padrão) ---
     const prepareForDownload = (): Partial<Carta>[] => {
         return cards.map(({ origBaralhoId, edited, ...rest }: CartaInterna) => {
             const cardData: Partial<Carta> = { ...rest };
-            // Lógica de limpeza por tipo mantida do original...
             if (rest.tipo !== "ContraTempo") delete (cardData as Partial<CartaContraTempo>).tempoLimite;
             if (rest.tipo !== "RelacionarColunas") { delete (cardData as Partial<CartaRelacionarColunas>).colunaA; delete (cardData as Partial<CartaRelacionarColunas>).colunaB; }
             if (rest.tipo !== "PontoCerto") { delete (cardData as Partial<CartaPontoCerto>).imagemURL; delete (cardData as Partial<CartaPontoCerto>).zonasClicaveis; }
@@ -686,7 +752,6 @@ const CriadorDeCarta: React.FC = () => {
             } else if (rest.tipo === "Ordem" && cardData.opcoes) {
                  cardData.opcoes = cardData.opcoes.map(({ ordemTemp, ...o }) => o);
             }
-            // <-- ADICIONADO: Remove o campo 'baralho' se for o nome padrão
             if (!cardData.baralho || cardData.baralho === DEFAULT_BARALHO_NAME) {
                 delete cardData.baralho;
             }
@@ -696,26 +761,17 @@ const CriadorDeCarta: React.FC = () => {
     const generateCode = (format: 'js' | 'json') => { const deckFinal = prepareForDownload(); if (format === 'json') { return JSON.stringify(deckFinal, null, 2); } else { const deck = JSON.stringify(deckFinal, null, 2); return `const ${deckName || 'meu_baralho'} = ${deck};\n\nexport default ${deckName || 'meu_baralho'};`; } };
     const downloadCode = (format: 'js' | 'json') => { const element = document.createElement("a"); const fileContent = generateCode(format); const fileType = format === 'js' ? 'text/javascript' : 'application/json'; const fileName = `${deckName || 'meu_baralho'}.${format}`; const file = new Blob([fileContent], { type: fileType }); element.href = URL.createObjectURL(file); element.download = fileName; document.body.appendChild(element); element.click(); document.body.removeChild(element); };
 
-    // --- JSX do Criador (com estrutura e estilos do 2º código) ---
     return (
-        <div className="p-4 max-w-7xl mx-auto relative"> {/* Adicionado relative para o botão fixo */}
+        <div className="p-4 max-w-7xl mx-auto relative">
             <h1 className="text-3xl font-bold mb-6 text-center">Criador de Cartas Eco Challenge</h1>
 
-            {/* Seção Superior: Nome Baralho e Gerenciamento (com estilo Card) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <Card> {/* Estilo Card */}
-                    <CardHeader>
-                        <CardTitle className="text-xl">Nome do Baralho & Download</CardTitle>
-                    </CardHeader>
+                 <Card>
+                    <CardHeader><CardTitle className="text-xl">Nome do Baralho & Download</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium mb-1">Nome (para arquivo .js)</label>
-                            <Input
-                                type="text"
-                                value={deckName}
-                                onChange={(e) => setDeckName(e.target.value.replace(/[^a-zA-Z0-9_]/g, '_'))}
-                                placeholder="meu_baralho" // Placeholder original
-                            />
+                            <Input type="text" value={deckName} onChange={(e) => setDeckName(e.target.value.replace(/[^a-zA-Z0-9_]/g, '_'))} placeholder="meu_baralho"/>
                         </div>
                         <div className="flex space-x-4">
                             <Button onClick={() => downloadCode('js')} className="bg-blue-600 hover:bg-blue-700 text-white flex-1">Baixar .js</Button>
@@ -727,11 +783,9 @@ const CriadorDeCarta: React.FC = () => {
                             </Button>
                          )}
                     </CardContent>
-                </Card>
-                 <Card> {/* Estilo Card */}
-                    <CardHeader>
-                        <CardTitle className="text-xl">Carregar/Gerenciar Baralhos Existentes</CardTitle>
-                    </CardHeader>
+                 </Card>
+                 <Card>
+                    <CardHeader><CardTitle className="text-xl">Carregar/Gerenciar Baralhos Existentes</CardTitle></CardHeader>
                     <CardContent className="space-y-3">
                         <Input type="file" accept=".js,.json" onChange={handleFileUpload} multiple />
                         {isLoading && <p className="text-sm text-blue-600">Carregando...</p>}
@@ -748,15 +802,8 @@ const CriadorDeCarta: React.FC = () => {
                                     <ul className="space-y-1">
                                         {baralhosCarregados.map((b) => (
                                             <li key={b.id} className="flex items-center justify-between p-1 even:bg-gray-50">
-                                                <div>
-                                                    <span className="font-medium text-sm">{b.nome}</span>
-                                                    <span className="text-xs text-gray-500 ml-2">({b.cartas.length})</span>
-                                                </div>
-                                                {!b.adicionado ? (
-                                                    <Button onClick={() => adicionarBaralho(b.id)} size="sm" variant="outline" className="h-7 px-2 text-xs">Add ao Editor</Button>
-                                                ) : (
-                                                    <Button onClick={() => removerBaralho(b.id)} size="sm" variant="destructive" className="h-7 px-2 text-xs">Remover do Editor</Button>
-                                                )}
+                                                <div><span className="font-medium text-sm">{b.nome}</span><span className="text-xs text-gray-500 ml-2">({b.cartas.length})</span></div>
+                                                {!b.adicionado ? (<Button onClick={() => adicionarBaralho(b.id)} size="sm" variant="outline" className="h-7 px-2 text-xs">Add ao Editor</Button>) : (<Button onClick={() => removerBaralho(b.id)} size="sm" variant="destructive" className="h-7 px-2 text-xs">Remover do Editor</Button>)}
                                             </li>
                                         ))}
                                     </ul>
@@ -764,26 +811,20 @@ const CriadorDeCarta: React.FC = () => {
                              </>
                         )}
                     </CardContent>
-                </Card>
+                 </Card>
             </div>
 
-             {/* Seção Principal: Layout 3 colunas */}
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                {/* Coluna Esquerda+Meio: Formulário com scroll e estilo Card */}
-                <Card className="lg:col-span-2 max-h-[90vh] overflow-y-auto self-start shadow-lg border form-scroll-container"> {/* Estilo Card, Scroll e Classe para Rolagem */}
-                    <CardHeader className="sticky top-0 bg-white/95 backdrop-blur-sm z-10 border-b pb-3"> {/* Header fixo */}
-                         <CardTitle className="text-2xl">
+                <Card className="lg:col-span-2 max-h-[90vh] overflow-y-auto self-start shadow-lg border form-scroll-container">
+                   <CardHeader className="sticky top-0 bg-white/95 backdrop-blur-sm z-10 border-b pb-3">
+                       <CardTitle className="text-2xl">
                             {editIndex !== null ? `Editando: ${cards[editIndex]?.titulo || `Carta ${editIndex + 1}`}` : "Criar Nova Carta"}
-                         </CardTitle>
-                         <AlertDescription>
+                       </CardTitle>
+                       <AlertDescription>
                             Preencha os campos para {editIndex !== null ? 'atualizar' : 'criar'} uma carta.
-                         </AlertDescription>
-                    </CardHeader>
-
-                    <CardContent className="space-y-5 p-4 md:p-6"> {/* Padding interno */}
-
-                        {/* Card: Campos Comuns Base (Tipo, Título, Dificuldade) */}
+                       </AlertDescription>
+                   </CardHeader>
+                   <CardContent className="space-y-5 p-4 md:p-6">
                         <Card className="border bg-slate-50 p-4 rounded-lg shadow-sm">
                              <CardContent className="p-0 space-y-4">
                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -812,8 +853,6 @@ const CriadorDeCarta: React.FC = () => {
                                 </div>
                             </CardContent>
                         </Card>
-
-                        {/* Card: Pergunta e Popups */}
                         <Card className="border bg-white p-4 rounded-lg shadow-sm">
                             <CardContent className="p-0 space-y-3">
                                 <div>
@@ -823,11 +862,10 @@ const CriadorDeCarta: React.FC = () => {
                                         id="card-pergunta"
                                         value={pergunta}
                                         onChange={(e) => setPergunta(e.target.value)}
-                                        className="h-40 font-mono text-sm" // Altura pode ser ajustada
+                                        className="h-40 font-mono text-sm"
                                         placeholder="Escreva aqui..."
                                     />
                                 </div>
-                                {/* Card de Inserir Popups (mantido funcionalmente, com estilo) */}
                                 <Card className="border-dashed bg-gray-50">
                                     <CardHeader className="p-2">
                                         <CardTitle className="text-sm font-medium">Inserir Popup de Mídia</CardTitle>
@@ -852,14 +890,12 @@ const CriadorDeCarta: React.FC = () => {
                                  </Card>
                             </CardContent>
                         </Card>
-
-                        {/* --- Campos Condicionais (Envolvidos em Cards com Estilos) --- */}
                         {["Pergunta", "MultiplaEscolha", "Ordem", "Vantagem", "Desvantagem", "Outras", "ContraTempo"].includes(tipo) && (
-                            <Card className="border bg-gray-50 p-4 rounded-lg shadow-sm"> {/* Estilo Card */}
-                                <CardHeader className="p-0 mb-3"> {/* Estilo Header */}
+                            <Card className="border bg-gray-50 p-4 rounded-lg shadow-sm">
+                                <CardHeader className="p-0 mb-3">
                                     <CardTitle className="text-lg">Opções</CardTitle>
                                 </CardHeader>
-                                <CardContent className="p-0 space-y-3"> {/* Estilo Content */}
+                                <CardContent className="p-0 space-y-3">
                                     <div className="flex space-x-2">
                                         <Input type="text" value={novaOpcao} onChange={(e) => setNovaOpcao(e.target.value)} placeholder="Texto da nova opção" className="flex-1"/>
                                         <Button type="button" onClick={handleAddOpcao}>Adicionar</Button>
@@ -892,23 +928,21 @@ const CriadorDeCarta: React.FC = () => {
                                 </CardContent>
                             </Card>
                         )}
-
                         {tipo === "ContraTempo" && (
-                            <Card className="border bg-yellow-100 border-yellow-300 p-4 rounded-lg shadow-sm"> {/* Estilo Card */}
+                            <Card className="border bg-yellow-100 border-yellow-300 p-4 rounded-lg shadow-sm">
                                 <CardContent className="p-0">
                                     <label className="block text-sm font-medium mb-1 text-yellow-800">Tempo Limite (segundos)</label>
                                     <Input type="number" value={tempoLimite} onChange={(e) => setTempoLimite(Math.max(5, parseInt(e.target.value, 10) || 5))} min="5" className="w-24 border-yellow-400"/>
                                 </CardContent>
                             </Card>
                         )}
-
                         {tipo === "RelacionarColunas" && (
-                            <Card className="border bg-blue-50 border-blue-200 p-4 rounded-lg shadow-sm"> {/* Estilo Card */}
+                            <Card className="border bg-blue-50 border-blue-200 p-4 rounded-lg shadow-sm">
                                 <CardHeader className="p-0 mb-3">
                                     <CardTitle className="text-lg text-blue-800">Relacionar Colunas</CardTitle>
                                 </CardHeader>
                                 <CardContent className="p-0 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div> {/* Coluna A */}
+                                    <div>
                                         <h4 className="text-md font-semibold mb-2">Coluna A</h4>
                                         <div className="flex space-x-2 mb-2">
                                             <Input type="text" value={novaColunaA} onChange={e => setNovaColunaA(e.target.value)} placeholder="Texto item A" className="flex-1"/>
@@ -916,7 +950,7 @@ const CriadorDeCarta: React.FC = () => {
                                         </div>
                                         <ScrollArea className="h-24 border rounded p-1 bg-white"><ul className="text-sm space-y-1">{colunaAItems.map(item => <li key={item.id} className="flex justify-between items-center"><span>{item.id}: {item.texto}</span><Button type="button" variant="ghost" className="text-red-500 hover:bg-red-100 h-6 w-6 p-0" onClick={() => handleRemoveColunaA(item.id)}><X className="h-4 w-4"/></Button></li>)}</ul></ScrollArea>
                                     </div>
-                                    <div> {/* Coluna B */}
+                                    <div>
                                         <h4 className="text-md font-semibold mb-2">Coluna B</h4>
                                         <div className="flex space-x-2 mb-2">
                                             <Input type="text" value={novaColunaB} onChange={e => setNovaColunaB(e.target.value)} placeholder="Texto item B" className="flex-1"/>
@@ -931,9 +965,8 @@ const CriadorDeCarta: React.FC = () => {
                                 </CardContent>
                             </Card>
                         )}
-
                         {tipo === "PontoCerto" && (
-                             <Card className="border bg-indigo-50 border-indigo-200 p-4 rounded-lg shadow-sm"> {/* Estilo Card */}
+                             <Card className="border bg-indigo-50 border-indigo-200 p-4 rounded-lg shadow-sm">
                                 <CardHeader className="p-0 mb-3">
                                     <CardTitle className="text-lg text-indigo-800">Ponto Certo</CardTitle>
                                 </CardHeader>
@@ -984,9 +1017,8 @@ const CriadorDeCarta: React.FC = () => {
                                 </CardContent>
                             </Card>
                         )}
-
                         {tipo === "CompletarFrase" && (
-                            <Card className="border bg-pink-50 border-pink-200 p-4 rounded-lg shadow-sm"> {/* Estilo Card */}
+                            <Card className="border bg-pink-50 border-pink-200 p-4 rounded-lg shadow-sm">
                                  <CardHeader className="p-0 mb-3">
                                     <CardTitle className="text-lg text-pink-800">Completar Frase</CardTitle>
                                 </CardHeader>
@@ -1010,21 +1042,18 @@ const CriadorDeCarta: React.FC = () => {
                                 </CardContent>
                             </Card>
                         )}
-
-                        {/* Card: Metadados (Categorias, Fontes, Baralho) */}
                          <Card className="border bg-slate-50 p-4 rounded-lg shadow-sm">
                             <CardHeader className="p-0 mb-3">
                                 <CardTitle className="text-lg">Metadados</CardTitle>
                             </CardHeader>
                              <CardContent className="p-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {/* Categorias (com estilo Lock) */}
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <label className="text-sm font-medium">Categorias</label>
                                         <div className="flex items-center space-x-1" title="Travar para manter ao criar nova carta">
                                             {categoriasBloqueadas ? <Lock className="h-3 w-3"/> : <LockOpen className="h-3 w-3"/>}
                                             <Checkbox id="lockCat" checked={categoriasBloqueadas} onCheckedChange={checked => setCategoriasBloqueadas(Boolean(checked))} />
-                                            <label htmlFor="lockCat" className="text-xs cursor-help sr-only">Travar</label> {/* Acessibilidade */}
+                                            <label htmlFor="lockCat" className="text-xs cursor-help sr-only">Travar</label>
                                         </div>
                                     </div>
                                     <div className="flex space-x-2 mb-1">
@@ -1042,7 +1071,6 @@ const CriadorDeCarta: React.FC = () => {
                                         </ul>
                                     </ScrollArea>
                                 </div>
-                                {/* Fontes (com estilo Lock) */}
                                  <div>
                                      <div className="flex items-center justify-between mb-2">
                                           <label className="text-sm font-medium">Fontes</label>
@@ -1067,7 +1095,6 @@ const CriadorDeCarta: React.FC = () => {
                                         </ul>
                                     </ScrollArea>
                                 </div>
-                                {/* Baralho (NOVO CAMPO com estilo Lock) */}
                                  <div>
                                      <div className="flex items-center justify-between mb-2">
                                           <label htmlFor="card-baralho-input" className="text-sm font-medium">Baralho</label>
@@ -1082,15 +1109,13 @@ const CriadorDeCarta: React.FC = () => {
                                           type="text"
                                           value={baralhoCartaAtual}
                                           onChange={(e) => setBaralhoCartaAtual(e.target.value)}
-                                          placeholder={DEFAULT_BARALHO_NAME} // Usa a constante
+                                          placeholder={DEFAULT_BARALHO_NAME}
                                           className="h-9"
                                        />
                                       <p className="text-xs text-gray-500 mt-1">Deixe em branco para usar &quot;{DEFAULT_BARALHO_NAME}&quot;.</p>
                                  </div>
                             </CardContent>
                          </Card>
-
-                        {/* Card: Feedback (Vantagem, Desvantagem, Dica) com estilo */}
                         <Card className="border bg-slate-50 p-4 rounded-lg shadow-sm">
                              <CardContent className="p-0 space-y-3">
                                 <div>
@@ -1113,13 +1138,11 @@ const CriadorDeCarta: React.FC = () => {
                                 </div>
                             </CardContent>
                         </Card>
-
-                        {/* Botões de Ação Finais */}
                         <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0 pt-4 border-t mt-6">
                             <Button
                                 type="button"
                                 onClick={handleAddOrUpdateCard}
-                                className="bg-green-600 hover:bg-green-700 text-white flex-1 h-10" // Estilo botão maior
+                                className="bg-green-600 hover:bg-green-700 text-white flex-1 h-10"
                             >
                                 {editIndex !== null ? "Salvar Edições" : "Adicionar Carta ao Baralho"}
                             </Button>
@@ -1128,96 +1151,161 @@ const CriadorDeCarta: React.FC = () => {
                                     type="button"
                                     onClick={cancelEdit}
                                     variant="outline"
-                                    className="flex-1 h-10" // Estilo botão maior
+                                    className="flex-1 h-10"
                                 >
                                     Cancelar Edição
                                 </Button>
                             )}
                         </div>
-                    </CardContent>
+                   </CardContent>
                 </Card>
 
-                 {/* Coluna Direita: Lista e Preview Fixo */}
                  <div className="space-y-4 lg:sticky lg:top-4 self-start">
-                     {/* Preview Estático (com estilo Card) */}
-                     <Card className="border-2 border-gray-300 shadow-lg"> {/* Estilo Borda */}
-                            <CardHeader className="bg-gray-100 py-2"> {/* Estilo Header */}
-                                <CardTitle className="text-lg text-center font-semibold">Preview da Carta</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-2">
-                                 <CardStaticView card={
-                                    editIndex !== null
-                                    ? cards[editIndex] // Usa carta existente
-                                    : (() => { // Constrói preview para nova carta
-                                        const finalRespostaCorretaPreview = (() => { // Lógica mantida do original
-                                             if (tipo === 'Pergunta' || tipo === 'ContraTempo') return respostaCorreta[0];
-                                             if (tipo === 'PontoCerto') return respostaCorretaPontoCerto ?? undefined;
-                                             if (tipo === 'RelacionarColunas') { try { return parseParesRelacionar(paresCorretosInput); } catch { return []; } }
-                                             if (tipo === 'CompletarFrase') return ordemFragmentos.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
-                                             if (tipo === 'Ordem') { const sorted = [...opcoes].sort((a, b) => (parseInt(a.ordemTemp || '999', 10) - parseInt(b.ordemTemp || '999', 10))); return sorted.map(o => o.id); }
-                                             if (tipo === 'Vantagem') return opcoes.map(o => o.id);
-                                             if (tipo === 'Desvantagem') return [];
-                                             return respostaCorreta;
-                                        })();
-                                        const previewCard: Partial<Carta> = { // Inclui 'baralho'
-                                            tipo, titulo, baralho: baralhoCartaAtual.trim() || undefined, // Usa baralho atual ou undefined
-                                            pergunta, dificuldade, categorias, fontes,
-                                            vantagem, desvantagem, dica,
-                                            respostaCorreta: finalRespostaCorretaPreview as any,
-                                        };
-                                        // Adiciona props específicas (lógica mantida do original)
-                                        switch (tipo) {
-                                            case "Pergunta": case "MultiplaEscolha": case "Ordem": case "Vantagem": case "Desvantagem": case "Outras": previewCard.opcoes = opcoes; break;
-                                            case "ContraTempo": previewCard.opcoes = opcoes; (previewCard as Partial<CartaContraTempo>).tempoLimite = tempoLimite; break;
-                                            case "RelacionarColunas": (previewCard as Partial<CartaRelacionarColunas>).colunaA = colunaAItems; (previewCard as Partial<CartaRelacionarColunas>).colunaB = colunaBItems; break;
-                                            case "PontoCerto": (previewCard as Partial<CartaPontoCerto>).imagemURL = imagemURLPontoCerto; (previewCard as Partial<CartaPontoCerto>).zonasClicaveis = zonasClicaveis; break;
-                                            case "CompletarFrase": (previewCard as Partial<CartaCompletarFrase>).fraseIncompleta = fraseIncompleta; (previewCard as Partial<CartaCompletarFrase>).fragmentos = fragmentos; break;
-                                        }
-                                        return previewCard;
-                                    })()
-                                 }/>
-                             </CardContent>
+                     <Card className="border-2 border-gray-300 shadow-lg">
+                         <CardHeader className="bg-gray-100 py-2">
+                             <CardTitle className="text-lg text-center font-semibold">Preview da Carta</CardTitle>
+                         </CardHeader>
+                         <CardContent className="p-2">
+                             <CardStaticView card={
+                                editIndex !== null
+                                ? cards[editIndex]
+                                : (() => {
+                                    const finalRespostaCorretaPreview = (() => {
+                                         if (tipo === 'Pergunta' || tipo === 'ContraTempo') return respostaCorreta[0];
+                                         if (tipo === 'PontoCerto') return respostaCorretaPontoCerto ?? undefined;
+                                         if (tipo === 'RelacionarColunas') { try { return parseParesRelacionar(paresCorretosInput); } catch { return []; } }
+                                         if (tipo === 'CompletarFrase') return ordemFragmentos.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+                                         if (tipo === 'Ordem') { const sorted = [...opcoes].sort((a, b) => (parseInt(a.ordemTemp || '999', 10) - parseInt(b.ordemTemp || '999', 10))); return sorted.map(o => o.id); }
+                                         if (tipo === 'Vantagem') return opcoes.map(o => o.id);
+                                         if (tipo === 'Desvantagem') return [];
+                                         return respostaCorreta;
+                                    })();
+                                    const previewCard: Partial<Carta> = {
+                                        tipo, titulo, baralho: baralhoCartaAtual.trim() || undefined,
+                                        pergunta, dificuldade, categorias, fontes,
+                                        vantagem, desvantagem, dica,
+                                        respostaCorreta: finalRespostaCorretaPreview as any,
+                                    };
+                                    switch (tipo) {
+                                        case "Pergunta": case "MultiplaEscolha": case "Ordem": case "Vantagem": case "Desvantagem": case "Outras": previewCard.opcoes = opcoes; break;
+                                        case "ContraTempo": previewCard.opcoes = opcoes; (previewCard as Partial<CartaContraTempo>).tempoLimite = tempoLimite; break;
+                                        case "RelacionarColunas": (previewCard as Partial<CartaRelacionarColunas>).colunaA = colunaAItems; (previewCard as Partial<CartaRelacionarColunas>).colunaB = colunaBItems; break;
+                                        case "PontoCerto": (previewCard as Partial<CartaPontoCerto>).imagemURL = imagemURLPontoCerto; (previewCard as Partial<CartaPontoCerto>).zonasClicaveis = zonasClicaveis; break;
+                                        case "CompletarFrase": (previewCard as Partial<CartaCompletarFrase>).fraseIncompleta = fraseIncompleta; (previewCard as Partial<CartaCompletarFrase>).fragmentos = fragmentos; break;
+                                    }
+                                    return previewCard;
+                                })()
+                             }/>
+                         </CardContent>
                      </Card>
 
-                     {/* Lista de Cartas (com estilo Card e mostrando baralho) */}
                      <Card>
                         <CardHeader>
-                            <CardTitle className="text-xl">Baralho Atual ({cards.length} Cartas)</CardTitle>
-                            <AlertDescription>Clique para editar.</AlertDescription>
+                            <div className="flex justify-between items-center">
+                                <CardTitle className="text-xl">Baralho Atual ({cards.length} Cartas)</CardTitle>
+                                <Dialog open={isManageModalOpen} onOpenChange={setIsManageModalOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline" size="sm" disabled={cards.length === 0}>
+                                            <ListChecks className="mr-2 h-4 w-4" /> Gerenciar
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+                                        <DialogHeader>
+                                            <DialogTitle>Gerenciar Cartas do Baralho ({cards.length})</DialogTitle>
+                                            <DialogDescription>
+                                                Visualize, selecione e edite ou remova cartas.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <ScrollArea className="flex-grow border rounded-md p-2 bg-gray-50 -mx-6 px-6">
+                                            {cards.length > 0 ? (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                                    {cardsToShowInModal.map((card, pageIndex) => {
+                                                        const globalIndex = startIndex + pageIndex;
+                                                        const isSelected = selectedCardIndices.has(globalIndex);
+                                                        return (
+                                                            <div key={`modal-card-${card.id || globalIndex}`} className="relative border rounded-lg bg-white p-1 hover:shadow-lg transition-shadow">
+                                                                <Checkbox
+                                                                    checked={isSelected}
+                                                                    onCheckedChange={() => handleToggleSelectCard(globalIndex)}
+                                                                    className="absolute top-2 right-2 z-10 bg-white border-gray-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-700"
+                                                                    aria-label={`Selecionar carta ${card.titulo}`}
+                                                                />
+                                                                <CardStaticView card={card} small={true} />
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                <p className="text-center text-gray-500 italic py-10">Nenhuma carta no baralho.</p>
+                                            )}
+                                        </ScrollArea>
+                                        {cards.length > 0 && (
+                                            <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-2 border-t pt-3">
+                                                 <div className="flex items-center gap-2">
+                                                      <Button variant="outline" size="sm" onClick={handleSelectPage} title="Selecionar todos nesta página">
+                                                         <CheckSquare className="h-4 w-4 mr-1.5"/> Sel. Página
+                                                      </Button>
+                                                      <Button variant="outline" size="sm" onClick={handleDeselectPage} title="Desselecionar todos nesta página">
+                                                         <Square className="h-4 w-4 mr-1.5"/> Des. Página
+                                                      </Button>
+                                                 </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <Button variant="outline" size="icon" onClick={() => handleModalPageChange('prev')} disabled={modalCurrentPage <= 1} className="h-8 w-8">
+                                                        <ChevronLeft className="h-4 w-4" />
+                                                    </Button>
+                                                    <span className="text-sm font-medium text-gray-700">
+                                                        Página {modalCurrentPage} de {totalPages}
+                                                    </span>
+                                                    <Button variant="outline" size="icon" onClick={() => handleModalPageChange('next')} disabled={modalCurrentPage >= totalPages} className="h-8 w-8">
+                                                        <ChevronRight className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <DialogFooter className="mt-4 gap-2 sm:gap-0">
+                                            <Button variant="outline" onClick={() => setIsManageModalOpen(false)}>Fechar</Button>
+                                            <Button
+                                                variant="default"
+                                                onClick={handleEditSelectedCard}
+                                                disabled={selectedCardIndices.size !== 1}
+                                                className="bg-blue-600 hover:bg-blue-700"
+                                            >
+                                                <Edit className="mr-2 h-4 w-4" /> Editar Selecionada
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                onClick={handleDeleteSelectedCards}
+                                                disabled={selectedCardIndices.size === 0}
+                                            >
+                                                <Trash className="mr-2 h-4 w-4" /> Remover Selecionadas ({selectedCardIndices.size})
+                                            </Button>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
+                            <AlertDescription>
+                                Visualize no Preview ou use "Gerenciar" para editar/remover.
+                            </AlertDescription>
                         </CardHeader>
                         <CardContent>
                              {cards.length === 0 ? (
                                 <p className="text-gray-500 italic text-center py-4">Nenhuma carta.</p>
                              ) : (
-                                 // ScrollArea com altura ajustada e estilo
-                                <ScrollArea className="h-[calc(50vh - 8rem)] min-h-[200px] pr-3 border rounded-md bg-gray-50 p-2">
+                                <ScrollArea className="h-72 min-h-[150px] pr-3 border rounded-md bg-gray-50 p-2">
                                     <div className="space-y-2">
                                         {cards.map((c, index) => (
-                                            <Card
-                                                key={`card-display-${c.id || index}`}
-                                                className={cn(
-                                                    "hover:shadow-md transition-shadow cursor-pointer border", // Estilo hover
-                                                    editIndex === index && "ring-2 ring-blue-500 border-blue-400" // Estilo selecionado
-                                                )}
-                                                onClick={() => loadCardForEdit(index)}
-                                            >
-                                                {/* Conteúdo do item da lista com baralho */}
+                                            <Card key={`card-display-${c.id || index}`} className={cn( "hover:shadow-md transition-shadow border", editIndex === index && "ring-2 ring-blue-500 border-blue-400" )}>
                                                 <CardContent className="p-2 flex items-center justify-between gap-2">
                                                     <div className="flex-1 overflow-hidden">
                                                         <p className="text-xs font-semibold text-blue-700">
                                                             {c.tipo} - {c.dificuldade}
-                                                            {/* ADICIONADO: Mostra baralho se não for Padrão */}
                                                             {c.baralho && c.baralho !== DEFAULT_BARALHO_NAME ? ` (${c.baralho})`: ''}
                                                         </p>
                                                         <p className="font-medium truncate text-sm" title={c.titulo}>
                                                             {c.titulo || `Carta ${index + 1}`}
                                                         </p>
                                                     </div>
-                                                    <Button
-                                                        onClick={(e) => {e.stopPropagation(); deleteCard(index)}}
-                                                        size="sm" variant="ghost"
-                                                        className="text-red-500 hover:bg-red-100 h-7 w-7 p-0 flex-shrink-0"
-                                                    >
+                                                    <Button onClick={(e) => {e.stopPropagation(); deleteCard(index)}} size="sm" variant="ghost" className="text-red-500 hover:bg-red-100 h-7 w-7 p-0 flex-shrink-0">
                                                         <Trash className="h-4 w-4"/>
                                                     </Button>
                                                 </CardContent>
@@ -1231,7 +1319,6 @@ const CriadorDeCarta: React.FC = () => {
                  </div>
              </div>
 
-              {/* Botão Voltar ao Topo Fixo (do 2º código) */}
               {showScrollTop && (
                 <Button
                     onClick={scrollToTop}
