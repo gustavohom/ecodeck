@@ -22,7 +22,6 @@ import manejoPlantadas from "./deck/cards_manejo_plantada";
 import manejoNativas from "./deck/cards_manejo_nativa";
 import ecologiaFlorestal from "./deck/cards_ecologia_florestal";
 import estrelasAliens from "./dlc/cards_estrelas_aliens";
-import testCards from "./.test/test_card";
 
 // --- Tipos de Dados ---
 interface Opcao { id: number; texto: string; }
@@ -102,7 +101,6 @@ const builtInSourcesData: Omit<SourceInfo, 'active' | 'internalBaralhos' | 'tota
     { id: "builtin-manejoNativas", name: "Manejo Nativas", type: 'builtin', cards: manejoNativas as Carta[] },
     { id: "builtin-ecologiaFlorestal", name: "Ecologia Florestal", type: 'builtin', cards: ecologiaFlorestal as Carta[] },
     { id: "builtin-estrelasAliens", name: "Estrelas & Aliens (DLC)", type: 'builtin', cards: estrelasAliens as Carta[] },
-    { id: "builtin-testCards", name: "Test Cards", type: 'builtin', cards: testCards as Carta[] },
 ];
 const initialBuiltInSources: SourceInfo[] = builtInSourcesData.map(source => {
     const { processedCards, internalBaralhos, totalCards } = processCardsAndExtractBaralhos(source.cards);
